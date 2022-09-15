@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public record DigitalMediaObject(
     String type,
-    String dwcaId,
+    String physicalSpecimenId,
     String mediaUrl,
     String format,
     String sourceSystemId,
