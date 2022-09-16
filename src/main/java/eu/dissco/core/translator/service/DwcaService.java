@@ -21,6 +21,7 @@ import java.util.concurrent.ExecutionException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.gbif.dwc.Archive;
+import org.gbif.dwc.ArchiveField;
 import org.gbif.dwc.ArchiveFile;
 import org.gbif.dwc.DwcFiles;
 import org.gbif.dwc.record.Record;
@@ -35,7 +36,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class DwcaService {
 
   private static final List<String> DEFAULT_MAPPED_FIELD = List.of("ac:accessUri", "dcterms:format",
-      "dc:type");
+      "dc:type", "dcterms:identifier", "dcterms:type");
   private final ObjectMapper mapper = new ObjectMapper();
   private final WebClientProperties webClientProperties;
   private final WebClient webClient;
@@ -70,27 +71,59 @@ public class DwcaService {
     for (var extension : archive.getExtensions()) {
       if (extension.getRowType().qualifiedName().equals("http://rs.tdwg.org/ac/terms/Multimedia")) {
         log.info("Title: {}", extension.getRowType().prefixedName());
+        extractACMultimedia(extension);
       }
-      for (var rec : extension) {
-        var type = determineDigitalMediaType(extension, rec);
-        log.info("Type of digitalMediaObject is: {}", type);
-        var digitalMediaObject = new DigitalMediaObject(
-            type,
-            rec.id(),
-            rec.value(extension.getField("ac:accessUri").getTerm()),
-            rec.value(extension.getField("dcterms:format").getTerm()),
-            webClientProperties.getSourceSystemId(),
-            getData(extension, rec, false),
-            getData(extension, rec, true),
-            "DWCA"
-        );
-        log.info("MultiMediaObject: {}", digitalMediaObject);
-        var digitalMediaObjectEvent = new DigitalMediaObjectEvent(enrichmentServices(true),
-            digitalMediaObject);
-        kafkaService.sendMessage("digital-media-object",
-            mapper.writeValueAsString(digitalMediaObjectEvent));
+      if (extension.getRowType().qualifiedName()
+          .equals("http://rs.gbif.org/terms/1.0/Multimedia")) {
+        log.info("Title: {}", extension.getRowType().prefixedName());
+        extractGbifMultiMedia(extension);
       }
     }
+  }
+
+  private void extractGbifMultiMedia(ArchiveFile extension) throws JsonProcessingException {
+    for (var rec : extension) {
+      var type = determineDigitalMediaType(extension, rec);
+      log.info("Type of digitalMediaObject is: {}", type);
+      var digitalMediaObject = new DigitalMediaObject(
+          type,
+          rec.id(),
+          rec.value(extension.getField("dcterms:identifier").getTerm()),
+          rec.value(extension.getField("dcterms:format").getTerm()),
+          webClientProperties.getSourceSystemId(),
+          getData(extension, rec, false),
+          getData(extension, rec, true),
+          "DWCA"
+      );
+      publishDigitalMediaObject(digitalMediaObject);
+    }
+  }
+
+  private void extractACMultimedia(ArchiveFile extension) throws JsonProcessingException {
+    for (var rec : extension) {
+      var type = determineDigitalMediaType(extension, rec);
+      log.info("Type of digitalMediaObject is: {}", type);
+      var digitalMediaObject = new DigitalMediaObject(
+          type,
+          rec.id(),
+          rec.value(extension.getField("ac:accessUri").getTerm()),
+          rec.value(extension.getField("dcterms:format").getTerm()),
+          webClientProperties.getSourceSystemId(),
+          getData(extension, rec, false),
+          getData(extension, rec, true),
+          "DWCA"
+      );
+      publishDigitalMediaObject(digitalMediaObject);
+    }
+  }
+
+  private void publishDigitalMediaObject(DigitalMediaObject digitalMediaObject)
+      throws JsonProcessingException {
+    log.info("MultiMediaObject: {}", digitalMediaObject);
+    var digitalMediaObjectEvent = new DigitalMediaObjectEvent(enrichmentServices(true),
+        digitalMediaObject);
+    kafkaService.sendMessage("digital-media-object",
+        mapper.writeValueAsString(digitalMediaObjectEvent));
   }
 
   private List<String> enrichmentServices(boolean multiMediaObject) {
@@ -99,12 +132,21 @@ public class DwcaService {
   }
 
   private String determineDigitalMediaType(ArchiveFile extension, Record rec) {
-    var dublinCoreType = rec.value(extension.getField("dc:type").getTerm());
+    var dublinCoreType = rec.value(getTypeField(extension).getTerm());
     if (dublinCoreType.equals("StillImage")) {
       return "2DImageObject";
     }
     log.warn("Received Unmapped type from the dwca");
     return "Unknown";
+  }
+
+  private ArchiveField getTypeField(ArchiveFile extension) {
+    var dcType = extension.getField("dc:type");
+    if (dcType != null) {
+      return dcType;
+    } else {
+      return extension.getField("dcterms:type");
+    }
   }
 
   private void processDigitalSpecimen(ArchiveFile core) throws IOException {
