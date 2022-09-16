@@ -172,7 +172,9 @@ public class DwcaService {
       kafkaService.sendMessage("digital-specimen", mapper.writeValueAsString(translatorEvent));
       if (hasAssociatedMedia) {
         var associatedMedia = rec.value(core.getField("dwc:associatedMedia").getTerm());
-        publishAssociatedMedia(associatedMedia, digitalSpecimen);
+        if (associatedMedia != null) {
+          publishAssociatedMedia(associatedMedia, digitalSpecimen);
+        }
       }
     }
   }
