@@ -36,7 +36,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class DwcaService {
 
   private static final List<String> DEFAULT_MAPPED_FIELD = List.of("ac:accessUri", "dcterms:format",
-      "dc:type", "dcterms:identifier", "dcterms:type");
+      "dc:type", "dcterms:identifier", "dcterms:type", "dwc:associatedMedia");
   private final ObjectMapper mapper = new ObjectMapper();
   private final WebClientProperties webClientProperties;
   private final WebClient webClient;
@@ -150,6 +150,7 @@ public class DwcaService {
   }
 
   private void processDigitalSpecimen(ArchiveFile core) throws IOException {
+    var hasAssociatedMedia = core.hasTerm("dwc:associatedMedia");
     for (var rec : core) {
       var organizationId = getProperty("organization_id", core, rec);
       var physicalSpecimenIdType = getProperty("physical_specimen_id_type", core, rec);
@@ -169,6 +170,28 @@ public class DwcaService {
       var translatorEvent = new DigitalSpecimenEvent(enrichmentServices(false),
           digitalSpecimen);
       kafkaService.sendMessage("digital-specimen", mapper.writeValueAsString(translatorEvent));
+      if (hasAssociatedMedia) {
+        var associatedMedia = rec.value(core.getField("dwc:associatedMedia").getTerm());
+        publishAssociatedMedia(associatedMedia, digitalSpecimen);
+      }
+    }
+  }
+
+  private void publishAssociatedMedia(String associatedMedia, DigitalSpecimen digitalSpecimen)
+      throws JsonProcessingException {
+    log.info("Digital Specimen: {}, has associatedMedia", digitalSpecimen.physicalSpecimenId(), associatedMedia);
+    String[] mediaUrls = associatedMedia.split("\\|");
+    for (var mediaUrl : mediaUrls) {
+      var digitalMediaObject = new DigitalMediaObject(
+          null,
+          digitalSpecimen.physicalSpecimenId(),
+          mediaUrl,
+          null,
+          webClientProperties.getSourceSystemId(),
+          null,
+          null,
+          "physical_specimen_id");
+      publishDigitalMediaObject(digitalMediaObject);
     }
   }
 
