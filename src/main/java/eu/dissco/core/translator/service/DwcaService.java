@@ -183,7 +183,7 @@ public class DwcaService {
     String[] mediaUrls = associatedMedia.split("\\|");
     for (var mediaUrl : mediaUrls) {
       var digitalMediaObject = new DigitalMediaObject(
-          null,
+          "Unknown",
           digitalSpecimen.physicalSpecimenId(),
           mediaUrl,
           null,
