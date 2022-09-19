@@ -16,6 +16,7 @@ import eu.dissco.core.translator.repository.SourceSystemRepository;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import lombok.RequiredArgsConstructor;
@@ -127,8 +128,12 @@ public class DwcaService {
   }
 
   private List<String> enrichmentServices(boolean multiMediaObject) {
-    return enrichmentProperties.getList().stream().filter(e -> e.isImageOnly() == multiMediaObject)
-        .map(Enrichment::getName).toList();
+    if (enrichmentProperties.getList() != null) {
+      return enrichmentProperties.getList().stream().filter(e -> e.isImageOnly() == multiMediaObject)
+          .map(Enrichment::getName).toList();
+    } else {
+      return Collections.emptyList();
+    }
   }
 
   private String determineDigitalMediaType(ArchiveFile extension, Record rec) {
