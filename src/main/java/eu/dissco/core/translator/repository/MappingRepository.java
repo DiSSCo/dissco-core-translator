@@ -22,10 +22,12 @@ public class MappingRepository {
 
   public JsonNode retrieveMapping(String sourceSystemId) {
     return context.select(NEW_MAPPING.MAPPING)
+        .distinctOn(NEW_MAPPING.ID)
         .from(NEW_MAPPING)
         .join(NEW_SOURCE_SYSTEM)
         .on(NEW_SOURCE_SYSTEM.MAPPING_ID.eq(NEW_MAPPING.ID))
         .where(NEW_SOURCE_SYSTEM.ID.eq(sourceSystemId))
+        .orderBy(NEW_MAPPING.ID, NEW_MAPPING.VERSION.desc())
         .fetchOne(this::mapToJson);
   }
 
