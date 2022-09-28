@@ -14,10 +14,13 @@ import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,13 +49,16 @@ public class DwcaService {
   private final MappingComponent mapping;
   private final EnrichmentProperties enrichmentProperties;
   private final SourceSystemRepository repository;
+  private final List<String> idTobeIgnored = new ArrayList<>();
+  private final List<String> allowedBasisOfRecord = List.of("PRESERVEDSPECIMEN", "FOSSIL", "OTHER",
+      "ROCK", "MINERAL", "METEORITE", "FOSSILSPECIMEN", "LIVINGSPECIMEN", "MATERIALSAMPLE");
 
   public void retrieveData() {
     var endpoint = repository.getEndpoint(webClientProperties.getSourceSystemId());
     try {
       var file = Path.of(dwcaProperties.getDownloadFile());
-      var buffer = webClient.get().uri(endpoint).retrieve().bodyToFlux(
-          DataBuffer.class);
+      var buffer = webClient.get().uri(URI.create(endpoint)).retrieve()
+          .bodyToFlux(DataBuffer.class);
       DataBufferUtils.write(buffer, Files.newOutputStream(file)).map(DataBufferUtils::release)
           .then().toFuture().get();
       var archive = DwcFiles.fromCompressed(file, Path.of(dwcaProperties.getTempFolder()));
@@ -86,35 +92,32 @@ public class DwcaService {
     for (var rec : extension) {
       var type = determineDigitalMediaType(extension, rec);
       log.info("Type of digitalMediaObject is: {}", type);
-      var digitalMediaObject = new DigitalMediaObject(
-          type,
-          rec.id(),
+      var digitalMediaObject = new DigitalMediaObject(type, rec.id(),
           rec.value(extension.getField("dcterms:identifier").getTerm()),
           rec.value(extension.getField("dcterms:format").getTerm()),
-          webClientProperties.getSourceSystemId(),
-          getData(extension, rec, false),
-          getData(extension, rec, true),
-          "DWCA"
-      );
+          webClientProperties.getSourceSystemId(), getData(extension, rec, false),
+          getData(extension, rec, true), "DWCA");
       publishDigitalMediaObject(digitalMediaObject);
     }
   }
 
   private void extractACMultimedia(ArchiveFile extension) throws JsonProcessingException {
     for (var rec : extension) {
-      var type = determineDigitalMediaType(extension, rec);
-      log.info("Type of digitalMediaObject is: {}", type);
-      var digitalMediaObject = new DigitalMediaObject(
-          type,
-          rec.id(),
-          rec.value(extension.getField("ac:accessUri").getTerm()),
-          rec.value(extension.getField("dcterms:format").getTerm()),
-          webClientProperties.getSourceSystemId(),
-          getData(extension, rec, false),
-          getData(extension, rec, true),
-          "DWCA"
-      );
-      publishDigitalMediaObject(digitalMediaObject);
+      if (idTobeIgnored.contains(rec.id())) {
+        log.info("Skipped media with id: {} as the specimen has been ignored", rec.id());
+      } else {
+        var type = determineDigitalMediaType(extension, rec);
+        log.info("Type of digitalMediaObject is: {}", type);
+        var digitalMediaObject = new DigitalMediaObject(
+            type,
+            rec.id(),
+            rec.value(extension.getField("ac:accessUri").getTerm()),
+            rec.value(extension.getField("dcterms:format").getTerm()),
+            webClientProperties.getSourceSystemId(), getData(extension, rec, false),
+            getData(extension, rec, true),
+            "DWCA");
+        publishDigitalMediaObject(digitalMediaObject);
+      }
     }
   }
 
@@ -129,8 +132,8 @@ public class DwcaService {
 
   private List<String> enrichmentServices(boolean multiMediaObject) {
     if (enrichmentProperties.getList() != null) {
-      return enrichmentProperties.getList().stream().filter(e -> e.isImageOnly() == multiMediaObject)
-          .map(Enrichment::getName).toList();
+      return enrichmentProperties.getList().stream()
+          .filter(e -> e.isImageOnly() == multiMediaObject).map(Enrichment::getName).toList();
     } else {
       return Collections.emptyList();
     }
@@ -157,54 +160,64 @@ public class DwcaService {
   private void processDigitalSpecimen(ArchiveFile core) throws IOException {
     var hasAssociatedMedia = core.hasTerm("dwc:associatedMedia");
     for (var rec : core) {
-      var organizationId = getProperty("organization_id", core, rec);
-      var physicalSpecimenIdType = getProperty("physical_specimen_id_type", core, rec);
-      var digitalSpecimen = new DigitalSpecimen(
-          getProperty("type", core, rec),
-          getPhysicalSpecimenId(physicalSpecimenIdType, organizationId, core, rec),
-          physicalSpecimenIdType,
-          getProperty("physical_specimen_collection", core, rec),
-          getProperty("specimen_name", core, rec),
-          organizationId,
-          getProperty("dataset_id", core, rec),
-          webClientProperties.getSourceSystemId(),
-          getData(core, rec, false),
-          getData(core, rec, true),
-          rec.id());
-      log.info("Digital Specimen: {}", digitalSpecimen);
-      var translatorEvent = new DigitalSpecimenEvent(enrichmentServices(false),
-          digitalSpecimen);
-      kafkaService.sendMessage("digital-specimen", mapper.writeValueAsString(translatorEvent));
-      if (hasAssociatedMedia) {
-        var associatedMedia = rec.value(core.getField("dwc:associatedMedia").getTerm());
-        if (associatedMedia != null) {
-          publishAssociatedMedia(associatedMedia, digitalSpecimen);
+      if (recordNeedsToBeIgnored(rec, core)) {
+        idTobeIgnored.add(rec.id());
+      } else {
+        var organizationId = getProperty("organization_id", core, rec);
+        var physicalSpecimenIdType = getProperty("physical_specimen_id_type", core, rec);
+        var digitalSpecimen = new DigitalSpecimen(getProperty("type", core, rec),
+            getPhysicalSpecimenId(physicalSpecimenIdType, organizationId, core, rec),
+            physicalSpecimenIdType, getProperty("physical_specimen_collection", core, rec),
+            getProperty("specimen_name", core, rec), organizationId,
+            getProperty("dataset_id", core, rec), webClientProperties.getSourceSystemId(),
+            getData(core, rec, false), getData(core, rec, true),
+            rec.id());
+        log.info("Digital Specimen: {}", digitalSpecimen);
+        var translatorEvent = new DigitalSpecimenEvent(enrichmentServices(false), digitalSpecimen);
+        kafkaService.sendMessage("digital-specimen", mapper.writeValueAsString(translatorEvent));
+        if (hasAssociatedMedia) {
+          var associatedMedia = rec.value(core.getField("dwc:associatedMedia").getTerm());
+          if (associatedMedia != null) {
+            publishAssociatedMedia(associatedMedia, digitalSpecimen);
+          }
         }
+      }
+    }
+  }
+
+  private boolean recordNeedsToBeIgnored(Record rec, ArchiveFile core) {
+    if (!core.hasTerm("dwc:basisOfRecord")) {
+      log.warn("Record with id: {} is missing the basis of Record, Record will be ignored",
+          rec.id());
+      return true;
+    } else {
+      var basisOfRecord = rec.value(core.getField("dwc:basisOfRecord").getTerm());
+      basisOfRecord = basisOfRecord.toUpperCase(Locale.ROOT);
+      if (allowedBasisOfRecord.contains(basisOfRecord)) {
+        return false;
+      } else {
+        log.warn("Record with id: {} has basisOfRecord: {} which is not a physical specimen",
+            rec.id(), basisOfRecord);
+        return true;
       }
     }
   }
 
   private void publishAssociatedMedia(String associatedMedia, DigitalSpecimen digitalSpecimen)
       throws JsonProcessingException {
-    log.info("Digital Specimen: {}, has associatedMedia", digitalSpecimen.physicalSpecimenId(), associatedMedia);
+    log.info("Digital Specimen: {}, has associatedMedia", digitalSpecimen.physicalSpecimenId(),
+        associatedMedia);
     String[] mediaUrls = associatedMedia.split("\\|");
     for (var mediaUrl : mediaUrls) {
-      var digitalMediaObject = new DigitalMediaObject(
-          "Unknown",
-          digitalSpecimen.physicalSpecimenId(),
-          mediaUrl,
-          null,
-          webClientProperties.getSourceSystemId(),
-          null,
-          null,
-          "physical_specimen_id");
+      var digitalMediaObject = new DigitalMediaObject("Unknown",
+          digitalSpecimen.physicalSpecimenId(), mediaUrl, null,
+          webClientProperties.getSourceSystemId(), null, null, "physical_specimen_id");
       publishDigitalMediaObject(digitalMediaObject);
     }
   }
 
   private String getPhysicalSpecimenId(String physicalSpecimenIdType, String organizationId,
-      ArchiveFile core,
-      Record rec) {
+      ArchiveFile core, Record rec) {
     if (physicalSpecimenIdType.equals("cetaf")) {
       return getProperty("physical_specimen_id", core, rec);
     } else if (physicalSpecimenIdType.equals("combined")) {
