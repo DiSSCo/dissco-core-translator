@@ -1,6 +1,6 @@
 package eu.dissco.core.translator;
 
-import eu.dissco.core.translator.service.DwcaService;
+import eu.dissco.core.translator.service.WebClientService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @AllArgsConstructor
 public class ProjectRunner implements CommandLineRunner {
 
-  private final DwcaService webService;
+  private final WebClientService webService;
   private final ConfigurableApplicationContext context;
 
   @Override

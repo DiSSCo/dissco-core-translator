@@ -13,10 +13,6 @@ public class WebClientProperties {
   @NotBlank
   private String sourceSystemId;
 
-  private String queryParams;
-
-  private int itemsPerRequest = 500;
-
-  private String contentNamespace;
+  private int itemsPerRequest = 100;
 
 }
