@@ -59,6 +59,7 @@ public class BioCaseService implements WebClientService {
   private static final String ABCD = "abcd:";
   private static final List<RecordBasisEnum> ALLOWED_RECORD_BASIS = List.of(PRESERVED_SPECIMEN,
       LIVING_SPECIMEN, FOSSILE_SPECIMEN, OTHER_SPECIMEN);
+  private static final String PHYSICAL_SPECIMEN_ID = "physical_specimen_id";
 
   private final ObjectMapper mapper;
   private final WebClientProperties webClientProperties;
@@ -137,29 +138,35 @@ public class BioCaseService implements WebClientService {
       if (ALLOWED_RECORD_BASIS.contains(unit.getRecordBasis())) {
         var organizationId = getProperty("organization_id", unitData);
         var physicalSpecimenIdType = getProperty("physical_specimen_id_type", unitData);
-        var physicalSpecimenId = getPhysicalSpecimenId(physicalSpecimenIdType, organizationId,
-            unitData);
-        var digitalSpecimen = new DigitalSpecimen(
-            getProperty("type", unitData),
-            physicalSpecimenId,
-            physicalSpecimenIdType,
-            getProperty("physical_specimen_collection", unitData),
-            getProperty("specimen_name", unitData),
-            organizationId,
-            datasets.getDatasetGUID(),
-            webClientProperties.getSourceSystemId(),
-            removeMappedFields(unitData),
-            unitData,
-            null
-        );
-        log.info("Result digital Specimen: {}", digitalSpecimen);
-        kafkaService.sendMessage("digital-specimen",
-            mapper.writeValueAsString(
-                new DigitalSpecimenEvent(enrichmentServices(false), digitalSpecimen)));
-        processDigitalMediaObjects(physicalSpecimenId, unit);
+        if (physicalSpecimenIdType != null) {
+          var physicalSpecimenId = getPhysicalSpecimenId(physicalSpecimenIdType, organizationId,
+              unitData);
+          var digitalSpecimen = new DigitalSpecimen(
+              getProperty("type", unitData),
+              physicalSpecimenId,
+              physicalSpecimenIdType,
+              getProperty("physical_specimen_collection", unitData),
+              getProperty("specimen_name", unitData),
+              organizationId,
+              datasets.getDatasetGUID(),
+              webClientProperties.getSourceSystemId(),
+              removeMappedFields(unitData),
+              unitData,
+              null
+          );
+          log.info("Result digital Specimen: {}", digitalSpecimen);
+          kafkaService.sendMessage("digital-specimen",
+              mapper.writeValueAsString(
+                  new DigitalSpecimenEvent(enrichmentServices(false), digitalSpecimen)));
+          processDigitalMediaObjects(physicalSpecimenId, unit);
+        } else {
+          log.warn("Ignoring record with id: {} as we cannot determine the physicalSpecimenIdType",
+              getProperty(PHYSICAL_SPECIMEN_ID, unitData));
+        }
+
       } else {
         log.info("Record with id: {} and record basis: {} is ignored ",
-            getProperty("physical_specimen_id", unitData), unit.getRecordBasis());
+            getProperty(PHYSICAL_SPECIMEN_ID, unitData), unit.getRecordBasis());
       }
     }
   }
@@ -174,9 +181,9 @@ public class BioCaseService implements WebClientService {
   private String getPhysicalSpecimenId(String physicalSpecimenIdType, String organizationId,
       JsonNode unitData) {
     if (physicalSpecimenIdType.equals("cetaf")) {
-      return getProperty("physical_specimen_id", unitData);
+      return getProperty(PHYSICAL_SPECIMEN_ID, unitData);
     } else if (physicalSpecimenIdType.equals("combined")) {
-      return getProperty("physical_specimen_id", unitData) + ":" + minifyOrganizationId(
+      return getProperty(PHYSICAL_SPECIMEN_ID, unitData) + ":" + minifyOrganizationId(
           organizationId);
     } else {
       log.warn("Unknown physicalSpecimenIdType specified");
@@ -349,5 +356,5 @@ public class BioCaseService implements WebClientService {
       count = count + 1;
     }
   }
-  
+
 }
