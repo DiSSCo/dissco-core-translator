@@ -3,6 +3,7 @@ package eu.dissco.core.translator.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.dissco.core.translator.Profiles;
 import eu.dissco.core.translator.component.MappingComponent;
 import eu.dissco.core.translator.domain.DigitalMediaObject;
 import eu.dissco.core.translator.domain.DigitalMediaObjectEvent;
@@ -29,6 +30,7 @@ import org.gbif.dwc.ArchiveField;
 import org.gbif.dwc.ArchiveFile;
 import org.gbif.dwc.DwcFiles;
 import org.gbif.dwc.record.Record;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.stereotype.Service;
@@ -36,8 +38,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
 @Slf4j
+@Profile(Profiles.DWCA)
 @RequiredArgsConstructor
-public class DwcaService {
+public class DwcaService implements WebClientService{
 
   private static final List<String> DEFAULT_MAPPED_FIELD = List.of("ac:accessUri", "dcterms:format",
       "dc:type", "dcterms:identifier", "dcterms:type", "dwc:associatedMedia");
@@ -53,6 +56,7 @@ public class DwcaService {
   private final List<String> allowedBasisOfRecord = List.of("PRESERVEDSPECIMEN", "FOSSIL", "OTHER",
       "ROCK", "MINERAL", "METEORITE", "FOSSILSPECIMEN", "LIVINGSPECIMEN", "MATERIALSAMPLE");
 
+  @Override
   public void retrieveData() {
     var endpoint = repository.getEndpoint(webClientProperties.getSourceSystemId());
     try {
