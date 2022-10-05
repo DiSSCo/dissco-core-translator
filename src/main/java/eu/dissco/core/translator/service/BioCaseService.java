@@ -1,19 +1,23 @@
 package eu.dissco.core.translator.service;
 
-import static abcd206.RecordBasisEnum.FOSSILE_SPECIMEN;
-import static abcd206.RecordBasisEnum.LIVING_SPECIMEN;
-import static abcd206.RecordBasisEnum.OTHER_SPECIMEN;
-import static abcd206.RecordBasisEnum.PRESERVED_SPECIMEN;
 
-import abcd206.DataSets;
-import abcd206.MultiMediaObject;
-import abcd206.RecordBasisEnum;
-import abcd206.Unit;
+import static efg.RecordBasisEnum.FOSSILE_SPECIMEN;
+import static efg.RecordBasisEnum.FOSSIL_SPECIMEN;
+import static efg.RecordBasisEnum.LIVING_SPECIMEN;
+import static efg.RecordBasisEnum.OTHER_SPECIMEN;
+import static efg.RecordBasisEnum.PRESERVED_SPECIMEN;
+import static efg.RecordBasisEnum.UNSPECIFIED;
+
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import efg.DataSets;
+import efg.EarthScienceSpecimenType;
+import efg.MultiMediaObject;
+import efg.RecordBasisEnum;
+import efg.Unit;
 import eu.dissco.core.translator.Profiles;
 import eu.dissco.core.translator.component.MappingComponent;
 import eu.dissco.core.translator.domain.DigitalMediaObject;
@@ -42,11 +46,14 @@ import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
+import javax.xml.transform.Source;
+import javax.xml.transform.dom.DOMSource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.w3c.dom.Node;
 
 @Slf4j
 @Service
@@ -57,8 +64,9 @@ public class BioCaseService implements WebClientService {
   private static final String START_AT = "startAt";
   private static final String LIMIT = "limit";
   private static final String ABCD = "abcd:";
+  private static final String ABCDEFG = "abcd-efg:";
   private static final List<RecordBasisEnum> ALLOWED_RECORD_BASIS = List.of(PRESERVED_SPECIMEN,
-      LIVING_SPECIMEN, FOSSILE_SPECIMEN, OTHER_SPECIMEN);
+      LIVING_SPECIMEN, FOSSILE_SPECIMEN, OTHER_SPECIMEN, UNSPECIFIED, FOSSIL_SPECIMEN);
   private static final String PHYSICAL_SPECIMEN_ID = "physical_specimen_id";
 
   private final ObjectMapper mapper;
@@ -134,8 +142,12 @@ public class BioCaseService implements WebClientService {
     var datasetsMarshaller = context.createUnmarshaller().unmarshal(xmlEventReader, DataSets.class);
     var datasets = datasetsMarshaller.getValue().getDataSet().get(0);
     for (var unit : datasets.getUnits().getUnit()) {
+      var efg = getEfg(unit);
       var unitData = getData(mapper.valueToTree(unit));
-      if (ALLOWED_RECORD_BASIS.contains(unit.getRecordBasis())) {
+      if (efg != null) {
+        addEfgFields(unitData, efg);
+      }
+      if (unit.getRecordBasis() != null && ALLOWED_RECORD_BASIS.contains(unit.getRecordBasis())) {
         var organizationId = getProperty("organization_id", unitData);
         var physicalSpecimenIdType = getProperty("physical_specimen_id_type", unitData);
         if (physicalSpecimenIdType != null) {
@@ -163,12 +175,45 @@ public class BioCaseService implements WebClientService {
           log.warn("Ignoring record with id: {} as we cannot determine the physicalSpecimenIdType",
               getProperty(PHYSICAL_SPECIMEN_ID, unitData));
         }
-
       } else {
         log.info("Record with id: {} and record basis: {} is ignored ",
             getProperty(PHYSICAL_SPECIMEN_ID, unitData), unit.getRecordBasis());
       }
     }
+  }
+
+  private EarthScienceSpecimenType getEfg(Unit unit) {
+    try {
+      var context = JAXBContext.newInstance(EarthScienceSpecimenType.class);
+      var document = ((Node) unit.getUnitExtension()).getOwnerDocument();
+      try {
+        Source xmlSource = new DOMSource(document);
+        var xmlEventReader = xmlFactory.createXMLEventReader(xmlSource);
+        while (xmlEventReader.hasNext()) {
+          xmlEventReader.nextEvent();
+          if (isStartElement(xmlEventReader.peek(), "EarthScienceSpecimen")) {
+            try {
+              return context.createUnmarshaller()
+                  .unmarshal(xmlEventReader, EarthScienceSpecimenType.class)
+                  .getValue();
+            } catch (JAXBException e) {
+              e.printStackTrace();
+            }
+          }
+        }
+      } catch (XMLStreamException e) {
+        throw new RuntimeException(e);
+      }
+    } catch (JAXBException e) {
+      throw new RuntimeException(e);
+    }
+    return null;
+  }
+
+  private void addEfgFields(ObjectNode unitData, EarthScienceSpecimenType efg) {
+    StringBuilder prefix = new StringBuilder();
+    iterateOverNode(unitData, mapper.valueToTree(efg), ABCDEFG, prefix);
+    unitData.remove("abcd:unitExtension");
   }
 
   private JsonNode removeMappedFields(JsonNode unitData) {
@@ -301,57 +346,58 @@ public class BioCaseService implements WebClientService {
     }
   }
 
-  private JsonNode getData(JsonNode node) {
+  private ObjectNode getData(JsonNode node) {
     var data = mapper.createObjectNode();
     StringBuilder prefix = new StringBuilder();
-    iterateOverNode(node, data, prefix);
+    iterateOverNode(node, data, ABCD, prefix);
     return data;
   }
 
-  private void iterateOverNode(JsonNode node, ObjectNode data, StringBuilder prefix) {
+  private void iterateOverNode(JsonNode node, ObjectNode data, String nameSpace,
+      StringBuilder prefix) {
     node.fields().forEachRemaining(
         field -> {
           if (field.getValue().isObject()) {
-            walkThroughObjects(data, prefix, field);
+            walkThroughObjects(data, prefix, field, nameSpace);
           } else if (field.getValue().isArray()) {
-            walkThroughArray(data, prefix, field);
+            walkThroughArray(data, prefix, field, nameSpace);
           } else {
-            getValueFromField(data, prefix, field);
+            getValueFromField(data, prefix, field, nameSpace);
           }
         }
     );
   }
 
   private void getValueFromField(ObjectNode data, StringBuilder prefix,
-      Entry<String, JsonNode> field) {
+      Entry<String, JsonNode> field, String nameSpace) {
     if (field.getValue().isTextual()) {
-      data.put(ABCD + prefix + field.getKey(), field.getValue().textValue());
+      data.put(nameSpace + prefix + field.getKey(), field.getValue().textValue());
     } else if (field.getValue().isDouble()) {
-      data.put(ABCD + prefix + field.getKey(), field.getValue().doubleValue());
+      data.put(nameSpace + prefix + field.getKey(), field.getValue().doubleValue());
     } else if (field.getValue().isInt()) {
-      data.put(ABCD + prefix + field.getKey(), field.getValue().intValue());
+      data.put(nameSpace + prefix + field.getKey(), field.getValue().intValue());
     } else if (field.getValue().isBoolean()) {
-      data.put(ABCD + prefix + field.getKey(), field.getValue().booleanValue());
+      data.put(nameSpace + prefix + field.getKey(), field.getValue().booleanValue());
     } else if (field.getValue().isBigDecimal()) {
-      data.put(ABCD + prefix + field.getKey(), field.getValue().decimalValue());
+      data.put(nameSpace + prefix + field.getKey(), field.getValue().decimalValue());
     } else if (field.getValue().isBigInteger()) {
-      data.put(ABCD + prefix + field.getKey(), field.getValue().bigIntegerValue());
+      data.put(nameSpace + prefix + field.getKey(), field.getValue().bigIntegerValue());
     }
   }
 
   private void walkThroughObjects(ObjectNode data, StringBuilder prefix,
-      Entry<String, JsonNode> field) {
+      Entry<String, JsonNode> field, String namespace) {
     prefix.append(field.getKey()).append("/");
-    iterateOverNode(field.getValue(), data, prefix);
+    iterateOverNode(field.getValue(), data, namespace, prefix);
     prefix.delete(prefix.length() - field.getKey().length() - 1, prefix.length());
   }
 
   private void walkThroughArray(ObjectNode data, StringBuilder prefix,
-      Entry<String, JsonNode> field) {
+      Entry<String, JsonNode> field, String namespace) {
     var count = 0;
     for (JsonNode item : field.getValue()) {
       prefix.append(field.getKey()).append("/").append(count).append("/");
-      iterateOverNode(item, data, prefix);
+      iterateOverNode(item, data, namespace, prefix);
       prefix.delete(prefix.length() - field.getKey().length() - 3, prefix.length());
       count = count + 1;
     }
