@@ -164,6 +164,20 @@
               <clearOutputDir>false</clearOutputDir>
             </configuration>
           </execution>
+          <execution>
+            <id>efg</id>
+            <goals>
+              <goal>xjc</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>src/main/resources/efg.xsd</source>
+              </sources>
+              <outputDirectory>${basedir}/target/generated-sources</outputDirectory>
+              <packageName>efg</packageName>
+              <clearOutputDir>false</clearOutputDir>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
       <plugin>

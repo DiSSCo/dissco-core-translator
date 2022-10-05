@@ -1772,11 +1772,16 @@
       <xs:enumeration value="PreservedSpecimen"/>
       <xs:enumeration value="LivingSpecimen"/>
       <xs:enumeration value="FossileSpecimen"/>
+      <xs:enumeration value="FossilSpecimen"/>
       <xs:enumeration value="OtherSpecimen"/>
       <xs:enumeration value="HumanObservation"/>
       <xs:enumeration value="MachineObservation"/>
       <xs:enumeration value="DrawingOrPhotograph"/>
       <xs:enumeration value="MultimediaObject"/>
+      <xs:enumeration value="Unspecified"/>
+      <xs:enumeration value="RockSpecimen"/>
+      <xs:enumeration value="MineralSpecimen"/>
+      <xs:enumeration value="MeteoriteSpecimen"/>
     </xs:restriction>
   </xs:simpleType>
   <xs:simpleType name="SexCodeEnum">
