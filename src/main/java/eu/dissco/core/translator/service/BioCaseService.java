@@ -4,8 +4,11 @@ package eu.dissco.core.translator.service;
 import static efg.RecordBasisEnum.FOSSILE_SPECIMEN;
 import static efg.RecordBasisEnum.FOSSIL_SPECIMEN;
 import static efg.RecordBasisEnum.LIVING_SPECIMEN;
+import static efg.RecordBasisEnum.METEORITE_SPECIMEN;
+import static efg.RecordBasisEnum.MINERAL_SPECIMEN;
 import static efg.RecordBasisEnum.OTHER_SPECIMEN;
 import static efg.RecordBasisEnum.PRESERVED_SPECIMEN;
+import static efg.RecordBasisEnum.ROCK_SPECIMEN;
 import static efg.RecordBasisEnum.UNSPECIFIED;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -66,7 +69,8 @@ public class BioCaseService implements WebClientService {
   private static final String ABCD = "abcd:";
   private static final String ABCDEFG = "abcd-efg:";
   private static final List<RecordBasisEnum> ALLOWED_RECORD_BASIS = List.of(PRESERVED_SPECIMEN,
-      LIVING_SPECIMEN, FOSSILE_SPECIMEN, OTHER_SPECIMEN, UNSPECIFIED, FOSSIL_SPECIMEN);
+      LIVING_SPECIMEN, FOSSILE_SPECIMEN, OTHER_SPECIMEN, UNSPECIFIED, FOSSIL_SPECIMEN,
+      ROCK_SPECIMEN, METEORITE_SPECIMEN, MINERAL_SPECIMEN);
   private static final String PHYSICAL_SPECIMEN_ID = "physical_specimen_id";
 
   private final ObjectMapper mapper;
@@ -185,24 +189,27 @@ public class BioCaseService implements WebClientService {
   private EarthScienceSpecimenType getEfg(Unit unit) {
     try {
       var context = JAXBContext.newInstance(EarthScienceSpecimenType.class);
-      var document = ((Node) unit.getUnitExtension()).getOwnerDocument();
-      try {
-        Source xmlSource = new DOMSource(document);
-        var xmlEventReader = xmlFactory.createXMLEventReader(xmlSource);
-        while (xmlEventReader.hasNext()) {
-          xmlEventReader.nextEvent();
-          if (isStartElement(xmlEventReader.peek(), "EarthScienceSpecimen")) {
-            try {
-              return context.createUnmarshaller()
-                  .unmarshal(xmlEventReader, EarthScienceSpecimenType.class)
-                  .getValue();
-            } catch (JAXBException e) {
-              e.printStackTrace();
+      var node = ((Node) unit.getUnitExtension());
+      if (node != null) {
+        var document = node.getOwnerDocument();
+        try {
+          Source xmlSource = new DOMSource(document);
+          var xmlEventReader = xmlFactory.createXMLEventReader(xmlSource);
+          while (xmlEventReader.hasNext()) {
+            xmlEventReader.nextEvent();
+            if (isStartElement(xmlEventReader.peek(), "EarthScienceSpecimen")) {
+              try {
+                return context.createUnmarshaller()
+                    .unmarshal(xmlEventReader, EarthScienceSpecimenType.class)
+                    .getValue();
+              } catch (JAXBException e) {
+                e.printStackTrace();
+              }
             }
           }
+        } catch (XMLStreamException e) {
+          throw new RuntimeException(e);
         }
-      } catch (XMLStreamException e) {
-        throw new RuntimeException(e);
       }
     } catch (JAXBException e) {
       throw new RuntimeException(e);
