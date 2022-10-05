@@ -6,9 +6,9 @@
 	xmlns:abcd="http://www.tdwg.org/schemas/abcd/2.06"
 	elementFormDefault="qualified" attributeFormDefault="unqualified"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="file:///home/sam-leeflang/Documents/repos/dissco-core-translator/src/main/resources/abcd-2-0-6.xsd">
+	xsi:schemaLocation="./abcd-2-0-6.xsd">
 	<xs:import namespace="http://www.tdwg.org/schemas/abcd/2.06"
-		schemaLocation="file:///home/sam-leeflang/Documents/repos/dissco-core-translator/src/main/resources/abcd-2-0-6.xsd"/>
+		schemaLocation="./abcd-2-0-6.xsd"/>
 	<!--Elements extending ABCD Unit-->
 	<xs:complexType name="EarthScienceSpecimenType">
 		<xs:annotation>
