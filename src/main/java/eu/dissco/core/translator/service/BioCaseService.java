@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import efg.DataSets;
 import efg.EarthScienceSpecimenType;
+import efg.MineralRockIdentifiedType;
 import efg.MultiMediaObject;
 import efg.RecordBasisEnum;
 import efg.Unit;
@@ -38,6 +39,7 @@ import jakarta.xml.bind.JAXBException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -146,11 +148,8 @@ public class BioCaseService implements WebClientService {
     var datasetsMarshaller = context.createUnmarshaller().unmarshal(xmlEventReader, DataSets.class);
     var datasets = datasetsMarshaller.getValue().getDataSet().get(0);
     for (var unit : datasets.getUnits().getUnit()) {
-      var efg = getEfg(unit);
       var unitData = getData(mapper.valueToTree(unit));
-      if (efg != null) {
-        addEfgFields(unitData, efg);
-      }
+      extractEfgInformation(unit, unitData);
       if (unit.getRecordBasis() != null && ALLOWED_RECORD_BASIS.contains(unit.getRecordBasis())) {
         var organizationId = getProperty("organization_id", unitData);
         var physicalSpecimenIdType = getProperty("physical_specimen_id_type", unitData);
@@ -186,14 +185,74 @@ public class BioCaseService implements WebClientService {
     }
   }
 
-  private EarthScienceSpecimenType getEfg(Unit unit) {
+  private void extractEfgInformation(Unit unit, ObjectNode unitData) {
+    var efgTaxExtension = getEfgTaxExtension(unit);
+    if (!efgTaxExtension.isEmpty()) {
+      addEfgFieldsForIdentifications(unitData, efgTaxExtension);
+    }
+    var efgUnitExtension = getEfgUnitExtension(unit);
+    if (efgUnitExtension != null) {
+      addEfgFieldsForExtension(unitData, efgUnitExtension);
+    }
+  }
+
+  private void addEfgFieldsForIdentifications(ObjectNode unitData,
+      List<MineralRockIdentifiedType> efgTaxExtension) {
+    StringBuilder prefix = new StringBuilder();
+    for (int i = 0; i < efgTaxExtension.size(); i++) {
+      MineralRockIdentifiedType identification = efgTaxExtension.get(i);
+      iterateOverNode(mapper.valueToTree(identification), unitData, ABCDEFG, prefix);
+      unitData.remove("abcd:identifications/identification/" + i + "/result/extension");
+    }
+  }
+
+  private List<MineralRockIdentifiedType> getEfgTaxExtension(Unit unit) {
+    var efgIdentifications = new ArrayList<MineralRockIdentifiedType>();
+    try {
+      var context = JAXBContext.newInstance(MineralRockIdentifiedType.class);
+      if (unit.getIdentifications() != null) {
+        if (!unit.getIdentifications().getIdentification().isEmpty()) {
+          unit.getIdentifications().getIdentification().forEach(identification -> {
+            var node = (Node) identification.getResult().getExtension();
+            if (node != null) {
+              var document = node.getOwnerDocument();
+              Source xmlSource = new DOMSource(document);
+              try {
+                var xmlEventReader = xmlFactory.createXMLEventReader(xmlSource);
+                while (xmlEventReader.hasNext()) {
+                  xmlEventReader.nextEvent();
+                  if (isStartElement(xmlEventReader.peek(), "MineralRockIdentified")) {
+                    try {
+                      efgIdentifications.add(context.createUnmarshaller()
+                          .unmarshal(xmlEventReader, MineralRockIdentifiedType.class)
+                          .getValue());
+                    } catch (JAXBException e) {
+                      e.printStackTrace();
+                    }
+                  }
+                }
+              } catch (XMLStreamException e) {
+                throw new RuntimeException(e);
+              }
+
+            }
+          });
+        }
+      }
+    } catch (JAXBException e) {
+      throw new RuntimeException(e);
+    }
+    return efgIdentifications;
+  }
+
+  private EarthScienceSpecimenType getEfgUnitExtension(Unit unit) {
     try {
       var context = JAXBContext.newInstance(EarthScienceSpecimenType.class);
-      var node = ((Node) unit.getUnitExtension());
+      var node = (Node) unit.getUnitExtension();
       if (node != null) {
         var document = node.getOwnerDocument();
+        Source xmlSource = new DOMSource(document);
         try {
-          Source xmlSource = new DOMSource(document);
           var xmlEventReader = xmlFactory.createXMLEventReader(xmlSource);
           while (xmlEventReader.hasNext()) {
             xmlEventReader.nextEvent();
@@ -217,9 +276,9 @@ public class BioCaseService implements WebClientService {
     return null;
   }
 
-  private void addEfgFields(ObjectNode unitData, EarthScienceSpecimenType efg) {
+  private void addEfgFieldsForExtension(ObjectNode unitData, EarthScienceSpecimenType efg) {
     StringBuilder prefix = new StringBuilder();
-    iterateOverNode(unitData, mapper.valueToTree(efg), ABCDEFG, prefix);
+    iterateOverNode(mapper.valueToTree(efg), unitData, ABCDEFG, prefix);
     unitData.remove("abcd:unitExtension");
   }
 
