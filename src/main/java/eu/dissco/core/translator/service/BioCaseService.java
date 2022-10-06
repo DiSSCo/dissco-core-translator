@@ -198,8 +198,8 @@ public class BioCaseService implements WebClientService {
 
   private void addEfgFieldsForIdentifications(ObjectNode unitData,
       List<MineralRockIdentifiedType> efgTaxExtension) {
-    StringBuilder prefix = new StringBuilder();
     for (int i = 0; i < efgTaxExtension.size(); i++) {
+      StringBuilder prefix = new StringBuilder("identifications/identification/"+i+"/result/mineralRockIdentified");
       MineralRockIdentifiedType identification = efgTaxExtension.get(i);
       iterateOverNode(mapper.valueToTree(identification), unitData, ABCDEFG, prefix);
       unitData.remove("abcd:identifications/identification/" + i + "/result/extension");
@@ -210,39 +210,41 @@ public class BioCaseService implements WebClientService {
     var efgIdentifications = new ArrayList<MineralRockIdentifiedType>();
     try {
       var context = JAXBContext.newInstance(MineralRockIdentifiedType.class);
-      if (unit.getIdentifications() != null) {
-        if (!unit.getIdentifications().getIdentification().isEmpty()) {
+      if (unit.getIdentifications() != null && !unit.getIdentifications().getIdentification().isEmpty()) {
           unit.getIdentifications().getIdentification().forEach(identification -> {
             var node = (Node) identification.getResult().getExtension();
             if (node != null) {
               var document = node.getOwnerDocument();
               Source xmlSource = new DOMSource(document);
               try {
-                var xmlEventReader = xmlFactory.createXMLEventReader(xmlSource);
-                while (xmlEventReader.hasNext()) {
-                  xmlEventReader.nextEvent();
-                  if (isStartElement(xmlEventReader.peek(), "MineralRockIdentified")) {
-                    try {
-                      efgIdentifications.add(context.createUnmarshaller()
-                          .unmarshal(xmlEventReader, MineralRockIdentifiedType.class)
-                          .getValue());
-                    } catch (JAXBException e) {
-                      e.printStackTrace();
-                    }
-                  }
-                }
+                extractMineralRockIdentification(efgIdentifications, context, xmlSource);
               } catch (XMLStreamException e) {
                 throw new RuntimeException(e);
               }
-
             }
           });
-        }
       }
     } catch (JAXBException e) {
       throw new RuntimeException(e);
     }
     return efgIdentifications;
+  }
+
+  private void extractMineralRockIdentification(ArrayList<MineralRockIdentifiedType> efgIdentifications,
+      JAXBContext context, Source xmlSource) throws XMLStreamException {
+    var xmlEventReader = xmlFactory.createXMLEventReader(xmlSource);
+    while (xmlEventReader.hasNext()) {
+      xmlEventReader.nextEvent();
+      if (isStartElement(xmlEventReader.peek(), "MineralRockIdentified/")) {
+        try {
+          efgIdentifications.add(context.createUnmarshaller()
+              .unmarshal(xmlEventReader, MineralRockIdentifiedType.class)
+              .getValue());
+        } catch (JAXBException e) {
+          e.printStackTrace();
+        }
+      }
+    }
   }
 
   private EarthScienceSpecimenType getEfgUnitExtension(Unit unit) {
@@ -277,7 +279,7 @@ public class BioCaseService implements WebClientService {
   }
 
   private void addEfgFieldsForExtension(ObjectNode unitData, EarthScienceSpecimenType efg) {
-    StringBuilder prefix = new StringBuilder();
+    StringBuilder prefix = new StringBuilder("earthScienceSpecimen/");
     iterateOverNode(mapper.valueToTree(efg), unitData, ABCDEFG, prefix);
     unitData.remove("abcd:unitExtension");
   }
@@ -286,7 +288,18 @@ public class BioCaseService implements WebClientService {
     var objectNode = (ObjectNode) unitData.deepCopy();
     objectNode.remove(mapping.getFieldMappings().values());
     objectNode.remove(mapping.getDefaultMappings().values());
+    removeMultiMediaFields(objectNode);
     return objectNode;
+  }
+
+  private void removeMultiMediaFields(ObjectNode unitData) {
+    var multiMediaFields = new ArrayList<String>();
+    unitData.fields().forEachRemaining(field -> {
+      if (field.getKey().startsWith("abcd:multiMediaObjects")){
+        multiMediaFields.add(field.getKey());
+      }
+    });
+    unitData.remove(multiMediaFields);
   }
 
   private String getPhysicalSpecimenId(String physicalSpecimenIdType, String organizationId,
@@ -368,6 +381,9 @@ public class BioCaseService implements WebClientService {
       return mapping.getDefaultMappings().get(fieldName);
     } else if (mapping.getFieldMappings().containsKey(fieldName)) {
       var value = data.get(mapping.getFieldMappings().get(fieldName));
+      if (value == null){
+        value = data.get("identifications/identification/0/result/mineralRockIdentified/classifiedName/fullScientificNameString");
+      }
       if (value != null && value.isTextual()) {
         return value.asText();
       } else {
