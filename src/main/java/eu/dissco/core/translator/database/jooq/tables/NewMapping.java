@@ -129,12 +129,12 @@ public class NewMapping extends TableImpl<NewMappingRecord> {
 
     @Override
     public UniqueKey<NewMappingRecord> getPrimaryKey() {
-        return Keys.NEW_MAPPING_PKEY;
+        return Keys.NEW_MAPPING_PK;
     }
 
     @Override
     public List<UniqueKey<NewMappingRecord>> getKeys() {
-        return Arrays.<UniqueKey<NewMappingRecord>>asList(Keys.NEW_MAPPING_PKEY);
+        return Arrays.<UniqueKey<NewMappingRecord>>asList(Keys.NEW_MAPPING_PK);
     }
 
     @Override

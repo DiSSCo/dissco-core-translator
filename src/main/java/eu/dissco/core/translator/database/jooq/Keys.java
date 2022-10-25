@@ -26,7 +26,7 @@ public class Keys {
     // UNIQUE and PRIMARY KEY definitions
     // -------------------------------------------------------------------------
 
-    public static final UniqueKey<NewMappingRecord> NEW_MAPPING_PKEY = Internal.createUniqueKey(NewMapping.NEW_MAPPING, DSL.name("new_mapping_pkey"), new TableField[] { NewMapping.NEW_MAPPING.ID }, true);
+    public static final UniqueKey<NewMappingRecord> NEW_MAPPING_PK = Internal.createUniqueKey(NewMapping.NEW_MAPPING, DSL.name("new_mapping_pk"), new TableField[] { NewMapping.NEW_MAPPING.ID, NewMapping.NEW_MAPPING.VERSION }, true);
     public static final UniqueKey<NewSourceSystemRecord> NEW_SOURCE_SYSTEM_ENDPOINT_KEY = Internal.createUniqueKey(NewSourceSystem.NEW_SOURCE_SYSTEM, DSL.name("new_source_system_endpoint_key"), new TableField[] { NewSourceSystem.NEW_SOURCE_SYSTEM.ENDPOINT }, true);
     public static final UniqueKey<NewSourceSystemRecord> NEW_SOURCE_SYSTEM_PKEY = Internal.createUniqueKey(NewSourceSystem.NEW_SOURCE_SYSTEM, DSL.name("new_source_system_pkey"), new TableField[] { NewSourceSystem.NEW_SOURCE_SYSTEM.ID }, true);
 }

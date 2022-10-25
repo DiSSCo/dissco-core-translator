@@ -776,7 +776,7 @@
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element type="RecordBasisEnum" name="RecordBasis" minOccurs="0">
+      <xs:element type="String" name="RecordBasis" minOccurs="0">
         <xs:annotation>
           <xs:documentation>An indication of what the unit record describes. Note that the element SourceReference provides for the case that the record is based on a publication.</xs:documentation>
         </xs:annotation>
@@ -1242,7 +1242,7 @@
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element type="SexCodeEnum" name="Sex" minOccurs="0">
+      <xs:element type="String" name="Sex" minOccurs="0">
         <xs:annotation>
           <xs:documentation>Maps to Darwin Core 2: Sex. Refers to the entire unit, which may be mixed. Note that counts can be provided in the Unit's MeasurementsOrFacts section.</xs:documentation>
         </xs:annotation>
@@ -1763,38 +1763,6 @@
       <xs:documentation>An abbreviated designation of an institution.</xs:documentation>
     </xs:annotation>
     <xs:restriction base="xs:string"/>
-  </xs:simpleType>
-  <xs:simpleType name="RecordBasisEnum">
-    <xs:annotation>
-      <xs:documentation>A standard designator for the nature of the object of the record.</xs:documentation>
-    </xs:annotation>
-    <xs:restriction base="xs:Name">
-      <xs:enumeration value="PreservedSpecimen"/>
-      <xs:enumeration value="LivingSpecimen"/>
-      <xs:enumeration value="FossileSpecimen"/>
-      <xs:enumeration value="FossilSpecimen"/>
-      <xs:enumeration value="OtherSpecimen"/>
-      <xs:enumeration value="HumanObservation"/>
-      <xs:enumeration value="MachineObservation"/>
-      <xs:enumeration value="DrawingOrPhotograph"/>
-      <xs:enumeration value="MultimediaObject"/>
-      <xs:enumeration value="Unspecified"/>
-      <xs:enumeration value="RockSpecimen"/>
-      <xs:enumeration value="MineralSpecimen"/>
-      <xs:enumeration value="MeteoriteSpecimen"/>
-    </xs:restriction>
-  </xs:simpleType>
-  <xs:simpleType name="SexCodeEnum">
-    <xs:annotation>
-      <xs:documentation>Sex of the organism (Male, Female, Unknown, Not applicable (e.g. for a fungus in a herbarium), MiXed.</xs:documentation>
-    </xs:annotation>
-    <xs:restriction base="xs:Name">
-      <xs:enumeration value="M"/>
-      <xs:enumeration value="F"/>
-      <xs:enumeration value="U"/>
-      <xs:enumeration value="N"/>
-      <xs:enumeration value="X"/>
-    </xs:restriction>
   </xs:simpleType>
   <xs:complexType name="Reference">
     <xs:annotation>
@@ -3021,7 +2989,7 @@
           <xs:documentation>Any free text comments related to the name</xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element type="CodeOfNomenclatureEnum" name="Code" minOccurs="0">
+      <xs:element type="String" name="Code" minOccurs="0">
         <xs:annotation>
           <xs:documentation>The Code of Nomenclature that applies to the scientific name.</xs:documentation>
         </xs:annotation>
@@ -3095,7 +3063,7 @@
           <xs:documentation>The final epithet of a botanical name of infraspecific rank.</xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element type="RankAbbreviation" name="Rank" minOccurs="0">
+      <xs:element type="String" name="Rank" minOccurs="0">
         <xs:annotation>
           <xs:documentation>The rank of the name where needed to form it.</xs:documentation>
         </xs:annotation>
@@ -3236,47 +3204,6 @@
     </xs:annotation>
     <xs:restriction base="xs:string"/>
   </xs:simpleType>
-  <xs:simpleType name="RankAbbreviation">
-    <xs:annotation>
-      <xs:documentation xml:lang="en">The abbreviation of a taxonomic rank as used in (botanical) name strings.</xs:documentation>
-    </xs:annotation>
-    <xs:restriction base="xs:Name">
-      <xs:enumeration value="subgen."/>
-      <xs:enumeration value="sect."/>
-      <xs:enumeration value="subsp."/>
-      <xs:enumeration value="var."/>
-      <xs:enumeration value="subvar."/>
-      <xs:enumeration value="forma"/>
-      <xs:enumeration value="f."/>
-      <xs:enumeration value="subforma"/>
-      <xs:enumeration value="subf."/>
-      <xs:enumeration value="f.spec."/>
-    </xs:restriction>
-  </xs:simpleType>
-  <xs:simpleType name="HigherTaxonRankEnum">
-    <xs:annotation>
-      <xs:documentation>A taxonomic rank designation above the rank of genus.</xs:documentation>
-    </xs:annotation>
-    <xs:restriction base="xs:Name">
-      <xs:enumeration value="regnum"/>
-      <xs:enumeration value="subregnum"/>
-      <xs:enumeration value="superphylum"/>
-      <xs:enumeration value="phylum"/>
-      <xs:enumeration value="subphylum"/>
-      <xs:enumeration value="superclassis"/>
-      <xs:enumeration value="classis"/>
-      <xs:enumeration value="subclassis"/>
-      <xs:enumeration value="superordo"/>
-      <xs:enumeration value="ordo"/>
-      <xs:enumeration value="subordo"/>
-      <xs:enumeration value="superfamilia"/>
-      <xs:enumeration value="familia"/>
-      <xs:enumeration value="subfamilia"/>
-      <xs:enumeration value="tribus"/>
-      <xs:enumeration xml:lang="en" value="genusgroup"/>
-      <xs:enumeration xml:lang="en" value="unranked"/>
-    </xs:restriction>
-  </xs:simpleType>
   <xs:complexType name="ScientificName">
     <xs:annotation>
       <xs:documentation>Name of the taxon identified, formed according to the different Codes of Nomenclature which apply to scientific names.</xs:documentation>
@@ -3360,19 +3287,7 @@
     </xs:annotation>
     <xs:sequence>
       <xs:element type="Monomial" name="HigherTaxonName"/>
-      <xs:element type="HigherTaxonRankEnum" name="HigherTaxonRank" minOccurs="0"/>
+      <xs:element type="String" name="HigherTaxonRank" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
-  <xs:simpleType name="CodeOfNomenclatureEnum">
-    <xs:annotation>
-      <xs:documentation>An enumeration of the Codes of Nomenclature</xs:documentation>
-    </xs:annotation>
-    <xs:restriction base="xs:Name">
-      <xs:enumeration value="Bacteriological"/>
-      <xs:enumeration value="Botanical"/>
-      <xs:enumeration value="Viral"/>
-      <xs:enumeration value="Zoological"/>
-      <xs:enumeration value="Cultivated"/>
-    </xs:restriction>
-  </xs:simpleType>
 </xs:schema>
