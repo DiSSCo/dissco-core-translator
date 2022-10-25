@@ -186,18 +186,16 @@ public class BioCaseService implements WebClientService {
 
   private String getSpecimenName(ObjectNode unitData) {
     String specimenName = null;
-    var specimenNode = unitData.get(
-        "abcd:identifications/identification/0/result/taxonIdentified/scientificName/fullScientificNameString");
-    if (specimenNode != null && specimenNode.isTextual()) {
-      specimenName = specimenNode.asText();
-    }
-    if (specimenName == null) {
-      specimenName = unitData.get(
-              "abcd-efg:identifications/identification/0/result/mineralRockIdentified/classifiedName/fullScientificNameString")
-          .asText();
-    }
-    if (specimenName != null) {
-      specimenName = specimenName.strip();
+    if (unitData.get(
+        "abcd:identifications/identification/0/result/taxonIdentified/scientificName/fullScientificNameString")
+        != null) {
+      specimenName = getStringFromNode(unitData.get(
+          "abcd:identifications/identification/0/result/taxonIdentified/scientificName/fullScientificNameString"));
+    } else if (unitData.get(
+        "abcd-efg:identifications/identification/0/result/mineralRockIdentified/classifiedName/fullScientificNameString")
+        != null) {
+      return getStringFromNode(unitData.get(
+          "abcd-efg:identifications/identification/0/result/mineralRockIdentified/classifiedName/fullScientificNameString"));
     } else {
       log.info("Cannot determine specimen name from unitData: {}", unitData);
     }
@@ -504,6 +502,13 @@ public class BioCaseService implements WebClientService {
       prefix.delete(prefix.length() - field.getKey().length() - 3, prefix.length());
       count = count + 1;
     }
+  }
+
+  private String getStringFromNode(JsonNode specimenNode) {
+    if (specimenNode.isTextual()) {
+      return specimenNode.asText();
+    }
+    return null;
   }
 
 }
