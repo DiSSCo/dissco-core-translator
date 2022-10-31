@@ -112,6 +112,7 @@ public class BioCaseService implements WebClientService {
 
   private boolean mapToABCD(String xml) {
     var recordCount = 0;
+    var recordDropped = 0;
     try {
       var xmlEventReader = xmlFactory.createXMLEventReader(new StringReader(xml));
       while (xmlEventReader.hasNext()) {
@@ -119,10 +120,20 @@ public class BioCaseService implements WebClientService {
         if (isStartElement(element, "content")) {
           recordCount = Integer.parseInt(
               element.asStartElement().getAttributeByName(new QName("recordCount")).getValue());
+          recordDropped = Integer.parseInt(
+              element.asStartElement().getAttributeByName(new QName("recordDropped")).getValue());
+          log.info("Received {} records in BioCase request", recordCount);
         }
         retrieveUnitData(xmlEventReader);
       }
-      return recordCount % webClientProperties.getItemsPerRequest() != 0;
+      if ((recordCount+recordDropped) % webClientProperties.getItemsPerRequest() != 0) {
+        log.info("Received records {} does not match requested records {}. "
+                + "All records have been processed", recordCount,
+            webClientProperties.getItemsPerRequest());
+        return true;
+      } else {
+        return false;
+      }
     } catch (XMLStreamException | JsonProcessingException e) {
       log.info("Error converting response tot XML", e);
     }
@@ -168,7 +179,7 @@ public class BioCaseService implements WebClientService {
               unitData,
               null
           );
-          log.info("Result digital Specimen: {}", digitalSpecimen);
+          log.debug("Result digital Specimen: {}", digitalSpecimen);
           kafkaService.sendMessage("digital-specimen",
               mapper.writeValueAsString(
                   new DigitalSpecimenEvent(enrichmentServices(false), digitalSpecimen)));
@@ -370,7 +381,7 @@ public class BioCaseService implements WebClientService {
         data,
         "BioCase"
     );
-    log.info("Result digital media object: {}", digitalMediaObject);
+    log.debug("Result digital media object: {}", digitalMediaObject);
     kafkaService.sendMessage("digital-media-object",
         mapper.writeValueAsString(
             new DigitalMediaObjectEvent(enrichmentServices(true), digitalMediaObject)));
@@ -410,7 +421,7 @@ public class BioCaseService implements WebClientService {
         return null;
       }
     } else {
-      log.warn("Cannot find field {}", fieldName);
+      log.debug("Cannot find field {}", fieldName);
       return null;
     }
   }
