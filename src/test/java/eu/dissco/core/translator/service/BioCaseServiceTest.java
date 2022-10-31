@@ -1,16 +1,16 @@
 package eu.dissco.core.translator.service;
 
-import static eu.dissco.core.translator.TestUtils.*;
 import static eu.dissco.core.translator.TestUtils.DEFAULTS;
+import static eu.dissco.core.translator.TestUtils.FIELD_MAPPING;
 import static eu.dissco.core.translator.TestUtils.loadResourceFile;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.times;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.dissco.core.translator.TestUtils;
 import eu.dissco.core.translator.component.MappingComponent;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
@@ -74,14 +74,16 @@ public class BioCaseServiceTest {
     given(properties.getSourceSystemId()).willReturn("ABC-DDD-ASD");
     given(repository.getEndpoint(anyString())).willReturn("https://endpoint.com");
     given(responseSpec.bodyToMono(any(Class.class))).willReturn(
-        Mono.just(loadResourceFile("biocase/biocase-206-response.xml")));
-    given(properties.getItemsPerRequest()).willReturn(10);
+            Mono.just(loadResourceFile("biocase/geocase-record-dropped.xml")))
+        .willReturn(Mono.just(loadResourceFile("biocase/biocase-206-response.xml")));
+    given(properties.getItemsPerRequest()).willReturn(100);
 
     // When
     service.retrieveData();
 
     // Then
-    then(kafkaService).should().sendMessage(eq("digital-specimen"), anyString());
+    then(webClient).should(times(2)).get();
+    then(kafkaService).should(times(100)).sendMessage(eq("digital-specimen"), anyString());
   }
 
   private void givenJsonWebclient() {
