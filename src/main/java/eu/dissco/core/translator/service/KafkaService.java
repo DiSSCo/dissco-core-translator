@@ -22,6 +22,7 @@ public class KafkaService {
 
       @Override
       public void onSuccess(SendResult<String, String> result) {
+        // No need to do anything on success
       }
 
       @Override

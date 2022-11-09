@@ -1,7 +1,7 @@
 package eu.dissco.core.translator.service;
 
-import static eu.dissco.core.translator.TestUtils.DEFAULTS;
-import static eu.dissco.core.translator.TestUtils.FIELD_MAPPING;
+import static eu.dissco.core.translator.TestUtils.ABCD_DEFAULTS;
+import static eu.dissco.core.translator.TestUtils.ABCD_FIELD_MAPPING;
 import static eu.dissco.core.translator.TestUtils.loadResourceFile;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -32,7 +32,7 @@ import org.springframework.web.reactive.function.client.WebClient.ResponseSpec;
 import reactor.core.publisher.Mono;
 
 @ExtendWith(MockitoExtension.class)
-public class BioCaseServiceTest {
+class BioCaseServiceTest {
 
   private final XMLInputFactory factory = XMLInputFactory.newFactory();
   private final ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
@@ -69,8 +69,8 @@ public class BioCaseServiceTest {
   void testRetrieveData206() throws IOException {
     // Given
     givenJsonWebclient();
-    given(mappingComponent.getFieldMappings()).willReturn(FIELD_MAPPING);
-    given(mappingComponent.getDefaultMappings()).willReturn(DEFAULTS);
+    given(mappingComponent.getFieldMappings()).willReturn(ABCD_FIELD_MAPPING);
+    given(mappingComponent.getDefaultMappings()).willReturn(ABCD_DEFAULTS);
     given(properties.getSourceSystemId()).willReturn("ABC-DDD-ASD");
     given(repository.getEndpoint(anyString())).willReturn("https://endpoint.com");
     given(responseSpec.bodyToMono(any(Class.class))).willReturn(
@@ -83,7 +83,28 @@ public class BioCaseServiceTest {
 
     // Then
     then(webClient).should(times(2)).get();
+    then(kafkaService).should(times(99)).sendMessage(eq("digital-specimen"), anyString());
+  }
+
+  @Test
+  void testRetrieveDataWithMedia206() throws IOException {
+    // Given
+    givenJsonWebclient();
+    given(mappingComponent.getFieldMappings()).willReturn(ABCD_FIELD_MAPPING);
+    given(mappingComponent.getDefaultMappings()).willReturn(ABCD_DEFAULTS);
+    given(properties.getSourceSystemId()).willReturn("ABC-DDD-ASD");
+    given(repository.getEndpoint(anyString())).willReturn("https://endpoint.com");
+    given(responseSpec.bodyToMono(any(Class.class))).willReturn(
+            Mono.just(loadResourceFile("biocase/biocase-206-with-media.xml")));
+    given(properties.getItemsPerRequest()).willReturn(101);
+
+    // When
+    service.retrieveData();
+
+    // Then
+    then(webClient).should(times(1)).get();
     then(kafkaService).should(times(100)).sendMessage(eq("digital-specimen"), anyString());
+    then(kafkaService).should(times(299)).sendMessage(eq("digital-media-object"), anyString());
   }
 
   private void givenJsonWebclient() {

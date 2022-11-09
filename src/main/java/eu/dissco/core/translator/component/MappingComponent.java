@@ -1,5 +1,6 @@
 package eu.dissco.core.translator.component;
 
+import eu.dissco.core.translator.exception.DisscoRepositoryException;
 import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.MappingRepository;
 import java.util.HashMap;
@@ -21,7 +22,7 @@ public class MappingComponent {
   private final Map<String, String> defaults = new HashMap<>();
 
   @PostConstruct
-  void setup() {
+  void setup() throws DisscoRepositoryException {
     var objectNode = repository.retrieveMapping(properties.getSourceSystemId());
     var mappingObject = objectNode.get("mapping");
     mappingObject.iterator().forEachRemaining(node -> node.fields()

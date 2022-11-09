@@ -40,11 +40,17 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Slf4j
 @Profile(Profiles.DWCA)
 @RequiredArgsConstructor
-public class DwcaService implements WebClientService{
+public class DwcaService implements WebClientService {
 
-  private static final List<String> DEFAULT_MAPPED_FIELD = List.of("ac:accessUri", "dcterms:format",
-      "dc:type", "dcterms:identifier", "dcterms:type", "dwc:associatedMedia");
-  private final ObjectMapper mapper = new ObjectMapper();
+
+  private static final String DCTERMS_FORMAT = "dcterms:format";
+  private static final String DWC_ASSOCIATED_MEDIA = "dwc:associatedMedia";
+  private static final String UNKNOWN = "Unknown";
+  private static final String PHYSICAL_SPECIMEN_ID = "physical_specimen_id";
+  private static final List<String> DEFAULT_MAPPED_FIELD = List.of("ac:accessUri", DCTERMS_FORMAT,
+      "dc:type", "ac:accessURI", "dcterms:type", DWC_ASSOCIATED_MEDIA, "dcterms:identifier");
+
+  private final ObjectMapper mapper;
   private final WebClientProperties webClientProperties;
   private final WebClient webClient;
   private final DwcaProperties dwcaProperties;
@@ -98,7 +104,7 @@ public class DwcaService implements WebClientService{
       log.info("Type of digitalMediaObject is: {}", type);
       var digitalMediaObject = new DigitalMediaObject(type, rec.id(),
           rec.value(extension.getField("dcterms:identifier").getTerm()),
-          rec.value(extension.getField("dcterms:format").getTerm()),
+          rec.value(extension.getField(DCTERMS_FORMAT).getTerm()),
           webClientProperties.getSourceSystemId(), getData(extension, rec, false),
           getData(extension, rec, true), "DWCA");
       publishDigitalMediaObject(digitalMediaObject);
@@ -116,7 +122,7 @@ public class DwcaService implements WebClientService{
             type,
             rec.id(),
             rec.value(extension.getField("ac:accessUri").getTerm()),
-            rec.value(extension.getField("dcterms:format").getTerm()),
+            rec.value(extension.getField(DCTERMS_FORMAT).getTerm()),
             webClientProperties.getSourceSystemId(), getData(extension, rec, false),
             getData(extension, rec, true),
             "DWCA");
@@ -144,12 +150,16 @@ public class DwcaService implements WebClientService{
   }
 
   private String determineDigitalMediaType(ArchiveFile extension, Record rec) {
+    if (getTypeField(extension) == null) {
+      log.warn("No dc or dcterms type available in extension with id {}", rec.id());
+      return UNKNOWN;
+    }
     var dublinCoreType = rec.value(getTypeField(extension).getTerm());
     if (dublinCoreType.equals("StillImage")) {
       return "2DImageObject";
     }
     log.warn("Received Unmapped type from the dwca");
-    return "Unknown";
+    return UNKNOWN;
   }
 
   private ArchiveField getTypeField(ArchiveFile extension) {
@@ -162,7 +172,7 @@ public class DwcaService implements WebClientService{
   }
 
   private void processDigitalSpecimen(ArchiveFile core) throws IOException {
-    var hasAssociatedMedia = core.hasTerm("dwc:associatedMedia");
+    var hasAssociatedMedia = core.hasTerm(DWC_ASSOCIATED_MEDIA);
     for (var rec : core) {
       if (recordNeedsToBeIgnored(rec, core)) {
         idTobeIgnored.add(rec.id());
@@ -180,7 +190,7 @@ public class DwcaService implements WebClientService{
         var translatorEvent = new DigitalSpecimenEvent(enrichmentServices(false), digitalSpecimen);
         kafkaService.sendMessage("digital-specimen", mapper.writeValueAsString(translatorEvent));
         if (hasAssociatedMedia) {
-          var associatedMedia = rec.value(core.getField("dwc:associatedMedia").getTerm());
+          var associatedMedia = rec.value(core.getField(DWC_ASSOCIATED_MEDIA).getTerm());
           if (associatedMedia != null) {
             publishAssociatedMedia(associatedMedia, digitalSpecimen);
           }
@@ -196,6 +206,11 @@ public class DwcaService implements WebClientService{
       return true;
     } else {
       var basisOfRecord = rec.value(core.getField("dwc:basisOfRecord").getTerm());
+      if (basisOfRecord == null) {
+        log.warn("Record with id: {} has an empty the basis of Record, Record will be ignored",
+            rec.id());
+        return true;
+      }
       basisOfRecord = basisOfRecord.toUpperCase(Locale.ROOT);
       if (allowedBasisOfRecord.contains(basisOfRecord)) {
         return false;
@@ -209,13 +224,13 @@ public class DwcaService implements WebClientService{
 
   private void publishAssociatedMedia(String associatedMedia, DigitalSpecimen digitalSpecimen)
       throws JsonProcessingException {
-    log.info("Digital Specimen: {}, has associatedMedia", digitalSpecimen.physicalSpecimenId(),
+    log.info("Digital Specimen: {}, has associatedMedia {}", digitalSpecimen.physicalSpecimenId(),
         associatedMedia);
     String[] mediaUrls = associatedMedia.split("\\|");
     for (var mediaUrl : mediaUrls) {
-      var digitalMediaObject = new DigitalMediaObject("Unknown",
+      var digitalMediaObject = new DigitalMediaObject(UNKNOWN,
           digitalSpecimen.physicalSpecimenId(), mediaUrl, null,
-          webClientProperties.getSourceSystemId(), null, null, "physical_specimen_id");
+          webClientProperties.getSourceSystemId(), null, null, PHYSICAL_SPECIMEN_ID);
       publishDigitalMediaObject(digitalMediaObject);
     }
   }
@@ -223,13 +238,13 @@ public class DwcaService implements WebClientService{
   private String getPhysicalSpecimenId(String physicalSpecimenIdType, String organizationId,
       ArchiveFile core, Record rec) {
     if (physicalSpecimenIdType.equals("cetaf")) {
-      return getProperty("physical_specimen_id", core, rec);
+      return getProperty(PHYSICAL_SPECIMEN_ID, core, rec);
     } else if (physicalSpecimenIdType.equals("combined")) {
-      return getProperty("physical_specimen_id", core, rec) + ":" + minifyOrganizationId(
+      return getProperty(PHYSICAL_SPECIMEN_ID, core, rec) + ":" + minifyOrganizationId(
           organizationId);
     } else {
       log.warn("Unknown physicalSpecimenIdType specified");
-      return "Unknown";
+      return UNKNOWN;
     }
   }
 
@@ -250,7 +265,7 @@ public class DwcaService implements WebClientService{
       return rec.value(core.getField(mapping.getFieldMappings().get(fieldName)).getTerm());
     } else {
       log.warn("Cannot find property {}", fieldName);
-      return "Unknown";
+      return UNKNOWN;
     }
   }
 
