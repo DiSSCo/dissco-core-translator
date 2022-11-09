@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import efg.DataSets;
+import efg.DataSets.DataSet;
 import efg.EarthScienceSpecimenType;
 import efg.MineralRockIdentifiedType;
 import efg.MultiMediaObject;
@@ -18,6 +19,7 @@ import eu.dissco.core.translator.domain.DigitalMediaObjectEvent;
 import eu.dissco.core.translator.domain.DigitalSpecimen;
 import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
 import eu.dissco.core.translator.domain.Enrichment;
+import eu.dissco.core.translator.exception.DisscoEfgParsingException;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
@@ -59,12 +61,16 @@ public class BioCaseService implements WebClientService {
   private static final String LIMIT = "limit";
   private static final String ABCD = "abcd:";
   private static final String ABCDEFG = "abcd-efg:";
-  private static final List<String> IMAGE_FORMATS = List.of("IMAGE/JPG", "JPG", "IMAGE/PNG", "PNG");
+  private static final List<String> IMAGE_FORMATS = List.of("IMAGE/JPG", "JPG", "IMAGE/JPEG",
+      "JPEG", "IMAGE/PNG", "PNG");
   private static final String PHYSICAL_SPECIMEN_ID = "physical_specimen_id";
-  private final List<String> allowedBasisOfRecord = List.of("PRESERVEDSPECIMEN", "FOSSIL", "OTHER",
+  private static final List<String> allowedBasisOfRecord = List.of("PRESERVEDSPECIMEN", "FOSSIL",
+      "OTHER",
       "ROCK", "MINERAL", "METEORITE", "FOSSILSPECIMEN", "LIVINGSPECIMEN", "MATERIALSAMPLE",
       "FOSSIL SPECIMEN", "ROCKSPECIMEN", "ROCK SPECIMEN", "MINERALSPECIMEN", "MINERAL SPECIMEN",
       "METEORITESPECIMEN", "METEORITE SPECIMEN");
+  private static final String SPECIMEN_NAME_EFG = "abcd-efg:identifications/identification/0/result/mineralRockIdentified/classifiedName/fullScientificNameString";
+  private static final String SPECIMEN_NAME_ABCD = "abcd:identifications/identification/0/result/taxonIdentified/scientificName/fullScientificNameString";
 
   private final ObjectMapper mapper;
   private final WebClientProperties webClientProperties;
@@ -122,98 +128,101 @@ public class BioCaseService implements WebClientService {
               element.asStartElement().getAttributeByName(new QName("recordCount")).getValue());
           recordDropped = Integer.parseInt(
               element.asStartElement().getAttributeByName(new QName("recordDropped")).getValue());
-          log.info("Received {} records in BioCase request", recordCount);
+          log.info("Received {} records in BioCase request, {} records dropped", recordCount,
+              recordDropped);
         }
         retrieveUnitData(xmlEventReader);
       }
-      if ((recordCount+recordDropped) % webClientProperties.getItemsPerRequest() != 0) {
+      if ((recordCount + recordDropped) % webClientProperties.getItemsPerRequest() != 0) {
         log.info("Received records {} does not match requested records {}. "
-                + "All records have been processed", recordCount,
+                + "All records have been processed", (recordCount + recordDropped),
             webClientProperties.getItemsPerRequest());
         return true;
       } else {
         return false;
       }
-    } catch (XMLStreamException | JsonProcessingException e) {
-      log.info("Error converting response tot XML", e);
+    } catch (XMLStreamException | JAXBException e) {
+      log.error("Error converting response tot XML", e);
     }
     return false;
   }
 
   private void retrieveUnitData(XMLEventReader xmlEventReader)
-      throws XMLStreamException, JsonProcessingException {
+      throws XMLStreamException, JAXBException {
     mapper.setSerializationInclusion(Include.NON_NULL);
     if (isStartElement(xmlEventReader.peek(), "DataSets")) {
-      try {
         mapABCD206(xmlEventReader);
-      } catch (JAXBException e) {
-        e.printStackTrace();
-      }
     }
   }
 
   private void mapABCD206(XMLEventReader xmlEventReader)
-      throws JAXBException, JsonProcessingException {
+      throws JAXBException {
     var context = JAXBContext.newInstance(DataSets.class);
     var datasetsMarshaller = context.createUnmarshaller().unmarshal(xmlEventReader, DataSets.class);
     var datasets = datasetsMarshaller.getValue().getDataSet().get(0);
     for (var unit : datasets.getUnits().getUnit()) {
-      var unitData = getData(mapper.valueToTree(unit));
-      extractEfgInformation(unit, unitData);
-      if (isAcceptedType(unit)) {
-        var organizationId = getProperty("organization_id", unitData);
-        var physicalSpecimenIdType = getProperty("physical_specimen_id_type", unitData);
-        if (physicalSpecimenIdType != null) {
-          var physicalSpecimenId = getPhysicalSpecimenId(physicalSpecimenIdType, organizationId,
-              unitData);
-          var digitalSpecimen = new DigitalSpecimen(
-              getProperty("type", unitData),
-              physicalSpecimenId,
-              physicalSpecimenIdType,
-              getProperty("physical_specimen_collection", unitData),
-              getSpecimenName(unitData),
-              organizationId,
-              datasets.getDatasetGUID(),
-              webClientProperties.getSourceSystemId(),
-              removeMappedFields(unitData),
-              unitData,
-              null
-          );
-          log.debug("Result digital Specimen: {}", digitalSpecimen);
-          kafkaService.sendMessage("digital-specimen",
-              mapper.writeValueAsString(
-                  new DigitalSpecimenEvent(enrichmentServices(false), digitalSpecimen)));
-          processDigitalMediaObjects(physicalSpecimenId, unit);
-        } else {
-          log.warn("Ignoring record with id: {} as we cannot determine the physicalSpecimenIdType",
-              getProperty(PHYSICAL_SPECIMEN_ID, unitData));
-        }
-      } else {
-        log.info("Record with id: {} and record basis: {} is ignored ",
-            getProperty(PHYSICAL_SPECIMEN_ID, unitData), unit.getRecordBasis());
+      try {
+        processUnit(datasets, unit);
+      } catch (DisscoEfgParsingException | JsonProcessingException e) {
+        log.error("Unit could not be processed due to error", e);
       }
+    }
+  }
+
+  private void processUnit(DataSet datasets, Unit unit)
+      throws JsonProcessingException, DisscoEfgParsingException {
+    var unitData = getData(mapper.valueToTree(unit));
+    extractEfgInformation(unit, unitData);
+    if (isAcceptedType(unit)) {
+      var organizationId = getProperty("organization_id", unitData);
+      var physicalSpecimenIdType = getProperty("physical_specimen_id_type", unitData);
+      if (physicalSpecimenIdType != null) {
+        var physicalSpecimenId = getPhysicalSpecimenId(physicalSpecimenIdType, organizationId,
+            unitData);
+        var digitalSpecimen = new DigitalSpecimen(
+            getProperty("type", unitData),
+            physicalSpecimenId,
+            physicalSpecimenIdType,
+            getProperty("physical_specimen_collection", unitData),
+            getSpecimenName(unitData),
+            organizationId,
+            datasets.getDatasetGUID(),
+            webClientProperties.getSourceSystemId(),
+            removeMappedFields(unitData),
+            unitData,
+            null
+        );
+        log.debug("Result digital Specimen: {}", digitalSpecimen);
+        kafkaService.sendMessage("digital-specimen",
+            mapper.writeValueAsString(
+                new DigitalSpecimenEvent(enrichmentServices(false), digitalSpecimen)));
+        processDigitalMediaObjects(physicalSpecimenId, unit);
+      } else {
+        log.warn("Ignoring record with id: {} as we cannot determine the physicalSpecimenIdType",
+            getProperty(PHYSICAL_SPECIMEN_ID, unitData));
+      }
+    } else {
+      log.info("Record with id: {} and record basis: {} is ignored ",
+          getProperty(PHYSICAL_SPECIMEN_ID, unitData), unit.getRecordBasis());
     }
   }
 
   private String getSpecimenName(ObjectNode unitData) {
     String specimenName = null;
-    if (unitData.get(
-        "abcd:identifications/identification/0/result/taxonIdentified/scientificName/fullScientificNameString")
+    if (unitData.get(SPECIMEN_NAME_ABCD)
         != null) {
-      specimenName = getStringFromNode(unitData.get(
-          "abcd:identifications/identification/0/result/taxonIdentified/scientificName/fullScientificNameString"));
-    } else if (unitData.get(
-        "abcd-efg:identifications/identification/0/result/mineralRockIdentified/classifiedName/fullScientificNameString")
+      specimenName = getStringFromNode(unitData.get(SPECIMEN_NAME_ABCD));
+    } else if (unitData.get(SPECIMEN_NAME_EFG)
         != null) {
-      return getStringFromNode(unitData.get(
-          "abcd-efg:identifications/identification/0/result/mineralRockIdentified/classifiedName/fullScientificNameString"));
+      return getStringFromNode(unitData.get(SPECIMEN_NAME_EFG));
     } else {
       log.info("Cannot determine specimen name from unitData: {}", unitData);
     }
     return specimenName;
   }
 
-  private void extractEfgInformation(Unit unit, ObjectNode unitData) {
+  private void extractEfgInformation(Unit unit, ObjectNode unitData)
+      throws DisscoEfgParsingException {
     var efgTaxExtension = getEfgTaxExtension(unit);
     if (!efgTaxExtension.isEmpty()) {
       addEfgFieldsForIdentifications(unitData, efgTaxExtension);
@@ -235,34 +244,32 @@ public class BioCaseService implements WebClientService {
     }
   }
 
-  private List<MineralRockIdentifiedType> getEfgTaxExtension(Unit unit) {
+  private List<MineralRockIdentifiedType> getEfgTaxExtension(Unit unit)
+      throws DisscoEfgParsingException {
     var efgIdentifications = new ArrayList<MineralRockIdentifiedType>();
-    try {
-      var context = JAXBContext.newInstance(MineralRockIdentifiedType.class);
-      if (unit.getIdentifications() != null && !unit.getIdentifications().getIdentification()
-          .isEmpty()) {
-        unit.getIdentifications().getIdentification().forEach(identification -> {
-          var node = (Node) identification.getResult().getExtension();
-          if (node != null) {
-            var document = node.getOwnerDocument();
-            Source xmlSource = new DOMSource(document);
-            try {
-              extractMineralRockIdentification(efgIdentifications, context, xmlSource);
-            } catch (XMLStreamException e) {
-              throw new RuntimeException(e);
-            }
+    if (unit.getIdentifications() != null && !unit.getIdentifications().getIdentification()
+        .isEmpty()) {
+      for (var identification : unit.getIdentifications().getIdentification()) {
+        var node = (Node) identification.getResult().getExtension();
+        if (node != null) {
+          var document = node.getOwnerDocument();
+          Source xmlSource = new DOMSource(document);
+          try {
+            var context = JAXBContext.newInstance(MineralRockIdentifiedType.class);
+            extractMineralRockIdentification(efgIdentifications, context, xmlSource);
+          } catch (XMLStreamException | JAXBException e) {
+            throw new DisscoEfgParsingException(
+                "Failed to parse XML extension for EarthScienceSpecimen XML", e);
           }
-        });
+        }
       }
-    } catch (JAXBException e) {
-      throw new RuntimeException(e);
     }
     return efgIdentifications;
   }
 
   private void extractMineralRockIdentification(
       ArrayList<MineralRockIdentifiedType> efgIdentifications,
-      JAXBContext context, Source xmlSource) throws XMLStreamException {
+      JAXBContext context, Source xmlSource) throws XMLStreamException, DisscoEfgParsingException {
     var xmlEventReader = xmlFactory.createXMLEventReader(xmlSource);
     while (xmlEventReader.hasNext()) {
       xmlEventReader.nextEvent();
@@ -272,41 +279,47 @@ public class BioCaseService implements WebClientService {
               .unmarshal(xmlEventReader, MineralRockIdentifiedType.class)
               .getValue());
         } catch (JAXBException e) {
-          e.printStackTrace();
+          throw new DisscoEfgParsingException("Failed to map to MineralRockIdentified object",
+              e);
         }
       }
     }
   }
 
-  private EarthScienceSpecimenType getEfgUnitExtension(Unit unit) {
-    try {
-      var context = JAXBContext.newInstance(EarthScienceSpecimenType.class);
-      var node = (Node) unit.getUnitExtension();
-      if (node != null) {
-        var document = node.getOwnerDocument();
-        Source xmlSource = new DOMSource(document);
-        try {
-          var xmlEventReader = xmlFactory.createXMLEventReader(xmlSource);
-          while (xmlEventReader.hasNext()) {
-            xmlEventReader.nextEvent();
-            if (isStartElement(xmlEventReader.peek(), "EarthScienceSpecimen")) {
-              try {
-                return context.createUnmarshaller()
-                    .unmarshal(xmlEventReader, EarthScienceSpecimenType.class)
-                    .getValue();
-              } catch (JAXBException e) {
-                e.printStackTrace();
-              }
-            }
-          }
-        } catch (XMLStreamException e) {
-          throw new RuntimeException(e);
-        }
+  private EarthScienceSpecimenType getEfgUnitExtension(Unit unit) throws DisscoEfgParsingException {
+    var node = (Node) unit.getUnitExtension();
+    if (node != null) {
+      var document = node.getOwnerDocument();
+      Source xmlSource = new DOMSource(document);
+      try {
+        var context = JAXBContext.newInstance(EarthScienceSpecimenType.class);
+        return extractEarthScienceSpecimenType(xmlSource, context);
+      } catch (JAXBException | XMLStreamException e) {
+        throw new DisscoEfgParsingException(
+            "Failed to parse XML extension for EarthScienceSpecimen XML", e);
       }
-    } catch (JAXBException e) {
-      throw new RuntimeException(e);
     }
     return null;
+  }
+
+  private EarthScienceSpecimenType extractEarthScienceSpecimenType(Source xmlSource,
+      JAXBContext context)
+      throws DisscoEfgParsingException, XMLStreamException {
+    var xmlEventReader = xmlFactory.createXMLEventReader(xmlSource);
+    while (xmlEventReader.hasNext()) {
+      xmlEventReader.nextEvent();
+      if (isStartElement(xmlEventReader.peek(), "EarthScienceSpecimen")) {
+        try {
+          return context.createUnmarshaller()
+              .unmarshal(xmlEventReader, EarthScienceSpecimenType.class)
+              .getValue();
+        } catch (JAXBException e) {
+          throw new DisscoEfgParsingException("Failed to map to EarthScienceSpecimen object",
+              e);
+        }
+      }
+    }
+    throw new DisscoEfgParsingException("Unable to find EarthScienceSpecimen in extension");
   }
 
   private void addEfgFieldsForExtension(ObjectNode unitData, EarthScienceSpecimenType efg) {
@@ -319,8 +332,7 @@ public class BioCaseService implements WebClientService {
     var objectNode = (ObjectNode) unitData.deepCopy();
     objectNode.remove(mapping.getFieldMappings().values());
     objectNode.remove(mapping.getDefaultMappings().values());
-    objectNode.remove(
-        "abcd-efg:identifications/identification/0/result/mineralRockIdentified/classifiedName/fullScientificNameString");
+    objectNode.remove(SPECIMEN_NAME_EFG);
     removeMultiMediaFields(objectNode);
     return objectNode;
   }

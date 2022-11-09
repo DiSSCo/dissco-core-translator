@@ -389,7 +389,7 @@
                 </abcd:Result>
               </abcd:Identification>
             </abcd:Identifications>
-            <abcd:RecordBasis>RockSpecimen</abcd:RecordBasis>
+            <abcd:RecordBasis>SedimentSpecimen</abcd:RecordBasis>
             <abcd:KindOfUnit language="en">single specimen</abcd:KindOfUnit>
             <abcd:Gathering>
               <abcd:DateTime>
