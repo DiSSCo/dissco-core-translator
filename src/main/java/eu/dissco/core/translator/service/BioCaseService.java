@@ -13,7 +13,6 @@ import efg.MineralRockIdentifiedType;
 import efg.MultiMediaObject;
 import efg.Unit;
 import eu.dissco.core.translator.Profiles;
-import eu.dissco.core.translator.component.MappingComponent;
 import eu.dissco.core.translator.domain.DigitalMediaObject;
 import eu.dissco.core.translator.domain.DigitalMediaObjectEvent;
 import eu.dissco.core.translator.domain.DigitalSpecimen;
@@ -23,6 +22,21 @@ import eu.dissco.core.translator.exception.DisscoEfgParsingException;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
+import eu.dissco.core.translator.terms.License;
+import eu.dissco.core.translator.terms.SourceSystemId;
+import eu.dissco.core.translator.terms.TermMapper;
+import eu.dissco.core.translator.terms.media.AccessUri;
+import eu.dissco.core.translator.terms.media.Format;
+import eu.dissco.core.translator.terms.media.MediaType;
+import eu.dissco.core.translator.terms.specimen.DatasetId;
+import eu.dissco.core.translator.terms.specimen.Modified;
+import eu.dissco.core.translator.terms.specimen.ObjectType;
+import eu.dissco.core.translator.terms.specimen.OrganisationId;
+import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenCollection;
+import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenId;
+import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenIdType;
+import eu.dissco.core.translator.terms.specimen.SpecimenName;
+import eu.dissco.core.translator.terms.specimen.Type;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 import jakarta.xml.bind.JAXBContext;
@@ -61,16 +75,12 @@ public class BioCaseService implements WebClientService {
   private static final String LIMIT = "limit";
   private static final String ABCD = "abcd:";
   private static final String ABCDEFG = "abcd-efg:";
-  private static final List<String> IMAGE_FORMATS = List.of("IMAGE/JPG", "JPG", "IMAGE/JPEG",
-      "JPEG", "IMAGE/PNG", "PNG");
-  private static final String PHYSICAL_SPECIMEN_ID = "physical_specimen_id";
+
   private static final List<String> allowedBasisOfRecord = List.of("PRESERVEDSPECIMEN", "FOSSIL",
-      "OTHER",
-      "ROCK", "MINERAL", "METEORITE", "FOSSILSPECIMEN", "LIVINGSPECIMEN", "MATERIALSAMPLE",
+      "OTHER", "ROCK", "MINERAL", "METEORITE", "FOSSILSPECIMEN", "LIVINGSPECIMEN", "MATERIALSAMPLE",
       "FOSSIL SPECIMEN", "ROCKSPECIMEN", "ROCK SPECIMEN", "MINERALSPECIMEN", "MINERAL SPECIMEN",
       "METEORITESPECIMEN", "METEORITE SPECIMEN");
-  private static final String SPECIMEN_NAME_EFG = "abcd-efg:identifications/identification/0/result/mineralRockIdentified/classifiedName/fullScientificNameString";
-  private static final String SPECIMEN_NAME_ABCD = "abcd:identifications/identification/0/result/taxonIdentified/scientificName/fullScientificNameString";
+
 
   private final ObjectMapper mapper;
   private final WebClientProperties webClientProperties;
@@ -78,11 +88,11 @@ public class BioCaseService implements WebClientService {
   private final SourceSystemRepository repository;
   private final Configuration configuration;
   private final XMLInputFactory xmlFactory;
-  private final MappingComponent mapping;
+  private final TermMapper termMapper;
   private final KafkaService kafkaService;
   private final EnrichmentProperties enrichmentProperties;
 
-  private boolean isAcceptedType(Unit unit) {
+  private boolean isAcceptedBasisOfRecord(Unit unit) {
     var recordBasis = unit.getRecordBasis();
     if (recordBasis != null && !recordBasis.isBlank()) {
       return allowedBasisOfRecord.contains(recordBasis.strip().toUpperCase());
@@ -105,7 +115,6 @@ public class BioCaseService implements WebClientService {
             .bodyToMono(String.class).map(this::mapToABCD).toFuture().get();
         if (finished) {
           log.info("Unable to get records from xml");
-          finished = true;
         }
       } catch (InterruptedException | ExecutionException e) {
         log.error("Failed to get response from uri", e);
@@ -151,7 +160,7 @@ public class BioCaseService implements WebClientService {
       throws XMLStreamException, JAXBException {
     mapper.setSerializationInclusion(Include.NON_NULL);
     if (isStartElement(xmlEventReader.peek(), "DataSets")) {
-        mapABCD206(xmlEventReader);
+      mapABCD206(xmlEventReader);
     }
   }
 
@@ -171,27 +180,21 @@ public class BioCaseService implements WebClientService {
 
   private void processUnit(DataSet datasets, Unit unit)
       throws JsonProcessingException, DisscoEfgParsingException {
-    var unitData = getData(mapper.valueToTree(unit));
-    extractEfgInformation(unit, unitData);
-    if (isAcceptedType(unit)) {
-      var organizationId = getProperty("organization_id", unitData);
-      var physicalSpecimenIdType = getProperty("physical_specimen_id_type", unitData);
+    var unitAttributes = parseToJson(unit);
+    if (isAcceptedBasisOfRecord(unit)) {
+      var organizationId = termMapper.retrieveFromABCD(new OrganisationId(), unitAttributes);
+      var physicalSpecimenIdType = termMapper.retrieveFromABCD(new PhysicalSpecimenIdType(),
+          unitAttributes);
       if (physicalSpecimenIdType != null) {
         var physicalSpecimenId = getPhysicalSpecimenId(physicalSpecimenIdType, organizationId,
-            unitData);
+            unitAttributes);
         var digitalSpecimen = new DigitalSpecimen(
-            getProperty("type", unitData),
             physicalSpecimenId,
-            physicalSpecimenIdType,
-            getProperty("physical_specimen_collection", unitData),
-            getSpecimenName(unitData),
-            organizationId,
-            datasets.getDatasetGUID(),
-            webClientProperties.getSourceSystemId(),
-            removeMappedFields(unitData),
-            unitData,
-            null
+            termMapper.retrieveFromABCD(new Type(), unitAttributes),
+            harmonizeAttributes(datasets, unitAttributes, physicalSpecimenIdType, organizationId),
+            unitAttributes
         );
+
         log.debug("Result digital Specimen: {}", digitalSpecimen);
         kafkaService.sendMessage("digital-specimen",
             mapper.writeValueAsString(
@@ -199,48 +202,59 @@ public class BioCaseService implements WebClientService {
         processDigitalMediaObjects(physicalSpecimenId, unit);
       } else {
         log.warn("Ignoring record with id: {} as we cannot determine the physicalSpecimenIdType",
-            getProperty(PHYSICAL_SPECIMEN_ID, unitData));
+            termMapper.retrieveFromABCD(new PhysicalSpecimenId(), unitAttributes));
       }
     } else {
       log.info("Record with id: {} and record basis: {} is ignored ",
-          getProperty(PHYSICAL_SPECIMEN_ID, unitData), unit.getRecordBasis());
+          termMapper.retrieveFromABCD(new PhysicalSpecimenId(), unitAttributes),
+          unit.getRecordBasis());
     }
   }
 
-  private String getSpecimenName(ObjectNode unitData) {
-    String specimenName = null;
-    if (unitData.get(SPECIMEN_NAME_ABCD)
-        != null) {
-      specimenName = getStringFromNode(unitData.get(SPECIMEN_NAME_ABCD));
-    } else if (unitData.get(SPECIMEN_NAME_EFG)
-        != null) {
-      return getStringFromNode(unitData.get(SPECIMEN_NAME_EFG));
-    } else {
-      log.info("Cannot determine specimen name from unitData: {}", unitData);
-    }
-    return specimenName;
+  private ObjectNode parseToJson(Unit unit) throws DisscoEfgParsingException {
+    var unitData = getData(mapper.valueToTree(unit));
+    extractEfgInformation(unit, unitData);
+    removeMultiMediaFields(unitData);
+    return unitData;
   }
 
-  private void extractEfgInformation(Unit unit, ObjectNode unitData)
+  private JsonNode harmonizeAttributes(DataSet datasets, ObjectNode unitAttributes,
+      String physicalSpecimenIdType, String organizationId) {
+    var attributes = mapper.createObjectNode();
+    attributes.put(PhysicalSpecimenIdType.TERM, physicalSpecimenIdType);
+    attributes.put(OrganisationId.TERM, organizationId);
+    attributes.put(SpecimenName.TERM,
+        termMapper.retrieveFromABCD(new SpecimenName(), unitAttributes));
+    attributes.put(PhysicalSpecimenCollection.TERM,
+        termMapper.retrieveFromABCD(new PhysicalSpecimenCollection(), unitAttributes));
+    attributes.put(DatasetId.TERM, termMapper.retrieveFromABCD(new DatasetId(), unitAttributes));
+    attributes.put(SourceSystemId.TERM, webClientProperties.getSourceSystemId());
+    attributes.put(License.TERM, termMapper.retrieveFromABCD(new License(), datasets));
+    attributes.put(ObjectType.TERM, termMapper.retrieveFromABCD(new ObjectType(), unitAttributes));
+    attributes.put(Modified.TERM, termMapper.retrieveFromABCD(new Modified(), unitAttributes));
+    return attributes;
+  }
+
+  private void extractEfgInformation(Unit unit, ObjectNode unitAttributes)
       throws DisscoEfgParsingException {
     var efgTaxExtension = getEfgTaxExtension(unit);
     if (!efgTaxExtension.isEmpty()) {
-      addEfgFieldsForIdentifications(unitData, efgTaxExtension);
+      addEfgFieldsForIdentifications(unitAttributes, efgTaxExtension);
     }
     var efgUnitExtension = getEfgUnitExtension(unit);
     if (efgUnitExtension != null) {
-      addEfgFieldsForExtension(unitData, efgUnitExtension);
+      addEfgFieldsForExtension(unitAttributes, efgUnitExtension);
     }
   }
 
-  private void addEfgFieldsForIdentifications(ObjectNode unitData,
+  private void addEfgFieldsForIdentifications(ObjectNode unitAttributes,
       List<MineralRockIdentifiedType> efgTaxExtension) {
     for (int i = 0; i < efgTaxExtension.size(); i++) {
       StringBuilder prefix = new StringBuilder(
           "identifications/identification/" + i + "/result/mineralRockIdentified/");
       MineralRockIdentifiedType identification = efgTaxExtension.get(i);
-      iterateOverNode(mapper.valueToTree(identification), unitData, ABCDEFG, prefix);
-      unitData.remove("abcd:identifications/identification/" + i + "/result/extension");
+      iterateOverNode(mapper.valueToTree(identification), unitAttributes, ABCDEFG, prefix);
+      unitAttributes.remove("abcd:identifications/identification/" + i + "/result/extension");
     }
   }
 
@@ -328,15 +342,6 @@ public class BioCaseService implements WebClientService {
     unitData.remove("abcd:unitExtension");
   }
 
-  private JsonNode removeMappedFields(JsonNode unitData) {
-    var objectNode = (ObjectNode) unitData.deepCopy();
-    objectNode.remove(mapping.getFieldMappings().values());
-    objectNode.remove(mapping.getDefaultMappings().values());
-    objectNode.remove(SPECIMEN_NAME_EFG);
-    removeMultiMediaFields(objectNode);
-    return objectNode;
-  }
-
   private void removeMultiMediaFields(ObjectNode unitData) {
     var multiMediaFields = new ArrayList<String>();
     unitData.fields().forEachRemaining(field -> {
@@ -348,12 +353,12 @@ public class BioCaseService implements WebClientService {
   }
 
   private String getPhysicalSpecimenId(String physicalSpecimenIdType, String organizationId,
-      JsonNode unitData) {
+      JsonNode unitAttributes) {
+    var id = termMapper.retrieveFromABCD(new PhysicalSpecimenId(), unitAttributes);
     if (physicalSpecimenIdType.equals("cetaf")) {
-      return getProperty(PHYSICAL_SPECIMEN_ID, unitData);
+      return id;
     } else if (physicalSpecimenIdType.equals("combined")) {
-      return getProperty(PHYSICAL_SPECIMEN_ID, unitData) + ":" + minifyOrganizationId(
-          organizationId);
+      return id + ":" + minifyOrganizationId(organizationId);
     } else {
       log.warn("Unknown physicalSpecimenIdType specified");
       return "Unknown";
@@ -382,16 +387,13 @@ public class BioCaseService implements WebClientService {
 
   private void processDigitalMediaObject(String physicalSpecimenId, MultiMediaObject media)
       throws JsonProcessingException {
-    var data = getData(mapper.valueToTree(media));
+    var attributes = getData(mapper.valueToTree(media));
     var digitalMediaObject = new DigitalMediaObject(
-        determineType(media.getFormat()),
+        termMapper.retrieveFromABCD(new MediaType(), attributes),
         physicalSpecimenId,
-        media.getFileURI(),
-        media.getFormat(),
-        webClientProperties.getSourceSystemId(),
-        removeMappedFields(data),
-        data,
-        "BioCase"
+        "BioCase",
+        harmonizeMedia(attributes),
+        attributes
     );
     log.debug("Result digital media object: {}", digitalMediaObject);
     kafkaService.sendMessage("digital-media-object",
@@ -399,17 +401,13 @@ public class BioCaseService implements WebClientService {
             new DigitalMediaObjectEvent(enrichmentServices(true), digitalMediaObject)));
   }
 
-  private String determineType(String format) {
-    if (format != null) {
-      format = format.toUpperCase();
-      if (IMAGE_FORMATS.contains(format)) {
-        return "2DImageObject";
-      } else {
-        log.warn("Unable to determine media type of digital media object");
-        return null;
-      }
-    }
-    return null;
+  private JsonNode harmonizeMedia(JsonNode mediaAttributes) {
+    var attributes = mapper.createObjectNode();
+    attributes.put(AccessUri.TERM, termMapper.retrieveFromABCD(new AccessUri(), mediaAttributes));
+    attributes.put(SourceSystemId.TERM, webClientProperties.getSourceSystemId());
+    attributes.put(Format.TERM, termMapper.retrieveFromABCD(new Format(), mediaAttributes));
+    attributes.put(License.TERM, termMapper.retrieveFromABCD(new License(), mediaAttributes));
+    return attributes;
   }
 
   private List<String> enrichmentServices(boolean multiMediaObject) {
@@ -418,23 +416,6 @@ public class BioCaseService implements WebClientService {
           .filter(e -> e.isImageOnly() == multiMediaObject).map(Enrichment::getName).toList();
     } else {
       return Collections.emptyList();
-    }
-  }
-
-  private String getProperty(String fieldName, JsonNode data) {
-    if (mapping.getDefaultMappings().containsKey(fieldName)) {
-      return mapping.getDefaultMappings().get(fieldName);
-    } else if (mapping.getFieldMappings().containsKey(fieldName)) {
-      var value = data.get(mapping.getFieldMappings().get(fieldName));
-      if (value != null && value.isTextual()) {
-        return value.asText();
-      } else {
-        log.warn("No values found for field: {}", fieldName);
-        return null;
-      }
-    } else {
-      log.debug("Cannot find field {}", fieldName);
-      return null;
     }
   }
 
@@ -506,6 +487,10 @@ public class BioCaseService implements WebClientService {
       data.put(nameSpace + prefix + field.getKey(), field.getValue().decimalValue());
     } else if (field.getValue().isBigInteger()) {
       data.put(nameSpace + prefix + field.getKey(), field.getValue().bigIntegerValue());
+    } else if (field.getValue().isLong()) {
+      data.put(nameSpace + prefix + field.getKey(), field.getValue().asLong());
+    } else {
+      log.warn("Field could not be mapped: {}", field.getKey());
     }
   }
 
@@ -525,13 +510,6 @@ public class BioCaseService implements WebClientService {
       prefix.delete(prefix.length() - field.getKey().length() - 3, prefix.length());
       count = count + 1;
     }
-  }
-
-  private String getStringFromNode(JsonNode specimenNode) {
-    if (specimenNode.isTextual()) {
-      return specimenNode.asText();
-    }
-    return null;
   }
 
 }
