@@ -1,6 +1,5 @@
 package eu.dissco.core.translator.terms;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import efg.DataSets.DataSet;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -20,8 +19,9 @@ public class License extends Term {
 
   @Override
   public String retrieveFromABCD(DataSet datasets) {
-    if (datasets.getMetadata() != null && datasets.getMetadata() != null
-        && !datasets.getMetadata().getIPRStatements().getLicenses().getLicense().isEmpty()) {
+    if (datasets != null && datasets.getMetadata() != null && datasets.getMetadata()
+        .getIPRStatements().getLicenses()!= null && !datasets.getMetadata()
+        .getIPRStatements().getLicenses().getLicense().isEmpty()) {
       var license = datasets.getMetadata().getIPRStatements().getLicenses().getLicense().get(0)
           .getURI();
       if (license == null) {
