@@ -19,12 +19,7 @@ public class Modified extends Term {
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    var epochString = super.searchAbcdForTerm(unit, abcdTerms);
-    if (epochString != null){
-      var timestamp = Instant.ofEpochMilli(Long.parseLong(epochString));
-      return timestamp.toString();
-    }
-    return null;
+    return super.searchAbcdForTerm(unit, abcdTerms);
   }
 
   @Override

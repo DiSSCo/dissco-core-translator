@@ -67,7 +67,7 @@ import org.w3c.dom.Node;
 
 @Slf4j
 @Service
-@Profile(Profiles.BIO_CASE)
+@Profile(Profiles.BIOCASE)
 @RequiredArgsConstructor
 public class BioCaseService implements WebClientService {
 

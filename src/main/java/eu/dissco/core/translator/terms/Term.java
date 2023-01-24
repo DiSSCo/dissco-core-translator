@@ -43,11 +43,11 @@ public abstract class Term {
 
   public String retrieveFromABCD(JsonNode unit) {
     log.info("No specific attributes retrieve specified for field: {}", getTerm());
-    return "";
+    return null;
   }
 
   public String retrieveFromABCD(DataSet datasets) {
     log.info("No specific attributes retrieve specified for field: {}", getTerm());
-    return "";
+    return null;
   }
 }

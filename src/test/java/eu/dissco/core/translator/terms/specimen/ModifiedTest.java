@@ -41,16 +41,15 @@ class ModifiedTest {
   @Test
   void testRetrieveFromABCD() {
     // Given
-    long epoch = 1674553668909L;
-    var instant = Instant.ofEpochMilli(epoch);
+    String modifiedString = "1674553668909";
     var unit = new ObjectMapper().createObjectNode();
-    unit.put("abcd:dateLastEdited", epoch);
+    unit.put("abcd:dateLastEdited", modifiedString);
 
     // When
     var result = modified.retrieveFromABCD(unit);
 
     // Then
-    assertThat(result).isEqualTo(instant.toString());
+    assertThat(result).isEqualTo(modifiedString);
   }
 
   @Test
