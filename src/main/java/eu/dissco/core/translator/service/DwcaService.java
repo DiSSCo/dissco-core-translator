@@ -35,8 +35,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -69,7 +71,7 @@ public class DwcaService implements WebClientService {
   private final TermMapper termMapper;
   private final EnrichmentProperties enrichmentProperties;
   private final SourceSystemRepository repository;
-  private final List<String> idTobeIgnored = new ArrayList<>();
+  private final Set<String> idTobeIgnored = new HashSet<>();
   private final List<String> allowedBasisOfRecord = List.of("PRESERVEDSPECIMEN", "FOSSIL", "OTHER",
       "ROCK", "MINERAL", "METEORITE", "FOSSILSPECIMEN", "LIVINGSPECIMEN", "MATERIALSAMPLE");
 

@@ -29,6 +29,7 @@ import eu.dissco.core.translator.terms.media.AccessUri;
 import eu.dissco.core.translator.terms.media.Format;
 import eu.dissco.core.translator.terms.media.MediaType;
 import eu.dissco.core.translator.terms.specimen.DatasetId;
+import eu.dissco.core.translator.terms.specimen.DwcaId;
 import eu.dissco.core.translator.terms.specimen.Modified;
 import eu.dissco.core.translator.terms.specimen.ObjectType;
 import eu.dissco.core.translator.terms.specimen.OrganisationId;
@@ -232,6 +233,7 @@ public class BioCaseService implements WebClientService {
     attributes.put(License.TERM, termMapper.retrieveFromABCD(new License(), datasets));
     attributes.put(ObjectType.TERM, termMapper.retrieveFromABCD(new ObjectType(), unitAttributes));
     attributes.put(Modified.TERM, termMapper.retrieveFromABCD(new Modified(), unitAttributes));
+    attributes.put(DwcaId.TERM, (String) null);
     return attributes;
   }
 
