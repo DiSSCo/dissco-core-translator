@@ -1,7 +1,5 @@
 package eu.dissco.core.translator.service;
 
-import static eu.dissco.core.translator.TestUtils.ABCD_DEFAULTS;
-import static eu.dissco.core.translator.TestUtils.ABCD_FIELD_MAPPING;
 import static eu.dissco.core.translator.TestUtils.loadResourceFile;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -10,11 +8,13 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.dissco.core.translator.component.MappingComponent;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
+import eu.dissco.core.translator.terms.TermMapper;
+import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenIdType;
 import freemarker.cache.FileTemplateLoader;
 import freemarker.template.Configuration;
 import java.io.IOException;
@@ -49,7 +49,7 @@ class BioCaseServiceTest {
   @Mock
   private ResponseSpec responseSpec;
   @Mock
-  private MappingComponent mappingComponent;
+  private TermMapper termMapper;
   @Mock
   private KafkaService kafkaService;
   @Mock
@@ -62,15 +62,18 @@ class BioCaseServiceTest {
     configuration.setTemplateLoader(
         new FileTemplateLoader(new ClassPathResource("templates").getFile()));
     service = new BioCaseService(mapper, properties, webClient, repository, configuration, factory,
-        mappingComponent, kafkaService, enrichmentProperties);
+        termMapper, kafkaService, enrichmentProperties);
+
+    // Given
+    givenJsonWebclient();
+    given(termMapper.retrieveFromABCD(any(), any(JsonNode.class))).willReturn("someValue");
+    given(termMapper.retrieveFromABCD(any(PhysicalSpecimenIdType.class), any(JsonNode.class)))
+        .willReturn("cetaf");
   }
 
   @Test
   void testRetrieveData206() throws IOException {
     // Given
-    givenJsonWebclient();
-    given(mappingComponent.getFieldMappings()).willReturn(ABCD_FIELD_MAPPING);
-    given(mappingComponent.getDefaultMappings()).willReturn(ABCD_DEFAULTS);
     given(properties.getSourceSystemId()).willReturn("ABC-DDD-ASD");
     given(repository.getEndpoint(anyString())).willReturn("https://endpoint.com");
     given(responseSpec.bodyToMono(any(Class.class))).willReturn(
@@ -89,13 +92,10 @@ class BioCaseServiceTest {
   @Test
   void testRetrieveDataWithMedia206() throws IOException {
     // Given
-    givenJsonWebclient();
-    given(mappingComponent.getFieldMappings()).willReturn(ABCD_FIELD_MAPPING);
-    given(mappingComponent.getDefaultMappings()).willReturn(ABCD_DEFAULTS);
     given(properties.getSourceSystemId()).willReturn("ABC-DDD-ASD");
     given(repository.getEndpoint(anyString())).willReturn("https://endpoint.com");
     given(responseSpec.bodyToMono(any(Class.class))).willReturn(
-            Mono.just(loadResourceFile("biocase/biocase-206-with-media.xml")));
+        Mono.just(loadResourceFile("biocase/biocase-206-with-media.xml")));
     given(properties.getItemsPerRequest()).willReturn(101);
 
     // When

@@ -1,9 +1,7 @@
 package eu.dissco.core.translator.service;
 
 import static eu.dissco.core.translator.TestUtils.DWC_DEFAULTS;
-import static eu.dissco.core.translator.TestUtils.DWC_FIELD_MAPPING;
 import static eu.dissco.core.translator.TestUtils.DWC_KEW_DEFAULTS;
-import static eu.dissco.core.translator.TestUtils.DWC_KEW_FIELD_MAPPING;
 import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -17,6 +15,8 @@ import eu.dissco.core.translator.properties.DwcaProperties;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
+import eu.dissco.core.translator.terms.TermMapper;
+import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenIdType;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -55,7 +55,7 @@ class DwcaServiceTest {
   @Mock
   private KafkaService kafkaService;
   @Mock
-  private MappingComponent mappingComponent;
+  private TermMapper termMapper;
   @Mock
   private EnrichmentProperties enrichmentProperties;
   @Mock
@@ -72,15 +72,17 @@ class DwcaServiceTest {
   @BeforeEach
   void setup() {
     this.service = new DwcaService(MAPPER, webClientProperties, webClient, dwcaProperties,
-        kafkaService, mappingComponent, enrichmentProperties, repository);
+        kafkaService, termMapper, enrichmentProperties, repository);
+
+    // Given
+    givenEndpoint();
+    given(termMapper.retrieveFromDWCA(any(), any(), any())).willReturn("someValue");
+    given(termMapper.retrieveFromDWCA(any(PhysicalSpecimenIdType.class), any(), any())).willReturn("cetaf");
   }
 
   @Test
   void testRetrieveData() throws IOException {
     // Given
-    given(mappingComponent.getFieldMappings()).willReturn(DWC_FIELD_MAPPING);
-    given(mappingComponent.getDefaultMappings()).willReturn(DWC_DEFAULTS);
-    givenEndpoint();
     givenDWCA("/dwca-rbins.zip");
 
     // When
@@ -95,9 +97,6 @@ class DwcaServiceTest {
   @Test
   void testRetrieveDataWithGbifMedia() throws IOException {
     // Given
-    given(mappingComponent.getFieldMappings()).willReturn(DWC_KEW_FIELD_MAPPING);
-    given(mappingComponent.getDefaultMappings()).willReturn(DWC_KEW_DEFAULTS);
-    givenEndpoint();
     givenDWCA("/dwca-kew-gbif-media.zip");
 
     // When
@@ -112,9 +111,6 @@ class DwcaServiceTest {
   @Test
   void testRetrieveDataWithAcMedia() throws IOException {
     // Given
-    given(mappingComponent.getFieldMappings()).willReturn(DWC_KEW_FIELD_MAPPING);
-    given(mappingComponent.getDefaultMappings()).willReturn(DWC_KEW_DEFAULTS);
-    givenEndpoint();
     givenDWCA("/dwca-naturalis-ac-media.zip");
 
     // When
@@ -129,9 +125,6 @@ class DwcaServiceTest {
   @Test
   void testRetrieveDataWithAssociatedMedia() throws IOException {
     // Given
-    given(mappingComponent.getFieldMappings()).willReturn(DWC_KEW_FIELD_MAPPING);
-    given(mappingComponent.getDefaultMappings()).willReturn(DWC_KEW_DEFAULTS);
-    givenEndpoint();
     givenDWCA("/dwca-lux-associated-media.zip");
 
     // When

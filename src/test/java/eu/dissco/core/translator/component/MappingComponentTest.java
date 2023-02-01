@@ -1,15 +1,17 @@
 package eu.dissco.core.translator.component;
 
+import static eu.dissco.core.translator.TestUtils.DEFAULT_MAPPING;
 import static eu.dissco.core.translator.TestUtils.DWC_DEFAULTS;
-import static eu.dissco.core.translator.TestUtils.DWC_FIELD_MAPPING;
 import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static eu.dissco.core.translator.TestUtils.MAPPING_JSON;
 import static eu.dissco.core.translator.TestUtils.SOURCE_SYSTEM_ID;
+import static eu.dissco.core.translator.TestUtils.TERM_MAPPING;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
 import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.MappingRepository;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,8 +43,8 @@ class MappingComponentTest {
     mappingComponent.setup();
 
     // Then
-    assertThat(mappingComponent.getFieldMappings()).isEqualTo(DWC_FIELD_MAPPING);
-    assertThat(mappingComponent.getDefaultMappings()).isEqualTo(DWC_DEFAULTS);
+    assertThat(mappingComponent.getFieldMappings()).isEqualTo(TERM_MAPPING);
+    assertThat(mappingComponent.getDefaultMappings()).isEqualTo(DEFAULT_MAPPING);
   }
 
 }
