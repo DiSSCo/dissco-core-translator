@@ -141,7 +141,8 @@ public class DwcaService implements WebClientService {
             rec.id(),
             "DWCA",
             harmonizeMedia(extension, rec),
-            getOriginalAttributes(extension, rec));
+            getOriginalAttributes(extension, rec)
+        );
         publishDigitalMediaObject(digitalMediaObject);
       }
     }
