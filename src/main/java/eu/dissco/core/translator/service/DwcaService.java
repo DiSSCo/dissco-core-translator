@@ -13,27 +13,30 @@ import eu.dissco.core.translator.properties.DwcaProperties;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
-import eu.dissco.core.translator.terms.media.AccessUri;
-import eu.dissco.core.translator.terms.specimen.DatasetId;
-import eu.dissco.core.translator.terms.specimen.DwcaId;
-import eu.dissco.core.translator.terms.media.Format;
 import eu.dissco.core.translator.terms.License;
+import eu.dissco.core.translator.terms.SourceSystemId;
+import eu.dissco.core.translator.terms.TermMapper;
+import eu.dissco.core.translator.terms.media.AccessUri;
+import eu.dissco.core.translator.terms.media.Format;
 import eu.dissco.core.translator.terms.media.MediaType;
+import eu.dissco.core.translator.terms.specimen.CollectingNumber;
+import eu.dissco.core.translator.terms.specimen.Collector;
+import eu.dissco.core.translator.terms.specimen.DatasetId;
+import eu.dissco.core.translator.terms.specimen.DateCollected;
+import eu.dissco.core.translator.terms.specimen.DwcaId;
 import eu.dissco.core.translator.terms.specimen.Modified;
 import eu.dissco.core.translator.terms.specimen.ObjectType;
 import eu.dissco.core.translator.terms.specimen.OrganisationId;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenCollection;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenId;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenIdType;
-import eu.dissco.core.translator.terms.SourceSystemId;
 import eu.dissco.core.translator.terms.specimen.SpecimenName;
-import eu.dissco.core.translator.terms.TermMapper;
 import eu.dissco.core.translator.terms.specimen.Type;
+import eu.dissco.core.translator.terms.specimen.TypeStatus;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -210,9 +213,9 @@ public class DwcaService implements WebClientService {
   private JsonNode harmonizeSpecimenAttributes(String physicalSpecimenIdType, String organizationId,
       ArchiveFile core, Record rec) {
     var attributes = mapper.createObjectNode();
-    attributes.put(License.TERM, termMapper.retrieveFromDWCA(new License(), core, rec));
     attributes.put(PhysicalSpecimenIdType.TERM, physicalSpecimenIdType);
     attributes.put(OrganisationId.TERM, organizationId);
+    attributes.put(License.TERM, termMapper.retrieveFromDWCA(new License(), core, rec));
     attributes.put(SpecimenName.TERM, termMapper.retrieveFromDWCA(new SpecimenName(), core, rec));
     attributes.put(PhysicalSpecimenCollection.TERM,
         termMapper.retrieveFromDWCA(new PhysicalSpecimenCollection(), core, rec));
@@ -220,6 +223,11 @@ public class DwcaService implements WebClientService {
     attributes.put(SourceSystemId.TERM, webClientProperties.getSourceSystemId());
     attributes.put(ObjectType.TERM, termMapper.retrieveFromDWCA(new ObjectType(), core, rec));
     attributes.put(Modified.TERM, termMapper.retrieveFromDWCA(new Modified(), core, rec));
+    attributes.put(DateCollected.TERM, termMapper.retrieveFromDWCA(new DateCollected(), core, rec));
+    attributes.put(CollectingNumber.TERM,
+        termMapper.retrieveFromDWCA(new CollectingNumber(), core, rec));
+    attributes.put(Collector.TERM, termMapper.retrieveFromDWCA(new Collector(), core, rec));
+    attributes.put(TypeStatus.TERM, termMapper.retrieveFromDWCA(new TypeStatus(), core, rec));
     attributes.put(DwcaId.TERM, rec.id());
     return attributes;
   }

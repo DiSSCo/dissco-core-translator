@@ -28,7 +28,10 @@ import eu.dissco.core.translator.terms.TermMapper;
 import eu.dissco.core.translator.terms.media.AccessUri;
 import eu.dissco.core.translator.terms.media.Format;
 import eu.dissco.core.translator.terms.media.MediaType;
+import eu.dissco.core.translator.terms.specimen.CollectingNumber;
+import eu.dissco.core.translator.terms.specimen.Collector;
 import eu.dissco.core.translator.terms.specimen.DatasetId;
+import eu.dissco.core.translator.terms.specimen.DateCollected;
 import eu.dissco.core.translator.terms.specimen.DwcaId;
 import eu.dissco.core.translator.terms.specimen.Modified;
 import eu.dissco.core.translator.terms.specimen.ObjectType;
@@ -38,6 +41,7 @@ import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenId;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenIdType;
 import eu.dissco.core.translator.terms.specimen.SpecimenName;
 import eu.dissco.core.translator.terms.specimen.Type;
+import eu.dissco.core.translator.terms.specimen.TypeStatus;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 import jakarta.xml.bind.JAXBContext;
@@ -233,6 +237,12 @@ public class BioCaseService implements WebClientService {
     attributes.put(License.TERM, termMapper.retrieveFromABCD(new License(), datasets));
     attributes.put(ObjectType.TERM, termMapper.retrieveFromABCD(new ObjectType(), unitAttributes));
     attributes.put(Modified.TERM, termMapper.retrieveFromABCD(new Modified(), unitAttributes));
+    attributes.put(DateCollected.TERM,
+        termMapper.retrieveFromABCD(new DateCollected(), unitAttributes));
+    attributes.put(CollectingNumber.TERM,
+        termMapper.retrieveFromABCD(new CollectingNumber(), unitAttributes));
+    attributes.put(Collector.TERM, termMapper.retrieveFromABCD(new Collector(), unitAttributes));
+    attributes.put(TypeStatus.TERM, termMapper.retrieveFromABCD(new TypeStatus(), unitAttributes));
     attributes.put(DwcaId.TERM, (String) null);
     return attributes;
   }
