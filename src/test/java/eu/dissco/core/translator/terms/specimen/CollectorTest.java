@@ -8,7 +8,6 @@ import org.gbif.dwc.ArchiveField;
 import org.gbif.dwc.ArchiveFile;
 import org.gbif.dwc.record.Record;
 import org.gbif.dwc.terms.DwcTerm;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -18,18 +17,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class CollectorTest {
 
   private static final String COLLECTOR_NAME = "Fricke, Ronald";
-
+  private final Collector collector = new Collector();
   @Mock
   private ArchiveFile archiveFile;
   @Mock
   private Record rec;
-  private Collector collector;
-
-  @BeforeEach
-  void setup() {
-    collector = new Collector();
-  }
-
 
   @Test
   void testRetrieveFromDWCA() {
