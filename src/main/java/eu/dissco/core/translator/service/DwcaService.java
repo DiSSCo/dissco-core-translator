@@ -1,5 +1,7 @@
 package eu.dissco.core.translator.service;
 
+import static eu.dissco.core.translator.terms.TermMapper.dwcaHarmonisedTerms;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,27 +15,22 @@ import eu.dissco.core.translator.properties.DwcaProperties;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
-import eu.dissco.core.translator.terms.media.AccessUri;
-import eu.dissco.core.translator.terms.specimen.DatasetId;
-import eu.dissco.core.translator.terms.specimen.DwcaId;
-import eu.dissco.core.translator.terms.media.Format;
 import eu.dissco.core.translator.terms.License;
+import eu.dissco.core.translator.terms.SourceSystemId;
+import eu.dissco.core.translator.terms.Term;
+import eu.dissco.core.translator.terms.TermMapper;
+import eu.dissco.core.translator.terms.media.AccessUri;
+import eu.dissco.core.translator.terms.media.Format;
 import eu.dissco.core.translator.terms.media.MediaType;
-import eu.dissco.core.translator.terms.specimen.Modified;
-import eu.dissco.core.translator.terms.specimen.ObjectType;
+import eu.dissco.core.translator.terms.specimen.DwcaId;
 import eu.dissco.core.translator.terms.specimen.OrganisationId;
-import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenCollection;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenId;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenIdType;
-import eu.dissco.core.translator.terms.SourceSystemId;
-import eu.dissco.core.translator.terms.specimen.SpecimenName;
-import eu.dissco.core.translator.terms.TermMapper;
 import eu.dissco.core.translator.terms.specimen.Type;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -210,17 +207,13 @@ public class DwcaService implements WebClientService {
   private JsonNode harmonizeSpecimenAttributes(String physicalSpecimenIdType, String organizationId,
       ArchiveFile core, Record rec) {
     var attributes = mapper.createObjectNode();
-    attributes.put(License.TERM, termMapper.retrieveFromDWCA(new License(), core, rec));
     attributes.put(PhysicalSpecimenIdType.TERM, physicalSpecimenIdType);
     attributes.put(OrganisationId.TERM, organizationId);
-    attributes.put(SpecimenName.TERM, termMapper.retrieveFromDWCA(new SpecimenName(), core, rec));
-    attributes.put(PhysicalSpecimenCollection.TERM,
-        termMapper.retrieveFromDWCA(new PhysicalSpecimenCollection(), core, rec));
-    attributes.put(DatasetId.TERM, termMapper.retrieveFromDWCA(new SpecimenName(), core, rec));
     attributes.put(SourceSystemId.TERM, webClientProperties.getSourceSystemId());
-    attributes.put(ObjectType.TERM, termMapper.retrieveFromDWCA(new ObjectType(), core, rec));
-    attributes.put(Modified.TERM, termMapper.retrieveFromDWCA(new Modified(), core, rec));
     attributes.put(DwcaId.TERM, rec.id());
+    for (Term term : dwcaHarmonisedTerms()) {
+      attributes.put(term.getTerm(), termMapper.retrieveFromDWCA(term, core, rec));
+    }
     return attributes;
   }
 

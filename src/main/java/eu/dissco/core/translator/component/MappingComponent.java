@@ -25,8 +25,10 @@ public class MappingComponent {
   void setup() throws DisscoRepositoryException {
     var objectNode = repository.retrieveMapping(properties.getSourceSystemId());
     var mappingObject = objectNode.get("mapping");
-    mappingObject.iterator().forEachRemaining(node -> node.fields()
-        .forEachRemaining(field -> fieldMappings.put(field.getKey(), field.getValue().asText())));
+    if (mappingObject != null){
+      mappingObject.iterator().forEachRemaining(node -> node.fields()
+          .forEachRemaining(field -> fieldMappings.put(field.getKey(), field.getValue().asText())));
+    }
     var defaultObject = objectNode.get("defaults");
     defaultObject.iterator().forEachRemaining(node -> node.fields()
         .forEachRemaining(field -> defaults.put(field.getKey(), field.getValue().asText())));
