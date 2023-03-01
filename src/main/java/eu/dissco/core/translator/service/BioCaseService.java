@@ -35,7 +35,6 @@ import eu.dissco.core.translator.terms.specimen.DwcaId;
 import eu.dissco.core.translator.terms.specimen.OrganisationId;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenId;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenIdType;
-import eu.dissco.core.translator.terms.specimen.QuantitativeLocation;
 import eu.dissco.core.translator.terms.specimen.Type;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
