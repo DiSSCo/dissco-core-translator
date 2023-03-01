@@ -8,11 +8,20 @@ import org.gbif.dwc.record.Record;
 
 public class TypeStatus extends Term {
 
-  public static final String TERM = ODS_PREFIX + "typeStatus";
+  public static final String TERM = DWC_PREFIX + "typeStatus";
 
-  private final List<String> dwcaTerms = List.of("dwc:typeStatus");
+  private final List<String> dwcaTerms = List.of(TERM);
+
   // Pick the first TypeStatus from ABCD
-  private final List<String> abcdTerms = List.of("abcd:specimenUnit/nomenclaturalTypeDesignations/nomenclaturalTypeDesignation/0/typeStatus");
+  private final List<String> abcdTermsTypeStatus =
+      List.of(
+          "abcd:specimenUnit/nomenclaturalTypeDesignations/nomenclaturalTypeDesignation/0/typeStatus");
+  private final List<String> abcdTermsTypeName =
+      List.of(
+          "abcd:specimenUnit/nomenclaturalTypeDesignations/nomenclaturalTypeDesignation/0/typifiedName/fullScientificNameString");
+  private final List<String> abcdTermsCitation =
+      List.of(
+          "abcd:specimenUnit/nomenclaturalTypeDesignations/nomenclaturalTypeDesignation/0/nomenclaturalReference/titleCitation");
 
   @Override
   public String retrieveFromDWCA(ArchiveFile archiveFile, Record rec) {
@@ -21,7 +30,10 @@ public class TypeStatus extends Term {
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    return super.searchAbcdForTerm(unit, abcdTerms);
+    var status = super.searchAbcdForTerm(unit, abcdTermsTypeStatus);
+    var typeName = super.searchAbcdForTerm(unit, abcdTermsTypeName);
+    var citation = super.searchAbcdForTerm(unit, abcdTermsCitation);
+    return status + " | " + typeName + " | " + citation;
   }
 
   @Override

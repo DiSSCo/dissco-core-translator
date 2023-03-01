@@ -16,7 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class TypeStatusTest {
 
-  private static final String STATUS = "holotype";
+  private static final String STATUS = "holotype | FULL_NAME | CITATION";
 
   private final TypeStatus typeStatus = new TypeStatus();
   @Mock
@@ -44,7 +44,13 @@ class TypeStatusTest {
     var unit = new ObjectMapper().createObjectNode();
     unit.put(
         "abcd:specimenUnit/nomenclaturalTypeDesignations/nomenclaturalTypeDesignation/0/typeStatus",
-        STATUS);
+        "holotype");
+    unit.put(
+        "abcd:specimenUnit/nomenclaturalTypeDesignations/nomenclaturalTypeDesignation/0/typifiedName/fullScientificNameString",
+        "FULL_NAME");
+    unit.put(
+        "abcd:specimenUnit/nomenclaturalTypeDesignations/nomenclaturalTypeDesignation/0/nomenclaturalReference/titleCitation",
+        "CITATION");
     unit.put(
         "abcd:specimenUnit/nomenclaturalTypeDesignations/nomenclaturalTypeDesignation/1/typeStatus",
         "Another_Status");

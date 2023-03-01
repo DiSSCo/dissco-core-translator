@@ -1,6 +1,8 @@
 package eu.dissco.core.translator.service;
 
 
+import static eu.dissco.core.translator.terms.TermMapper.abcdHarmonisedTerms;
+
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -24,24 +26,17 @@ import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
 import eu.dissco.core.translator.terms.License;
 import eu.dissco.core.translator.terms.SourceSystemId;
+import eu.dissco.core.translator.terms.Term;
 import eu.dissco.core.translator.terms.TermMapper;
 import eu.dissco.core.translator.terms.media.AccessUri;
 import eu.dissco.core.translator.terms.media.Format;
 import eu.dissco.core.translator.terms.media.MediaType;
-import eu.dissco.core.translator.terms.specimen.CollectingNumber;
-import eu.dissco.core.translator.terms.specimen.Collector;
-import eu.dissco.core.translator.terms.specimen.DatasetId;
-import eu.dissco.core.translator.terms.specimen.DateCollected;
 import eu.dissco.core.translator.terms.specimen.DwcaId;
-import eu.dissco.core.translator.terms.specimen.Modified;
-import eu.dissco.core.translator.terms.specimen.ObjectType;
 import eu.dissco.core.translator.terms.specimen.OrganisationId;
-import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenCollection;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenId;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenIdType;
-import eu.dissco.core.translator.terms.specimen.SpecimenName;
+import eu.dissco.core.translator.terms.specimen.QuantitativeLocation;
 import eu.dissco.core.translator.terms.specimen.Type;
-import eu.dissco.core.translator.terms.specimen.TypeStatus;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 import jakarta.xml.bind.JAXBContext;
@@ -228,22 +223,12 @@ public class BioCaseService implements WebClientService {
     var attributes = mapper.createObjectNode();
     attributes.put(PhysicalSpecimenIdType.TERM, physicalSpecimenIdType);
     attributes.put(OrganisationId.TERM, organizationId);
-    attributes.put(SpecimenName.TERM,
-        termMapper.retrieveFromABCD(new SpecimenName(), unitAttributes));
-    attributes.put(PhysicalSpecimenCollection.TERM,
-        termMapper.retrieveFromABCD(new PhysicalSpecimenCollection(), unitAttributes));
-    attributes.put(DatasetId.TERM, termMapper.retrieveFromABCD(new DatasetId(), unitAttributes));
     attributes.put(SourceSystemId.TERM, webClientProperties.getSourceSystemId());
-    attributes.put(License.TERM, termMapper.retrieveFromABCD(new License(), datasets));
-    attributes.put(ObjectType.TERM, termMapper.retrieveFromABCD(new ObjectType(), unitAttributes));
-    attributes.put(Modified.TERM, termMapper.retrieveFromABCD(new Modified(), unitAttributes));
-    attributes.put(DateCollected.TERM,
-        termMapper.retrieveFromABCD(new DateCollected(), unitAttributes));
-    attributes.put(CollectingNumber.TERM,
-        termMapper.retrieveFromABCD(new CollectingNumber(), unitAttributes));
-    attributes.put(Collector.TERM, termMapper.retrieveFromABCD(new Collector(), unitAttributes));
-    attributes.put(TypeStatus.TERM, termMapper.retrieveFromABCD(new TypeStatus(), unitAttributes));
     attributes.put(DwcaId.TERM, (String) null);
+    attributes.put(License.TERM, termMapper.retrieveFromABCD(new License(), datasets));
+    for (Term term : abcdHarmonisedTerms()) {
+      attributes.put(term.getTerm(), termMapper.retrieveFromABCD(term, unitAttributes));
+    }
     return attributes;
   }
 
