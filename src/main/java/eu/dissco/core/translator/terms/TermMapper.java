@@ -3,6 +3,7 @@ package eu.dissco.core.translator.terms;
 import com.fasterxml.jackson.databind.JsonNode;
 import efg.DataSets.DataSet;
 import eu.dissco.core.translator.component.MappingComponent;
+import eu.dissco.core.translator.terms.media.Format;
 import eu.dissco.core.translator.terms.specimen.CollectingNumber;
 import eu.dissco.core.translator.terms.specimen.Collector;
 import eu.dissco.core.translator.terms.specimen.DatasetId;
@@ -24,6 +25,22 @@ import eu.dissco.core.translator.terms.specimen.location.IslandGroup;
 import eu.dissco.core.translator.terms.specimen.location.Locality;
 import eu.dissco.core.translator.terms.specimen.location.StateProvince;
 import eu.dissco.core.translator.terms.specimen.location.WaterBody;
+import eu.dissco.core.translator.terms.specimen.stratigraphy.biostratigraphic.HighestBiostratigraphicZone;
+import eu.dissco.core.translator.terms.specimen.stratigraphy.biostratigraphic.LowestBiostratigraphicZone;
+import eu.dissco.core.translator.terms.specimen.stratigraphy.chronostratigraphic.EarliestAgeOrLowestStage;
+import eu.dissco.core.translator.terms.specimen.stratigraphy.chronostratigraphic.EarliestEonOrLowestEonothem;
+import eu.dissco.core.translator.terms.specimen.stratigraphy.chronostratigraphic.EarliestEpochOrLowestSeries;
+import eu.dissco.core.translator.terms.specimen.stratigraphy.chronostratigraphic.EarliestEraOrLowestErathem;
+import eu.dissco.core.translator.terms.specimen.stratigraphy.chronostratigraphic.EarliestPeriodOrLowestSystem;
+import eu.dissco.core.translator.terms.specimen.stratigraphy.chronostratigraphic.LatestAgeOrHighestStage;
+import eu.dissco.core.translator.terms.specimen.stratigraphy.chronostratigraphic.LatestEonOrHighestEonothem;
+import eu.dissco.core.translator.terms.specimen.stratigraphy.chronostratigraphic.LatestEpochOrHighestSeries;
+import eu.dissco.core.translator.terms.specimen.stratigraphy.chronostratigraphic.LatestEraOrHighestErathem;
+import eu.dissco.core.translator.terms.specimen.stratigraphy.chronostratigraphic.LatestPeriodOrHighestSystem;
+import eu.dissco.core.translator.terms.specimen.stratigraphy.lithostratigraphic.Bed;
+import eu.dissco.core.translator.terms.specimen.stratigraphy.lithostratigraphic.Formation;
+import eu.dissco.core.translator.terms.specimen.stratigraphy.lithostratigraphic.Group;
+import eu.dissco.core.translator.terms.specimen.stratigraphy.lithostratigraphic.Member;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -56,6 +73,27 @@ public class TermMapper {
     return list;
   }
 
+  private static List<Term> stratigraphyTerms() {
+    var list = new ArrayList<Term>();
+    list.add(new EarliestAgeOrLowestStage());
+    list.add(new EarliestEonOrLowestEonothem());
+    list.add(new EarliestEpochOrLowestSeries());
+    list.add(new EarliestEraOrLowestErathem());
+    list.add(new EarliestPeriodOrLowestSystem());
+    list.add(new LatestAgeOrHighestStage());
+    list.add(new LatestEonOrHighestEonothem());
+    list.add(new LatestEpochOrHighestSeries());
+    list.add(new LatestEraOrHighestErathem());
+    list.add(new LatestPeriodOrHighestSystem());
+    list.add(new Bed());
+    list.add(new Formation());
+    list.add(new Group());
+    list.add(new Member());
+    list.add(new HighestBiostratigraphicZone());
+    list.add(new LowestBiostratigraphicZone());
+    return list;
+  }
+
   public static List<Term> harmonisedTerms() {
     var list = new ArrayList<Term>();
     list.add(new SpecimenName());
@@ -68,6 +106,7 @@ public class TermMapper {
     list.add(new Collector());
     list.add(new TypeStatus());
     list.addAll(locationTerms());
+    list.addAll(stratigraphyTerms());
     return list;
   }
 

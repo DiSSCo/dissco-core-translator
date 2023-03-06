@@ -13,15 +13,12 @@ public class TypeStatus extends Term {
   private final List<String> dwcaTerms = List.of(TERM);
 
   // Pick the first TypeStatus from ABCD
-  private final List<String> abcdTermsTypeStatus =
+  private final List<String> abcdTerms =
       List.of(
-          "abcd:specimenUnit/nomenclaturalTypeDesignations/nomenclaturalTypeDesignation/0/typeStatus");
-  private final List<String> abcdTermsTypeName =
-      List.of(
-          "abcd:specimenUnit/nomenclaturalTypeDesignations/nomenclaturalTypeDesignation/0/typifiedName/fullScientificNameString");
-  private final List<String> abcdTermsCitation =
-      List.of(
-          "abcd:specimenUnit/nomenclaturalTypeDesignations/nomenclaturalTypeDesignation/0/nomenclaturalReference/titleCitation");
+          "abcd:specimenUnit/nomenclaturalTypeDesignations/nomenclaturalTypeDesignation/0/typeStatus",
+          "abcd:specimenUnit/nomenclaturalTypeDesignations/nomenclaturalTypeDesignation/0/typifiedName/fullScientificNameString",
+          "abcd:specimenUnit/nomenclaturalTypeDesignations/nomenclaturalTypeDesignation/0/nomenclaturalReference/titleCitation"
+          );
 
   @Override
   public String retrieveFromDWCA(ArchiveFile archiveFile, Record rec) {
@@ -30,10 +27,7 @@ public class TypeStatus extends Term {
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    var status = super.searchAbcdForTerm(unit, abcdTermsTypeStatus);
-    var typeName = super.searchAbcdForTerm(unit, abcdTermsTypeName);
-    var citation = super.searchAbcdForTerm(unit, abcdTermsCitation);
-    return status + " | " + typeName + " | " + citation;
+    return super.combineABCDTerms(unit, abcdTerms);
   }
 
   @Override

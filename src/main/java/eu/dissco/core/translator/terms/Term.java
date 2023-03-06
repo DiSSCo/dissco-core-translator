@@ -38,7 +38,7 @@ public abstract class Term {
         }
       }
     }
-    log.info("Term not found in any of these search fields: {}", originalTerms);
+    log.debug("Term not found in any of these search fields: {}", originalTerms);
     return null;
   }
 
@@ -48,19 +48,36 @@ public abstract class Term {
         return attributes.get(originalTerm).asText();
       }
     }
-    log.info("Term not found in any of these search fields: {}", originalTerms);
+    log.debug("Term not found in any of these search fields: {}", originalTerms);
     return null;
+  }
+
+  protected String combineABCDTerms(JsonNode unit, List<String> abcdTerms) {
+    var builder = new StringBuilder();
+    for (var abcdTerm : abcdTerms) {
+      if (unit.get(abcdTerm) != null){
+        if (builder.length() != 0) {
+          builder.append( " | ");
+        }
+        builder.append(unit.get(abcdTerm).asText());
+      }
+    }
+    if (builder.isEmpty()){
+      return null;
+    } else {
+      return builder.toString();
+    }
   }
 
   public abstract String getTerm();
 
   public String retrieveFromABCD(JsonNode unit) {
-    log.info("No specific attributes retrieve specified for field: {}", getTerm());
+    log.debug("No specific attributes retrieve specified for field: {}", getTerm());
     return null;
   }
 
   public String retrieveFromABCD(DataSet datasets) {
-    log.info("No specific attributes retrieve specified for field: {}", getTerm());
+    log.debug("No specific attributes retrieve specified for field: {}", getTerm());
     return null;
   }
 }

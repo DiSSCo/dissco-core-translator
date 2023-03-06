@@ -22,21 +22,20 @@ public class Collector extends Term {
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    StringBuilder builder = new StringBuilder();
-    combinePossibleValues(unit, builder);
-    if (builder.length() == 0){
+    var value = combinePossibleValues(unit);
+    if (value == null){
       if (unit.get("abcd:gathering/agents/gatheringAgentsText") != null){
-        builder.append(unit.get("abcd:gathering/agents/gatheringAgentsText").asText());
-        return builder.toString();
+        return unit.get("abcd:gathering/agents/gatheringAgentsText").asText();
       } else {
         return null;
       }
     } else {
-      return builder.toString();
+      return value;
     }
   }
 
-  private void combinePossibleValues(JsonNode unit, StringBuilder builder) {
+  private String combinePossibleValues(JsonNode unit) {
+    var builder = new StringBuilder();
     var iterateOverElements = true;
     var numberFound = 0;
     while (iterateOverElements) {
@@ -58,6 +57,11 @@ public class Collector extends Term {
       } else {
         iterateOverElements = false;
       }
+    }
+    if (builder.length() != 0){
+      return builder.toString();
+    } else {
+      return null;
     }
   }
 
