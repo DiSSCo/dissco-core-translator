@@ -7,6 +7,7 @@ import org.gbif.dwc.ArchiveFile;
 import org.gbif.dwc.record.Record;
 
 public class LowestBiostratigraphicZone extends Term {
+
   public static final String TERM = DWC_PREFIX + "lowestBiostratigraphicZone";
 
   private final List<String> dwcaTerms = List.of(TERM);

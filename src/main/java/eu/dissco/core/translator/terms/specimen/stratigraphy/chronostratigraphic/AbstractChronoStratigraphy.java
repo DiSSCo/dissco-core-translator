@@ -8,9 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public abstract class AbstractChronoStratigraphy extends Term {
 
-  private final String abcdDivision =
+  private static final String ABCD_DIVISION =
       "abcd-efg:earthScienceSpecimen/unitStratigraphicDetermination/chronostratigraphicAttributions/chronostratigraphicAttribution/%s/chronoStratigraphicDivision";
-  private final String abcdValue =
+  private static final String ABCD_VALUE =
       "abcd-efg:earthScienceSpecimen/unitStratigraphicDetermination/chronostratigraphicAttributions/chronostratigraphicAttribution/%s/chronostratigraphicName";
 
   protected String searchABCDChronostratigraphy(JsonNode unit, List<String> divisionSearched) {
@@ -18,12 +18,12 @@ public abstract class AbstractChronoStratigraphy extends Term {
       var iterateOverElements = true;
       var numberFound = 0;
       while (iterateOverElements) {
-        var divisionNode = unit.get(String.format(abcdDivision, numberFound));
+        var divisionNode = unit.get(String.format(ABCD_DIVISION, numberFound));
         if (divisionNode != null) {
           var division = divisionNode.asText();
           if (division.equalsIgnoreCase(divisionSearch)
-              && unit.get(String.format(abcdValue, numberFound)) != null) {
-            return unit.get(String.format(abcdValue, numberFound)).asText();
+              && unit.get(String.format(ABCD_VALUE, numberFound)) != null) {
+            return unit.get(String.format(ABCD_VALUE, numberFound)).asText();
           }
           numberFound++;
         } else {

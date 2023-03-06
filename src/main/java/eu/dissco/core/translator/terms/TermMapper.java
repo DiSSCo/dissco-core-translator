@@ -3,7 +3,6 @@ package eu.dissco.core.translator.terms;
 import com.fasterxml.jackson.databind.JsonNode;
 import efg.DataSets.DataSet;
 import eu.dissco.core.translator.component.MappingComponent;
-import eu.dissco.core.translator.terms.media.Format;
 import eu.dissco.core.translator.terms.specimen.CollectingNumber;
 import eu.dissco.core.translator.terms.specimen.Collector;
 import eu.dissco.core.translator.terms.specimen.DatasetId;

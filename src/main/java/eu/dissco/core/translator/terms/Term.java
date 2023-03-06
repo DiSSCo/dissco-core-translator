@@ -2,17 +2,7 @@ package eu.dissco.core.translator.terms;
 
 
 import com.fasterxml.jackson.databind.JsonNode;
-
 import efg.DataSets.DataSet;
-import eu.dissco.core.translator.terms.specimen.CollectingNumber;
-import eu.dissco.core.translator.terms.specimen.Collector;
-import eu.dissco.core.translator.terms.specimen.DatasetId;
-import eu.dissco.core.translator.terms.specimen.DateCollected;
-import eu.dissco.core.translator.terms.specimen.Modified;
-import eu.dissco.core.translator.terms.specimen.ObjectType;
-import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenCollection;
-import eu.dissco.core.translator.terms.specimen.SpecimenName;
-import eu.dissco.core.translator.terms.specimen.TypeStatus;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.gbif.dwc.ArchiveFile;
@@ -29,11 +19,12 @@ public abstract class Term {
     return "";
   }
 
-  protected String searchDWCAForTerm(ArchiveFile archiveFile, Record rec, List<String> originalTerms){
+  protected String searchDWCAForTerm(ArchiveFile archiveFile, Record rec,
+      List<String> originalTerms) {
     for (var originalTerm : originalTerms) {
-      if (archiveFile.getField(originalTerm) != null){
+      if (archiveFile.getField(originalTerm) != null) {
         var value = rec.value(archiveFile.getField(originalTerm).getTerm());
-        if (value != null){
+        if (value != null) {
           return value;
         }
       }
@@ -42,9 +33,9 @@ public abstract class Term {
     return null;
   }
 
-  protected String searchAbcdForTerm(JsonNode attributes, List<String> originalTerms){
+  protected String searchAbcdForTerm(JsonNode attributes, List<String> originalTerms) {
     for (var originalTerm : originalTerms) {
-      if (attributes.get(originalTerm) != null){
+      if (attributes.get(originalTerm) != null) {
         return attributes.get(originalTerm).asText();
       }
     }
@@ -55,14 +46,14 @@ public abstract class Term {
   protected String combineABCDTerms(JsonNode unit, List<String> abcdTerms) {
     var builder = new StringBuilder();
     for (var abcdTerm : abcdTerms) {
-      if (unit.get(abcdTerm) != null){
+      if (unit.get(abcdTerm) != null) {
         if (builder.length() != 0) {
-          builder.append( " | ");
+          builder.append(" | ");
         }
         builder.append(unit.get(abcdTerm).asText());
       }
     }
-    if (builder.isEmpty()){
+    if (builder.isEmpty()) {
       return null;
     } else {
       return builder.toString();
