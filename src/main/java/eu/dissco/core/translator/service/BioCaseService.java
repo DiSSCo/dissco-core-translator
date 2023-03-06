@@ -191,7 +191,7 @@ public class BioCaseService implements WebClientService {
             physicalSpecimenId,
             termMapper.retrieveFromABCD(new Type(), unitAttributes),
             harmonizeAttributes(datasets, unitAttributes, physicalSpecimenIdType, organizationId),
-            unitAttributes
+            removeMultiMediaFields(unitAttributes)
         );
 
         log.debug("Result digital Specimen: {}", digitalSpecimen);
@@ -213,7 +213,6 @@ public class BioCaseService implements WebClientService {
   private ObjectNode parseToJson(Unit unit) throws DisscoEfgParsingException {
     var unitData = getData(mapper.valueToTree(unit));
     extractEfgInformation(unit, unitData);
-    removeMultiMediaFields(unitData);
     return unitData;
   }
 
@@ -338,14 +337,16 @@ public class BioCaseService implements WebClientService {
     unitData.remove("abcd:unitExtension");
   }
 
-  private void removeMultiMediaFields(ObjectNode unitData) {
+  private JsonNode removeMultiMediaFields(ObjectNode unitData) {
     var multiMediaFields = new ArrayList<String>();
-    unitData.fields().forEachRemaining(field -> {
+    var data = unitData.deepCopy();
+    data.fields().forEachRemaining(field -> {
       if (field.getKey().startsWith("abcd:multiMediaObjects")) {
         multiMediaFields.add(field.getKey());
       }
     });
-    unitData.remove(multiMediaFields);
+    data.remove(multiMediaFields);
+    return data;
   }
 
   private String getPhysicalSpecimenId(String physicalSpecimenIdType, String organizationId,
