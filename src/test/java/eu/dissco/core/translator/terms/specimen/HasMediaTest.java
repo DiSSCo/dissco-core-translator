@@ -52,6 +52,19 @@ class HasMediaTest {
   }
 
   @Test
+  void testRetrieveFromABCDNoMedia() {
+    // Given
+    var unit = new ObjectMapper().createObjectNode();
+    unit.put("", MEDIA_URL);
+
+    // When
+    var result = hasMedia.retrieveFromABCD(unit);
+
+    // Then
+    assertThat(result).isEqualTo("false");
+  }
+
+  @Test
   void testGetTerm() {
     // When
     var result = hasMedia.getTerm();
