@@ -25,11 +25,7 @@ public class HasMedia extends Term {
   }
 
   private static String toBoolean(String result) {
-    if (result != null){
-      return "true";
-    } else {
-      return "false";
-    }
+    return String.valueOf(result != null);
   }
 
   @Override
