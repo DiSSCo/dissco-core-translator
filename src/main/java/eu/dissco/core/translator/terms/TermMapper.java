@@ -12,6 +12,7 @@ import eu.dissco.core.translator.terms.specimen.ObjectType;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenCollection;
 import eu.dissco.core.translator.terms.specimen.SpecimenName;
 import eu.dissco.core.translator.terms.specimen.TypeStatus;
+import eu.dissco.core.translator.terms.specimen.HasMedia;
 import eu.dissco.core.translator.terms.specimen.location.Continent;
 import eu.dissco.core.translator.terms.specimen.location.Country;
 import eu.dissco.core.translator.terms.specimen.location.CountryCode;
@@ -67,6 +68,7 @@ public class TermMapper {
     list.add(new CollectingNumber());
     list.add(new Collector());
     list.add(new TypeStatus());
+    list.add(new HasMedia());
     list.addAll(locationTerms());
     return list;
   }
