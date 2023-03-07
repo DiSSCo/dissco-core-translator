@@ -63,6 +63,18 @@ class TypeStatusTest {
   }
 
   @Test
+  void testRetrieveFromABCDNoTypeStatus() {
+    // Given
+    var unit = new ObjectMapper().createObjectNode();
+
+    // When
+    var result = typeStatus.retrieveFromABCD(unit);
+
+    // Then
+    assertThat(result).isNull();
+  }
+
+  @Test
   void testGetTerm() {
     // When
     var result = typeStatus.getTerm();
