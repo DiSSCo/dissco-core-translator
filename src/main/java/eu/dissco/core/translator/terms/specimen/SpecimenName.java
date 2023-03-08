@@ -36,9 +36,8 @@ public class SpecimenName extends Term {
   }
 
   private String getSpecimenName(JsonNode unit, Pair<String, String> term) {
-    var iterateOverElements = true;
     var numberFound = 0;
-    while (iterateOverElements) {
+    while (true) {
       if (unit.get(String.format(term.getLeft(), numberFound)) != null) {
         var preffered = unit.get(String.format(term.getLeft(), numberFound)).asBoolean();
         if (preffered) {
@@ -49,14 +48,17 @@ public class SpecimenName extends Term {
           numberFound++;
         }
       } else {
-        if (unit.get(String.format(term.getRight(), 0)) != null) {
-          return unit.get(String.format(term.getRight(), 0)).asText();
-        } else {
-          iterateOverElements = false;
-        }
+        return getFirstName(unit, term);
       }
     }
-    return null;
+  }
+
+  private String getFirstName(JsonNode unit, Pair<String, String> term) {
+    if (unit.get(String.format(term.getRight(), 0)) != null) {
+      return unit.get(String.format(term.getRight(), 0)).asText();
+    } else {
+      return null;
+    }
   }
 
   @Override
