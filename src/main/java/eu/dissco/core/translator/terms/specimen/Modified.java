@@ -8,8 +8,8 @@ import org.gbif.dwc.record.Record;
 
 public class Modified extends Term {
 
-  public static final String TERM = ODS_PREFIX + "modified";
-  private final List<String> dwcaTerms = List.of("dcterms:modified");
+  public static final String TERM = "dcterms:modified";
+  private final List<String> dwcaTerms = List.of(TERM);
   private final List<String> abcdTerms = List.of("abcd:hasDateModified", "abcd:dateLastEdited");
 
   @Override
