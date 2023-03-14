@@ -39,7 +39,7 @@ class SpecimenNameTest {
   }
 
   @Test
-  void testRetrieveFromABCD() {
+  void testRetrieveFromABCDEFG() {
     // Given
     var specimenNameString = "SpecimenName";
     var unit = new ObjectMapper().createObjectNode();
@@ -53,6 +53,59 @@ class SpecimenNameTest {
     // Then
     assertThat(result).isEqualTo(specimenNameString);
   }
+
+  @Test
+  void testRetrieveFromABCDWithPreferred() {
+    // Given
+    var unit = new ObjectMapper().createObjectNode();
+    unit.put(
+        "abcd:identifications/identification/0/preferredFlag", false);
+    unit.put("abcd:identifications/identification/0/result/taxonIdentified/scientificName/fullScientificNameString",
+        "Arrabidaea chica (Humb. & Bonpl.) B.Verl.");
+    unit.put(
+        "abcd:identifications/identification/1/preferredFlag", true);
+    unit.put("abcd:identifications/identification/1/result/taxonIdentified/scientificName/fullScientificNameString",
+        "Bignonia chica Humb. & Bonpl.");
+    unit.put(
+        "abcd:identifications/identification/2/preferredFlag", false);
+    unit.put("abcd:identifications/identification/2/result/taxonIdentified/scientificName/fullScientificNameString",
+        "Arrabidaea chica var. thyrsoidea Bureau");
+
+    // When
+    var result = specimenName.retrieveFromABCD(unit);
+
+    // Then
+    assertThat(result).isEqualTo("Bignonia chica Humb. & Bonpl.");
+  }
+
+  @Test
+  void testRetrieveFromABCD() {
+    // Given
+    var specimenNameString = "SpecimenName";
+    var unit = new ObjectMapper().createObjectNode();
+    unit.put(
+        "abcd:identifications/identification/0/result/taxonIdentified/scientificName/fullScientificNameString",
+        specimenNameString);
+
+    // When
+    var result = specimenName.retrieveFromABCD(unit);
+
+    // Then
+    assertThat(result).isEqualTo(specimenNameString);
+  }
+
+  @Test
+  void testRetrieveFromABCDNotPresent() {
+    // Given
+    var unit = new ObjectMapper().createObjectNode();
+
+    // When
+    var result = specimenName.retrieveFromABCD(unit);
+
+    // Then
+    assertThat(result).isNull();
+  }
+
 
   @Test
   void testGetTerm() {

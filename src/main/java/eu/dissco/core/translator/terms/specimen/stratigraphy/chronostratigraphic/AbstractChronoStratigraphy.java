@@ -4,26 +4,32 @@ import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
 
 @Slf4j
 public abstract class AbstractChronoStratigraphy extends Term {
 
-  private static final String ABCD_DIVISION =
-      "abcd-efg:earthScienceSpecimen/unitStratigraphicDetermination/chronostratigraphicAttributions/chronostratigraphicAttribution/%s/chronoStratigraphicDivision";
-  private static final String ABCD_VALUE =
-      "abcd-efg:earthScienceSpecimen/unitStratigraphicDetermination/chronostratigraphicAttributions/chronostratigraphicAttribution/%s/chronostratigraphicName";
+  private static final Pair<String, String> ABCD_DIVISION =
+      Pair.of(
+          "abcd-efg:earthScienceSpecimen/unitStratigraphicDetermination/chronostratigraphicAttributions/chronostratigraphicAttribution/",
+          "/chronoStratigraphicDivision");
+  private static final Pair<String, String> ABCD_VALUE =
+      Pair.of(
+          "abcd-efg:earthScienceSpecimen/unitStratigraphicDetermination/chronostratigraphicAttributions/chronostratigraphicAttribution/",
+          "/chronostratigraphicName");
 
   protected String searchABCDChronostratigraphy(JsonNode unit, List<String> divisionSearched) {
     for (var divisionSearch : divisionSearched) {
       var iterateOverElements = true;
       var numberFound = 0;
       while (iterateOverElements) {
-        var divisionNode = unit.get(String.format(ABCD_DIVISION, numberFound));
+        var divisionNode = unit.get(
+            ABCD_DIVISION.getLeft() + numberFound + ABCD_DIVISION.getRight());
         if (divisionNode != null) {
           var division = divisionNode.asText();
           if (division.equalsIgnoreCase(divisionSearch)
-              && unit.get(String.format(ABCD_VALUE, numberFound)) != null) {
-            return unit.get(String.format(ABCD_VALUE, numberFound)).asText();
+              && unit.get(ABCD_VALUE.getLeft() + numberFound + ABCD_VALUE.getRight()) != null) {
+            return unit.get(ABCD_VALUE.getLeft() + numberFound + ABCD_VALUE.getRight()).asText();
           }
           numberFound++;
         } else {
