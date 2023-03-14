@@ -1,16 +1,10 @@
 package eu.dissco.core.translator.terms.specimen;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.gbif.dwc.ArchiveField;
-import org.gbif.dwc.ArchiveFile;
-import org.gbif.dwc.record.Record;
-import org.gbif.dwc.terms.DwcTerm;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -18,20 +12,15 @@ class CollectorTest {
 
   private static final String COLLECTOR_NAME = "Fricke, Ronald";
   private final Collector collector = new Collector();
-  @Mock
-  private ArchiveFile archiveFile;
-  @Mock
-  private Record rec;
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var archiveField = new ArchiveField(0, DwcTerm.preparations);
-    given(archiveFile.getField("dwc:recordedBy")).willReturn(archiveField);
-    given(rec.value(archiveField.getTerm())).willReturn(COLLECTOR_NAME);
+    var unit = new ObjectMapper().createObjectNode();
+    unit.put("dwc:recordedBy", COLLECTOR_NAME);
 
     // When
-    var result = collector.retrieveFromDWCA(archiveFile, rec);
+    var result = collector.retrieveFromDWCA(unit);
 
     // Then
     assertThat(result).isEqualTo(COLLECTOR_NAME);

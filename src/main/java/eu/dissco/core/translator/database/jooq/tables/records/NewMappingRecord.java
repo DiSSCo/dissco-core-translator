@@ -5,9 +5,7 @@ package eu.dissco.core.translator.database.jooq.tables.records;
 
 
 import eu.dissco.core.translator.database.jooq.tables.NewMapping;
-
 import java.time.Instant;
-
 import org.jooq.Field;
 import org.jooq.JSONB;
 import org.jooq.Record2;

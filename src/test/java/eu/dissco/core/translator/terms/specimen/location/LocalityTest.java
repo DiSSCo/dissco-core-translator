@@ -1,16 +1,10 @@
 package eu.dissco.core.translator.terms.specimen.location;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.gbif.dwc.ArchiveField;
-import org.gbif.dwc.ArchiveFile;
-import org.gbif.dwc.record.Record;
-import org.gbif.dwc.terms.DwcTerm;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -21,20 +15,15 @@ class LocalityTest {
           + "Niedersachsen/Lower Saxony";
 
   private final Locality locality = new Locality();
-  @Mock
-  private ArchiveFile archiveFile;
-  @Mock
-  private Record rec;
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var archiveField = new ArchiveField(0, DwcTerm.locality);
-    given(archiveFile.getField("dwc:locality")).willReturn(archiveField);
-    given(rec.value(archiveField.getTerm())).willReturn(LOCALITY_STRING);
+    var unit = new ObjectMapper().createObjectNode();
+    unit.put("dwc:locality", LOCALITY_STRING);
 
     // When
-    var result = locality.retrieveFromDWCA(archiveFile, rec);
+    var result = locality.retrieveFromDWCA(unit);
 
     // Then
     assertThat(result).isEqualTo(LOCALITY_STRING);

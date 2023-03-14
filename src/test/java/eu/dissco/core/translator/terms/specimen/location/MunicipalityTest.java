@@ -1,36 +1,26 @@
 package eu.dissco.core.translator.terms.specimen.location;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
 
-import org.gbif.dwc.ArchiveField;
-import org.gbif.dwc.ArchiveFile;
-import org.gbif.dwc.record.Record;
-import org.gbif.dwc.terms.DwcTerm;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class MunicipalityTest {
 
   private final Municipality municipality = new Municipality();
-  @Mock
-  private ArchiveFile archiveFile;
-  @Mock
-  private Record rec;
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
     var municipalityString = "Gouda";
-    var archiveField = new ArchiveField(0, DwcTerm.municipality);
-    given(archiveFile.getField("dwc:municipality")).willReturn(archiveField);
-    given(rec.value(archiveField.getTerm())).willReturn(municipalityString);
+    var unit = new ObjectMapper().createObjectNode();
+    unit.put("dwc:municipality", municipalityString);
 
     // When
-    var result = municipality.retrieveFromDWCA(archiveFile, rec);
+    var result = municipality.retrieveFromDWCA(unit);
 
     // Then
     assertThat(result).isEqualTo(municipalityString);

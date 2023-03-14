@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
-import org.gbif.dwc.ArchiveFile;
-import org.gbif.dwc.record.Record;
 
 @Slf4j
 public class SpecimenName extends Term {
@@ -24,8 +22,8 @@ public class SpecimenName extends Term {
   );
 
   @Override
-  public String retrieveFromDWCA(ArchiveFile archiveFile, Record rec) {
-    return super.searchDWCAForTerm(archiveFile, rec, dwcaTerms);
+  public String retrieveFromDWCA(JsonNode unit) {
+    return super.searchJsonForTerm(unit, dwcaTerms);
   }
 
   @Override

@@ -1,7 +1,6 @@
 package eu.dissco.core.translator.component;
 
 import static eu.dissco.core.translator.TestUtils.DEFAULT_MAPPING;
-import static eu.dissco.core.translator.TestUtils.DWC_DEFAULTS;
 import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static eu.dissco.core.translator.TestUtils.MAPPING_JSON;
 import static eu.dissco.core.translator.TestUtils.SOURCE_SYSTEM_ID;
@@ -11,7 +10,6 @@ import static org.mockito.BDDMockito.given;
 
 import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.MappingRepository;
-import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

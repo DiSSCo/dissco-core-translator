@@ -5,8 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import efg.DataSets.DataSet;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.gbif.dwc.ArchiveFile;
-import org.gbif.dwc.record.Record;
 
 @Slf4j
 public abstract class Term {
@@ -14,28 +12,10 @@ public abstract class Term {
   protected static final String ODS_PREFIX = "ods:";
   protected static final String DWC_PREFIX = "dwc:";
 
-  public String retrieveFromDWCA(ArchiveFile archiveFile, Record rec) {
-    log.info("No specific attributes retrieve specified for term: {}", getTerm());
-    return "";
-  }
-
-  protected String searchDWCAForTerm(ArchiveFile archiveFile, Record rec,
-      List<String> originalTerms) {
+  protected String searchJsonForTerm(JsonNode attributes, List<String> originalTerms) {
     for (var originalTerm : originalTerms) {
-      if (archiveFile.getField(originalTerm) != null) {
-        var value = rec.value(archiveFile.getField(originalTerm).getTerm());
-        if (value != null) {
-          return value;
-        }
-      }
-    }
-    log.debug("Term not found in any of these search fields: {}", originalTerms);
-    return null;
-  }
-
-  protected String searchAbcdForTerm(JsonNode attributes, List<String> originalTerms) {
-    for (var originalTerm : originalTerms) {
-      if (attributes.get(originalTerm) != null) {
+      var valueNode = attributes.get(originalTerm);
+      if (valueNode != null && valueNode.isTextual()) {
         return attributes.get(originalTerm).asText();
       }
     }
@@ -68,6 +48,11 @@ public abstract class Term {
   }
 
   public String retrieveFromABCD(DataSet datasets) {
+    log.debug("No specific attributes retrieve specified for field: {}", getTerm());
+    return null;
+  }
+
+  public String retrieveFromDWCA(JsonNode unit) {
     log.debug("No specific attributes retrieve specified for field: {}", getTerm());
     return null;
   }

@@ -3,8 +3,6 @@ package eu.dissco.core.translator.terms.specimen.stratigraphy.biostratigraphic;
 import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.terms.Term;
 import java.util.List;
-import org.gbif.dwc.ArchiveFile;
-import org.gbif.dwc.record.Record;
 
 public class HighestBiostratigraphicZone extends Term {
 
@@ -17,8 +15,8 @@ public class HighestBiostratigraphicZone extends Term {
       "abcd-efg:earthScienceSpecimen/unitStratigraphicDetermination/biostratigraphicAttributionsType/biostratigraphicAttribution/0/fossilSubzoneName");
 
   @Override
-  public String retrieveFromDWCA(ArchiveFile archiveFile, Record rec) {
-    return super.searchDWCAForTerm(archiveFile, rec, dwcaTerms);
+  public String retrieveFromDWCA(JsonNode unit) {
+    return super.searchJsonForTerm(unit, dwcaTerms);
   }
 
   @Override

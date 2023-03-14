@@ -8,7 +8,6 @@ import eu.dissco.core.translator.database.jooq.tables.NewMapping;
 import eu.dissco.core.translator.database.jooq.tables.NewSourceSystem;
 import eu.dissco.core.translator.database.jooq.tables.records.NewMappingRecord;
 import eu.dissco.core.translator.database.jooq.tables.records.NewSourceSystemRecord;
-
 import org.jooq.TableField;
 import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
