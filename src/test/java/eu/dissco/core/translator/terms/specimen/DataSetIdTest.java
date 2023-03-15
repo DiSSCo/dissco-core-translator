@@ -1,8 +1,8 @@
 package eu.dissco.core.translator.terms.specimen;
 
+import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -16,7 +16,7 @@ class DataSetIdTest {
   void testRetrieveFromDWCA() {
     // Given
     var datasetIdString = "datasetId-123456";
-    var unit = new ObjectMapper().createObjectNode();
+    var unit = MAPPER.createObjectNode();
     unit.put("dwc:datasetID", datasetIdString);
 
     // When

@@ -1,8 +1,8 @@
 package eu.dissco.core.translator.terms;
 
+import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import efg.ContentMetadata;
 import efg.DataSets.DataSet;
 import efg.IPRStatements;
@@ -39,7 +39,7 @@ class LicenseTest {
   void testRetrieveFromDWCA() {
     // Given
     var licenseString = "https://creativecommons.org/licenses/by-nc/4.0";
-    var unit = new ObjectMapper().createObjectNode();
+    var unit = MAPPER.createObjectNode();
     unit.put("dcterms:license", licenseString);
 
     // When

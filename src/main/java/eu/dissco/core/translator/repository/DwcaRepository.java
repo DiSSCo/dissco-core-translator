@@ -10,7 +10,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jooq.DSLContext;
 import org.jooq.Field;
@@ -22,6 +24,7 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.springframework.stereotype.Repository;
 
+@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class DwcaRepository {
@@ -46,7 +49,8 @@ public class DwcaRepository {
   }
 
   public void postRecords(String tableName, List<Pair<String, JsonNode>> dbRecords) {
-    var queries = dbRecords.stream().map(dbRecord -> recordToQuery(tableName, dbRecord)).toList();
+    var queries = dbRecords.stream().map(dbRecord -> recordToQuery(tableName, dbRecord)).filter(
+        Objects::nonNull).toList();
     context.batch(queries).execute();
   }
 
@@ -55,12 +59,9 @@ public class DwcaRepository {
       return context.insertInto(getTable(tableName)).set(idField, dbRecord.getLeft())
           .set(dataField, JSONB.jsonb(mapper.writeValueAsString(dbRecord.getRight())));
     } catch (JsonProcessingException e) {
-      throw new RuntimeException(e);
+      log.error("Unable to map JSON to JSONB, ignoring record: {}", dbRecord.getLeft(), e);
+      return null;
     }
-  }
-
-  public void deleteTable(String tableName) {
-    context.dropTableIfExists(tableName).execute();
   }
 
   public Map<String, ObjectNode> getCoreRecords(List<String> batch, String tableName) {
@@ -72,14 +73,21 @@ public class DwcaRepository {
     try {
       return mapper.readValue(dbRecord.get(dataField).data(), ObjectNode.class);
     } catch (JsonProcessingException e) {
-      throw new RuntimeException(e);
+      log.error("Unable to map JSONB to JSON, ignoring record: {}", dbRecord.get(idField), e);
+      return null;
     }
   }
 
   public Map<String, List<ObjectNode>> getRecords(List<String> batch, String tableName) {
     return context.selectFrom(getTable(tableName)).where(idField.in(batch))
-        .stream().collect(groupingBy(dbRecord -> dbRecord.get(idField), mapping(this::getNode, toList())));
+        .stream()
+        .collect(groupingBy(dbRecord -> dbRecord.get(idField), mapping(this::getNode, toList())));
   }
+
+  public void deleteTable(String tableName) {
+    context.dropTableIfExists(tableName).execute();
+  }
+
 
 }
 

@@ -3,7 +3,6 @@ package eu.dissco.core.translator.terms.specimen.stratigraphy;
 import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.dissco.core.translator.terms.Term;
 import eu.dissco.core.translator.terms.specimen.stratigraphy.biostratigraphic.HighestBiostratigraphicZone;
 import eu.dissco.core.translator.terms.specimen.stratigraphy.biostratigraphic.LowestBiostratigraphicZone;
@@ -82,7 +81,7 @@ class BiostratigraphicZoneTest {
   @MethodSource("dwcArguments")
   void testRetrieveFromDWCA(Term term, String expected, String dwc) {
     // Given
-    var unit = new ObjectMapper().createObjectNode();
+    var unit = MAPPER.createObjectNode();
     unit.put(dwc, expected);
 
     // When

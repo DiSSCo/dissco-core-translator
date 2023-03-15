@@ -15,12 +15,13 @@ public class HasMedia extends Term {
     var result = super.searchJsonForTerm(unit, dwcaTerms);
     if (result != null){
       return String.valueOf(true);
-    } else{
-      var gbifExtension = unit.get("gbif:Multimedia");
+    } else if (unit.get("extensions") != null){
+      var extensions = unit.get("extensions");
+      var gbifExtension = extensions.get("gbif:Multimedia");
       if (gbifExtension != null && gbifExtension.size() > 0){
         return String.valueOf(true);
       }
-      var acExtension = unit.get("ac:Multimedia");
+      var acExtension = extensions.get("http://rs.tdwg.org/ac/terms/Multimedia");
       if (acExtension != null && acExtension.size() > 0){
         return String.valueOf(true);
       }

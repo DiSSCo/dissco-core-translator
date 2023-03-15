@@ -1,5 +1,6 @@
 package eu.dissco.core.translator.service;
 
+import static eu.dissco.core.translator.service.IngestionUtility.getPhysicalSpecimenId;
 import static eu.dissco.core.translator.terms.TermMapper.dwcaHarmonisedTerms;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -12,6 +13,7 @@ import eu.dissco.core.translator.domain.DigitalMediaObjectEvent;
 import eu.dissco.core.translator.domain.DigitalSpecimen;
 import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
 import eu.dissco.core.translator.domain.Enrichment;
+import eu.dissco.core.translator.exception.DiSSCoDataException;
 import eu.dissco.core.translator.properties.DwcaProperties;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
@@ -63,12 +65,12 @@ import org.springframework.web.reactive.function.client.WebClient;
 @RequiredArgsConstructor
 public class DwcaService implements WebClientService {
 
-
   private static final String DWC_ASSOCIATED_MEDIA = "dwc:associatedMedia";
   private static final String GBIF_MULTIMEDIA = "gbif:Multimedia";
   private static final String AC_MULTIMEDIA = "http://rs.tdwg.org/ac/terms/Multimedia";
-  private static final String UNKNOWN = "Unknown";
   private static final String PHYSICAL_SPECIMEN_ID = "physical_specimen_id";
+  private static final String UNKNOWN = "Unknown";
+  private static final String EXTENSIONS = "extensions";
 
   private final ObjectMapper mapper;
   private final WebClientProperties webClientProperties;
@@ -131,13 +133,13 @@ public class DwcaService implements WebClientService {
       log.info("Got {} with records: {} ", getTableName(extension), extensionData.size());
       for (var specimenValue : specimenData.entrySet()) {
         var extensionValue = extensionData.get(specimenValue.getKey());
-        if (extensionValue != null) {
+        if (extensionValue != null && specimenValue.getValue() != null) {
           var jsonArrayNode = mapper.createArrayNode();
           for (var recordValue : extensionValue) {
             jsonArrayNode.add(recordValue);
           }
-          specimenValue.getValue()
-              .set(extension.getRowType().prefixedName(), jsonArrayNode);
+          var extensionArray = (ObjectNode) specimenValue.getValue().get(EXTENSIONS);
+          extensionArray.set(extension.getRowType().prefixedName(), jsonArrayNode);
         }
       }
     }
@@ -146,30 +148,41 @@ public class DwcaService implements WebClientService {
   private void processDigitalSpecimen(Collection<ObjectNode> fullRecords)
       throws JsonProcessingException {
     for (var fullRecord : fullRecords) {
-      var recordId = fullRecord.get(DwcaTerm.ID.prefixedName()).asText();
-      if (!recordNeedsToBeIgnored(fullRecord, recordId)) {
-        var digitalSpecimen = createDigitalSpecimen(fullRecord);
-        log.info("Digital Specimen: {}", digitalSpecimen);
-        var translatorEvent = new DigitalSpecimenEvent(enrichmentServices(false), digitalSpecimen);
-        kafkaService.sendMessage("digital-specimen", mapper.writeValueAsString(translatorEvent));
-        processMedia(digitalSpecimen.id(), fullRecord);
+      if (fullRecord != null) {
+        var recordId = fullRecord.get(DwcaTerm.ID.prefixedName()).asText();
+        if (!recordNeedsToBeIgnored(fullRecord, recordId)) {
+          try {
+            var digitalSpecimen = createDigitalSpecimen(fullRecord);
+            log.info("Digital Specimen: {}", digitalSpecimen);
+            var translatorEvent = new DigitalSpecimenEvent(enrichmentServices(false),
+                digitalSpecimen);
+            kafkaService.sendMessage("digital-specimen",
+                mapper.writeValueAsString(translatorEvent));
+            processMedia(digitalSpecimen.id(), fullRecord);
+          } catch (DiSSCoDataException e) {
+            log.error("Encountered data issue with record: {}", fullRecord, e);
+          }
+        }
       }
     }
   }
 
   private void processMedia(String recordId, JsonNode fullDigitalSpecimen)
       throws JsonProcessingException {
+    var extensions = fullDigitalSpecimen.get(EXTENSIONS);
     if (fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA) != null) {
       publishAssociatedMedia(recordId, fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA).asText());
-    } else if (fullDigitalSpecimen.get(GBIF_MULTIMEDIA) != null) {
-      var imageArray = fullDigitalSpecimen.get(GBIF_MULTIMEDIA);
-      if (imageArray.isArray() && imageArray.size() > 0) {
-        extractMultiMedia(recordId, imageArray);
-      }
-    } else if (fullDigitalSpecimen.get(AC_MULTIMEDIA) != null) {
-      var imageArray = fullDigitalSpecimen.get(AC_MULTIMEDIA);
-      if (imageArray.isArray() && imageArray.size() > 0) {
-        extractMultiMedia(recordId, imageArray);
+    } else if (extensions != null) {
+      if (extensions.get(GBIF_MULTIMEDIA) != null) {
+        var imageArray = extensions.get(GBIF_MULTIMEDIA);
+        if (imageArray.isArray() && imageArray.size() > 0) {
+          extractMultiMedia(recordId, imageArray);
+        }
+      } else if (extensions.get(AC_MULTIMEDIA) != null) {
+        var imageArray = extensions.get(AC_MULTIMEDIA);
+        if (imageArray.isArray() && imageArray.size() > 0) {
+          extractMultiMedia(recordId, imageArray);
+        }
       }
     }
   }
@@ -212,12 +225,13 @@ public class DwcaService implements WebClientService {
     return attributes;
   }
 
-  private DigitalSpecimen createDigitalSpecimen(JsonNode fullRecord) {
+  private DigitalSpecimen createDigitalSpecimen(JsonNode fullRecord) throws DiSSCoDataException {
     var physicalSpecimenIdType = termMapper.retrieveFromDWCA(new PhysicalSpecimenIdType(),
         fullRecord);
     var organizationId = termMapper.retrieveFromDWCA(new OrganisationId(), fullRecord);
+    var physicalSpecimenId = termMapper.retrieveFromDWCA(new PhysicalSpecimenId(), fullRecord);
     return new DigitalSpecimen(
-        getPhysicalSpecimenId(physicalSpecimenIdType, organizationId, fullRecord),
+        getPhysicalSpecimenId(physicalSpecimenIdType, organizationId, physicalSpecimenId),
         termMapper.retrieveFromDWCA(new Type(), fullRecord),
         harmonizeSpecimenAttributes(physicalSpecimenIdType, organizationId, fullRecord),
         removeMedia(fullRecord)
@@ -230,18 +244,6 @@ public class DwcaService implements WebClientService {
     return originalData;
   }
 
-  private String getPhysicalSpecimenId(String physicalSpecimenIdType, String organizationId,
-      JsonNode fullRecord) {
-    String id = termMapper.retrieveFromDWCA(new PhysicalSpecimenId(), fullRecord);
-    if (physicalSpecimenIdType.equals("cetaf")) {
-      return id;
-    } else if (physicalSpecimenIdType.equals("combined")) {
-      return id + ":" + minifyOrganizationId(organizationId);
-    } else {
-      log.warn("Unknown physicalSpecimenIdType specified");
-      return UNKNOWN;
-    }
-  }
 
   private JsonNode harmonizeSpecimenAttributes(String physicalSpecimenIdType,
       String organizationId, JsonNode fullRecord) {
@@ -329,7 +331,9 @@ public class DwcaService implements WebClientService {
     var idList = new ArrayList<String>();
     for (var rec : core) {
       idList.add(rec.id());
-      dbRecords.add(Pair.of(rec.id(), convertToJson(core, rec)));
+      var json = convertToJson(core, rec);
+      json.set(EXTENSIONS, mapper.createObjectNode());
+      dbRecords.add(Pair.of(rec.id(), json));
       if (dbRecords.size() % 10000 == 0) {
         postToDatabase(core, dbRecords);
       }
@@ -388,17 +392,7 @@ public class DwcaService implements WebClientService {
     }
   }
 
-  private String minifyOrganizationId(String organizationId) {
-    if (organizationId.startsWith("https://ror.org")) {
-      return organizationId.replace("https://ror.org/", "");
-    } else {
-      log.warn("Cannot determine organizationId: {} for combined physicalSpecimenId",
-          organizationId);
-      return "UnknownOrganisationUrl";
-    }
-  }
-
-  private JsonNode convertToJson(ArchiveFile core, Record rec) {
+  private ObjectNode convertToJson(ArchiveFile core, Record rec) {
     var data = mapper.createObjectNode();
     data.put(DwcaTerm.ID.prefixedName(), rec.id());
     for (var field : core.getFields().keySet()) {

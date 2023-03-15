@@ -1,6 +1,7 @@
 package eu.dissco.core.translator.service;
 
 import static eu.dissco.core.translator.TestUtils.MAPPER;
+import static eu.dissco.core.translator.TestUtils.MAPPING_JSON;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -81,6 +82,9 @@ class DwcaServiceTest {
 
     // Given
     givenEndpoint();
+  }
+
+  private void setupTermMapper() {
     given(termMapper.retrieveFromDWCA(any(), any())).willReturn("someValue");
     given(termMapper.retrieveFromDWCA(any(PhysicalSpecimenIdType.class), any())).willReturn(
         "cetaf");
@@ -89,6 +93,7 @@ class DwcaServiceTest {
   @Test
   void testRetrieveData() throws IOException {
     // Given
+    setupTermMapper();
     givenDWCA("/dwca-rbins.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(9));
 
@@ -109,6 +114,7 @@ class DwcaServiceTest {
       var objectNode = MAPPER.createObjectNode();
       objectNode.put("dwca:ID", "id" + 1);
       objectNode.put("dwc:basisOfRecord", "PreservedSpecimen");
+      objectNode.set("extensions", MAPPER.createObjectNode());
       givenMap.put("id:" + i, objectNode);
     }
     return givenMap;
@@ -118,6 +124,7 @@ class DwcaServiceTest {
   void testRetrieveDataWithGbifMedia() throws IOException {
     // Given
     givenDWCA("/dwca-kew-gbif-media.zip");
+    setupTermMapper();
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(19));
     given(dwcaRepository.getRecords(anyList(), eq("ABC-DDD-ASD_dwc:Identification"))).willReturn(
         Map.of());
@@ -149,6 +156,7 @@ class DwcaServiceTest {
   void testRetrieveDataWithAcMedia() throws IOException {
     // Given
     givenDWCA("/dwca-naturalis-ac-media.zip");
+    setupTermMapper();
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(14));
     given(dwcaRepository.getRecords(anyList(), eq("ABC-DDD-ASD_http://rs.tdwg.org/ac/terms/Multimedia"))).willReturn(givenImageMap(14));
 
@@ -167,6 +175,7 @@ class DwcaServiceTest {
   void testRetrieveDataWithAssociatedMedia() throws IOException {
     // Given
     givenDWCA("/dwca-lux-associated-media.zip");
+    setupTermMapper();
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMapWithMedia(20));
 
     // When
@@ -210,7 +219,24 @@ class DwcaServiceTest {
             new DefaultDataBufferFactory(), 1000));
   }
 
-  //TODO: Add test where id needs combined
+  @Test
+  void testRetrieveDataNull() throws IOException {
+    // Given
+    givenDWCA("/dwca-lux-associated-media.zip");
+    var nullMap = new HashMap<String, ObjectNode>();
+    nullMap.put("id", null);
+    given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(nullMap);
+
+    // When
+    service.retrieveData();
+
+    // Then
+    then(dwcaRepository).should(times(1)).createTable(anyString());
+    then(dwcaRepository).should(times(1)).postRecords(anyString(), anyList());
+    then(kafkaService).shouldHaveNoInteractions();
+    then(kafkaService).shouldHaveNoInteractions();
+    cleanup("src/test/resources/dwca/test/dwca-lux-associated-media.zip");
+  }
 
   private String getAbsolutePath() {
     String path = "src/test/resources/dwca/test";

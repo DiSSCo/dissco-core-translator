@@ -1,8 +1,8 @@
 package eu.dissco.core.translator.terms.media;
 
+import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -16,7 +16,7 @@ class AccessUriTest {
   void testRetrieveFromDWCA() {
     // Given
     var accessUriString = "https://accessuri.eu/image_1";
-    var unit = new ObjectMapper().createObjectNode();
+    var unit = MAPPER.createObjectNode();
     unit.put("ac:accessURI", accessUriString);
 
     // When
@@ -30,7 +30,7 @@ class AccessUriTest {
   void testRetrieveFromABCD() {
     // Given
     var accessUriString = "https://accessuri.eu/image_1";
-    var unit = new ObjectMapper().createObjectNode();
+    var unit = MAPPER.createObjectNode();
     unit.put("abcd:fileURI", accessUriString);
 
     // When

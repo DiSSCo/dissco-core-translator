@@ -16,11 +16,23 @@ public class TypeStatus extends Term {
           "abcd:specimenUnit/nomenclaturalTypeDesignations/nomenclaturalTypeDesignation/0/typeStatus",
           "abcd:specimenUnit/nomenclaturalTypeDesignations/nomenclaturalTypeDesignation/0/typifiedName/fullScientificNameString",
           "abcd:specimenUnit/nomenclaturalTypeDesignations/nomenclaturalTypeDesignation/0/nomenclaturalReference/titleCitation"
-          );
+      );
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
-    return super.searchJsonForTerm(unit, dwcaTerms);
+    var result = super.searchJsonForTerm(unit, dwcaTerms);
+    if (result != null) {
+      return result;
+    } else {
+      var extensions = unit.get("extensions");
+      if (extensions != null) {
+        var identification = extensions.get("dwc:Identification");
+        if (identification.size() == 1) {
+          return searchJsonForTerm(identification.get(0), dwcaTerms);
+        }
+      }
+    }
+    return null;
   }
 
   @Override

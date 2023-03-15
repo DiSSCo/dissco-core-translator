@@ -1,8 +1,8 @@
 package eu.dissco.core.translator.terms.media;
 
+import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -16,7 +16,7 @@ class FormatTest {
   void testRetrieveFromDWCA() {
     // Given
     var formatString = "StillImage";
-    var unit = new ObjectMapper().createObjectNode();
+    var unit = MAPPER.createObjectNode();
     unit.putNull("dcterms:format");
     unit.put("dc:format", formatString);
 
@@ -31,7 +31,7 @@ class FormatTest {
   void testRetrieveFromABCD() {
     // Given
     var formatString = "SpecimenName";
-    var unit = new ObjectMapper().createObjectNode();
+    var unit = MAPPER.createObjectNode();
     unit.put("abcd:format", formatString);
 
     // When

@@ -1,8 +1,8 @@
 package eu.dissco.core.translator.terms.specimen.location;
 
+import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -19,7 +19,7 @@ class LocalityTest {
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var unit = new ObjectMapper().createObjectNode();
+    var unit = MAPPER.createObjectNode();
     unit.put("dwc:locality", LOCALITY_STRING);
 
     // When
@@ -32,7 +32,7 @@ class LocalityTest {
   @Test
   void testRetrieveFromABCD() {
     // Given
-    var unit = new ObjectMapper().createObjectNode();
+    var unit = MAPPER.createObjectNode();
     unit.put("abcd:gathering/localityText/value", LOCALITY_STRING);
 
     // When

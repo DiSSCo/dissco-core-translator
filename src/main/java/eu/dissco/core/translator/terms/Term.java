@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public abstract class Term {
 
+  private static final String MESSAGE = "No specific attributes retrieve specified for field: {}";
+
   protected static final String ODS_PREFIX = "ods:";
   protected static final String DWC_PREFIX = "dwc:";
 
@@ -43,17 +45,17 @@ public abstract class Term {
   public abstract String getTerm();
 
   public String retrieveFromABCD(JsonNode unit) {
-    log.debug("No specific attributes retrieve specified for field: {}", getTerm());
+    log.debug(MESSAGE, getTerm());
     return null;
   }
 
   public String retrieveFromABCD(DataSet datasets) {
-    log.debug("No specific attributes retrieve specified for field: {}", getTerm());
+    log.debug(MESSAGE, getTerm());
     return null;
   }
 
   public String retrieveFromDWCA(JsonNode unit) {
-    log.debug("No specific attributes retrieve specified for field: {}", getTerm());
+    log.debug(MESSAGE, getTerm());
     return null;
   }
 }

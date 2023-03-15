@@ -1,8 +1,8 @@
 package eu.dissco.core.translator.terms.media;
 
+import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,21 +16,7 @@ class MediaTypeTest {
 
   private final MediaType mediaType = new MediaType();
 
-  @ParameterizedTest
-  @MethodSource("provideACTypes")
-  void testRetrieveFromDWCA(String acType, String expected) {
-    // Given
-    var unit = new ObjectMapper().createObjectNode();
-    unit.put("dcterms:type", acType);
-
-    // When
-    var result = mediaType.retrieveFromDWCA(unit);
-
-    // Then
-    assertThat(result).isEqualTo(expected);
-  }
-
-  private static Stream<Arguments> provideACTypes(){
+  private static Stream<Arguments> provideACTypes() {
     return Stream.of(
         Arguments.of("StillImage", "2DImageObject"),
         Arguments.of("Image", "2DImageObject"),
@@ -40,13 +26,44 @@ class MediaTypeTest {
     );
   }
 
+  private static Stream<Arguments> provideFormatTypes() {
+    return Stream.of(
+        Arguments.of("image/jpeg", "2DImageObject"),
+        Arguments.of("audio/example", "AudioObject"),
+        Arguments.of("video/example", "VideoObject"),
+        Arguments.of("RandomString", null)
+    );
+  }
+
+  private static Stream<Arguments> provideABCDFormats() {
+    return Stream.of(
+        Arguments.of("image/jpeg", "2DImageObject"),
+        Arguments.of("unknown/format", null),
+        Arguments.of(null, null)
+    );
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideACTypes")
+  void testRetrieveFromDWCA(String acType, String expected) {
+    // Given
+    var unit = MAPPER.createObjectNode();
+    unit.put("dcterms:type", acType);
+
+    // When
+    var result = mediaType.retrieveFromDWCA(unit);
+
+    // Then
+    assertThat(result).isEqualTo(expected);
+  }
+
   @ParameterizedTest
   @MethodSource("provideFormatTypes")
   void testRetrieveFromDWCANoType(String format, String expected) {
     // Given
-    var unit = new ObjectMapper().createObjectNode();
-    unit.set("dcterms:type", null);
-    unit.set("dc:type", null);
+    var unit = MAPPER.createObjectNode();
+    unit.putNull("dcterms:type");
+    unit.putNull("dc:type");
     unit.put("dcterms:format", format);
 
     // When
@@ -56,20 +73,11 @@ class MediaTypeTest {
     assertThat(result).isEqualTo(expected);
   }
 
-  private static Stream<Arguments> provideFormatTypes(){
-    return Stream.of(
-        Arguments.of("image/jpeg", "2DImageObject"),
-        Arguments.of("audio/example", "AudioObject"),
-        Arguments.of("video/example", "VideoObject"),
-        Arguments.of("RandomString", null)
-    );
-  }
-
   @ParameterizedTest
   @MethodSource("provideABCDFormats")
   void testRetrieveFromABCD(String format, String expected) {
     // Given
-    var unit = new ObjectMapper().createObjectNode();
+    var unit = MAPPER.createObjectNode();
     if (format != null) {
       unit.put("abcd:format", format);
     }
@@ -79,14 +87,6 @@ class MediaTypeTest {
 
     // Then
     assertThat(result).isEqualTo(expected);
-  }
-
-  private static Stream<Arguments> provideABCDFormats(){
-    return Stream.of(
-        Arguments.of("image/jpeg", "2DImageObject"),
-        Arguments.of("unknown/format", null),
-        Arguments.of(null, null)
-    );
   }
 
   @Test

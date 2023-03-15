@@ -1,8 +1,8 @@
 package eu.dissco.core.translator.terms.specimen;
 
+import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -17,8 +17,27 @@ class TypeStatusTest {
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var unit = new ObjectMapper().createObjectNode();
+    var unit = MAPPER.createObjectNode();
     unit.put("dwc:typeStatus", STATUS);
+
+    // When
+    var result = typeStatus.retrieveFromDWCA(unit);
+
+    // Then
+    assertThat(result).isEqualTo(STATUS);
+  }
+
+  @Test
+  void testRetrieveFromDWCAInExtension() {
+    // Given
+    var unit = MAPPER.createObjectNode();
+    var array = MAPPER.createArrayNode();
+    var extension = MAPPER.createObjectNode();
+    extension.put("dwc:typeStatus", STATUS);
+    array.add(extension);
+    var extensions = MAPPER.createObjectNode();
+    extensions.set("dwc:Identification", array);
+    unit.set("extensions", extensions);
 
     // When
     var result = typeStatus.retrieveFromDWCA(unit);
@@ -30,7 +49,7 @@ class TypeStatusTest {
   @Test
   void testRetrieveFromABCD() {
     // Given
-    var unit = new ObjectMapper().createObjectNode();
+    var unit = MAPPER.createObjectNode();
     unit.put(
         "abcd:specimenUnit/nomenclaturalTypeDesignations/nomenclaturalTypeDesignation/0/typeStatus",
         "holotype");
@@ -54,7 +73,7 @@ class TypeStatusTest {
   @Test
   void testRetrieveFromABCDNoTypeStatus() {
     // Given
-    var unit = new ObjectMapper().createObjectNode();
+    var unit = MAPPER.createObjectNode();
 
     // When
     var result = typeStatus.retrieveFromABCD(unit);

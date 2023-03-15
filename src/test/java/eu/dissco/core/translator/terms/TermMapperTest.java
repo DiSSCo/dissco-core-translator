@@ -1,12 +1,12 @@
 package eu.dissco.core.translator.terms;
 
+import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import efg.DataSets.DataSet;
 import eu.dissco.core.translator.component.MappingComponent;
 import eu.dissco.core.translator.terms.specimen.OrganisationId;
@@ -53,7 +53,7 @@ class TermMapperTest {
     var dwcaTerm = "dwc:collectionID";
     given(mappingComponent.getFieldMappings()).willReturn(
         Map.of(PhysicalSpecimenCollection.TERM, dwcaTerm));
-    var unit = new ObjectMapper().createObjectNode();
+    var unit = MAPPER.createObjectNode();
     unit.put("dwc:collectionID", "TestCollection");
 
     // When
@@ -95,7 +95,7 @@ class TermMapperTest {
   void testRetrieveFromABCDFieldMapping() {
     // Given
     var abcdTerm = "abcd:unitID";
-    var attributes = new ObjectMapper().createObjectNode();
+    var attributes = MAPPER.createObjectNode();
     attributes.put(abcdTerm, "123456");
     given(mappingComponent.getFieldMappings()).willReturn(
         Map.of(PhysicalSpecimenId.TERM, abcdTerm));

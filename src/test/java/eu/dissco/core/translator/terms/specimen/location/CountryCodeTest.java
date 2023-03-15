@@ -1,8 +1,8 @@
 package eu.dissco.core.translator.terms.specimen.location;
 
+import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -17,7 +17,7 @@ class CountryCodeTest {
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var unit = new ObjectMapper().createObjectNode();
+    var unit = MAPPER.createObjectNode();
     unit.put("dwc:countryCode", COUNTRY_CODE);
 
     // When
@@ -30,7 +30,7 @@ class CountryCodeTest {
   @Test
   void testRetrieveFromABCD() {
     // Given
-    var unit = new ObjectMapper().createObjectNode();
+    var unit = MAPPER.createObjectNode();
     unit.put("abcd:gathering/country/iso3166Code", COUNTRY_CODE);
 
     // When
