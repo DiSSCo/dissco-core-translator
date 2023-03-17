@@ -27,7 +27,7 @@ public class TypeStatus extends Term {
       var extensions = unit.get("extensions");
       if (extensions != null) {
         var identification = extensions.get("dwc:Identification");
-        if (identification.size() == 1) {
+        if (identification!= null && identification.size() == 1) {
           return searchJsonForTerm(identification.get(0), dwcaTerms);
         }
       }

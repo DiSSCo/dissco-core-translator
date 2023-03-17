@@ -239,8 +239,11 @@ public class DwcaService implements WebClientService {
   }
 
   private JsonNode removeMedia(JsonNode fullRecord) {
-    ObjectNode originalData = fullRecord.deepCopy();
-    originalData.remove(List.of(GBIF_MULTIMEDIA, AC_MULTIMEDIA));
+    var originalData = fullRecord.deepCopy();
+    ObjectNode extensions = (ObjectNode) originalData.get(EXTENSIONS);
+    if (extensions != null){
+      extensions.remove(List.of(GBIF_MULTIMEDIA, AC_MULTIMEDIA));
+    }
     return originalData;
   }
 
