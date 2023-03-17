@@ -2,7 +2,6 @@ package eu.dissco.core.translator.terms.specimen.stratigraphy;
 
 import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
 
 import eu.dissco.core.translator.terms.Term;
 import eu.dissco.core.translator.terms.specimen.stratigraphy.chronostratigraphic.EarliestAgeOrLowestStage;
@@ -18,15 +17,10 @@ import eu.dissco.core.translator.terms.specimen.stratigraphy.chronostratigraphic
 import java.util.List;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.tuple.Pair;
-import org.gbif.dwc.ArchiveField;
-import org.gbif.dwc.ArchiveFile;
-import org.gbif.dwc.record.Record;
-import org.gbif.dwc.terms.DwcTerm;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,33 +30,29 @@ class ChronostratigraphicTest {
   private static final String ABCD_NAME_0 = "abcd-efg:earthScienceSpecimen/unitStratigraphicDetermination/chronostratigraphicAttributions/chronostratigraphicAttribution/0/chronostratigraphicName";
   private static final String ABCD_DIVISION_1 = "abcd-efg:earthScienceSpecimen/unitStratigraphicDetermination/chronostratigraphicAttributions/chronostratigraphicAttribution/1/chronoStratigraphicDivision";
   private static final String ABCD_NAME_1 = "abcd-efg:earthScienceSpecimen/unitStratigraphicDetermination/chronostratigraphicAttributions/chronostratigraphicAttribution/1/chronostratigraphicName";
-  @Mock
-  private ArchiveFile archiveFile;
-  @Mock
-  private Record rec;
 
   private static Stream<Arguments> dwcArguments() {
     return Stream.of(
         Arguments.of(new EarliestEpochOrLowestSeries(), "Öland Series",
-            "dwc:earliestEpochOrLowestSeries", DwcTerm.earliestEpochOrLowestSeries),
+            "dwc:earliestEpochOrLowestSeries"),
         Arguments.of(new LatestEpochOrHighestSeries(), "Öland Series",
-            "dwc:latestEpochOrHighestSeries", DwcTerm.latestEpochOrHighestSeries),
+            "dwc:latestEpochOrHighestSeries"),
         Arguments.of(new EarliestAgeOrLowestStage(), "Pakerort Stage",
-            "dwc:earliestAgeOrLowestStage", DwcTerm.earliestAgeOrLowestStage),
+            "dwc:earliestAgeOrLowestStage"),
         Arguments.of(new LatestAgeOrHighestStage(), "Pakerort Stage",
-            "dwc:latestAgeOrHighestStage", DwcTerm.latestAgeOrHighestStage),
+            "dwc:latestAgeOrHighestStage"),
         Arguments.of(new EarliestPeriodOrLowestSystem(), "Baltic Ordovician",
-            "dwc:earliestPeriodOrLowestSystem", DwcTerm.earliestPeriodOrLowestSystem),
+            "dwc:earliestPeriodOrLowestSystem"),
         Arguments.of(new LatestPeriodOrHighestSystem(), "Baltic Ordovician",
-            "dwc:latestPeriodOrHighestSystem", DwcTerm.latestPeriodOrHighestSystem),
+            "dwc:latestPeriodOrHighestSystem"),
         Arguments.of(new EarliestEraOrLowestErathem(), "Mesozoic",
-            "dwc:earliestEraOrLowestErathem", DwcTerm.earliestEraOrLowestErathem),
+            "dwc:earliestEraOrLowestErathem"),
         Arguments.of(new LatestEraOrHighestErathem(), "Mesozoic",
-            "dwc:latestEraOrHighestErathem", DwcTerm.latestEraOrHighestErathem),
+            "dwc:latestEraOrHighestErathem"),
         Arguments.of(new EarliestEonOrLowestEonothem(), "Phanerozoic",
-            "dwc:earliestEonOrLowestEonothem", DwcTerm.earliestEonOrLowestEonothem),
+            "dwc:earliestEonOrLowestEonothem"),
         Arguments.of(new LatestEonOrHighestEonothem(), "Phanerozoic",
-            "dwc:latestEonOrHighestEonothem", DwcTerm.latestEonOrHighestEonothem)
+            "dwc:latestEonOrHighestEonothem")
     );
   }
 
@@ -70,7 +60,7 @@ class ChronostratigraphicTest {
     return Stream.of(
         Arguments.of(new EarliestAgeOrLowestStage(), "Pakerort SubStage",
             List.of(Pair.of(ABCD_DIVISION_0, "Stage"), Pair.of(ABCD_NAME_0, "Pakerort Stage"),
-            Pair.of(ABCD_DIVISION_1, "SubStage"), Pair.of(ABCD_NAME_1, "Pakerort SubStage"))),
+                Pair.of(ABCD_DIVISION_1, "SubStage"), Pair.of(ABCD_NAME_1, "Pakerort SubStage"))),
         Arguments.of(new LatestAgeOrHighestStage(), "Pakerort Stage",
             List.of(Pair.of(ABCD_DIVISION_0, "Stage"), Pair.of(ABCD_NAME_0, "Pakerort Stage"))),
         Arguments.of(new EarliestEpochOrLowestSeries(), "Öland Series",
@@ -111,15 +101,13 @@ class ChronostratigraphicTest {
 
   @ParameterizedTest
   @MethodSource("dwcArguments")
-  void testRetrieveFromDWCA(Term term, String expected, String dwc,
-      org.gbif.dwc.terms.Term dwcTerm) {
+  void testRetrieveFromDWCA(Term term, String expected, String dwc) {
     // Given
-    var archiveField = new ArchiveField(0, dwcTerm);
-    given(archiveFile.getField(dwc)).willReturn(archiveField);
-    given(rec.value(archiveField.getTerm())).willReturn(expected);
+    var unit = MAPPER.createObjectNode();
+    unit.put(dwc, expected);
 
     // When
-    var result = term.retrieveFromDWCA(archiveFile, rec);
+    var result = term.retrieveFromDWCA(unit);
 
     // Then
     assertThat(result).isEqualTo(expected);

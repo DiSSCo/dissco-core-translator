@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.gbif.dwc.ArchiveFile;
-import org.gbif.dwc.record.Record;
 
 @Slf4j
 public class MediaType extends Term {
@@ -15,13 +13,14 @@ public class MediaType extends Term {
 
   private final List<String> dwcaTerms = List.of(TERM, "dc:type");
   private final List<String> imageFormats = List.of("IMAGE/JPG", "JPG", "IMAGE/JPEG",
-      "JPEG", "IMAGE/PNG", "PNG");
+      "JPEG", "IMAGE/PNG", "PNG", "IMAGE/TIF", "TIF");
 
   @Override
-  public String retrieveFromDWCA(ArchiveFile archiveFile, Record rec) {
-    var recoveredType = super.searchDWCAForTerm(archiveFile, rec, dwcaTerms);
+  public String retrieveFromDWCA(JsonNode unit) {
+    var recoveredType = super.searchJsonForTerm(unit, dwcaTerms);
     if (recoveredType == null) {
-      return checkFormat(archiveFile, rec);
+      var format = new Format().retrieveFromDWCA(unit);
+      return checkFormat(format);
     } else {
       return parseToOdsType(recoveredType);
     }
@@ -60,10 +59,9 @@ public class MediaType extends Term {
     return null;
   }
 
-  private String checkFormat(ArchiveFile archiveFile, Record rec) {
-    var format = new Format().retrieveFromDWCA(archiveFile, rec);
+  private String checkFormat(String format) {
     if (format != null) {
-      if (format.startsWith("image")) {
+      if (imageFormats.contains(format) || format.startsWith("image")) {
         return IMAGE_OBJECT;
       }
       if (format.startsWith("audio")) {

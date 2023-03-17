@@ -2,7 +2,6 @@ package eu.dissco.core.translator.terms.specimen.stratigraphy;
 
 import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
 
 import eu.dissco.core.translator.terms.Term;
 import eu.dissco.core.translator.terms.specimen.stratigraphy.lithostratigraphic.Bed;
@@ -12,31 +11,21 @@ import eu.dissco.core.translator.terms.specimen.stratigraphy.lithostratigraphic.
 import java.util.List;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.tuple.Pair;
-import org.gbif.dwc.ArchiveField;
-import org.gbif.dwc.ArchiveFile;
-import org.gbif.dwc.record.Record;
-import org.gbif.dwc.terms.DwcTerm;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class LithostratigraphicTest {
 
-  @Mock
-  private ArchiveFile archiveFile;
-  @Mock
-  private Record rec;
-
   private static Stream<Arguments> dwcArguments() {
     return Stream.of(
-        Arguments.of(new Bed(), "Harlem coal", "dwc:bed", DwcTerm.bed),
-        Arguments.of(new Formation(), "Fillmore Formation", "dwc:formation", DwcTerm.formation),
-        Arguments.of(new Group(), "Hellnmaria Member", "dwc:group", DwcTerm.group),
-        Arguments.of(new Member(), "Bathurst", "dwc:member", DwcTerm.member)
+        Arguments.of(new Bed(), "Harlem coal", "dwc:bed"),
+        Arguments.of(new Formation(), "Fillmore Formation", "dwc:formation"),
+        Arguments.of(new Group(), "Hellnmaria Member", "dwc:group"),
+        Arguments.of(new Member(), "Bathurst", "dwc:member")
     );
   }
 
@@ -62,7 +51,7 @@ class LithostratigraphicTest {
         Arguments.of(new Group(), "Hellnmaria Member",
             List.of(Pair.of(
                 "abcd-efg:earthScienceSpecimen/unitStratigraphicDetermination/lithostratigraphicAttributions/lithostratigraphicAttribution/0/group",
-                    "Hellnmaria Member"))),
+                "Hellnmaria Member"))),
         Arguments.of(new Member(), "Bathurst",
             List.of(Pair.of(
                 "abcd-efg:earthScienceSpecimen/unitStratigraphicDetermination/lithostratigraphicAttributions/lithostratigraphicAttribution/0/member",
@@ -90,15 +79,13 @@ class LithostratigraphicTest {
 
   @ParameterizedTest
   @MethodSource("dwcArguments")
-  void testRetrieveFromDWCA(Term term, String expected, String dwc,
-      org.gbif.dwc.terms.Term dwcTerm) {
+  void testRetrieveFromDWCA(Term term, String expected, String dwc) {
     // Given
-    var archiveField = new ArchiveField(0, dwcTerm);
-    given(archiveFile.getField(dwc)).willReturn(archiveField);
-    given(rec.value(archiveField.getTerm())).willReturn(expected);
+    var unit = MAPPER.createObjectNode();
+    unit.put(dwc, expected);
 
     // When
-    var result = term.retrieveFromDWCA(archiveFile, rec);
+    var result = term.retrieveFromDWCA(unit);
 
     // Then
     assertThat(result).isEqualTo(expected);

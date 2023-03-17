@@ -6,10 +6,8 @@ package eu.dissco.core.translator.database.jooq;
 
 import eu.dissco.core.translator.database.jooq.tables.NewMapping;
 import eu.dissco.core.translator.database.jooq.tables.NewSourceSystem;
-
 import java.util.Arrays;
 import java.util.List;
-
 import org.jooq.Catalog;
 import org.jooq.Table;
 import org.jooq.impl.SchemaImpl;

@@ -1,6 +1,5 @@
 package eu.dissco.core.translator.service;
 
-import eu.dissco.core.translator.properties.KafkaProperties;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;

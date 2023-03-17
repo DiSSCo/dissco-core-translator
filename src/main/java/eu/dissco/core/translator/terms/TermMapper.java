@@ -7,12 +7,12 @@ import eu.dissco.core.translator.terms.specimen.CollectingNumber;
 import eu.dissco.core.translator.terms.specimen.Collector;
 import eu.dissco.core.translator.terms.specimen.DatasetId;
 import eu.dissco.core.translator.terms.specimen.DateCollected;
+import eu.dissco.core.translator.terms.specimen.HasMedia;
 import eu.dissco.core.translator.terms.specimen.Modified;
 import eu.dissco.core.translator.terms.specimen.ObjectType;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenCollection;
 import eu.dissco.core.translator.terms.specimen.SpecimenName;
 import eu.dissco.core.translator.terms.specimen.TypeStatus;
-import eu.dissco.core.translator.terms.specimen.HasMedia;
 import eu.dissco.core.translator.terms.specimen.location.Continent;
 import eu.dissco.core.translator.terms.specimen.location.Country;
 import eu.dissco.core.translator.terms.specimen.location.CountryCode;
@@ -45,8 +45,6 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.gbif.dwc.ArchiveFile;
-import org.gbif.dwc.record.Record;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -121,16 +119,17 @@ public class TermMapper {
     return terms;
   }
 
-  public String retrieveFromDWCA(Term term, ArchiveFile archiveFile, Record rec) {
-    var harmonisedTerm = term.getTerm();
-    if (mapping.getDefaultMappings().containsKey(harmonisedTerm)) {
-      return mapping.getDefaultMappings().get(harmonisedTerm);
+  public String retrieveFromDWCA(Term term, JsonNode unit) {
+    var termName = term.getTerm();
+    if (mapping.getDefaultMappings().containsKey(termName)) {
+      return mapping.getDefaultMappings().get(termName);
+    } else if (mapping.getFieldMappings().containsKey(termName)) {
+      var value = unit.get(mapping.getFieldMappings().get(termName));
+      if (value != null && value.isTextual()) {
+        return value.asText();
+      }
     }
-    if (mapping.getFieldMappings().containsKey(harmonisedTerm)) {
-      return rec.value(
-          archiveFile.getField(mapping.getFieldMappings().get(harmonisedTerm)).getTerm());
-    }
-    return term.retrieveFromDWCA(archiveFile, rec);
+    return term.retrieveFromDWCA(unit);
   }
 
   public String retrieveFromABCD(Term term, JsonNode unit) {

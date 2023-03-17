@@ -1,22 +1,18 @@
 package eu.dissco.core.translator.terms;
 
+import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import efg.DataSets.DataSet;
 import eu.dissco.core.translator.component.MappingComponent;
 import eu.dissco.core.translator.terms.specimen.OrganisationId;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenCollection;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenId;
 import java.util.Map;
-import org.gbif.dwc.ArchiveField;
-import org.gbif.dwc.ArchiveFile;
-import org.gbif.dwc.record.Record;
-import org.gbif.dwc.terms.DwcTerm;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,10 +24,6 @@ class TermMapperTest {
 
   @Mock
   private MappingComponent mappingComponent;
-  @Mock
-  private ArchiveFile archiveFile;
-  @Mock
-  private Record record;
 
   private TermMapper termMapper;
 
@@ -48,7 +40,7 @@ class TermMapperTest {
         Map.of(OrganisationId.TERM, "https://ror.org/02y22ws83"));
 
     // When
-    var result = termMapper.retrieveFromDWCA(organisationId, archiveFile, record);
+    var result = termMapper.retrieveFromDWCA(organisationId, mock(JsonNode.class));
 
     // Then
     assertThat(result).isEqualTo("https://ror.org/02y22ws83");
@@ -61,12 +53,11 @@ class TermMapperTest {
     var dwcaTerm = "dwc:collectionID";
     given(mappingComponent.getFieldMappings()).willReturn(
         Map.of(PhysicalSpecimenCollection.TERM, dwcaTerm));
-    var archiveField = new ArchiveField(0, DwcTerm.collectionID);
-    given(archiveFile.getField(dwcaTerm)).willReturn(archiveField);
-    given(record.value(archiveField.getTerm())).willReturn("TestCollection");
+    var unit = MAPPER.createObjectNode();
+    unit.put("dwc:collectionID", "TestCollection");
 
     // When
-    var result = termMapper.retrieveFromDWCA(physicalSpecimenCollection, archiveFile, record);
+    var result = termMapper.retrieveFromDWCA(physicalSpecimenCollection, unit);
 
     // Then
     assertThat(result).isEqualTo("TestCollection");
@@ -77,12 +68,13 @@ class TermMapperTest {
     // Given
     var physicalSpecimenCollection = mock(PhysicalSpecimenCollection.class);
     given(physicalSpecimenCollection.getTerm()).willReturn(PhysicalSpecimenCollection.TERM);
+    var attributes = mock(JsonNode.class);
 
     // When
-    termMapper.retrieveFromDWCA(physicalSpecimenCollection, archiveFile, record);
+    termMapper.retrieveFromDWCA(physicalSpecimenCollection, attributes);
 
     // Then
-    then(physicalSpecimenCollection).should().retrieveFromDWCA(archiveFile, record);
+    then(physicalSpecimenCollection).should().retrieveFromDWCA(attributes);
   }
 
   @Test
@@ -103,7 +95,7 @@ class TermMapperTest {
   void testRetrieveFromABCDFieldMapping() {
     // Given
     var abcdTerm = "abcd:unitID";
-    var attributes = new ObjectMapper().createObjectNode();
+    var attributes = MAPPER.createObjectNode();
     attributes.put(abcdTerm, "123456");
     given(mappingComponent.getFieldMappings()).willReturn(
         Map.of(PhysicalSpecimenId.TERM, abcdTerm));

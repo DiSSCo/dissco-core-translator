@@ -1,16 +1,10 @@
 package eu.dissco.core.translator.terms.specimen;
 
+import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.gbif.dwc.ArchiveField;
-import org.gbif.dwc.ArchiveFile;
-import org.gbif.dwc.record.Record;
-import org.gbif.dwc.terms.DwcTerm;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -19,20 +13,34 @@ class TypeStatusTest {
   private static final String STATUS = "holotype | FULL_NAME | CITATION";
 
   private final TypeStatus typeStatus = new TypeStatus();
-  @Mock
-  private ArchiveFile archiveFile;
-  @Mock
-  private Record rec;
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var archiveField = new ArchiveField(0, DwcTerm.scientificName);
-    given(archiveFile.getField("dwc:typeStatus")).willReturn(archiveField);
-    given(rec.value(archiveField.getTerm())).willReturn(STATUS);
+    var unit = MAPPER.createObjectNode();
+    unit.put("dwc:typeStatus", STATUS);
 
     // When
-    var result = typeStatus.retrieveFromDWCA(archiveFile, rec);
+    var result = typeStatus.retrieveFromDWCA(unit);
+
+    // Then
+    assertThat(result).isEqualTo(STATUS);
+  }
+
+  @Test
+  void testRetrieveFromDWCAInExtension() {
+    // Given
+    var unit = MAPPER.createObjectNode();
+    var array = MAPPER.createArrayNode();
+    var extension = MAPPER.createObjectNode();
+    extension.put("dwc:typeStatus", STATUS);
+    array.add(extension);
+    var extensions = MAPPER.createObjectNode();
+    extensions.set("dwc:Identification", array);
+    unit.set("extensions", extensions);
+
+    // When
+    var result = typeStatus.retrieveFromDWCA(unit);
 
     // Then
     assertThat(result).isEqualTo(STATUS);
@@ -41,7 +49,7 @@ class TypeStatusTest {
   @Test
   void testRetrieveFromABCD() {
     // Given
-    var unit = new ObjectMapper().createObjectNode();
+    var unit = MAPPER.createObjectNode();
     unit.put(
         "abcd:specimenUnit/nomenclaturalTypeDesignations/nomenclaturalTypeDesignation/0/typeStatus",
         "holotype");
@@ -65,7 +73,7 @@ class TypeStatusTest {
   @Test
   void testRetrieveFromABCDNoTypeStatus() {
     // Given
-    var unit = new ObjectMapper().createObjectNode();
+    var unit = MAPPER.createObjectNode();
 
     // When
     var result = typeStatus.retrieveFromABCD(unit);

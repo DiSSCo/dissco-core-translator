@@ -1,37 +1,26 @@
 package eu.dissco.core.translator.terms.specimen;
 
+import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.gbif.dwc.ArchiveField;
-import org.gbif.dwc.ArchiveFile;
-import org.gbif.dwc.record.Record;
-import org.gbif.dwc.terms.DcTerm;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class ModifiedTest {
 
   private final Modified modified = new Modified();
-  @Mock
-  private ArchiveFile archiveFile;
-  @Mock
-  private Record rec;
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
     var licenseString = "23-03-1989";
-    var archiveField = new ArchiveField(0, DcTerm.modified);
-    given(archiveFile.getField("dcterms:modified")).willReturn(archiveField);
-    given(rec.value(archiveField.getTerm())).willReturn(licenseString);
+    var unit = MAPPER.createObjectNode();
+    unit.put("dcterms:modified", licenseString);
 
     // When
-    var result = modified.retrieveFromDWCA(archiveFile, rec);
+    var result = modified.retrieveFromDWCA(unit);
 
     // Then
     assertThat(result).isEqualTo(licenseString);
@@ -41,7 +30,7 @@ class ModifiedTest {
   void testRetrieveFromABCD() {
     // Given
     String modifiedString = "1674553668909";
-    var unit = new ObjectMapper().createObjectNode();
+    var unit = MAPPER.createObjectNode();
     unit.put("abcd:dateLastEdited", modifiedString);
 
     // When
@@ -54,7 +43,7 @@ class ModifiedTest {
   @Test
   void testRetrieveFromABCDEmpty() {
     // Given
-    var unit = new ObjectMapper().createObjectNode();
+    var unit = MAPPER.createObjectNode();
 
     // When
     var result = modified.retrieveFromABCD(unit);

@@ -3,8 +3,6 @@ package eu.dissco.core.translator.terms.specimen;
 import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.terms.Term;
 import java.util.List;
-import org.gbif.dwc.ArchiveFile;
-import org.gbif.dwc.record.Record;
 
 public class HasMedia extends Term {
 
@@ -13,14 +11,27 @@ public class HasMedia extends Term {
   private final List<String> abcdTerms = List.of("abcd:multiMediaObjects/multiMediaObject/0/fileURI");
 
   @Override
-  public String retrieveFromDWCA(ArchiveFile archiveFile, Record rec) {
-    var result = super.searchDWCAForTerm(archiveFile, rec, dwcaTerms);
-    return toBoolean(result);
+  public String retrieveFromDWCA(JsonNode unit) {
+    var result = super.searchJsonForTerm(unit, dwcaTerms);
+    if (result != null){
+      return String.valueOf(true);
+    } else if (unit.get("extensions") != null){
+      var extensions = unit.get("extensions");
+      var gbifExtension = extensions.get("gbif:Multimedia");
+      if (gbifExtension != null && gbifExtension.size() > 0){
+        return String.valueOf(true);
+      }
+      var acExtension = extensions.get("http://rs.tdwg.org/ac/terms/Multimedia");
+      if (acExtension != null && acExtension.size() > 0){
+        return String.valueOf(true);
+      }
+    }
+    return String.valueOf(false);
   }
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    var result = super.searchAbcdForTerm(unit, abcdTerms);
+    var result = super.searchJsonForTerm(unit, abcdTerms);
     return toBoolean(result);
   }
 

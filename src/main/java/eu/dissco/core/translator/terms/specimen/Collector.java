@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
-import org.gbif.dwc.ArchiveFile;
-import org.gbif.dwc.record.Record;
 
 public class Collector extends Term {
 
@@ -14,11 +12,11 @@ public class Collector extends Term {
   private final List<String> dwcaTerms = List.of("dwc:recordedBy", "dwc:recordedByID");
   private final List<Pair<String, String>> abcdTerms = List.of(
       Pair.of("abcd:gathering/agents/gatheringAgent/", "/person/fullName"),
-          Pair.of("abcd:gathering/agents/gatheringAgent/", "/person/agentText"));
+      Pair.of("abcd:gathering/agents/gatheringAgent/", "/person/agentText"));
 
   @Override
-  public String retrieveFromDWCA(ArchiveFile archiveFile, Record rec) {
-    return super.searchDWCAForTerm(archiveFile, rec, dwcaTerms);
+  public String retrieveFromDWCA(JsonNode unit) {
+    return super.searchJsonForTerm(unit, dwcaTerms);
   }
 
   @Override

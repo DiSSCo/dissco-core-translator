@@ -1,16 +1,12 @@
 package eu.dissco.core.translator.terms.specimen;
 
+import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.gbif.dwc.ArchiveField;
-import org.gbif.dwc.ArchiveFile;
-import org.gbif.dwc.record.Record;
-import org.gbif.dwc.terms.DwcTerm;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -19,20 +15,34 @@ class HasMediaTest {
   private static final String MEDIA_URL = "https://archimg.mnhn.lu/Collections/Collections/ZS536.JPG";
 
   private final HasMedia hasMedia = new HasMedia();
-  @Mock
-  private ArchiveFile archiveFile;
-  @Mock
-  private Record rec;
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var archiveField = new ArchiveField(0, DwcTerm.associatedMedia);
-    given(archiveFile.getField("dwc:associatedMedia")).willReturn(archiveField);
-    given(rec.value(archiveField.getTerm())).willReturn(MEDIA_URL);
+    var unit = MAPPER.createObjectNode();
+    unit.put("dwc:associatedMedia", MEDIA_URL);
 
     // When
-    var result = hasMedia.retrieveFromDWCA(archiveFile, rec);
+    var result = hasMedia.retrieveFromDWCA(unit);
+
+    // Then
+    assertThat(result).isEqualTo("true");
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"gbif:Multimedia", "http://rs.tdwg.org/ac/terms/Multimedia"})
+  void testRetrieveFromDWCAExtension(String extensionName) {
+    // Given
+    var unit = MAPPER.createObjectNode();
+    var array = MAPPER.createArrayNode();
+    var image = MAPPER.createObjectNode();
+    array.add(image);
+    var extensions = MAPPER.createObjectNode();
+    extensions.put(extensionName, array);
+    unit.put("extensions", extensions);
+
+    // When
+    var result = hasMedia.retrieveFromDWCA(unit);
 
     // Then
     assertThat(result).isEqualTo("true");
@@ -41,7 +51,7 @@ class HasMediaTest {
   @Test
   void testRetrieveFromABCD() {
     // Given
-    var unit = new ObjectMapper().createObjectNode();
+    var unit = MAPPER.createObjectNode();
     unit.put("abcd:multiMediaObjects/multiMediaObject/0/fileURI", MEDIA_URL);
 
     // When
@@ -54,7 +64,7 @@ class HasMediaTest {
   @Test
   void testRetrieveFromABCDNoMedia() {
     // Given
-    var unit = new ObjectMapper().createObjectNode();
+    var unit = MAPPER.createObjectNode();
     unit.put("", MEDIA_URL);
 
     // When

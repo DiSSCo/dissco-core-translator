@@ -1,9 +1,8 @@
 package eu.dissco.core.translator.terms.specimen.location;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.terms.Term;
 import java.util.List;
-import org.gbif.dwc.ArchiveFile;
-import org.gbif.dwc.record.Record;
 
 public class StateProvince extends Term {
 
@@ -11,8 +10,8 @@ public class StateProvince extends Term {
   private final List<String> dwcaTerms = List.of(TERM);
 
   @Override
-  public String retrieveFromDWCA(ArchiveFile archiveFile, Record rec) {
-    return super.searchDWCAForTerm(archiveFile, rec, dwcaTerms);
+  public String retrieveFromDWCA(JsonNode unit) {
+    return super.searchJsonForTerm(unit, dwcaTerms);
   }
 
   @Override

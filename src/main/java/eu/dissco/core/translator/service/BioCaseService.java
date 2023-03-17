@@ -1,6 +1,7 @@
 package eu.dissco.core.translator.service;
 
 
+import static eu.dissco.core.translator.service.IngestionUtility.getPhysicalSpecimenId;
 import static eu.dissco.core.translator.terms.TermMapper.abcdHarmonisedTerms;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -20,6 +21,7 @@ import eu.dissco.core.translator.domain.DigitalMediaObjectEvent;
 import eu.dissco.core.translator.domain.DigitalSpecimen;
 import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
 import eu.dissco.core.translator.domain.Enrichment;
+import eu.dissco.core.translator.exception.DiSSCoDataException;
 import eu.dissco.core.translator.exception.DisscoEfgParsingException;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
@@ -79,7 +81,6 @@ public class BioCaseService implements WebClientService {
       "OTHER", "ROCK", "MINERAL", "METEORITE", "FOSSILSPECIMEN", "LIVINGSPECIMEN", "MATERIALSAMPLE",
       "FOSSIL SPECIMEN", "ROCKSPECIMEN", "ROCK SPECIMEN", "MINERALSPECIMEN", "MINERAL SPECIMEN",
       "METEORITESPECIMEN", "METEORITE SPECIMEN");
-
 
   private final ObjectMapper mapper;
   private final WebClientProperties webClientProperties;
@@ -184,21 +185,25 @@ public class BioCaseService implements WebClientService {
       var organizationId = termMapper.retrieveFromABCD(new OrganisationId(), unitAttributes);
       var physicalSpecimenIdType = termMapper.retrieveFromABCD(new PhysicalSpecimenIdType(),
           unitAttributes);
+      var id = termMapper.retrieveFromABCD(new PhysicalSpecimenId(), unitAttributes);
       if (physicalSpecimenIdType != null) {
-        var physicalSpecimenId = getPhysicalSpecimenId(physicalSpecimenIdType, organizationId,
-            unitAttributes);
-        var digitalSpecimen = new DigitalSpecimen(
-            physicalSpecimenId,
-            termMapper.retrieveFromABCD(new Type(), unitAttributes),
-            harmonizeAttributes(datasets, unitAttributes, physicalSpecimenIdType, organizationId),
-            removeMultiMediaFields(unitAttributes)
-        );
-
-        log.debug("Result digital Specimen: {}", digitalSpecimen);
-        kafkaService.sendMessage("digital-specimen",
-            mapper.writeValueAsString(
-                new DigitalSpecimenEvent(enrichmentServices(false), digitalSpecimen)));
-        processDigitalMediaObjects(physicalSpecimenId, unit);
+        try {
+          var physicalSpecimenId = getPhysicalSpecimenId(physicalSpecimenIdType, organizationId,
+              id);
+          var digitalSpecimen = new DigitalSpecimen(
+              physicalSpecimenId,
+              termMapper.retrieveFromABCD(new Type(), unitAttributes),
+              harmonizeAttributes(datasets, unitAttributes, physicalSpecimenIdType, organizationId),
+              removeMultiMediaFields(unitAttributes)
+          );
+          log.debug("Result digital Specimen: {}", digitalSpecimen);
+          kafkaService.sendMessage("digital-specimen",
+              mapper.writeValueAsString(
+                  new DigitalSpecimenEvent(enrichmentServices(false), digitalSpecimen)));
+          processDigitalMediaObjects(physicalSpecimenId, unit);
+        } catch (DiSSCoDataException e) {
+          log.error("Encountered data issue with record: {}", unitAttributes, e);
+        }
       } else {
         log.warn("Ignoring record with id: {} as we cannot determine the physicalSpecimenIdType",
             termMapper.retrieveFromABCD(new PhysicalSpecimenId(), unitAttributes));
@@ -347,29 +352,6 @@ public class BioCaseService implements WebClientService {
     });
     data.remove(multiMediaFields);
     return data;
-  }
-
-  private String getPhysicalSpecimenId(String physicalSpecimenIdType, String organizationId,
-      JsonNode unitAttributes) {
-    var id = termMapper.retrieveFromABCD(new PhysicalSpecimenId(), unitAttributes);
-    if (physicalSpecimenIdType.equals("cetaf")) {
-      return id;
-    } else if (physicalSpecimenIdType.equals("combined")) {
-      return id + ":" + minifyOrganizationId(organizationId);
-    } else {
-      log.warn("Unknown physicalSpecimenIdType specified");
-      return "Unknown";
-    }
-  }
-
-  private String minifyOrganizationId(String organizationId) {
-    if (organizationId.startsWith("https://ror.org")) {
-      return organizationId.replace("https://ror.org/", "");
-    } else {
-      log.warn("Cannot determine organizationId: {} for combined physicalSpecimenId",
-          organizationId);
-      return "UnknownOrganisationUrl";
-    }
   }
 
   private void processDigitalMediaObjects(String physicalSpecimenId, Unit unit)
