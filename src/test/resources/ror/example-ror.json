@@ -1,0 +1,45 @@
+{
+  "id": "https://ror.org/03srysw20",
+  "name": "The MuseumFactory",
+  "email_address": null,
+  "ip_addresses": [],
+  "established": 2008,
+  "types": [
+    "Archive"
+  ],
+  "relationships": [],
+  "addresses": [],
+  "links": [
+    "https://demuseumfabriek.nl"
+  ],
+  "aliases": [],
+  "acronyms": [
+    "DMF"
+  ],
+  "status": "active",
+  "wikipedia_url": "https://en.wikipedia.org/wiki/De_Museumfabriek",
+  "labels": [
+    {
+      "label": "De MuseumFabriek",
+      "iso639": "nl"
+    }
+  ],
+  "country": {
+    "country_name": "Netherlands",
+    "country_code": "NL"
+  },
+  "external_ids": {
+    "ISNI": {
+      "preferred": "0000 0004 1784 7312",
+      "all": [
+        "0000 0004 1784 7312"
+      ]
+    },
+    "Wikidata": {
+      "preferred": "Q2203052",
+      "all": [
+        "Q2203052"
+      ]
+    }
+  }
+}

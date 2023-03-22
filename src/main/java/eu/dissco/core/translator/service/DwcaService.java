@@ -1,6 +1,7 @@
 package eu.dissco.core.translator.service;
 
 import static eu.dissco.core.translator.service.IngestionUtility.getPhysicalSpecimenId;
+import static eu.dissco.core.translator.service.IngestionUtility.minifyOrganizationId;
 import static eu.dissco.core.translator.terms.TermMapper.dwcaHarmonisedTerms;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -8,12 +9,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import eu.dissco.core.translator.Profiles;
+import eu.dissco.core.translator.component.RorComponent;
 import eu.dissco.core.translator.domain.DigitalMediaObject;
 import eu.dissco.core.translator.domain.DigitalMediaObjectEvent;
 import eu.dissco.core.translator.domain.DigitalSpecimen;
 import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
 import eu.dissco.core.translator.domain.Enrichment;
 import eu.dissco.core.translator.exception.DiSSCoDataException;
+import eu.dissco.core.translator.exception.OrganizationNotRorId;
 import eu.dissco.core.translator.properties.DwcaProperties;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
@@ -27,7 +30,8 @@ import eu.dissco.core.translator.terms.media.AccessUri;
 import eu.dissco.core.translator.terms.media.Format;
 import eu.dissco.core.translator.terms.media.MediaType;
 import eu.dissco.core.translator.terms.specimen.DwcaId;
-import eu.dissco.core.translator.terms.specimen.OrganisationId;
+import eu.dissco.core.translator.terms.specimen.OrganizationId;
+import eu.dissco.core.translator.terms.specimen.OrganizationName;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenId;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenIdType;
 import eu.dissco.core.translator.terms.specimen.Type;
@@ -81,6 +85,7 @@ public class DwcaService implements WebClientService {
   private final EnrichmentProperties enrichmentProperties;
   private final SourceSystemRepository repository;
   private final DwcaRepository dwcaRepository;
+  private final RorComponent rorComponent;
   private final List<String> allowedBasisOfRecord = List.of("PRESERVEDSPECIMEN", "FOSSIL", "OTHER",
       "ROCK", "MINERAL", "METEORITE", "FOSSILSPECIMEN", "LIVINGSPECIMEN", "MATERIALSAMPLE");
 
@@ -228,7 +233,7 @@ public class DwcaService implements WebClientService {
   private DigitalSpecimen createDigitalSpecimen(JsonNode fullRecord) throws DiSSCoDataException {
     var physicalSpecimenIdType = termMapper.retrieveFromDWCA(new PhysicalSpecimenIdType(),
         fullRecord);
-    var organizationId = termMapper.retrieveFromDWCA(new OrganisationId(), fullRecord);
+    var organizationId = termMapper.retrieveFromDWCA(new OrganizationId(), fullRecord);
     var physicalSpecimenId = termMapper.retrieveFromDWCA(new PhysicalSpecimenId(), fullRecord);
     return new DigitalSpecimen(
         getPhysicalSpecimenId(physicalSpecimenIdType, organizationId, physicalSpecimenId),
@@ -249,10 +254,11 @@ public class DwcaService implements WebClientService {
 
 
   private JsonNode harmonizeSpecimenAttributes(String physicalSpecimenIdType,
-      String organizationId, JsonNode fullRecord) {
+      String organizationId, JsonNode fullRecord) throws OrganizationNotRorId {
     var attributes = mapper.createObjectNode();
     attributes.put(PhysicalSpecimenIdType.TERM, physicalSpecimenIdType);
-    attributes.put(OrganisationId.TERM, organizationId);
+    attributes.put(OrganizationId.TERM, organizationId);
+    attributes.put(OrganizationName.TERM, rorComponent.getRoRId(minifyOrganizationId(organizationId)));
     attributes.put(SourceSystemId.TERM, webClientProperties.getSourceSystemId());
     attributes.put(DwcaId.TERM, fullRecord.get(DwcaTerm.ID.prefixedName()).asText());
     for (Term term : dwcaHarmonisedTerms()) {

@@ -9,7 +9,7 @@ import static org.mockito.Mockito.mock;
 import com.fasterxml.jackson.databind.JsonNode;
 import efg.DataSets.DataSet;
 import eu.dissco.core.translator.component.MappingComponent;
-import eu.dissco.core.translator.terms.specimen.OrganisationId;
+import eu.dissco.core.translator.terms.specimen.OrganizationId;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenCollection;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenId;
 import java.util.Map;
@@ -35,9 +35,9 @@ class TermMapperTest {
   @Test
   void testRetrieveFromDWCADefault() {
     // Given
-    var organisationId = new OrganisationId();
+    var organisationId = new OrganizationId();
     given(mappingComponent.getDefaultMappings()).willReturn(
-        Map.of(OrganisationId.TERM, "https://ror.org/02y22ws83"));
+        Map.of(OrganizationId.TERM, "https://ror.org/02y22ws83"));
 
     // When
     var result = termMapper.retrieveFromDWCA(organisationId, mock(JsonNode.class));
@@ -80,9 +80,9 @@ class TermMapperTest {
   @Test
   void testRetrieveFromABCDDefault() {
     // Given
-    var organisationId = new OrganisationId();
+    var organisationId = new OrganizationId();
     given(mappingComponent.getDefaultMappings()).willReturn(
-        Map.of(OrganisationId.TERM, "https://ror.org/02y22ws83"));
+        Map.of(OrganizationId.TERM, "https://ror.org/02y22ws83"));
 
     // When
     var result = termMapper.retrieveFromABCD(organisationId, mock(JsonNode.class));

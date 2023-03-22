@@ -9,7 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class OrganisationIdTest {
 
-  private final OrganisationId organisationId = new OrganisationId();
+  private final OrganizationId organisationId = new OrganizationId();
 
   @Test
   void testGetTerm(){
@@ -17,7 +17,7 @@ class OrganisationIdTest {
     var result = organisationId.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(OrganisationId.TERM);
+    assertThat(result).isEqualTo(OrganizationId.TERM);
 
   }
 }

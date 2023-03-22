@@ -12,7 +12,7 @@ public class IngestionUtility {
     // Utility class
   }
 
-  public static String getPhysicalSpecimenId(String physicalSpecimenIdType, String organizationId,
+  protected static String getPhysicalSpecimenId(String physicalSpecimenIdType, String organizationId,
       String physicalSpecimenId) throws DiSSCoDataException {
     if (physicalSpecimenIdType.equals("cetaf")) {
       return physicalSpecimenId;
@@ -24,7 +24,7 @@ public class IngestionUtility {
     }
   }
 
-  private static String minifyOrganizationId(String organizationId) throws OrganizationNotRorId {
+  protected static String minifyOrganizationId(String organizationId) throws OrganizationNotRorId {
     if (organizationId.startsWith("https://ror.org")) {
       return organizationId.replace("https://ror.org/", "");
     } else {
