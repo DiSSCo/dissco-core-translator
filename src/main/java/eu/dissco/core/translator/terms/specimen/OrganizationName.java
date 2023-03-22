@@ -8,6 +8,6 @@ public class OrganizationName extends Term {
 
   @Override
   public String getTerm() {
-    return null;
+    return TERM;
   }
 }
