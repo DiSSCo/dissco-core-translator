@@ -26,7 +26,7 @@ import reactor.core.publisher.Mono;
 class RorComponentTest {
 
   private static final String ROR = "03srysw20";
-  private static final String ORGANIZATION_NAME = "The MuseumFactory";
+  private static final String ORGANISATION_NAME = "The MuseumFactory";
   private final ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
   @Mock
   private WebClient client;
@@ -59,7 +59,7 @@ class RorComponentTest {
     var result = rorComponent.getRoRId(ROR);
 
     // Then
-    assertThat(result).isEqualTo(ORGANIZATION_NAME);
+    assertThat(result).isEqualTo(ORGANISATION_NAME);
   }
 
   @Test

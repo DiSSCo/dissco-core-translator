@@ -17,7 +17,7 @@ import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.DwcaRepository;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
 import eu.dissco.core.translator.terms.TermMapper;
-import eu.dissco.core.translator.terms.specimen.OrganizationId;
+import eu.dissco.core.translator.terms.specimen.OrganisationId;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenIdType;
 import java.io.File;
 import java.io.IOException;
@@ -89,7 +89,7 @@ class DwcaServiceTest {
 
   private void setupTermMapper() {
     given(termMapper.retrieveFromDWCA(any(), any())).willReturn("someValue");
-    given(termMapper.retrieveFromDWCA(any(OrganizationId.class), any())).willReturn("https://ror.org/03srysw20");
+    given(termMapper.retrieveFromDWCA(any(OrganisationId.class), any())).willReturn("https://ror.org/03srysw20");
     given(termMapper.retrieveFromDWCA(any(PhysicalSpecimenIdType.class), any())).willReturn(
         "cetaf");
   }

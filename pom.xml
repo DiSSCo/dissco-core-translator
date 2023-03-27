@@ -20,6 +20,7 @@
     <jaxb2-maven-plugin.version>3.1.0</jaxb2-maven-plugin.version>
     <jakarta.activation-api.version>2.1.0</jakarta.activation-api.version>
     <jakarta.xml.bind-api.version>4.0.0</jakarta.xml.bind-api.version>
+    <mockito-inline.version>5.2.0</mockito-inline.version>
     <testcontainers.version>1.17.5</testcontainers.version>
     <sonar.organization>dissco</sonar.organization>
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
@@ -116,6 +117,12 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-inline</artifactId>
+      <version>${mockito-inline.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>

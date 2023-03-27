@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import eu.dissco.core.translator.exception.DiSSCoDataException;
-import eu.dissco.core.translator.exception.OrganizationNotRorId;
+import eu.dissco.core.translator.exception.OrganisationNotRorId;
 import eu.dissco.core.translator.exception.UnknownPhysicalSpecimenIdType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -64,11 +64,11 @@ class IngestionUtlityTest {
     var id = "https://globally.unique.com/12345";
 
     // When
-    var exception = assertThrowsExactly(OrganizationNotRorId.class,
+    var exception = assertThrowsExactly(OrganisationNotRorId.class,
         () -> IngestionUtility.getPhysicalSpecimenId(type, organisationId, id));
 
     // Then
-    assertThat(exception).isInstanceOf(OrganizationNotRorId.class);
+    assertThat(exception).isInstanceOf(OrganisationNotRorId.class);
   }
 
 }

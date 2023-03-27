@@ -7,17 +7,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class OrganizationNameTest {
+class OrganisationNameTest {
 
-  private final OrganizationName organizationName = new OrganizationName();
+  private final OrganisationName organisationName = new OrganisationName();
 
   @Test
   void testGetTerm(){
     // When
-    var result = organizationName.getTerm();
+    var result = organisationName.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(OrganizationName.TERM);
+    assertThat(result).isEqualTo(OrganisationName.TERM);
 
   }
 }

@@ -11,15 +11,15 @@ public class TestUtils {
   public static ObjectMapper MAPPER = new ObjectMapper().findAndRegisterModules();
 
   public static final Map<String, String> ABCD_DEFAULTS = Map.of(
-      "ods:organizationId", "https://ror.org/0443cwa12",
+      "ods:organisationId", "https://ror.org/0443cwa12",
       "ods:type", "ZoologyVertebrateSpecimen",
       "ods:physicalSpecimenIdType", "cetaf");
   public static final Map<String, String> DWC_DEFAULTS = Map.of(
-      "ods:organizationId", "https://ror.org/02y22ws83",
+      "ods:organisationId", "https://ror.org/02y22ws83",
       "ods:type", "ZoologyVertebrateSpecimen",
       "ods:physicalSpecimenIdType", "cetaf");
   public static final Map<String, String> DWC_KEW_DEFAULTS = Map.of(
-      "ods:organizationId", "https://ror.org/00ynnr806",
+      "ods:organisationId", "https://ror.org/00ynnr806",
       "ods:type", "ZoologyVertebrateSpecimen",
       "ods:physicalSpecimenIdType", "cetaf");
 
@@ -28,7 +28,7 @@ public class TestUtils {
   public static Map<String, String> DEFAULT_MAPPING = Map.of(
       "ods:physicalSpecimenIdType", "cetaf",
       "ods:type", "ZoologyVertebrateSpecimen",
-      "ods:organizationId", "https://ror.org/02y22ws83"
+      "ods:organisationId", "https://ror.org/02y22ws83"
   );
   public static Map<String, String> TERM_MAPPING = Map.of(
       "ods:physicalSpecimenId", "dwc:occurrenceID",
@@ -60,7 +60,7 @@ public class TestUtils {
             "ods:type": "ZoologyVertebrateSpecimen"
           },
           {
-            "ods:organizationId": "https://ror.org/02y22ws83"
+            "ods:organisationId": "https://ror.org/02y22ws83"
           }
         ]
       }""";

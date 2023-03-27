@@ -2,7 +2,7 @@ package eu.dissco.core.translator.service;
 
 
 import static eu.dissco.core.translator.service.IngestionUtility.getPhysicalSpecimenId;
-import static eu.dissco.core.translator.service.IngestionUtility.minifyOrganizationId;
+import static eu.dissco.core.translator.service.IngestionUtility.minifyOrganisationId;
 import static eu.dissco.core.translator.terms.TermMapper.abcdHarmonisedTerms;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -25,7 +25,7 @@ import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
 import eu.dissco.core.translator.domain.Enrichment;
 import eu.dissco.core.translator.exception.DiSSCoDataException;
 import eu.dissco.core.translator.exception.DisscoEfgParsingException;
-import eu.dissco.core.translator.exception.OrganizationNotRorId;
+import eu.dissco.core.translator.exception.OrganisationNotRorId;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
@@ -37,8 +37,8 @@ import eu.dissco.core.translator.terms.media.AccessUri;
 import eu.dissco.core.translator.terms.media.Format;
 import eu.dissco.core.translator.terms.media.MediaType;
 import eu.dissco.core.translator.terms.specimen.DwcaId;
-import eu.dissco.core.translator.terms.specimen.OrganizationId;
-import eu.dissco.core.translator.terms.specimen.OrganizationName;
+import eu.dissco.core.translator.terms.specimen.OrganisationId;
+import eu.dissco.core.translator.terms.specimen.OrganisationName;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenId;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenIdType;
 import eu.dissco.core.translator.terms.specimen.Type;
@@ -187,18 +187,18 @@ public class BioCaseService implements WebClientService {
       throws JsonProcessingException, DisscoEfgParsingException {
     var unitAttributes = parseToJson(unit);
     if (isAcceptedBasisOfRecord(unit)) {
-      var organizationId = termMapper.retrieveFromABCD(new OrganizationId(), unitAttributes);
+      var organisationId = termMapper.retrieveFromABCD(new OrganisationId(), unitAttributes);
       var physicalSpecimenIdType = termMapper.retrieveFromABCD(new PhysicalSpecimenIdType(),
           unitAttributes);
       var id = termMapper.retrieveFromABCD(new PhysicalSpecimenId(), unitAttributes);
       if (physicalSpecimenIdType != null) {
         try {
-          var physicalSpecimenId = getPhysicalSpecimenId(physicalSpecimenIdType, organizationId,
+          var physicalSpecimenId = getPhysicalSpecimenId(physicalSpecimenIdType, organisationId,
               id);
           var digitalSpecimen = new DigitalSpecimen(
               physicalSpecimenId,
               termMapper.retrieveFromABCD(new Type(), unitAttributes),
-              harmonizeAttributes(datasets, unitAttributes, physicalSpecimenIdType, organizationId),
+              harmonizeAttributes(datasets, unitAttributes, physicalSpecimenIdType, organisationId),
               removeMultiMediaFields(unitAttributes)
           );
           log.debug("Result digital Specimen: {}", digitalSpecimen);
@@ -227,12 +227,12 @@ public class BioCaseService implements WebClientService {
   }
 
   private JsonNode harmonizeAttributes(DataSet datasets, ObjectNode unitAttributes,
-      String physicalSpecimenIdType, String organizationId) throws OrganizationNotRorId {
+      String physicalSpecimenIdType, String organisationId) throws OrganisationNotRorId {
     var attributes = mapper.createObjectNode();
     attributes.put(PhysicalSpecimenIdType.TERM, physicalSpecimenIdType);
-    attributes.put(OrganizationId.TERM, organizationId);
-    attributes.put(OrganizationName.TERM,
-        rorComponent.getRoRId(minifyOrganizationId(organizationId)));
+    attributes.put(OrganisationId.TERM, organisationId);
+    attributes.put(OrganisationName.TERM,
+        rorComponent.getRoRId(minifyOrganisationId(organisationId)));
     attributes.put(SourceSystemId.TERM, webClientProperties.getSourceSystemId());
     attributes.put(DwcaId.TERM, (String) null);
     attributes.put(License.TERM, termMapper.retrieveFromABCD(new License(), datasets));
@@ -377,7 +377,6 @@ public class BioCaseService implements WebClientService {
     var digitalMediaObject = new DigitalMediaObject(
         termMapper.retrieveFromABCD(new MediaType(), attributes),
         physicalSpecimenId,
-        "BioCase",
         harmonizeMedia(attributes),
         attributes
     );

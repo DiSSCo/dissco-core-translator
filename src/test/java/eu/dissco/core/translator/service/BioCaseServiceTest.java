@@ -15,7 +15,7 @@ import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
 import eu.dissco.core.translator.terms.TermMapper;
-import eu.dissco.core.translator.terms.specimen.OrganizationId;
+import eu.dissco.core.translator.terms.specimen.OrganisationId;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenIdType;
 import freemarker.cache.FileTemplateLoader;
 import freemarker.template.Configuration;
@@ -73,7 +73,7 @@ class BioCaseServiceTest {
     given(termMapper.retrieveFromABCD(any(), any(JsonNode.class))).willReturn("someValue");
     given(termMapper.retrieveFromABCD(any(PhysicalSpecimenIdType.class), any(JsonNode.class)))
         .willReturn("cetaf");
-    given(termMapper.retrieveFromABCD(any(OrganizationId.class), any(JsonNode.class))).willReturn(
+    given(termMapper.retrieveFromABCD(any(OrganisationId.class), any(JsonNode.class))).willReturn(
         "https://ror.org/03srysw20");
   }
 
