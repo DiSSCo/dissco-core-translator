@@ -1,7 +1,6 @@
 package eu.dissco.core.translator.service;
 
 import static eu.dissco.core.translator.TestUtils.MAPPER;
-import static eu.dissco.core.translator.TestUtils.MAPPING_JSON;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -11,12 +10,14 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import eu.dissco.core.translator.component.RorComponent;
 import eu.dissco.core.translator.properties.DwcaProperties;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.DwcaRepository;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
 import eu.dissco.core.translator.terms.TermMapper;
+import eu.dissco.core.translator.terms.specimen.OrganisationId;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenIdType;
 import java.io.File;
 import java.io.IOException;
@@ -66,6 +67,8 @@ class DwcaServiceTest {
   private SourceSystemRepository repository;
   @Mock
   private DwcaRepository dwcaRepository;
+  @Mock
+  private RorComponent rorComponent;
 
 
   private DwcaService service;
@@ -78,7 +81,7 @@ class DwcaServiceTest {
   @BeforeEach
   void setup() {
     this.service = new DwcaService(MAPPER, webClientProperties, webClient, dwcaProperties,
-        kafkaService, termMapper, enrichmentProperties, repository, dwcaRepository);
+        kafkaService, termMapper, enrichmentProperties, repository, dwcaRepository, rorComponent);
 
     // Given
     givenEndpoint();
@@ -86,6 +89,7 @@ class DwcaServiceTest {
 
   private void setupTermMapper() {
     given(termMapper.retrieveFromDWCA(any(), any())).willReturn("someValue");
+    given(termMapper.retrieveFromDWCA(any(OrganisationId.class), any())).willReturn("https://ror.org/03srysw20");
     given(termMapper.retrieveFromDWCA(any(PhysicalSpecimenIdType.class), any())).willReturn(
         "cetaf");
   }
@@ -96,6 +100,7 @@ class DwcaServiceTest {
     setupTermMapper();
     givenDWCA("/dwca-rbins.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(9));
+    given(rorComponent.getRoRId(anyString())).willReturn("organisationName");
 
     // When
     service.retrieveData();
@@ -129,6 +134,7 @@ class DwcaServiceTest {
     given(dwcaRepository.getRecords(anyList(), eq("ABC-DDD-ASD_dwc:Identification"))).willReturn(
         Map.of());
     given(dwcaRepository.getRecords(anyList(), eq("ABC-DDD-ASD_gbif:Multimedia"))).willReturn(givenImageMap(19));
+    given(rorComponent.getRoRId(anyString())).willReturn("organisationName");
 
     // When
     service.retrieveData();
@@ -159,6 +165,7 @@ class DwcaServiceTest {
     setupTermMapper();
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(14));
     given(dwcaRepository.getRecords(anyList(), eq("ABC-DDD-ASD_http://rs.tdwg.org/ac/terms/Multimedia"))).willReturn(givenImageMap(14));
+    given(rorComponent.getRoRId(anyString())).willReturn("organisationName");
 
     // When
     service.retrieveData();
@@ -177,6 +184,7 @@ class DwcaServiceTest {
     givenDWCA("/dwca-lux-associated-media.zip");
     setupTermMapper();
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMapWithMedia(20));
+    given(rorComponent.getRoRId(anyString())).willReturn("organisationName");
 
     // When
     service.retrieveData();

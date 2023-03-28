@@ -1,7 +1,7 @@
 package eu.dissco.core.translator.service;
 
 import eu.dissco.core.translator.exception.DiSSCoDataException;
-import eu.dissco.core.translator.exception.OrganizationNotRorId;
+import eu.dissco.core.translator.exception.OrganisationNotRorId;
 import eu.dissco.core.translator.exception.UnknownPhysicalSpecimenIdType;
 import lombok.extern.slf4j.Slf4j;
 
@@ -12,23 +12,23 @@ public class IngestionUtility {
     // Utility class
   }
 
-  public static String getPhysicalSpecimenId(String physicalSpecimenIdType, String organizationId,
+  protected static String getPhysicalSpecimenId(String physicalSpecimenIdType, String organisationId,
       String physicalSpecimenId) throws DiSSCoDataException {
     if (physicalSpecimenIdType.equals("cetaf")) {
       return physicalSpecimenId;
     } else if (physicalSpecimenIdType.equals("combined")) {
-      return physicalSpecimenId + ":" + minifyOrganizationId(organizationId);
+      return physicalSpecimenId + ":" + minifyOrganisationId(organisationId);
     } else {
       log.warn("Unknown physicalSpecimenIdType specified");
       throw new UnknownPhysicalSpecimenIdType(physicalSpecimenIdType + " is not a known id type");
     }
   }
 
-  private static String minifyOrganizationId(String organizationId) throws OrganizationNotRorId {
-    if (organizationId.startsWith("https://ror.org")) {
-      return organizationId.replace("https://ror.org/", "");
+  protected static String minifyOrganisationId(String organisationId) throws OrganisationNotRorId {
+    if (organisationId.startsWith("https://ror.org")) {
+      return organisationId.replace("https://ror.org/", "");
     } else {
-      throw new OrganizationNotRorId(organizationId + " is not a valid ror");
+      throw new OrganisationNotRorId(organisationId + " is not a valid ror");
     }
   }
 }

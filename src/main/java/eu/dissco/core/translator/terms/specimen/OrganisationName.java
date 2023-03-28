@@ -2,9 +2,9 @@ package eu.dissco.core.translator.terms.specimen;
 
 import eu.dissco.core.translator.terms.Term;
 
-public class OrganisationId extends Term {
+public class OrganisationName extends Term {
 
-  public static final String TERM = ODS_PREFIX + "organisationId";
+  public static final String TERM = ODS_PREFIX + "organisationName";
 
   @Override
   public String getTerm() {
