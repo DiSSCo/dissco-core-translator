@@ -1,17 +1,29 @@
-# Date: April 12, 2023
-# Package: Jackson Databind
-# Issue: Need to update Jackson-core.  Version 2.13.4.1 + fixed
+# Date: April 13, 2023
+# Package: Common-beanutils
+# Issue: Upgrade 1.8.3 -> 1.9.2
 # Severity: High
 # Notes: 2 issues in same package.
 # Status: Jira Ticket DD-444
-CVE-2022-42003
-CVE-2022-42004
+CVE-2014-0114
+CVE-2019-10086
 
-# Date: April 12, 2023
-# Package: Jackson Databind
-# Issue: Need tp update Jackson-xml. Version 2.9.1 fixed
-# Severity: Critical
-# Notes: Jira says we have 2.9.0 installed, but it should be 2.13.4 (as above). Maybe updating Spring boot will help
+# Date: April 13, 2023
+# Package: Postgresql
+# Issue: Upgrade 42.3.6 -> 42.3.7
+# Severity: High
 # Status: Jira Ticket DD-444
 
+# Date: April 13, 2023
+# Package: Spring-web
+# Issue: Upgrade Spring boot
+# Severity: Critical
+# Status: Jira Ticket DD-243
+CVE-2016-1000027
 
+# Date: April 13, 2023
+# Package: snakeyaml
+# Issue: Upgrade Spring boot
+# Severity: Critical, High
+# Status: Jira Ticket DD-243
+CVE-2022-1471
+CVE-2022-25857
