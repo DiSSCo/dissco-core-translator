@@ -12,6 +12,7 @@ CVE-2019-10086
 # Issue: Upgrade 42.3.6 -> 42.3.7
 # Severity: High
 # Status: Jira Ticket DD-444
+CVE-2022-31197
 
 # Date: April 13, 2023
 # Package: Spring-web
