@@ -69,6 +69,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.w3c.dom.Node;
+import reactor.core.scheduler.Schedulers;
 
 @Slf4j
 @Service
@@ -117,7 +118,7 @@ public class BioCaseService implements WebClientService {
       try {
         finished = webClient.get().uri(uri + writer)
             .retrieve()
-            .bodyToMono(String.class).map(this::mapToABCD).toFuture().get();
+            .bodyToMono(String.class).publishOn(Schedulers.boundedElastic()).map(this::mapToABCD).toFuture().get();
         if (finished) {
           log.info("Unable to get records from xml");
         }

@@ -21,6 +21,7 @@ import org.springframework.web.reactive.function.client.WebClient.RequestHeaders
 import org.springframework.web.reactive.function.client.WebClient.RequestHeadersUriSpec;
 import org.springframework.web.reactive.function.client.WebClient.ResponseSpec;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
 
 @ExtendWith(MockitoExtension.class)
 class RorComponentTest {
@@ -94,6 +95,7 @@ class RorComponentTest {
     given(headersSpec.uri(anyString())).willReturn(uriSpec);
     given(uriSpec.retrieve()).willReturn(responseSpec);
     given(responseSpec.bodyToMono(any(Class.class))).willReturn(jsonNodeMono);
+    given(jsonNodeMono.publishOn(any(Scheduler.class))).willReturn(jsonNodeMono);
     given(jsonNodeMono.toFuture()).willReturn(jsonFuture);
   }
 }
