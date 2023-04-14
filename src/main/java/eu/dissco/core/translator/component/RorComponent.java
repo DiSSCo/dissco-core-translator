@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.scheduler.Schedulers;
 
 @Slf4j
 @Component
@@ -19,8 +20,8 @@ public class RorComponent {
   public String getRoRId(String ror) {
     log.info("Requesting organisation details for organisation: {} with ror", ror);
     String url = "https://api.ror.org/organizations/" + ror;
-    var uriSpec = webClient.get().uri(url).retrieve();
-    var response = uriSpec.bodyToMono(JsonNode.class);
+    var response = webClient.get().uri(url).retrieve().bodyToMono(JsonNode.class)
+        .publishOn(Schedulers.boundedElastic());
     try {
       var json = response.toFuture().get();
       if (json != null) {
