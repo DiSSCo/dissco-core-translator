@@ -18,9 +18,10 @@ public class License extends Term {
 
   @Override
   public String retrieveFromABCD(DataSet datasets) {
-    if (datasets != null && datasets.getMetadata() != null && datasets.getMetadata()
-        .getIPRStatements().getLicenses()!= null && !datasets.getMetadata()
-        .getIPRStatements().getLicenses().getLicense().isEmpty()) {
+    if (datasets != null && datasets.getMetadata() != null
+        && datasets.getMetadata().getIPRStatements() != null
+        && datasets.getMetadata().getIPRStatements().getLicenses() != null
+        && !datasets.getMetadata().getIPRStatements().getLicenses().getLicense().isEmpty()) {
       var license = datasets.getMetadata().getIPRStatements().getLicenses().getLicense().get(0)
           .getURI();
       if (license == null) {
