@@ -15,7 +15,7 @@ public class LatestEonOrHighestEonothem extends AbstractChronoStratigraphy {
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    return super.searchABCDChronostratigraphy(unit, List.of("Eonothem"));
+    return super.searchABCDSplitTerms(unit, List.of("Eonothem"));
   }
 
   @Override

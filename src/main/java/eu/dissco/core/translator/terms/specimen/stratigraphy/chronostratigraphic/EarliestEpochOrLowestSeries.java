@@ -15,7 +15,7 @@ public class EarliestEpochOrLowestSeries extends AbstractChronoStratigraphy {
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    return super.searchABCDChronostratigraphy(unit,
+    return super.searchABCDSplitTerms(unit,
         List.of("SubSeries", "SubSerie", "Series", "Serie"));
   }
 

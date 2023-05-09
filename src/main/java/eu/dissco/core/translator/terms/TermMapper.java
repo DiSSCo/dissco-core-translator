@@ -11,7 +11,6 @@ import eu.dissco.core.translator.terms.specimen.HasMedia;
 import eu.dissco.core.translator.terms.specimen.Modified;
 import eu.dissco.core.translator.terms.specimen.ObjectType;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenCollection;
-import eu.dissco.core.translator.terms.specimen.SpecimenName;
 import eu.dissco.core.translator.terms.specimen.TypeStatus;
 import eu.dissco.core.translator.terms.specimen.location.Continent;
 import eu.dissco.core.translator.terms.specimen.location.Country;
@@ -41,6 +40,17 @@ import eu.dissco.core.translator.terms.specimen.stratigraphy.lithostratigraphic.
 import eu.dissco.core.translator.terms.specimen.stratigraphy.lithostratigraphic.Formation;
 import eu.dissco.core.translator.terms.specimen.stratigraphy.lithostratigraphic.Group;
 import eu.dissco.core.translator.terms.specimen.stratigraphy.lithostratigraphic.Member;
+import eu.dissco.core.translator.terms.specimen.taxonomy.Class;
+import eu.dissco.core.translator.terms.specimen.taxonomy.Family;
+import eu.dissco.core.translator.terms.specimen.taxonomy.Genus;
+import eu.dissco.core.translator.terms.specimen.taxonomy.InfraspecificEpithet;
+import eu.dissco.core.translator.terms.specimen.taxonomy.Kingdom;
+import eu.dissco.core.translator.terms.specimen.taxonomy.Order;
+import eu.dissco.core.translator.terms.specimen.taxonomy.Phylum;
+import eu.dissco.core.translator.terms.specimen.taxonomy.ScientificNameAuthorship;
+import eu.dissco.core.translator.terms.specimen.taxonomy.SpecificEpithet;
+import eu.dissco.core.translator.terms.specimen.taxonomy.SpecimenName;
+import eu.dissco.core.translator.terms.specimen.taxonomy.TaxonRank;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -94,7 +104,6 @@ public class TermMapper {
 
   public static List<Term> harmonisedTerms() {
     var list = new ArrayList<Term>();
-    list.add(new SpecimenName());
     list.add(new PhysicalSpecimenCollection());
     list.add(new DatasetId());
     list.add(new ObjectType());
@@ -106,6 +115,23 @@ public class TermMapper {
     list.add(new HasMedia());
     list.addAll(locationTerms());
     list.addAll(stratigraphyTerms());
+    list.addAll(taxonomyTerms());
+    return list;
+  }
+
+  public static List<Term> taxonomyTerms() {
+    var list = new ArrayList<Term>();
+    list.add(new SpecimenName());
+    list.add(new Class());
+    list.add(new Family());
+    list.add(new Genus());
+    list.add(new InfraspecificEpithet());
+    list.add(new Kingdom());
+    list.add(new Order());
+    list.add(new Phylum());
+    list.add(new ScientificNameAuthorship());
+    list.add(new SpecificEpithet());
+    list.add(new TaxonRank());
     return list;
   }
 

@@ -15,7 +15,7 @@ public class LatestAgeOrHighestStage extends AbstractChronoStratigraphy {
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    return super.searchABCDChronostratigraphy(unit, List.of("Stage"));
+    return super.searchABCDSplitTerms(unit, List.of("Stage"));
   }
 
   @Override

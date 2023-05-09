@@ -18,27 +18,8 @@ public abstract class AbstractChronoStratigraphy extends Term {
           "abcd-efg:earthScienceSpecimen/unitStratigraphicDetermination/chronostratigraphicAttributions/chronostratigraphicAttribution/",
           "/chronostratigraphicName");
 
-  protected String searchABCDChronostratigraphy(JsonNode unit, List<String> divisionSearched) {
-    for (var divisionSearch : divisionSearched) {
-      var iterateOverElements = true;
-      var numberFound = 0;
-      while (iterateOverElements) {
-        var divisionNode = unit.get(
-            ABCD_DIVISION.getLeft() + numberFound + ABCD_DIVISION.getRight());
-        if (divisionNode != null) {
-          var division = divisionNode.asText();
-          if (division.equalsIgnoreCase(divisionSearch)
-              && unit.get(ABCD_VALUE.getLeft() + numberFound + ABCD_VALUE.getRight()) != null) {
-            return unit.get(ABCD_VALUE.getLeft() + numberFound + ABCD_VALUE.getRight()).asText();
-          }
-          numberFound++;
-        } else {
-          iterateOverElements = false;
-        }
-      }
-    }
-    log.debug("No stratigraphy found for division: {}", divisionSearched);
-    return null;
+  protected String searchABCDSplitTerms(JsonNode unit, List<String> searchTerms) {
+    return searchABCDSplitTerms(unit, searchTerms, ABCD_DIVISION, ABCD_VALUE);
   }
 
 }

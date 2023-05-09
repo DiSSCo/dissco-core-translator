@@ -15,7 +15,7 @@ public class LatestPeriodOrHighestSystem extends AbstractChronoStratigraphy {
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    return super.searchABCDChronostratigraphy(unit, List.of("System"));
+    return super.searchABCDSplitTerms(unit, List.of("System"));
   }
 
   @Override
