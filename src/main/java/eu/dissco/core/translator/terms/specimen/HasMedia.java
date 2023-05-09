@@ -8,21 +8,26 @@ public class HasMedia extends Term {
 
   public static final String TERM = ODS_PREFIX + "hasMedia";
   private final List<String> dwcaTerms = List.of("dwc:associatedMedia");
-  private final List<String> abcdTerms = List.of("abcd:multiMediaObjects/multiMediaObject/0/fileURI");
+  private final List<String> abcdTerms = List.of(
+      "abcd:multiMediaObjects/multiMediaObject/0/fileURI");
+
+  private static String toBoolean(String result) {
+    return String.valueOf(result != null);
+  }
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
     var result = super.searchJsonForTerm(unit, dwcaTerms);
-    if (result != null){
+    if (result != null) {
       return String.valueOf(true);
-    } else if (unit.get("extensions") != null){
+    } else if (unit.get("extensions") != null) {
       var extensions = unit.get("extensions");
       var gbifExtension = extensions.get("gbif:Multimedia");
-      if (gbifExtension != null && gbifExtension.size() > 0){
+      if (gbifExtension != null && gbifExtension.size() > 0) {
         return String.valueOf(true);
       }
       var acExtension = extensions.get("http://rs.tdwg.org/ac/terms/Multimedia");
-      if (acExtension != null && acExtension.size() > 0){
+      if (acExtension != null && acExtension.size() > 0) {
         return String.valueOf(true);
       }
     }
@@ -33,10 +38,6 @@ public class HasMedia extends Term {
   public String retrieveFromABCD(JsonNode unit) {
     var result = super.searchJsonForTerm(unit, abcdTerms);
     return toBoolean(result);
-  }
-
-  private static String toBoolean(String result) {
-    return String.valueOf(result != null);
   }
 
   @Override

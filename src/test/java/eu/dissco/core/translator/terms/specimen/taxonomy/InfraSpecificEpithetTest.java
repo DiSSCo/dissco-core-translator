@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class InfraSpecificEpithetTest {
+
   private final InfraspecificEpithet infraSpecificEpithet = new InfraspecificEpithet();
 
   @Test
@@ -28,9 +29,13 @@ class InfraSpecificEpithetTest {
   void testRetrieveFromABCD() {
     // Given
     var unit = MAPPER.createObjectNode();
-    unit.put("abcd:identifications/identification/0/result/taxonIdentified/nameAtomised/botanical/genusOrMonomial", "Fridericia Mart.");
+    unit.put(
+        "abcd:identifications/identification/0/result/taxonIdentified/nameAtomised/botanical/genusOrMonomial",
+        "Fridericia Mart.");
     unit.put("abcd:identifications/identification/0/preferredFlag", false);
-    unit.put("abcd:identifications/identification/1/result/taxonIdentified/nameAtomised/botanical/infraspecificEpithet", "thyrsoidea");
+    unit.put(
+        "abcd:identifications/identification/1/result/taxonIdentified/nameAtomised/botanical/infraspecificEpithet",
+        "thyrsoidea");
     unit.put("abcd:identifications/identification/1/preferredFlag", true);
 
     // When

@@ -12,7 +12,7 @@ class OrganisationNameTest {
   private final OrganisationName organisationName = new OrganisationName();
 
   @Test
-  void testGetTerm(){
+  void testGetTerm() {
     // When
     var result = organisationName.getTerm();
 

@@ -12,7 +12,7 @@ class OrganisationIdTest {
   private final OrganisationId organisationId = new OrganisationId();
 
   @Test
-  void testGetTerm(){
+  void testGetTerm() {
     // When
     var result = organisationId.getTerm();
 

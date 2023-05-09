@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class ScientificNameAuthorshipTest {
+
   private final ScientificNameAuthorship authorship = new ScientificNameAuthorship();
 
   @Test
@@ -28,9 +29,15 @@ class ScientificNameAuthorshipTest {
   void testRetrieveFromABCD() {
     // Given
     var unit = MAPPER.createObjectNode();
-    unit.put("abcd:identifications/identification/0/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonRank", "classis");
-    unit.put("abcd:identifications/identification/0/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonName", "Eurotatoria");
-    unit.put("abcd:identifications/identification/0/result/taxonIdentified/nameAtomised/botanical/authorTeam", "Cham. &amp; Schltdl.");
+    unit.put(
+        "abcd:identifications/identification/0/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonRank",
+        "classis");
+    unit.put(
+        "abcd:identifications/identification/0/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonName",
+        "Eurotatoria");
+    unit.put(
+        "abcd:identifications/identification/0/result/taxonIdentified/nameAtomised/botanical/authorTeam",
+        "Cham. &amp; Schltdl.");
     unit.put("abcd:identifications/identification/0/preferredFlag", true);
 
     // When

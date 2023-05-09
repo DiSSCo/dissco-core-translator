@@ -12,7 +12,7 @@ class DwcaIdTest {
   private final DwcaId dwcaId = new DwcaId();
 
   @Test
-  void testGetTerm(){
+  void testGetTerm() {
     // When
     var result = dwcaId.getTerm();
 

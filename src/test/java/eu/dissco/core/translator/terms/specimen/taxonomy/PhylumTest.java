@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class PhylumTest {
+
   private final Phylum phylum = new Phylum();
 
   @Test
@@ -28,8 +29,12 @@ class PhylumTest {
   void testRetrieveFromABCD() {
     // Given
     var unit = MAPPER.createObjectNode();
-    unit.put("abcd:identifications/identification/0/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonRank", "phylum");
-    unit.put("abcd:identifications/identification/0/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonName", "Chordata");
+    unit.put(
+        "abcd:identifications/identification/0/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonRank",
+        "phylum");
+    unit.put(
+        "abcd:identifications/identification/0/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonName",
+        "Chordata");
 
     // When
     var result = phylum.retrieveFromABCD(unit);

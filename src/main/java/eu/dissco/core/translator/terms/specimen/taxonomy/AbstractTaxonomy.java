@@ -9,18 +9,20 @@ import org.apache.commons.lang3.tuple.Triple;
 
 public abstract class AbstractTaxonomy extends Term {
 
+  private static final String IDENTIFICATION = "abcd:identifications/identification/";
   private static final Triple<String, String, String> ABCD_TAXON_RANK =
       Triple.of(
-          "abcd:identifications/identification/",
+          IDENTIFICATION,
           "/result/taxonIdentified/higherTaxa/higherTaxon/",
           "/higherTaxonRank");
   private static final Triple<String, String, String> ABCD_VALUE =
       Triple.of(
-          "abcd:identifications/identification/",
+          IDENTIFICATION,
           "/result/taxonIdentified/higherTaxa/higherTaxon/",
           "/higherTaxonName");
-  private static final Pair<String, String> abcdPreferredFlag = Pair.of(
-      "abcd:identifications/identification/", "/preferredFlag");
+  private static final Pair<String, String> abcdPreferredFlag = Pair.of(IDENTIFICATION,
+      "/preferredFlag");
+
 
   private int getIdentificationIndex(JsonNode unit) {
     var numberFound = 0;
@@ -33,21 +35,9 @@ public abstract class AbstractTaxonomy extends Term {
           numberFound++;
         }
       } else {
-        return  0;
+        return 0;
       }
     }
-  }
-
-  private static String getStringAtIndex(Pair<String, String> string, int numberFound) {
-    return string.getLeft() + numberFound + string.getRight();
-  }
-
-  private static Optional<Integer> checkPreferredFlag(JsonNode unit, int numberFound) {
-    var preferred = unit.get(getStringAtIndex(abcdPreferredFlag, numberFound)).asBoolean();
-    if (preferred) {
-      return Optional.of(numberFound);
-    }
-    return Optional.empty();
   }
 
   protected String searchABCDSplitTerms(JsonNode unit, List<String> searchTerms) {
@@ -62,9 +52,21 @@ public abstract class AbstractTaxonomy extends Term {
   protected String searchABCDTerms(JsonNode unit, List<String> searchTerms) {
     var identificationIndex = getIdentificationIndex(unit);
     var terms = searchTerms.stream().map(
-        term -> "abcd:identifications/identification/" + identificationIndex
-            + "/result/taxonIdentified" + term).toList();
+        term -> IDENTIFICATION + identificationIndex + "/result/taxonIdentified" + term).toList();
     return searchJsonForTerm(unit, terms);
   }
+
+  private String getStringAtIndex(Pair<String, String> string, int numberFound) {
+    return string.getLeft() + numberFound + string.getRight();
+  }
+
+  private Optional<Integer> checkPreferredFlag(JsonNode unit, int numberFound) {
+    var preferred = unit.get(getStringAtIndex(abcdPreferredFlag, numberFound)).asBoolean();
+    if (preferred) {
+      return Optional.of(numberFound);
+    }
+    return Optional.empty();
+  }
+
 
 }

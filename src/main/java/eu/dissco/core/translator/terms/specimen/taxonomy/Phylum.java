@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
 
 public class Phylum extends AbstractTaxonomy {
+
   public static final String TERM = DWC_PREFIX + "phylum";
 
   private final List<String> dwcaTerms = List.of(TERM);

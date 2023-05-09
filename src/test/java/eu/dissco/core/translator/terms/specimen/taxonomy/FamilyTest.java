@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class FamilyTest {
+
   private final Family family = new Family();
 
   @Test
@@ -28,8 +29,12 @@ class FamilyTest {
   void testRetrieveFromABCD() {
     // Given
     var unit = MAPPER.createObjectNode();
-    unit.put("abcd:identifications/identification/0/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonRank", "familia");
-    unit.put("abcd:identifications/identification/0/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonName", "BIGNONIACEAE");
+    unit.put(
+        "abcd:identifications/identification/0/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonRank",
+        "familia");
+    unit.put(
+        "abcd:identifications/identification/0/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonName",
+        "BIGNONIACEAE");
 
     // When
     var result = family.retrieveFromABCD(unit);

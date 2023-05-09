@@ -29,13 +29,25 @@ class ClassTest {
   void testRetrieveFromABCD() {
     // Given
     var unit = MAPPER.createObjectNode();
-    unit.put("abcd:identifications/identification/0/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonRank", "classis");
-    unit.put("abcd:identifications/identification/0/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonName", "Eurotatoria");
+    unit.put(
+        "abcd:identifications/identification/0/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonRank",
+        "classis");
+    unit.put(
+        "abcd:identifications/identification/0/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonName",
+        "Eurotatoria");
     unit.put("abcd:identifications/identification/0/preferredFlag", false);
-    unit.put("abcd:identifications/identification/1/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonRank", "classis");
-    unit.put("abcd:identifications/identification/1/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonName", "Mammalia");
-    unit.put("abcd:identifications/identification/1/result/taxonIdentified/higherTaxa/higherTaxon/1/higherTaxonRank", "regnum");
-    unit.put("abcd:identifications/identification/1/result/taxonIdentified/higherTaxa/higherTaxon/1/higherTaxonName", "Animalia");
+    unit.put(
+        "abcd:identifications/identification/1/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonRank",
+        "classis");
+    unit.put(
+        "abcd:identifications/identification/1/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonName",
+        "Mammalia");
+    unit.put(
+        "abcd:identifications/identification/1/result/taxonIdentified/higherTaxa/higherTaxon/1/higherTaxonRank",
+        "regnum");
+    unit.put(
+        "abcd:identifications/identification/1/result/taxonIdentified/higherTaxa/higherTaxon/1/higherTaxonName",
+        "Animalia");
     unit.put("abcd:identifications/identification/1/preferredFlag", true);
 
     // When

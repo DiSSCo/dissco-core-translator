@@ -3,7 +3,7 @@ package eu.dissco.core.translator.terms.specimen.taxonomy;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
 
-public class SpecificEpithet extends AbstractTaxonomy{
+public class SpecificEpithet extends AbstractTaxonomy {
 
   public static final String TERM = DWC_PREFIX + "specificEpithet";
 

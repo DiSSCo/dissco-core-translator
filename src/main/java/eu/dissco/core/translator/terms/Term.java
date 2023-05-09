@@ -10,10 +10,9 @@ import org.apache.commons.lang3.tuple.Pair;
 @Slf4j
 public abstract class Term {
 
-  private static final String MESSAGE = "No specific attributes retrieve specified for field: {}";
-
   protected static final String ODS_PREFIX = "ods:";
   protected static final String DWC_PREFIX = "dwc:";
+  private static final String MESSAGE = "No specific attributes retrieve specified for field: {}";
 
   protected String searchJsonForTerm(JsonNode attributes, List<String> originalTerms) {
     for (var originalTerm : originalTerms) {

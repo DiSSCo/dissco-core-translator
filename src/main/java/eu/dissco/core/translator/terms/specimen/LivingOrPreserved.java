@@ -3,9 +3,9 @@ package eu.dissco.core.translator.terms.specimen;
 import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.terms.Term;
 
-public class LivingSpecimen extends Term {
+public class LivingOrPreserved extends Term {
 
-  public static final String TERM = ODS_PREFIX + "livingSpecimen";
+  public static final String TERM = ODS_PREFIX + "livingOrPreserved";
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
@@ -13,7 +13,7 @@ public class LivingSpecimen extends Term {
   }
 
   private String determineLiving(String basisOfRecord) {
-    if(basisOfRecord.toUpperCase().strip().equals("LIVINGSPECIMEN")){
+    if (basisOfRecord.toUpperCase().strip().equals("LIVINGSPECIMEN")) {
       return "Living";
     } else {
       return "Preserved";

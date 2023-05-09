@@ -5,6 +5,7 @@ import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
 public class PhysicalSpecimenId extends Term {
+
   public static final String TERM = ODS_PREFIX + "physicalSpecimenId";
 
   private final List<String> dwcaTerms = List.of("dwc:occurrenceID");

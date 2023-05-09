@@ -8,10 +8,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class LivingSpecimenTest {
+class LivingOrPreservedTest {
 
   private static final String LIVING_SPECIMEN = "Living";
-  private final LivingSpecimen livingSpecimen = new LivingSpecimen();
+  private final LivingOrPreserved livingSpecimen = new LivingOrPreserved();
 
   @Test
   void testRetrieveFromDWCA() {
@@ -58,7 +58,7 @@ class LivingSpecimenTest {
     var result = livingSpecimen.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(LivingSpecimen.TERM);
+    assertThat(result).isEqualTo(LivingOrPreserved.TERM);
   }
 
 }
