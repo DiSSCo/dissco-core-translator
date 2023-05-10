@@ -157,7 +157,7 @@ public class DwcaService implements WebClientService {
         if (!recordNeedsToBeIgnored(fullRecord, recordId)) {
           try {
             var digitalSpecimen = createDigitalSpecimen(fullRecord);
-            log.info("Digital Specimen: {}", digitalSpecimen);
+            log.debug("Digital Specimen: {}", digitalSpecimen);
             var translatorEvent = new DigitalSpecimenEvent(enrichmentServices(false),
                 digitalSpecimen);
             kafkaService.sendMessage("digital-specimen",
@@ -195,7 +195,7 @@ public class DwcaService implements WebClientService {
       throws JsonProcessingException {
     for (var image : imageArray) {
       var type = termMapper.retrieveFromDWCA(new MediaType(), image);
-      log.info("Type of digitalMediaObject is: {}", type);
+      log.debug("Type of digitalMediaObject is: {}", type);
       var digitalMediaObject = new DigitalMediaObject(
           type,
           recordId,
@@ -207,7 +207,7 @@ public class DwcaService implements WebClientService {
 
   private void publishAssociatedMedia(String recordId, String associatedMedia)
       throws JsonProcessingException {
-    log.info("Digital Specimen: {}, has associatedMedia {}", recordId,
+    log.debug("Digital Specimen: {}, has associatedMedia {}", recordId,
         associatedMedia);
     String[] mediaUrls = associatedMedia.split("\\|");
     for (var mediaUrl : mediaUrls) {

@@ -1,6 +1,7 @@
 package eu.dissco.core.translator.terms.specimen.taxonomy;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 import java.util.Optional;
@@ -10,6 +11,7 @@ import org.apache.commons.lang3.tuple.Triple;
 public abstract class AbstractTaxonomy extends Term {
 
   private static final String IDENTIFICATION = "abcd:identifications/identification/";
+  private static final String IDENTIFICATION_INDEX = "ods:taxonIdentificationIndex";
   private static final Triple<String, String, String> ABCD_TAXON_RANK =
       Triple.of(
           IDENTIFICATION,
@@ -24,7 +26,17 @@ public abstract class AbstractTaxonomy extends Term {
       "/preferredFlag");
 
 
-  private int getIdentificationIndex(JsonNode unit) {
+  protected String getIdentificationIndex(JsonNode unit) {
+    if (unit.get(IDENTIFICATION_INDEX) != null) {
+      return unit.get(IDENTIFICATION_INDEX).asText();
+    } else {
+      var identificationIndex = determineIdentificationIndex(unit);
+      ((ObjectNode) unit).put(IDENTIFICATION_INDEX, identificationIndex);
+      return identificationIndex;
+    }
+  }
+
+  private String determineIdentificationIndex(JsonNode unit) {
     var numberFound = 0;
     while (true) {
       if (unit.get(getStringAtIndex(abcdPreferredFlag, numberFound)) != null) {
@@ -35,7 +47,7 @@ public abstract class AbstractTaxonomy extends Term {
           numberFound++;
         }
       } else {
-        return 0;
+        return "0";
       }
     }
   }
@@ -56,14 +68,14 @@ public abstract class AbstractTaxonomy extends Term {
     return searchJsonForTerm(unit, terms);
   }
 
-  private String getStringAtIndex(Pair<String, String> string, int numberFound) {
+  protected String getStringAtIndex(Pair<String, String> string, int numberFound) {
     return string.getLeft() + numberFound + string.getRight();
   }
 
-  private Optional<Integer> checkPreferredFlag(JsonNode unit, int numberFound) {
+  private Optional<String> checkPreferredFlag(JsonNode unit, int numberFound) {
     var preferred = unit.get(getStringAtIndex(abcdPreferredFlag, numberFound)).asBoolean();
     if (preferred) {
-      return Optional.of(numberFound);
+      return Optional.of(String.valueOf(numberFound));
     }
     return Optional.empty();
   }
