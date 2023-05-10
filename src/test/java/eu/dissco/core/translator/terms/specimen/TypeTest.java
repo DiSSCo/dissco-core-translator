@@ -12,7 +12,7 @@ class TypeTest {
   private final Type type = new Type();
 
   @Test
-  void testGetTerm(){
+  void testGetTerm() {
     // When
     var result = type.getTerm();
 

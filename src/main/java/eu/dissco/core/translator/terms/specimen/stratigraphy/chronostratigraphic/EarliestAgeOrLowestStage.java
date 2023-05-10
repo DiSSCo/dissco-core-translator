@@ -15,7 +15,7 @@ public class EarliestAgeOrLowestStage extends AbstractChronoStratigraphy {
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    return super.searchABCDChronostratigraphy(unit, List.of("SubStage", "Stage"));
+    return super.searchABCDSplitTerms(unit, List.of("SubStage", "Stage"));
   }
 
   @Override

@@ -5,6 +5,7 @@ import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
 public class Island extends Term {
+
   public static final String TERM = DWC_PREFIX + "island";
   private final List<String> dwcaTerms = List.of(TERM);
 

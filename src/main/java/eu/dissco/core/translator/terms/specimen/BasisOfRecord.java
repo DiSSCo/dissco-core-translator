@@ -1,12 +1,15 @@
-package eu.dissco.core.translator.terms.specimen.stratigraphy.chronostratigraphic;
+package eu.dissco.core.translator.terms.specimen;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
-public class EarliestEraOrLowestErathem extends AbstractChronoStratigraphy {
+public class BasisOfRecord extends Term {
 
-  public static final String TERM = DWC_PREFIX + "earliestEraOrLowestErathem";
+  public static final String TERM = DWC_PREFIX + "basisOfRecord";
+
   private final List<String> dwcaTerms = List.of(TERM);
+  private final List<String> abcdTerms = List.of("abcd:recordBasis");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
@@ -15,7 +18,7 @@ public class EarliestEraOrLowestErathem extends AbstractChronoStratigraphy {
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    return super.searchABCDSplitTerms(unit, List.of("Erathem"));
+    return super.searchJsonForTerm(unit, abcdTerms);
   }
 
   @Override

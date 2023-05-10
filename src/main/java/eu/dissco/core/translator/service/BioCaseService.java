@@ -200,7 +200,7 @@ public class BioCaseService implements WebClientService {
               physicalSpecimenId,
               termMapper.retrieveFromABCD(new Type(), unitAttributes),
               harmonizeAttributes(datasets, unitAttributes, physicalSpecimenIdType, organisationId),
-              removeMultiMediaFields(unitAttributes)
+              cleanupRedundantFields(unitAttributes)
           );
           log.debug("Result digital Specimen: {}", digitalSpecimen);
           kafkaService.sendMessage("digital-specimen",
@@ -350,9 +350,10 @@ public class BioCaseService implements WebClientService {
     unitData.remove("abcd:unitExtension");
   }
 
-  private JsonNode removeMultiMediaFields(ObjectNode unitData) {
+  private JsonNode cleanupRedundantFields(ObjectNode unitData) {
     var multiMediaFields = new ArrayList<String>();
     var data = unitData.deepCopy();
+    data.remove("ods:taxonIdentificationIndex");
     data.fields().forEachRemaining(field -> {
       if (field.getKey().startsWith("abcd:multiMediaObjects")) {
         multiMediaFields.add(field.getKey());

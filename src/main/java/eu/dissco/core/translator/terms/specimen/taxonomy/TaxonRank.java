@@ -1,12 +1,12 @@
-package eu.dissco.core.translator.terms.specimen.location;
+package eu.dissco.core.translator.terms.specimen.taxonomy;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
-public class IslandGroup extends Term {
+public class TaxonRank extends AbstractTaxonomy {
 
-  public static final String TERM = DWC_PREFIX + "islandGroup";
+  public static final String TERM = DWC_PREFIX + "taxonRank";
+
   private final List<String> dwcaTerms = List.of(TERM);
 
   @Override
@@ -18,4 +18,6 @@ public class IslandGroup extends Term {
   public String getTerm() {
     return TERM;
   }
+
+
 }

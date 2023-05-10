@@ -15,7 +15,7 @@ public class LatestEraOrHighestErathem extends AbstractChronoStratigraphy {
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    return super.searchABCDChronostratigraphy(unit, List.of("Erathem"));
+    return super.searchABCDSplitTerms(unit, List.of("Erathem"));
   }
 
   @Override
