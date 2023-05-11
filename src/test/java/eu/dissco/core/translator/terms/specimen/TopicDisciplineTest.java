@@ -12,8 +12,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class CategoryTest {
-  private final Category category = new Category();
+class TopicDisciplineTest {
+  private final TopicDiscipline topicDiscipline = new TopicDiscipline();
 
   @ParameterizedTest
   @MethodSource("arguments")
@@ -24,7 +24,7 @@ class CategoryTest {
     unit.put("dwc:kingdom", kingdom);
 
     // When
-    var result = category.retrieveFromDWCA(unit);
+    var result = topicDiscipline.retrieveFromDWCA(unit);
 
     // Then
     assertThat(result).isEqualTo(expected);
@@ -33,7 +33,7 @@ class CategoryTest {
   private static Stream<Arguments> arguments() {
     return Stream.of(
         Arguments.of("FossilSpecimen", null, "Palaeontology"),
-        Arguments.of("MeteoriteSpecimen", null, "Extraterrestrial"),
+        Arguments.of("MeteoriteSpecimen", null, "Astrogeology"),
         Arguments.of("RockSpecimen", null, "Earth System"),
         Arguments.of("PreservedSpecimen", "Animalia", "Zoology"),
         Arguments.of("PreservedSpecimen", "Plantae", "Botany"),
@@ -57,7 +57,7 @@ class CategoryTest {
         kingdom);
 
     // When
-    var result = category.retrieveFromABCD(unit);
+    var result = topicDiscipline.retrieveFromABCD(unit);
 
     // Then
     assertThat(result).isEqualTo(expected);
@@ -66,9 +66,9 @@ class CategoryTest {
   @Test
   void testGetTerm() {
     // When
-    var result = category.getTerm();
+    var result = topicDiscipline.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(Category.TERM);
+    assertThat(result).isEqualTo(TopicDiscipline.TERM);
   }
 }

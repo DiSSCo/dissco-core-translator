@@ -5,9 +5,9 @@ import eu.dissco.core.translator.terms.Term;
 import eu.dissco.core.translator.terms.specimen.taxonomy.Kingdom;
 import java.util.List;
 
-public class Category extends Term {
+public class TopicDiscipline extends Term {
 
-  public static final String TERM = ODS_PREFIX + "category";
+  public static final String TERM = ODS_PREFIX + "topicDiscipline";
   private static final String UNCLASSIFIED = "Unclassified";
 
   private static final List<String> FOSSIL_BASIS_OF_RECORD = List.of("FOSSILSPECIMEN",
@@ -37,7 +37,7 @@ public class Category extends Term {
       if (FOSSIL_BASIS_OF_RECORD.contains(harBasisOfRecord)) {
         return "Palaeontology";
       } else if (EXTRATERRESTRIAL_BASIS_OF_RECORD.contains(harBasisOfRecord)) {
-        return "Extraterrestrial";
+        return "Astrogeology";
       } else if (EARTH_SYSTEM_BASIS_OF_RECORD.contains(harBasisOfRecord)){
         return "Earth System";
       } else if (kingdom != null){
