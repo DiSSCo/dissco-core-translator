@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import efg.DataSets.DataSet;
 import eu.dissco.core.translator.component.MappingComponent;
 import eu.dissco.core.translator.terms.specimen.BasisOfRecord;
+import eu.dissco.core.translator.terms.specimen.TopicDiscipline;
 import eu.dissco.core.translator.terms.specimen.CollectingNumber;
 import eu.dissco.core.translator.terms.specimen.Collector;
 import eu.dissco.core.translator.terms.specimen.DatasetId;
@@ -117,6 +118,7 @@ public class TermMapper {
     list.add(new HasMedia());
     list.add(new BasisOfRecord());
     list.add(new LivingOrPreserved());
+    list.add(new TopicDiscipline());
     list.addAll(locationTerms());
     list.addAll(stratigraphyTerms());
     list.addAll(taxonomyTerms());

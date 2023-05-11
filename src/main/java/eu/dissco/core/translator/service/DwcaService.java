@@ -382,7 +382,7 @@ public class DwcaService implements WebClientService {
 
   private void publishDigitalMediaObject(DigitalMediaObject digitalMediaObject)
       throws JsonProcessingException {
-    log.info("MultiMediaObject: {}", digitalMediaObject);
+    log.debug("MultiMediaObject: {}", digitalMediaObject);
     var digitalMediaObjectEvent = new DigitalMediaObjectEvent(enrichmentServices(true),
         digitalMediaObject);
     kafkaService.sendMessage("digital-media-object",
