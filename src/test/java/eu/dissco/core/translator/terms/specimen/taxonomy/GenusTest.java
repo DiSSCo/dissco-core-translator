@@ -26,6 +26,31 @@ class GenusTest {
   }
 
   @Test
+  void testRetrieveFromDWCAExtensionNoVerified() {
+    // Given
+    var unit = MAPPER.createObjectNode();
+    var extension = MAPPER.createObjectNode();
+    var identificationUnverified = MAPPER.createObjectNode();
+    identificationUnverified.put("dwc:genus", "Rhinopoma");
+    identificationUnverified.put("dwc:identificationVerificationStatus", "0");
+    var identificationVerified = MAPPER.createObjectNode();
+    identificationVerified.put("dwc:genus", "Rhinopoma");
+    identificationVerified.put("dwc:identificationVerificationStatus", "1");
+    var identifications = MAPPER.createArrayNode();
+    identifications.add(identificationUnverified);
+    identifications.add(identificationVerified);
+    extension.set("dwc:Identification", identifications);
+    unit.set("extensions", extension);
+    unit.put("ods:taxonIdentificationIndex", "1");
+
+    // When
+    var result = genus.retrieveFromDWCA(unit);
+
+    // Then
+    assertThat(result).isEqualTo("Rhinopoma");
+  }
+
+  @Test
   void testRetrieveFromABCD() {
     // Given
     var unit = MAPPER.createObjectNode();

@@ -2,7 +2,6 @@ package eu.dissco.core.translator.terms;
 
 
 import com.fasterxml.jackson.databind.JsonNode;
-import efg.DataSets.DataSet;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
@@ -14,11 +13,23 @@ public abstract class Term {
   protected static final String DWC_PREFIX = "dwc:";
   private static final String MESSAGE = "No specific attributes retrieve specified for field: {}";
 
-  protected String searchJsonForTerm(JsonNode attributes, List<String> originalTerms) {
+  protected String searchJsonForStringTerm(JsonNode attributes, List<String> originalTerms) {
     for (var originalTerm : originalTerms) {
       var valueNode = attributes.get(originalTerm);
       if (valueNode != null && valueNode.isTextual()) {
         return attributes.get(originalTerm).asText();
+      }
+    }
+    log.debug("Term not found in any of these search fields: {}", originalTerms);
+    return null;
+  }
+
+  protected String searchJsonForLongTerm(JsonNode attributes, List<String> originalTerms) {
+    for (var originalTerm : originalTerms) {
+      var valueNode = attributes.get(originalTerm);
+      if (valueNode != null && valueNode.isLong()) {
+        var longValue = attributes.get(originalTerm).asLong();
+        return String.valueOf(longValue);
       }
     }
     log.debug("Term not found in any of these search fields: {}", originalTerms);
@@ -49,7 +60,7 @@ public abstract class Term {
     return null;
   }
 
-  public String retrieveFromABCD(DataSet datasets) {
+  public String retrieveFromABCD(JsonNode dataset, JsonNode unit) {
     log.debug(MESSAGE, getTerm());
     return null;
   }

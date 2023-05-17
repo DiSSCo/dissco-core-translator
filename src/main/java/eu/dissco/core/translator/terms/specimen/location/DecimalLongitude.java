@@ -9,17 +9,20 @@ public class DecimalLongitude extends Term {
   public static final String TERM = DWC_PREFIX + "decimalLongitude";
 
   private final List<String> dwcaTerms = List.of(TERM);
-  private final List<String> abcdTerms = List.of(
-      "abcd:gathering/siteCoordinateSets/siteCoordinates/0/coordinatesLatLong/longitudeDecimal");
+  private final String abcdTerm = "abcd:gathering/siteCoordinateSets/siteCoordinates/0/coordinatesLatLong/longitudeDecimal";
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
-    return super.searchJsonForTerm(unit, dwcaTerms);
+    return super.searchJsonForStringTerm(unit, dwcaTerms);
   }
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    return super.searchJsonForTerm(unit, abcdTerms);
+    var longitude = unit.get(abcdTerm);
+    if (longitude != null && longitude.isDouble()) {
+      return String.valueOf(longitude.asDouble());
+    }
+    return null;
   }
 
   @Override

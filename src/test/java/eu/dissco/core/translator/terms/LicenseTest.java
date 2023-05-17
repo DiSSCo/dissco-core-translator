@@ -15,76 +15,50 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class LicenseTest {
 
-  private final License license = new License();
+  private static final String LICENSE_STRING = "https://creativecommons.org/licenses/by-nc/4.0";
 
-  private static DataSet getDataSet(String licenseString, boolean useUri) {
-    var dataset = new DataSet();
-    var metadata = new ContentMetadata();
-    var ipr = new IPRStatements();
-    var licenseElement = new Licenses();
-    var statement = new Statement();
-    if (useUri) {
-      statement.setURI(licenseString);
-    } else {
-      statement.setText(licenseString);
-    }
-    licenseElement.getLicense().add(statement);
-    ipr.setLicenses(licenseElement);
-    metadata.setIPRStatements(ipr);
-    dataset.setMetadata(metadata);
-    return dataset;
-  }
+  private final License license = new License();
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var licenseString = "https://creativecommons.org/licenses/by-nc/4.0";
     var unit = MAPPER.createObjectNode();
-    unit.put("dcterms:license", licenseString);
+    unit.put("dcterms:license", LICENSE_STRING);
 
     // When
     var result = license.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(licenseString);
+    assertThat(result).isEqualTo(LICENSE_STRING);
   }
 
   @Test
-  void testRetrieveFromABCDUri() {
+  void testRetrieveFromABCD() {
     // Given
-    var licenseString = "https://creativecommons.org/licenses/by-nc/4.0";
-    DataSet dataset = getDataSet(licenseString, true);
+    var dataset = MAPPER.createObjectNode();
+    dataset.put("abcd:metadata/iprstatements/licenses/license/0/uri", "Another License");
+    var unit = MAPPER.createObjectNode();
+    unit.put("abcd:iprstatements/licenses/license/0/uri", LICENSE_STRING);
 
     // When
-    var result = license.retrieveFromABCD(dataset);
+    var result = license.retrieveFromABCD(dataset, unit);
 
     // Then
-    assertThat(result).isEqualTo(licenseString);
+    assertThat(result).isEqualTo(LICENSE_STRING);
   }
 
   @Test
-  void testRetrieveFromABCDText() {
+  void testRetrieveFromABCDMetadata() {
     // Given
-    var licenseString = "https://creativecommons.org/licenses/by-nc/4.0";
-    DataSet dataset = getDataSet(licenseString, false);
+    var dataset = MAPPER.createObjectNode();
+    dataset.put("abcd:metadata/iprstatements/licenses/license/0/text", "Another License");
+    var unit = MAPPER.createObjectNode();
 
     // When
-    var result = license.retrieveFromABCD(dataset);
+    var result = license.retrieveFromABCD(dataset, unit);
 
     // Then
-    assertThat(result).isEqualTo(licenseString);
-  }
-
-  @Test
-  void testRetrieveFromABCDEmpty() {
-    // Given
-    DataSet dataset = new DataSet();
-
-    // When
-    var result = license.retrieveFromABCD(dataset);
-
-    // Then
-    assertThat(result).isNull();
+    assertThat(result).isEqualTo("Another License");
   }
 
   @Test

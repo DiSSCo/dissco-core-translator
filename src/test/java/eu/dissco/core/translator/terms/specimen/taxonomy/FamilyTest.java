@@ -26,6 +26,25 @@ class FamilyTest {
   }
 
   @Test
+  void testRetrieveFromDWCAExtensionNoVerified() {
+    // Given
+    var unit = MAPPER.createObjectNode();
+    var extension = MAPPER.createObjectNode();
+    var identification = MAPPER.createObjectNode();
+    identification.put("dwc:family", "Soricidae");
+    var identifications = MAPPER.createArrayNode();
+    identifications.add(identification);
+    extension.set("dwc:Identification", identifications);
+    unit.set("extensions", extension);
+
+    // When
+    var result = family.retrieveFromDWCA(unit);
+
+    // Then
+    assertThat(result).isEqualTo("Soricidae");
+  }
+
+  @Test
   void testRetrieveFromABCD() {
     // Given
     var unit = MAPPER.createObjectNode();

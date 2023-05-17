@@ -31,7 +31,7 @@ class DateCollectedTest {
   void testRetrieveFromABCD() {
     // Given
     var unit = MAPPER.createObjectNode();
-    unit.put("abcd:gathering/dateTime/isodateTimeStart", DATE);
+    unit.put("abcd:gathering/dateTime/isodateTimeBegin", DATE);
 
     // When
     var result = dateCollected.retrieveFromABCD(unit);

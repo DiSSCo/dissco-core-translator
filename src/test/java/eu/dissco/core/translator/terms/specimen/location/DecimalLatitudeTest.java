@@ -33,7 +33,7 @@ class DecimalLatitudeTest {
     var unit = MAPPER.createObjectNode();
     unit.put(
         "abcd:gathering/siteCoordinateSets/siteCoordinates/0/coordinatesLatLong/latitudeDecimal",
-        LATITUDE_STRING);
+        53.33167);
 
     // When
     var result = decimalLatitude.retrieveFromABCD(unit);

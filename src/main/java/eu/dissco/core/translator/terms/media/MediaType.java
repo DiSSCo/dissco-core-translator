@@ -17,7 +17,7 @@ public class MediaType extends Term {
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
-    var recoveredType = super.searchJsonForTerm(unit, dwcaTerms);
+    var recoveredType = super.searchJsonForStringTerm(unit, dwcaTerms);
     if (recoveredType == null) {
       var format = new Format().retrieveFromDWCA(unit);
       return checkFormat(format);

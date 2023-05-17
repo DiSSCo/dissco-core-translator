@@ -37,6 +37,7 @@ import eu.dissco.core.translator.terms.media.AccessUri;
 import eu.dissco.core.translator.terms.media.Format;
 import eu.dissco.core.translator.terms.media.MediaType;
 import eu.dissco.core.translator.terms.specimen.DwcaId;
+import eu.dissco.core.translator.terms.specimen.Modified;
 import eu.dissco.core.translator.terms.specimen.OrganisationId;
 import eu.dissco.core.translator.terms.specimen.OrganisationName;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenId;
@@ -118,7 +119,8 @@ public class BioCaseService implements WebClientService {
       try {
         finished = webClient.get().uri(uri + writer)
             .retrieve()
-            .bodyToMono(String.class).publishOn(Schedulers.boundedElastic()).map(this::mapToABCD).toFuture().get();
+            .bodyToMono(String.class).publishOn(Schedulers.boundedElastic()).map(this::mapToABCD)
+            .toFuture().get();
         if (finished) {
           log.info("Unable to get records from xml");
         }
@@ -184,9 +186,10 @@ public class BioCaseService implements WebClientService {
     }
   }
 
-  private void processUnit(DataSet datasets, Unit unit)
+  private void processUnit(DataSet dataset, Unit unit)
       throws JsonProcessingException, DisscoEfgParsingException {
     var unitAttributes = parseToJson(unit);
+    var datasetAttribute = getData(mapper.valueToTree(dataset));
     if (isAcceptedBasisOfRecord(unit)) {
       var organisationId = termMapper.retrieveFromABCD(new OrganisationId(), unitAttributes);
       var physicalSpecimenIdType = termMapper.retrieveFromABCD(new PhysicalSpecimenIdType(),
@@ -199,7 +202,8 @@ public class BioCaseService implements WebClientService {
           var digitalSpecimen = new DigitalSpecimen(
               physicalSpecimenId,
               termMapper.retrieveFromABCD(new Type(), unitAttributes),
-              harmonizeAttributes(datasets, unitAttributes, physicalSpecimenIdType, organisationId),
+              harmonizeAttributes(datasetAttribute, unitAttributes, physicalSpecimenIdType,
+                  organisationId),
               cleanupRedundantFields(unitAttributes)
           );
           log.debug("Result digital Specimen: {}", digitalSpecimen);
@@ -227,7 +231,7 @@ public class BioCaseService implements WebClientService {
     return unitData;
   }
 
-  private JsonNode harmonizeAttributes(DataSet datasets, ObjectNode unitAttributes,
+  private JsonNode harmonizeAttributes(ObjectNode datasetAttributes, ObjectNode unitAttributes,
       String physicalSpecimenIdType, String organisationId) throws OrganisationNotRorId {
     var attributes = mapper.createObjectNode();
     attributes.put(PhysicalSpecimenIdType.TERM, physicalSpecimenIdType);
@@ -236,7 +240,10 @@ public class BioCaseService implements WebClientService {
         rorComponent.getRoRId(minifyOrganisationId(organisationId)));
     attributes.put(SourceSystemId.TERM, webClientProperties.getSourceSystemId());
     attributes.put(DwcaId.TERM, (String) null);
-    attributes.put(License.TERM, termMapper.retrieveFromABCD(new License(), datasets));
+    attributes.put(License.TERM,
+        termMapper.retrieveFromABCD(new License(), datasetAttributes, unitAttributes));
+    attributes.put(Modified.TERM,
+        termMapper.retrieveFromABCD(new Modified(), datasetAttributes, unitAttributes));
     for (Term term : abcdHarmonisedTerms()) {
       attributes.put(term.getTerm(), termMapper.retrieveFromABCD(term, unitAttributes));
     }

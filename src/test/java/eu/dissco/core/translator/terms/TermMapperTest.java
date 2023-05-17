@@ -121,17 +121,17 @@ class TermMapperTest {
     then(physicalSpecimenCollection).should().retrieveFromABCD(attributes);
   }
 
-  @Test
-  void testRetrieveFromABCDNoMappingHeader() {
-    // Given
-    var physicalSpecimenCollection = mock(PhysicalSpecimenCollection.class);
-    var dataset = mock(DataSet.class);
-
-    // When
-    termMapper.retrieveFromABCD(physicalSpecimenCollection, dataset);
-
-    // Then
-    then(physicalSpecimenCollection).should().retrieveFromABCD(dataset);
-  }
+//  @Test
+//  void testRetrieveFromABCDNoMappingHeader() {
+//    // Given
+//    var physicalSpecimenCollection = mock(PhysicalSpecimenCollection.class);
+//    var dataset = mock(DataSet.class);
+//
+//    // When
+//    termMapper.retrieveFromABCD(physicalSpecimenCollection, dataset);
+//
+//    // Then
+//    then(physicalSpecimenCollection).should().retrieveFromABCD(dataset);
+//  }
 
 }
