@@ -11,10 +11,10 @@ import org.apache.commons.lang3.tuple.Triple;
 public abstract class AbstractTaxonomy extends Term {
 
   protected static final String IDENTIFICATION = "abcd:identifications/identification/";
-  private static final String IDENTIFICATION_INDEX = "ods:taxonIdentificationIndex";
   protected static final String EXTENSIONS = "extensions";
   protected static final String IDENTIFICATION_EXTENSION = "dwc:Identification";
   protected static final String IDENTIFICATION_VERIFICATION_STATUS = "dwc:identificationVerificationStatus";
+  private static final String IDENTIFICATION_INDEX = "ods:taxonIdentificationIndex";
   private static final Triple<String, String, String> ABCD_TAXON_RANK =
       Triple.of(
           IDENTIFICATION,
@@ -43,6 +43,7 @@ public abstract class AbstractTaxonomy extends Term {
     }
     return null;
   }
+
   private Optional<String> determineIdentificationIndexDWCA(JsonNode unit) {
     if (unit.get(EXTENSIONS) != null
         && unit.get(EXTENSIONS).get(IDENTIFICATION_EXTENSION) != null) {

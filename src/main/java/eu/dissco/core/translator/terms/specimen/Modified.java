@@ -19,13 +19,13 @@ public class Modified extends Term {
   @Override
   public String retrieveFromABCD(JsonNode dataset, JsonNode unit) {
     var modified = searchJsonForStringTerm(unit, abcdUnitTerms);
-    if (modified == null){
+    if (modified == null) {
       modified = searchJsonForLongTerm(unit, abcdUnitTerms);
     }
-    if (modified == null){
+    if (modified == null) {
       modified = searchJsonForStringTerm(dataset, abcdMetaTerms);
     }
-    if (modified == null){
+    if (modified == null) {
       modified = searchJsonForLongTerm(dataset, abcdMetaTerms);
     }
     return modified;

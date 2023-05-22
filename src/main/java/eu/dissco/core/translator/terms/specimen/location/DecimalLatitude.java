@@ -7,9 +7,8 @@ import java.util.List;
 public class DecimalLatitude extends Term {
 
   public static final String TERM = DWC_PREFIX + "decimalLatitude";
-
+  private static final String ABCD_TERM = "abcd:gathering/siteCoordinateSets/siteCoordinates/0/coordinatesLatLong/latitudeDecimal";
   private final List<String> dwcaTerms = List.of(TERM);
-  private final String abcdTerm = "abcd:gathering/siteCoordinateSets/siteCoordinates/0/coordinatesLatLong/latitudeDecimal";
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
@@ -18,7 +17,7 @@ public class DecimalLatitude extends Term {
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    var latitude = unit.get(abcdTerm);
+    var latitude = unit.get(ABCD_TERM);
     if (latitude != null && latitude.isDouble()) {
       return String.valueOf(latitude.asDouble());
     }

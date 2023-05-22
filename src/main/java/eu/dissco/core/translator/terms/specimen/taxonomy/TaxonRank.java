@@ -14,12 +14,8 @@ public class TaxonRank extends AbstractTaxonomy {
     return super.getTaxonFromDWCA(unit, dwcaTerms);
   }
 
-
-
   @Override
   public String getTerm() {
     return TERM;
   }
-
-
 }
