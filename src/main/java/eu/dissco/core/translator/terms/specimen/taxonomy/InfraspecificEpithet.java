@@ -12,7 +12,7 @@ public class InfraspecificEpithet extends AbstractTaxonomy {
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
-    return super.searchJsonForTerm(unit, dwcaTerms);
+    return super.getTaxonFromDWCA(unit, dwcaTerms);
   }
 
   @Override

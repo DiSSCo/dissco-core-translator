@@ -1,10 +1,9 @@
-package eu.dissco.core.translator.terms.specimen;
+package eu.dissco.core.translator.terms.specimen.taxonomy;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
-public class TypeStatus extends Term {
+public class TypeStatus extends AbstractTaxonomy {
 
   public static final String TERM = DWC_PREFIX + "typeStatus";
 
@@ -20,19 +19,7 @@ public class TypeStatus extends Term {
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
-    var result = super.searchJsonForTerm(unit, dwcaTerms);
-    if (result != null) {
-      return result;
-    } else {
-      var extensions = unit.get("extensions");
-      if (extensions != null) {
-        var identification = extensions.get("dwc:Identification");
-        if (identification != null && identification.size() == 1) {
-          return searchJsonForTerm(identification.get(0), dwcaTerms);
-        }
-      }
-    }
-    return null;
+    return super.getTaxonFromDWCA(unit, dwcaTerms);
   }
 
   @Override

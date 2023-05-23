@@ -11,24 +11,27 @@ public class SpecimenName extends AbstractTaxonomy {
   public static final String TERM = ODS_PREFIX + "specimenName";
   private final List<String> dwcaTerms = List.of("dwc:scientificName");
   private final List<Pair<String, String>> abcdTerms = List.of(
-      Pair.of("abcd:identifications/identification/",
-          "/result/taxonIdentified/scientificName/fullScientificNameString"),
+      Pair.of(IDENTIFICATION, "/result/taxonIdentified/scientificName/fullScientificNameString"),
       Pair.of("abcd-efg:identifications/identification/",
-          "/result/mineralRockIdentified/classifiedName/fullScientificNameString")
+          "/result/mineralRockIdentified/classifiedName/fullScientificNameString"),
+      Pair.of(IDENTIFICATION, "result/taxonIdentified/informalNameString"),
+      Pair.of(IDENTIFICATION,
+          "result/taxonIdentified/scientificName/nameAtomised/zoological/namedIndividual")
   );
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
-    return super.searchJsonForTerm(unit, dwcaTerms);
+    return super.getTaxonFromDWCA(unit, dwcaTerms);
   }
+
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    var identificationIndex = getIdentificationIndex(unit);
+    var identificationIndex = getIdentificationIndexABCD(unit);
     var terms = abcdTerms.stream()
         .map(abcdTerm -> getStringAtIndex(abcdTerm, Integer.parseInt(identificationIndex)))
         .toList();
-    return searchJsonForTerm(unit, terms);
+    return searchJsonForStringTerm(unit, terms);
   }
 
   @Override

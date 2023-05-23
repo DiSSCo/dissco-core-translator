@@ -1,10 +1,8 @@
 package eu.dissco.core.translator.terms;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import efg.DataSets.DataSet;
 import eu.dissco.core.translator.component.MappingComponent;
 import eu.dissco.core.translator.terms.specimen.BasisOfRecord;
-import eu.dissco.core.translator.terms.specimen.TopicDiscipline;
 import eu.dissco.core.translator.terms.specimen.CollectingNumber;
 import eu.dissco.core.translator.terms.specimen.Collector;
 import eu.dissco.core.translator.terms.specimen.DatasetId;
@@ -14,7 +12,7 @@ import eu.dissco.core.translator.terms.specimen.LivingOrPreserved;
 import eu.dissco.core.translator.terms.specimen.Modified;
 import eu.dissco.core.translator.terms.specimen.ObjectType;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenCollection;
-import eu.dissco.core.translator.terms.specimen.TypeStatus;
+import eu.dissco.core.translator.terms.specimen.TopicDiscipline;
 import eu.dissco.core.translator.terms.specimen.location.Continent;
 import eu.dissco.core.translator.terms.specimen.location.Country;
 import eu.dissco.core.translator.terms.specimen.location.CountryCode;
@@ -54,6 +52,7 @@ import eu.dissco.core.translator.terms.specimen.taxonomy.ScientificNameAuthorshi
 import eu.dissco.core.translator.terms.specimen.taxonomy.SpecificEpithet;
 import eu.dissco.core.translator.terms.specimen.taxonomy.SpecimenName;
 import eu.dissco.core.translator.terms.specimen.taxonomy.TaxonRank;
+import eu.dissco.core.translator.terms.specimen.taxonomy.TypeStatus;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -110,7 +109,6 @@ public class TermMapper {
     list.add(new PhysicalSpecimenCollection());
     list.add(new DatasetId());
     list.add(new ObjectType());
-    list.add(new Modified());
     list.add(new DateCollected());
     list.add(new CollectingNumber());
     list.add(new Collector());
@@ -148,6 +146,7 @@ public class TermMapper {
   public static List<Term> dwcaHarmonisedTerms() {
     var terms = harmonisedTerms();
     terms.add(new License());
+    terms.add(new Modified());
     return terms;
   }
 
@@ -177,7 +176,7 @@ public class TermMapper {
     return term.retrieveFromABCD(unit);
   }
 
-  public String retrieveFromABCD(Term term, DataSet datasets) {
-    return term.retrieveFromABCD(datasets);
+  public String retrieveFromABCD(Term term, JsonNode dataset, JsonNode unit) {
+    return term.retrieveFromABCD(dataset, unit);
   }
 }

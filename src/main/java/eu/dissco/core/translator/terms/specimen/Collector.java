@@ -16,7 +16,7 @@ public class Collector extends Term {
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
-    return super.searchJsonForTerm(unit, dwcaTerms);
+    return super.searchJsonForStringTerm(unit, dwcaTerms);
   }
 
   @Override

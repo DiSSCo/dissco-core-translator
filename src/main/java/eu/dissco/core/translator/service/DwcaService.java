@@ -236,12 +236,13 @@ public class DwcaService implements WebClientService {
         getPhysicalSpecimenId(physicalSpecimenIdType, organisationId, physicalSpecimenId),
         termMapper.retrieveFromDWCA(new Type(), fullRecord),
         harmonizeSpecimenAttributes(physicalSpecimenIdType, organisationId, fullRecord),
-        removeMedia(fullRecord)
+        cleanupRedundantFields(fullRecord)
     );
   }
 
-  private JsonNode removeMedia(JsonNode fullRecord) {
-    var originalData = fullRecord.deepCopy();
+  private JsonNode cleanupRedundantFields(JsonNode fullRecord) {
+    var originalData = (ObjectNode) fullRecord.deepCopy();
+    originalData.remove("ods:taxonIdentificationIndex");
     ObjectNode extensions = (ObjectNode) originalData.get(EXTENSIONS);
     if (extensions != null){
       extensions.remove(List.of(GBIF_MULTIMEDIA, AC_MULTIMEDIA));

@@ -6,7 +6,6 @@ import eu.dissco.core.translator.repository.MappingRepository;
 import jakarta.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

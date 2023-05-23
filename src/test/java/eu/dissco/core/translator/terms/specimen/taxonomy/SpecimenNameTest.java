@@ -27,6 +27,50 @@ class SpecimenNameTest {
   }
 
   @Test
+  void testRetrieveFromDWCAExtension() {
+    // Given
+    var unit = MAPPER.createObjectNode();
+    var extension = MAPPER.createObjectNode();
+    var identificationUnverified = MAPPER.createObjectNode();
+    identificationUnverified.put("dwc:scientificName", "SpecimenNameUnVerified");
+    identificationUnverified.put("dwc:identificationVerificationStatus", "0");
+    var identificationVerified = MAPPER.createObjectNode();
+    identificationVerified.put("dwc:scientificName", "SpecimenNameVerified");
+    identificationVerified.put("dwc:identificationVerificationStatus", "1");
+    var identifications = MAPPER.createArrayNode();
+    identifications.add(identificationVerified);
+    identifications.add(identificationUnverified);
+    extension.set("dwc:Identification", identifications);
+    unit.set("extensions", extension);
+
+    // When
+    var result = specimenName.retrieveFromDWCA(unit);
+
+    // Then
+    assertThat(result).isEqualTo("SpecimenNameVerified");
+  }
+
+  @Test
+  void testRetrieveFromDWCAExtensionNoVerified() {
+    // Given
+    var unit = MAPPER.createObjectNode();
+    var extension = MAPPER.createObjectNode();
+    var identificationUnverified = MAPPER.createObjectNode();
+    identificationUnverified.put("dwc:scientificName", "SpecimenNameUnVerified");
+    identificationUnverified.put("dwc:identificationVerificationStatus", "0");
+    var identifications = MAPPER.createArrayNode();
+    identifications.add(identificationUnverified);
+    extension.set("dwc:Identification", identifications);
+    unit.set("extensions", extension);
+
+    // When
+    var result = specimenName.retrieveFromDWCA(unit);
+
+    // Then
+    assertThat(result).isNull();
+  }
+
+  @Test
   void testRetrieveFromABCDEFG() {
     // Given
     var specimenNameString = "SpecimenName";

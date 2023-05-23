@@ -10,7 +10,10 @@ import org.apache.commons.lang3.tuple.Triple;
 
 public abstract class AbstractTaxonomy extends Term {
 
-  private static final String IDENTIFICATION = "abcd:identifications/identification/";
+  protected static final String IDENTIFICATION = "abcd:identifications/identification/";
+  protected static final String EXTENSIONS = "extensions";
+  protected static final String IDENTIFICATION_EXTENSION = "dwc:Identification";
+  protected static final String IDENTIFICATION_VERIFICATION_STATUS = "dwc:identificationVerificationStatus";
   private static final String IDENTIFICATION_INDEX = "ods:taxonIdentificationIndex";
   private static final Triple<String, String, String> ABCD_TAXON_RANK =
       Triple.of(
@@ -25,18 +28,67 @@ public abstract class AbstractTaxonomy extends Term {
   private static final Pair<String, String> abcdPreferredFlag = Pair.of(IDENTIFICATION,
       "/preferredFlag");
 
+  protected String getTaxonFromDWCA(JsonNode unit, List<String> dwcaTerms) {
+    var result = super.searchJsonForStringTerm(unit, dwcaTerms);
+    if (result != null) {
+      return result;
+    } else if (unit.get(EXTENSIONS) != null
+        && unit.get(EXTENSIONS).get(IDENTIFICATION_EXTENSION) != null) {
+      var identificationIndex = getIdentificationIndexDWCA(unit);
+      if (identificationIndex != null) {
+        return searchJsonForStringTerm(
+            unit.get(EXTENSIONS).get(IDENTIFICATION_EXTENSION)
+                .get(Integer.parseInt(identificationIndex)), dwcaTerms);
+      }
+    }
+    return null;
+  }
 
-  protected String getIdentificationIndex(JsonNode unit) {
+  private Optional<String> determineIdentificationIndexDWCA(JsonNode unit) {
+    if (unit.get(EXTENSIONS) != null
+        && unit.get(EXTENSIONS).get(IDENTIFICATION_EXTENSION) != null) {
+      var identifications = unit.get(EXTENSIONS).get(IDENTIFICATION_EXTENSION);
+      for (int i = 0; i < identifications.size(); i++) {
+        var identification = identifications.get(i);
+        if (identification.get(IDENTIFICATION_VERIFICATION_STATUS) == null) {
+          return Optional.of(String.valueOf(i));
+        } else {
+          var verificationStatus = identification.get(IDENTIFICATION_VERIFICATION_STATUS)
+              .asText();
+          if (verificationStatus.equals("1")) {
+            return Optional.of(String.valueOf(i));
+          }
+        }
+      }
+    }
+    return Optional.empty();
+  }
+
+  protected String getIdentificationIndexDWCA(JsonNode unit) {
     if (unit.get(IDENTIFICATION_INDEX) != null) {
       return unit.get(IDENTIFICATION_INDEX).asText();
     } else {
-      var identificationIndex = determineIdentificationIndex(unit);
+      var optionalIndex = determineIdentificationIndexDWCA(unit);
+      if (optionalIndex.isPresent()) {
+        ((ObjectNode) unit).put(IDENTIFICATION_INDEX, optionalIndex.get());
+        return optionalIndex.get();
+      } else {
+        return null;
+      }
+    }
+  }
+
+  protected String getIdentificationIndexABCD(JsonNode unit) {
+    if (unit.get(IDENTIFICATION_INDEX) != null) {
+      return unit.get(IDENTIFICATION_INDEX).asText();
+    } else {
+      var identificationIndex = determineIdentificationIndexABCD(unit);
       ((ObjectNode) unit).put(IDENTIFICATION_INDEX, identificationIndex);
       return identificationIndex;
     }
   }
 
-  private String determineIdentificationIndex(JsonNode unit) {
+  private String determineIdentificationIndexABCD(JsonNode unit) {
     var numberFound = 0;
     while (true) {
       if (unit.get(getStringAtIndex(abcdPreferredFlag, numberFound)) != null) {
@@ -53,7 +105,7 @@ public abstract class AbstractTaxonomy extends Term {
   }
 
   protected String searchABCDSplitTerms(JsonNode unit, List<String> searchTerms) {
-    var identificationIndex = getIdentificationIndex(unit);
+    var identificationIndex = getIdentificationIndexABCD(unit);
     return searchABCDSplitTerms(unit, searchTerms,
         Pair.of(ABCD_TAXON_RANK.getLeft() + identificationIndex + ABCD_TAXON_RANK.getMiddle(),
             ABCD_TAXON_RANK.getRight()),
@@ -62,10 +114,10 @@ public abstract class AbstractTaxonomy extends Term {
   }
 
   protected String searchABCDTerms(JsonNode unit, List<String> searchTerms) {
-    var identificationIndex = getIdentificationIndex(unit);
+    var identificationIndex = getIdentificationIndexABCD(unit);
     var terms = searchTerms.stream().map(
         term -> IDENTIFICATION + identificationIndex + "/result/taxonIdentified" + term).toList();
-    return searchJsonForTerm(unit, terms);
+    return searchJsonForStringTerm(unit, terms);
   }
 
   protected String getStringAtIndex(Pair<String, String> string, int numberFound) {

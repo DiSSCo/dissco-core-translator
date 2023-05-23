@@ -9,17 +9,17 @@ public class DateCollected extends Term {
   public static final String TERM = ODS_PREFIX + "dateCollected";
 
   private final List<String> dwcaTerms = List.of("dwc:eventDate");
-  private final List<String> abcdTerms = List.of("abcd:gathering/dateTime/isodateTimeStart",
+  private final List<String> abcdTerms = List.of("abcd:gathering/dateTime/isodateTimeBegin",
       "abcd:gathering/dateTime/isodateTimeEnd", "abcd:gathering/dateTime/dateText");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
-    return super.searchJsonForTerm(unit, dwcaTerms);
+    return super.searchJsonForStringTerm(unit, dwcaTerms);
   }
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    return super.searchJsonForTerm(unit, abcdTerms);
+    return super.searchJsonForStringTerm(unit, abcdTerms);
   }
 
   @Override

@@ -33,7 +33,7 @@ class DecimalLongitudeTest {
     var unit = MAPPER.createObjectNode();
     unit.put(
         "abcd:gathering/siteCoordinateSets/siteCoordinates/0/coordinatesLatLong/longitudeDecimal",
-        LONGITUDE_STRING);
+        10.48778);
 
     // When
     var result = decimalLongitude.retrieveFromABCD(unit);
