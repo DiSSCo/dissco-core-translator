@@ -1,6 +1,6 @@
 package eu.dissco.core.translator.repository;
 
-import static eu.dissco.core.translator.database.jooq.Tables.NEW_SOURCE_SYSTEM;
+import static eu.dissco.core.translator.database.jooq.Tables.SOURCE_SYSTEM;
 
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
@@ -14,9 +14,9 @@ public class SourceSystemRepository {
   private final DSLContext context;
 
   public String getEndpoint(String sourceSystemId) {
-    return context.select(NEW_SOURCE_SYSTEM.ENDPOINT)
-        .from(NEW_SOURCE_SYSTEM)
-        .where(NEW_SOURCE_SYSTEM.ID.eq(sourceSystemId))
+    return context.select(SOURCE_SYSTEM.ENDPOINT)
+        .from(SOURCE_SYSTEM)
+        .where(SOURCE_SYSTEM.ID.eq(sourceSystemId))
         .fetchOne(Record1::value1);
   }
 }
