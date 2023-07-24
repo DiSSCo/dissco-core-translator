@@ -4,10 +4,12 @@
 package eu.dissco.core.translator.database.jooq;
 
 
-import eu.dissco.core.translator.database.jooq.tables.NewMapping;
-import eu.dissco.core.translator.database.jooq.tables.NewSourceSystem;
+import eu.dissco.core.translator.database.jooq.tables.Mapping;
+import eu.dissco.core.translator.database.jooq.tables.SourceSystem;
+
 import java.util.Arrays;
 import java.util.List;
+
 import org.jooq.Catalog;
 import org.jooq.Table;
 import org.jooq.impl.SchemaImpl;
@@ -27,14 +29,14 @@ public class Public extends SchemaImpl {
     public static final Public PUBLIC = new Public();
 
     /**
-     * The table <code>public.new_mapping</code>.
+     * The table <code>public.mapping</code>.
      */
-    public final NewMapping NEW_MAPPING = NewMapping.NEW_MAPPING;
+    public final Mapping MAPPING = Mapping.MAPPING;
 
     /**
-     * The table <code>public.new_source_system</code>.
+     * The table <code>public.source_system</code>.
      */
-    public final NewSourceSystem NEW_SOURCE_SYSTEM = NewSourceSystem.NEW_SOURCE_SYSTEM;
+    public final SourceSystem SOURCE_SYSTEM = SourceSystem.SOURCE_SYSTEM;
 
     /**
      * No further instances allowed
@@ -51,8 +53,9 @@ public class Public extends SchemaImpl {
 
     @Override
     public final List<Table<?>> getTables() {
-        return Arrays.<Table<?>>asList(
-            NewMapping.NEW_MAPPING,
-            NewSourceSystem.NEW_SOURCE_SYSTEM);
+        return Arrays.asList(
+            Mapping.MAPPING,
+            SourceSystem.SOURCE_SYSTEM
+        );
     }
 }

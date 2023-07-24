@@ -1,7 +1,7 @@
 package eu.dissco.core.translator.repository;
 
-import static eu.dissco.core.translator.database.jooq.Tables.NEW_MAPPING;
-import static eu.dissco.core.translator.database.jooq.Tables.NEW_SOURCE_SYSTEM;
+import static eu.dissco.core.translator.database.jooq.Tables.MAPPING;
+import static eu.dissco.core.translator.database.jooq.Tables.SOURCE_SYSTEM;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -24,13 +24,13 @@ public class MappingRepository {
 
   public JsonNode retrieveMapping(String sourceSystemId) throws DisscoRepositoryException {
     try {
-      return context.select(NEW_MAPPING.MAPPING)
-          .distinctOn(NEW_MAPPING.ID)
-          .from(NEW_MAPPING)
-          .join(NEW_SOURCE_SYSTEM)
-          .on(NEW_SOURCE_SYSTEM.MAPPING_ID.eq(NEW_MAPPING.ID))
-          .where(NEW_SOURCE_SYSTEM.ID.eq(sourceSystemId))
-          .orderBy(NEW_MAPPING.ID, NEW_MAPPING.VERSION.desc())
+      return context.select(MAPPING.MAPPING_)
+          .distinctOn(MAPPING.ID)
+          .from(MAPPING)
+          .join(SOURCE_SYSTEM)
+          .on(SOURCE_SYSTEM.MAPPING_ID.eq(MAPPING.ID))
+          .where(SOURCE_SYSTEM.ID.eq(sourceSystemId))
+          .orderBy(MAPPING.ID, MAPPING.VERSION.desc())
           .fetchOne(this::mapToJson);
     } catch (
         DataAccessException ex) {

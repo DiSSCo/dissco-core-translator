@@ -1,0 +1,53 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: dwca-qdf-v40-810-translator-service
+spec:
+  backoffLimit: 2
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: dwca-qdf-v40-810-translator-service
+          image: public.ecr.aws/dissco/dissco-core-translator
+          resources:
+            requests:
+              memory: 2G
+            limits:
+              memory: 2G
+          env:
+            - name: spring.profiles.active
+              value: dwca
+            - name: webclient.sourceSystemId
+              value: 20.5000.1025/QDF-V40-810
+            - name: dwca.download-file
+              value: /temp/darwin.zip
+            - name: dwca.temp-folder
+              value: /temp/darwin
+            - name: kafka.host
+              value: kafka-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092
+            - name: kafka.topic
+              value: digital-specimen
+            - name: spring.datasource.url
+              value: jdbc:postgresql://database-1.cbppwfnjypll.eu-west-2.rds.amazonaws.com/dissco
+            - name: spring.datasource.username
+              valueFrom:
+                secretKeyRef:
+                  name: db-user-pass
+                  key: username
+            - name: spring.datasource.password
+              valueFrom:
+                secretKeyRef:
+                  name: db-user-pass
+                  key: password
+            - name: JAVA_OPTS
+              value: -server -XX:+useContainerSupport -XX:MaxRAMPercentage=75 --illegal-access=deny
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+          volumeMounts:
+            - mountPath: /temp
+              name: temp-volume
+      volumes:
+        - name: temp-volume
+          emptyDir: { }
