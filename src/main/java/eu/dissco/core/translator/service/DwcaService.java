@@ -1,37 +1,32 @@
 package eu.dissco.core.translator.service;
 
 import static eu.dissco.core.translator.service.IngestionUtility.getPhysicalSpecimenId;
-import static eu.dissco.core.translator.service.IngestionUtility.minifyOrganisationId;
-import static eu.dissco.core.translator.terms.TermMapper.dwcaHarmonisedTerms;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import eu.dissco.core.translator.Profiles;
-import eu.dissco.core.translator.component.RorComponent;
 import eu.dissco.core.translator.domain.DigitalMediaObject;
 import eu.dissco.core.translator.domain.DigitalMediaObjectEvent;
 import eu.dissco.core.translator.domain.DigitalSpecimen;
 import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
 import eu.dissco.core.translator.domain.Enrichment;
 import eu.dissco.core.translator.exception.DiSSCoDataException;
-import eu.dissco.core.translator.exception.OrganisationNotRorId;
 import eu.dissco.core.translator.properties.DwcaProperties;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.DwcaRepository;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
+import eu.dissco.core.translator.schema.DigitalSpecimen.OdsPhysicalSpecimenIdType;
+import eu.dissco.core.translator.terms.DigitalSpecimenDirector;
 import eu.dissco.core.translator.terms.License;
 import eu.dissco.core.translator.terms.SourceSystemId;
-import eu.dissco.core.translator.terms.Term;
 import eu.dissco.core.translator.terms.TermMapper;
 import eu.dissco.core.translator.terms.media.AccessUri;
 import eu.dissco.core.translator.terms.media.Format;
 import eu.dissco.core.translator.terms.media.MediaType;
-import eu.dissco.core.translator.terms.specimen.DwcaId;
 import eu.dissco.core.translator.terms.specimen.OrganisationId;
-import eu.dissco.core.translator.terms.specimen.OrganisationName;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenId;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenIdType;
 import eu.dissco.core.translator.terms.specimen.Type;
@@ -84,7 +79,7 @@ public class DwcaService implements WebClientService {
   private final EnrichmentProperties enrichmentProperties;
   private final SourceSystemRepository repository;
   private final DwcaRepository dwcaRepository;
-  private final RorComponent rorComponent;
+  private final DigitalSpecimenDirector digitalSpecimenDirector;
   private final List<String> allowedBasisOfRecord = List.of("PRESERVEDSPECIMEN", "FOSSIL", "OTHER",
       "ROCK", "MINERAL", "METEORITE", "FOSSILSPECIMEN", "LIVINGSPECIMEN", "MATERIALSAMPLE");
 
@@ -231,38 +226,41 @@ public class DwcaService implements WebClientService {
     var physicalSpecimenIdType = termMapper.retrieveFromDWCA(new PhysicalSpecimenIdType(),
         fullRecord);
     var organisationId = termMapper.retrieveFromDWCA(new OrganisationId(), fullRecord);
-    var physicalSpecimenId = termMapper.retrieveFromDWCA(new PhysicalSpecimenId(), fullRecord);
+    var physicalSpecimenId = getPhysicalSpecimenId(physicalSpecimenIdType, organisationId,
+        termMapper.retrieveFromDWCA(new PhysicalSpecimenId(), fullRecord));
+    var ds = new eu.dissco.core.translator.schema.DigitalSpecimen()
+        .withOdsPhysicalSpecimenIdType(convertToPhysicalSpecimenIdTypeEnum(physicalSpecimenIdType))
+        .withDwcInstitutionId(organisationId)
+        .withOdsPhysicalSpecimenId(physicalSpecimenId)
+        .withOdsSourceSystem(webClientProperties.getSourceSystemId());
     return new DigitalSpecimen(
-        getPhysicalSpecimenId(physicalSpecimenIdType, organisationId, physicalSpecimenId),
+        physicalSpecimenId,
         termMapper.retrieveFromDWCA(new Type(), fullRecord),
-        harmonizeSpecimenAttributes(physicalSpecimenIdType, organisationId, fullRecord),
+        digitalSpecimenDirector.constructDigitalSpecimen(ds, true, fullRecord),
         cleanupRedundantFields(fullRecord)
     );
   }
+
 
   private JsonNode cleanupRedundantFields(JsonNode fullRecord) {
     var originalData = (ObjectNode) fullRecord.deepCopy();
     originalData.remove("ods:taxonIdentificationIndex");
     ObjectNode extensions = (ObjectNode) originalData.get(EXTENSIONS);
-    if (extensions != null){
+    if (extensions != null) {
       extensions.remove(List.of(GBIF_MULTIMEDIA, AC_MULTIMEDIA));
     }
     return originalData;
   }
 
-
-  private JsonNode harmonizeSpecimenAttributes(String physicalSpecimenIdType,
-      String organisationId, JsonNode fullRecord) throws OrganisationNotRorId {
-    var attributes = mapper.createObjectNode();
-    attributes.put(PhysicalSpecimenIdType.TERM, physicalSpecimenIdType);
-    attributes.put(OrganisationId.TERM, organisationId);
-    attributes.put(OrganisationName.TERM, rorComponent.getRoRId(minifyOrganisationId(organisationId)));
-    attributes.put(SourceSystemId.TERM, webClientProperties.getSourceSystemId());
-    attributes.put(DwcaId.TERM, fullRecord.get(DwcaTerm.ID.prefixedName()).asText());
-    for (Term term : dwcaHarmonisedTerms()) {
-      attributes.put(term.getTerm(), termMapper.retrieveFromDWCA(term, fullRecord));
+  private eu.dissco.core.translator.schema.DigitalSpecimen.OdsPhysicalSpecimenIdType convertToPhysicalSpecimenIdTypeEnum(
+      String physicalSpecimenIdType) {
+    if (physicalSpecimenIdType.equals("cetaf") || physicalSpecimenIdType.equals("global")) {
+      return OdsPhysicalSpecimenIdType.GLOBAL;
+    } else if (physicalSpecimenIdType.equals("resolvable")) {
+      return OdsPhysicalSpecimenIdType.RESOLVABLE;
+    } else {
+      return OdsPhysicalSpecimenIdType.LOCAL;
     }
-    return attributes;
   }
 
   private boolean recordNeedsToBeIgnored(JsonNode fullRecord, String recordId) {

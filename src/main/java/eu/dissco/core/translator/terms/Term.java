@@ -2,6 +2,7 @@ package eu.dissco.core.translator.terms;
 
 
 import com.fasterxml.jackson.databind.JsonNode;
+import eu.dissco.core.translator.schema.DigitalSpecimen;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
@@ -68,6 +69,11 @@ public abstract class Term {
   public String retrieveFromDWCA(JsonNode unit) {
     log.debug(MESSAGE, getTerm());
     return null;
+  }
+
+  public DigitalSpecimen retrieveFromDWCANew(DigitalSpecimen ds, JsonNode unit) {
+    log.debug(MESSAGE, getTerm());
+    return ds;
   }
 
   protected String searchABCDSplitTerms(JsonNode unit, List<String> searchTerms,

@@ -12,7 +12,7 @@ public record DigitalSpecimen(
     @JsonProperty(Type.TERM)
     String type,
     @JsonProperty("ods:attributes")
-    JsonNode attributes,
+    eu.dissco.core.translator.schema.DigitalSpecimen attributes,
     @JsonProperty("ods:originalAttributes")
     JsonNode originalAttributes) {
 

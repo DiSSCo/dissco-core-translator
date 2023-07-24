@@ -4,8 +4,8 @@
 package eu.dissco.core.translator.database.jooq;
 
 
-import eu.dissco.core.translator.database.jooq.tables.NewMapping;
-import eu.dissco.core.translator.database.jooq.tables.NewSourceSystem;
+import eu.dissco.core.translator.database.jooq.tables.Mapping;
+import eu.dissco.core.translator.database.jooq.tables.SourceSystem;
 
 
 /**
@@ -15,12 +15,12 @@ import eu.dissco.core.translator.database.jooq.tables.NewSourceSystem;
 public class Tables {
 
     /**
-     * The table <code>public.new_mapping</code>.
+     * The table <code>public.mapping</code>.
      */
-    public static final NewMapping NEW_MAPPING = NewMapping.NEW_MAPPING;
+    public static final Mapping MAPPING = Mapping.MAPPING;
 
     /**
-     * The table <code>public.new_source_system</code>.
+     * The table <code>public.source_system</code>.
      */
-    public static final NewSourceSystem NEW_SOURCE_SYSTEM = NewSourceSystem.NEW_SOURCE_SYSTEM;
+    public static final SourceSystem SOURCE_SYSTEM = SourceSystem.SOURCE_SYSTEM;
 }

@@ -8,7 +8,7 @@ public class CollectingNumber extends Term {
 
   public static final String TERM = ODS_PREFIX + "collectingNumber";
 
-  private final List<String> dwcaTerms = List.of("dwc:recordNumber");
+  private final List<String> dwcaTerms = List.of("dwc:recordNumber", "dwc:fieldNumber");
   private final List<String> abcdTerms = List.of("abcd:collectorsFieldNumber",
       "abcd:gathering/code");
 

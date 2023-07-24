@@ -24,7 +24,7 @@ public class IngestionUtility {
     }
   }
 
-  protected static String minifyOrganisationId(String organisationId) throws OrganisationNotRorId {
+  public static String minifyOrganisationId(String organisationId) throws OrganisationNotRorId {
     if (organisationId.startsWith("https://ror.org")) {
       return organisationId.replace("https://ror.org/", "");
     } else {

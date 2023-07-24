@@ -202,8 +202,9 @@ public class BioCaseService implements WebClientService {
           var digitalSpecimen = new DigitalSpecimen(
               physicalSpecimenId,
               termMapper.retrieveFromABCD(new Type(), unitAttributes),
-              harmonizeAttributes(datasetAttribute, unitAttributes, physicalSpecimenIdType,
-                  organisationId),
+              null,
+//              harmonizeAttributes(datasetAttribute, unitAttributes, physicalSpecimenIdType,
+//                  organisationId),
               cleanupRedundantFields(unitAttributes)
           );
           log.debug("Result digital Specimen: {}", digitalSpecimen);

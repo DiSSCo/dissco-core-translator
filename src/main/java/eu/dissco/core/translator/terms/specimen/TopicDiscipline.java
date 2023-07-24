@@ -1,6 +1,7 @@
 package eu.dissco.core.translator.terms.specimen;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import eu.dissco.core.translator.schema.DigitalSpecimen.OdsTopicDiscipline;
 import eu.dissco.core.translator.terms.Term;
 import eu.dissco.core.translator.terms.specimen.taxonomy.Kingdom;
 import java.util.List;
@@ -29,6 +30,14 @@ public class TopicDiscipline extends Term {
     var basisOfRecord = new BasisOfRecord().retrieveFromABCD(unit);
     var kingdom = new Kingdom().retrieveFromABCD(unit);
     return getCategory(basisOfRecord, kingdom);
+  }
+
+  @Override
+  public eu.dissco.core.translator.schema.DigitalSpecimen retrieveFromDWCANew(
+      eu.dissco.core.translator.schema.DigitalSpecimen ds, JsonNode unit) {
+    var basisOfRecord = new BasisOfRecord().retrieveFromDWCA(unit);
+    var kingdom = new Kingdom().retrieveFromDWCA(unit);
+    return ds.withOdsTopicDiscipline(OdsTopicDiscipline.fromValue(getCategory(basisOfRecord, kingdom)));
   }
 
   private static String getCategory(String basisOfRecord, String kingdom) {
@@ -63,6 +72,8 @@ public class TopicDiscipline extends Term {
       return UNCLASSIFIED;
     }
   }
+
+
 
   @Override
   public String getTerm() {
