@@ -11,7 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class CollectorTest {
 
   private static final String COLLECTOR_NAME = "Fricke, Ronald";
-  private final Collector collector = new Collector();
+  private final RecordedBy collector = new RecordedBy();
 
   @Test
   void testRetrieveFromDWCA() {
@@ -74,7 +74,7 @@ class CollectorTest {
     var result = collector.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(Collector.TERM);
+    assertThat(result).isEqualTo(RecordedBy.TERM);
   }
 
 }

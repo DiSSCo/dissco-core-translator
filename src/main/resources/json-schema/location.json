@@ -80,6 +80,13 @@
         -100
       ]
     },
+    "dwc:higherGeography": {
+      "type": "string",
+      "description": "https://rs.tdwg.org/dwc/terms/higherGeography",
+      "examples": [
+        "Britain and Ireland"
+      ]
+    },
     "dwc:maximumElevationInMeters": {
       "type": "integer",
       "description": "https://rs.tdwg.org/dwc/terms/maximumElevationInMeters",
@@ -174,7 +181,7 @@
           "minimum": 0
         },
         "dwc:coordinatePrecision": {
-          "type": "integer",
+          "type": "number",
           "description": "https://rs.tdwg.org/dwc/terms/coordinatePrecision",
           "examples": [
             0.01667

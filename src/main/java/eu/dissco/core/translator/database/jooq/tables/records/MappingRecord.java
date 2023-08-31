@@ -402,5 +402,6 @@ public class MappingRecord extends UpdatableRecordImpl<MappingRecord> implements
         setCreator(creator);
         setDeleted(deleted);
         setSourcedatastandard(sourcedatastandard);
+        resetChangedOnNotNull();
     }
 }

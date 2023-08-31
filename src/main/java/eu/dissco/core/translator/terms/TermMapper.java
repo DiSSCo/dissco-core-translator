@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.component.MappingComponent;
 import eu.dissco.core.translator.terms.specimen.BasisOfRecord;
 import eu.dissco.core.translator.terms.specimen.CollectingNumber;
-import eu.dissco.core.translator.terms.specimen.Collector;
+import eu.dissco.core.translator.terms.specimen.RecordedBy;
 import eu.dissco.core.translator.terms.specimen.DatasetId;
 import eu.dissco.core.translator.terms.specimen.DateCollected;
 import eu.dissco.core.translator.terms.specimen.HasMedia;
@@ -111,7 +111,7 @@ public class TermMapper {
     list.add(new ObjectType());
     list.add(new DateCollected());
     list.add(new CollectingNumber());
-    list.add(new Collector());
+    list.add(new RecordedBy());
     list.add(new TypeStatus());
     list.add(new HasMedia());
     list.add(new BasisOfRecord());
@@ -150,7 +150,7 @@ public class TermMapper {
     return terms;
   }
 
-  public String retrieveFromDWCA(Term term, JsonNode unit) {
+  public String retrieveTerm(Term term, JsonNode unit, boolean dwc) {
     var termName = term.getTerm();
     if (mapping.getDefaultMappings().containsKey(termName)) {
       return mapping.getDefaultMappings().get(termName);
@@ -160,20 +160,11 @@ public class TermMapper {
         return value.asText();
       }
     }
-    return term.retrieveFromDWCA(unit);
-  }
-
-  public String retrieveFromABCD(Term term, JsonNode unit) {
-    var termName = term.getTerm();
-    if (mapping.getDefaultMappings().containsKey(termName)) {
-      return mapping.getDefaultMappings().get(termName);
-    } else if (mapping.getFieldMappings().containsKey(termName)) {
-      var value = unit.get(mapping.getFieldMappings().get(termName));
-      if (value != null && value.isTextual()) {
-        return value.asText();
-      }
+    if (dwc){
+      return term.retrieveFromDWCA(unit);
+    } else {
+      return term.retrieveFromABCD(unit);
     }
-    return term.retrieveFromABCD(unit);
   }
 
   public String retrieveFromABCD(Term term, JsonNode dataset, JsonNode unit) {

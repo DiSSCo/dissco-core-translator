@@ -401,5 +401,6 @@ public class SourceSystemRecord extends UpdatableRecordImpl<SourceSystemRecord> 
         setMappingId(mappingId);
         setVersion(version);
         setCreator(creator);
+        resetChangedOnNotNull();
     }
 }

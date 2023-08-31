@@ -5,9 +5,9 @@ import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
 
-public class Collector extends Term {
+public class RecordedBy extends Term {
 
-  public static final String TERM = ODS_PREFIX + "collector";
+  public static final String TERM = DWC_PREFIX + "recordedBy";
 
   private final List<String> dwcaTerms = List.of("dwc:recordedBy", "dwc:recordedByID");
   private final List<Pair<String, String>> abcdTerms = List.of(

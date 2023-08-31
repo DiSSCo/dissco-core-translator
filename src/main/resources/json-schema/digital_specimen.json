@@ -109,12 +109,26 @@
     },
     "ods:livingOrPreserved": {
       "type": "string",
-      "description": "Wether the specimen is living or preserved"
+      "description": "Whether the specimen is living or preserved"
     },
     "dcterms:license": {
       "type": "string",
       "description": "License for the metadata of the physical specimen",
       "$comment": "Determine available licenses"
+    },
+    "dcterms:modified": {
+      "type": "string",
+      "description": "Modification date for specimen information"
+    },
+    "dcterms:type": {
+      "type": "string",
+      "description": "The underlying type",
+      "$comment": "Switch this to enum as it is a controlled vocabulary"
+    },
+    "dwc:basisOfRecord": {
+      "type": "string",
+      "description": "The basis for the record",
+      "$comment": "Switch to enumeration as this is a limited list"
     },
     "dwc:preparations": {
       "type": "string",
@@ -193,6 +207,27 @@
       "description": "https://rs.tdwg.org/dwc/terms/recordedByID",
       "examples": [
         "https://orcid.org/0000-0002-1825-0097"
+      ]
+    },
+    "dwc:datasetName": {
+      "type": "string",
+      "description": "https://rs.tdwg.org/dwc/terms/datasetName",
+      "examples": [
+        "Hummingbirds"
+      ]
+    },
+    "dcterms:accessRights": {
+      "type": "string",
+      "description": "https://purl.org/dc/terms/accessRights",
+      "examples": [
+        "not-for-profit use only"
+      ]
+    },
+    "dcterms:rightsHolder": {
+      "type": "string",
+      "description": "https://purl.org/dc/terms/rightsHolder",
+      "examples": [
+        "Museu de História Natural e da Ciência da Universidade do Porto"
       ]
     },
     "materialEntity": {

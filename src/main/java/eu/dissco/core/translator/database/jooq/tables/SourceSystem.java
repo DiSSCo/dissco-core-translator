@@ -88,12 +88,12 @@ public class SourceSystem extends TableImpl<SourceSystemRecord> {
     /**
      * The column <code>public.source_system.version</code>.
      */
-    public final TableField<SourceSystemRecord, Integer> VERSION = createField(DSL.name("version"), SQLDataType.INTEGER.nullable(false).defaultValue(DSL.field("1", SQLDataType.INTEGER)), this, "");
+    public final TableField<SourceSystemRecord, Integer> VERSION = createField(DSL.name("version"), SQLDataType.INTEGER.nullable(false).defaultValue(DSL.field(DSL.raw("1"), SQLDataType.INTEGER)), this, "");
 
     /**
      * The column <code>public.source_system.creator</code>.
      */
-    public final TableField<SourceSystemRecord, String> CREATOR = createField(DSL.name("creator"), SQLDataType.CLOB.nullable(false).defaultValue(DSL.field("'0000-0002-5669-2769'::text", SQLDataType.CLOB)), this, "");
+    public final TableField<SourceSystemRecord, String> CREATOR = createField(DSL.name("creator"), SQLDataType.CLOB.nullable(false).defaultValue(DSL.field(DSL.raw("'0000-0002-5669-2769'::text"), SQLDataType.CLOB)), this, "");
 
     private SourceSystem(Name alias, Table<SourceSystemRecord> aliased) {
         this(alias, aliased, null);

@@ -176,6 +176,36 @@
               "Puma"
             ]
           },
+          "dwc:specificEpithet": {
+            "type": "string",
+            "description": "https://rs.tdwg.org/dwc/terms/specificEpithet",
+            "examples": [
+              "concolor"
+            ]
+          },
+          "dwc:taxonomicStatus": {
+            "type": "string",
+            "description": "https://rs.tdwg.org/dwc/terms/taxonomicStatus",
+            "$comment": "Might become an enum",
+            "examples": [
+              "accepted"
+            ]
+          },
+          "dwc:nomenclaturalCode": {
+            "type": "string",
+            "description": "https://rs.tdwg.org/dwc/terms/nomenclaturalCode",
+            "$comment": "Might become an enum",
+            "examples": [
+              "ICBN"
+            ]
+          },
+          "dwc:vernacularName": {
+            "type": "string",
+            "description": "https://rs.tdwg.org/dwc/terms/vernacularName",
+            "examples": [
+              "Meerval | Wels | Catfish | Silure glane | Wels | Waller | Siluro | Malle"
+            ]
+          },
           "dwc:subgenus": {
             "type": "string",
             "description": "https://rs.tdwg.org/dwc/terms/subgenus",

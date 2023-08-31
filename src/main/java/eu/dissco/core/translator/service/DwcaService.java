@@ -174,12 +174,12 @@ public class DwcaService implements WebClientService {
     } else if (extensions != null) {
       if (extensions.get(GBIF_MULTIMEDIA) != null) {
         var imageArray = extensions.get(GBIF_MULTIMEDIA);
-        if (imageArray.isArray() && imageArray.size() > 0) {
+        if (imageArray.isArray() && !imageArray.isEmpty()) {
           extractMultiMedia(recordId, imageArray);
         }
       } else if (extensions.get(AC_MULTIMEDIA) != null) {
         var imageArray = extensions.get(AC_MULTIMEDIA);
-        if (imageArray.isArray() && imageArray.size() > 0) {
+        if (imageArray.isArray() && !imageArray.isEmpty()) {
           extractMultiMedia(recordId, imageArray);
         }
       }
@@ -189,7 +189,7 @@ public class DwcaService implements WebClientService {
   private void extractMultiMedia(String recordId, JsonNode imageArray)
       throws JsonProcessingException {
     for (var image : imageArray) {
-      var type = termMapper.retrieveFromDWCA(new MediaType(), image);
+      var type = termMapper.retrieveTerm(new MediaType(), image, true);
       log.debug("Type of digitalMediaObject is: {}", type);
       var digitalMediaObject = new DigitalMediaObject(
           type,
@@ -223,11 +223,11 @@ public class DwcaService implements WebClientService {
   }
 
   private DigitalSpecimen createDigitalSpecimen(JsonNode fullRecord) throws DiSSCoDataException {
-    var physicalSpecimenIdType = termMapper.retrieveFromDWCA(new PhysicalSpecimenIdType(),
-        fullRecord);
-    var organisationId = termMapper.retrieveFromDWCA(new OrganisationId(), fullRecord);
+    var physicalSpecimenIdType = termMapper.retrieveTerm(new PhysicalSpecimenIdType(),
+        fullRecord, true);
+    var organisationId = termMapper.retrieveTerm(new OrganisationId(), fullRecord, true);
     var physicalSpecimenId = getPhysicalSpecimenId(physicalSpecimenIdType, organisationId,
-        termMapper.retrieveFromDWCA(new PhysicalSpecimenId(), fullRecord));
+        termMapper.retrieveTerm(new PhysicalSpecimenId(), fullRecord, true));
     var ds = new eu.dissco.core.translator.schema.DigitalSpecimen()
         .withOdsPhysicalSpecimenIdType(convertToPhysicalSpecimenIdTypeEnum(physicalSpecimenIdType))
         .withDwcInstitutionId(organisationId)
@@ -235,7 +235,7 @@ public class DwcaService implements WebClientService {
         .withOdsSourceSystem(webClientProperties.getSourceSystemId());
     return new DigitalSpecimen(
         physicalSpecimenId,
-        termMapper.retrieveFromDWCA(new Type(), fullRecord),
+        termMapper.retrieveTerm(new Type(), fullRecord, true),
         digitalSpecimenDirector.constructDigitalSpecimen(ds, true, fullRecord),
         cleanupRedundantFields(fullRecord)
     );
@@ -372,10 +372,10 @@ public class DwcaService implements WebClientService {
 
   private JsonNode harmonizeMedia(JsonNode media) {
     var attributes = mapper.createObjectNode();
-    attributes.put(AccessUri.TERM, termMapper.retrieveFromDWCA(new AccessUri(), media));
+    attributes.put(AccessUri.TERM, termMapper.retrieveTerm(new AccessUri(), media, true));
     attributes.put(SourceSystemId.TERM, webClientProperties.getSourceSystemId());
-    attributes.put(Format.TERM, termMapper.retrieveFromDWCA(new Format(), media));
-    attributes.put(License.TERM, termMapper.retrieveFromDWCA(new License(), media));
+    attributes.put(Format.TERM, termMapper.retrieveTerm(new Format(), media, true));
+    attributes.put(License.TERM, termMapper.retrieveTerm(new License(), media, true));
     return attributes;
   }
 
