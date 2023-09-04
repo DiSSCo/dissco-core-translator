@@ -21,17 +21,17 @@ public class TopicDiscipline extends Term {
   public String retrieveFromDWCA(JsonNode unit) {
     var basisOfRecord = new BasisOfRecord().retrieveFromDWCA(unit);
     var kingdom = new Kingdom().retrieveFromDWCA(unit);
-    return getCategory(basisOfRecord, kingdom);
+    return getDiscipline(basisOfRecord, kingdom);
   }
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
     var basisOfRecord = new BasisOfRecord().retrieveFromABCD(unit);
     var kingdom = new Kingdom().retrieveFromABCD(unit);
-    return getCategory(basisOfRecord, kingdom);
+    return getDiscipline(basisOfRecord, kingdom);
   }
 
-  private static String getCategory(String basisOfRecord, String kingdom) {
+  private static String getDiscipline(String basisOfRecord, String kingdom) {
     if (basisOfRecord != null) {
       var harBasisOfRecord = basisOfRecord.trim().toUpperCase();
       if (FOSSIL_BASIS_OF_RECORD.contains(harBasisOfRecord)) {
@@ -39,7 +39,7 @@ public class TopicDiscipline extends Term {
       } else if (EXTRATERRESTRIAL_BASIS_OF_RECORD.contains(harBasisOfRecord)) {
         return "Astrogeology";
       } else if (EARTH_SYSTEM_BASIS_OF_RECORD.contains(harBasisOfRecord)){
-        return "Earth System";
+        return "Geology";
       } else if (kingdom != null){
         var harKingdom = kingdom.trim().toUpperCase();
         switch (harKingdom) {

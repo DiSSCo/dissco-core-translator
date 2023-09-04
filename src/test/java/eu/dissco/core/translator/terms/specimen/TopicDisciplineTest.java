@@ -34,7 +34,7 @@ class TopicDisciplineTest {
     return Stream.of(
         Arguments.of("FossilSpecimen", null, "Palaeontology"),
         Arguments.of("MeteoriteSpecimen", null, "Astrogeology"),
-        Arguments.of("RockSpecimen", null, "Earth System"),
+        Arguments.of("RockSpecimen", null, "Geology"),
         Arguments.of("PreservedSpecimen", "Animalia", "Zoology"),
         Arguments.of("PreservedSpecimen", "Plantae", "Botany"),
         Arguments.of("PreservedSpecimen", "Bacteria", "Microbiology"),
