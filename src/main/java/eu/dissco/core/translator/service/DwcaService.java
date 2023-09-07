@@ -1,5 +1,6 @@
 package eu.dissco.core.translator.service;
 
+import static eu.dissco.core.translator.service.IngestionUtility.convertToPhysicalSpecimenIdTypeEnum;
 import static eu.dissco.core.translator.service.IngestionUtility.getPhysicalSpecimenId;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -250,17 +251,6 @@ public class DwcaService implements WebClientService {
       extensions.remove(List.of(GBIF_MULTIMEDIA, AC_MULTIMEDIA));
     }
     return originalData;
-  }
-
-  private eu.dissco.core.translator.schema.DigitalSpecimen.OdsPhysicalSpecimenIdType convertToPhysicalSpecimenIdTypeEnum(
-      String physicalSpecimenIdType) {
-    if (physicalSpecimenIdType.equals("cetaf") || physicalSpecimenIdType.equals("global")) {
-      return OdsPhysicalSpecimenIdType.GLOBAL;
-    } else if (physicalSpecimenIdType.equals("resolvable")) {
-      return OdsPhysicalSpecimenIdType.RESOLVABLE;
-    } else {
-      return OdsPhysicalSpecimenIdType.LOCAL;
-    }
   }
 
   private boolean recordNeedsToBeIgnored(JsonNode fullRecord, String recordId) {

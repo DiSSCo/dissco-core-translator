@@ -1,4 +1,4 @@
-package eu.dissco.core.translator.terms.specimen.location;
+package eu.dissco.core.translator.terms.specimen.location.georeference;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.terms.Term;
@@ -18,7 +18,7 @@ public class DecimalLongitude extends Term {
   @Override
   public String retrieveFromABCD(JsonNode unit) {
     var longitude = unit.get(ABCD_TERM);
-    if (longitude != null && longitude.isDouble()) {
+    if (longitude != null && (longitude.isDouble() || longitude.isBigDecimal())) {
       return String.valueOf(longitude.asDouble());
     }
     return null;

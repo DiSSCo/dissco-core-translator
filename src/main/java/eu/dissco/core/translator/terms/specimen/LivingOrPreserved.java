@@ -24,11 +24,7 @@ public class LivingOrPreserved extends Term {
   public String retrieveFromABCD(JsonNode unit) {
     return determineLiving(new BasisOfRecord().retrieveFromABCD(unit));
   }
-  @Override
-  public eu.dissco.core.translator.schema.DigitalSpecimen retrieveFromDWCANew(
-      eu.dissco.core.translator.schema.DigitalSpecimen ds, JsonNode unit) {
-    return ds.withOdsLivingOrPreserved(determineLiving(new BasisOfRecord().retrieveFromDWCA(unit)));
-  }
+
   @Override
   public String getTerm() {
     return TERM;

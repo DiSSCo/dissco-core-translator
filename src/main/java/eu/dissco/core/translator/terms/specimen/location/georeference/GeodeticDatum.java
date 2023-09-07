@@ -1,16 +1,16 @@
-package eu.dissco.core.translator.terms.specimen;
+package eu.dissco.core.translator.terms.specimen.location.georeference;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
-public class CollectingNumber extends Term {
+public class GeodeticDatum extends Term {
 
-  public static final String TERM = ODS_PREFIX + "collectingNumber";
+  public static final String TERM = DWC_PREFIX + "geodeticDatum";
 
-  private final List<String> dwcaTerms = List.of("dwc:recordNumber", "dwc:fieldNumber");
-  private final List<String> abcdTerms = List.of("abcd:collectorsFieldNumber",
-      "abcd:gathering/code");
+  private final List<String> dwcaTerms = List.of(TERM);
+  private final List<String> abcdTerms = List.of(
+      "abcd:gathering/siteCoordinateSets/siteCoordinates/0/coordinatesLatLong/spatialDatum");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {

@@ -1,4 +1,4 @@
-package eu.dissco.core.translator.terms.specimen;
+package eu.dissco.core.translator.terms.specimen.occurence;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.terms.Term;

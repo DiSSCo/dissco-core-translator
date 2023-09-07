@@ -12,12 +12,23 @@ public abstract class Term {
 
   protected static final String ODS_PREFIX = "ods:";
   protected static final String DWC_PREFIX = "dwc:";
+  protected static final Pair<String, String> ABCD_NAMED_AREA_KEY =
+      Pair.of(
+          "abcd:gathering/namedAreas/namedArea/",
+          "/areaClass/value");
+  protected static final Pair<String, String> ABCD_NAMED_AREA_VALUE =
+      Pair.of(
+          "abcd:gathering/namedAreas/namedArea/",
+          "/areaName/value");
   private static final String MESSAGE = "No specific attributes retrieve specified for field: {}";
 
-  protected String searchJsonForStringTerm(JsonNode attributes, List<String> originalTerms) {
+  protected String searchJsonForStringTerm(JsonNode attributes, List<String> originalTerms, Class clazz) {
     for (var originalTerm : originalTerms) {
       var valueNode = attributes.get(originalTerm);
       if (valueNode != null && valueNode.isTextual()) {
+        if (clazz.equals(Boolean.class)){
+          
+        }
         return attributes.get(originalTerm).asText();
       }
     }
@@ -96,7 +107,7 @@ public abstract class Term {
         }
       }
     }
-    log.debug("No stratigraphy found for division: {}", searchTerms);
+    log.debug("No value found for division: {}", searchTerms);
     return null;
   }
 }

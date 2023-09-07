@@ -1,15 +1,16 @@
-package eu.dissco.core.translator.terms.specimen.location;
+package eu.dissco.core.translator.terms.specimen.taxonomy;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
-public class County extends Term {
+public class IdentificationVerificationStatus extends Term {
 
-  public static final String TERM = DWC_PREFIX + "county";
+  public static final String TERM = DWC_PREFIX + "identificationVerificationStatus";
+
   private final List<String> dwcaTerms = List.of(TERM);
 
-  private final List<String> abcdTerms = List.of("County");
+  private final List<String> abcdTerms = List.of("preferredFlag");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
@@ -18,11 +19,12 @@ public class County extends Term {
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    return super.searchABCDSplitTerms(unit, abcdTerms, ABCD_NAMED_AREA_KEY, ABCD_NAMED_AREA_VALUE);
+    return super.searchJsonForStringTerm(unit, abcdTerms);
   }
 
   @Override
   public String getTerm() {
     return TERM;
   }
+
 }

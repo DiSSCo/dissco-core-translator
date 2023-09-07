@@ -1,11 +1,11 @@
-package eu.dissco.core.translator.terms.specimen.location;
+package eu.dissco.core.translator.terms.specimen.location.georeference;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
-public class CoordinatePrecision extends Term {
-  public static final String TERM = DWC_PREFIX + "coordinatePrecision";
+public class GeoreferencedBy extends Term {
+  public static final String TERM = DWC_PREFIX + "georeferencedBy";
 
   private final List<String> dwcaTerms = List.of(TERM);
 

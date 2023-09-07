@@ -3,6 +3,7 @@ package eu.dissco.core.translator.service;
 import eu.dissco.core.translator.exception.DiSSCoDataException;
 import eu.dissco.core.translator.exception.OrganisationNotRorId;
 import eu.dissco.core.translator.exception.UnknownPhysicalSpecimenIdType;
+import eu.dissco.core.translator.schema.DigitalSpecimen.OdsPhysicalSpecimenIdType;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -14,7 +15,7 @@ public class IngestionUtility {
 
   protected static String getPhysicalSpecimenId(String physicalSpecimenIdType, String sourceSystemId,
       String physicalSpecimenId) throws DiSSCoDataException {
-    if (physicalSpecimenIdType.equals("global") || physicalSpecimenIdType.equals("resolvable")) {
+    if (physicalSpecimenIdType.equals("global") || physicalSpecimenIdType.equals("resolvable") || physicalSpecimenIdType.equals("cetaf")) {
       return physicalSpecimenId;
     } else if (physicalSpecimenIdType.equals("local")) {
       return physicalSpecimenId + ":" + sourceSystemId;
@@ -24,4 +25,14 @@ public class IngestionUtility {
     }
   }
 
+  protected static eu.dissco.core.translator.schema.DigitalSpecimen.OdsPhysicalSpecimenIdType convertToPhysicalSpecimenIdTypeEnum(
+      String physicalSpecimenIdType) {
+    if (physicalSpecimenIdType.equals("cetaf") || physicalSpecimenIdType.equals("global")) {
+      return OdsPhysicalSpecimenIdType.GLOBAL;
+    } else if (physicalSpecimenIdType.equals("resolvable")) {
+      return OdsPhysicalSpecimenIdType.RESOLVABLE;
+    } else {
+      return OdsPhysicalSpecimenIdType.LOCAL;
+    }
+  }
 }

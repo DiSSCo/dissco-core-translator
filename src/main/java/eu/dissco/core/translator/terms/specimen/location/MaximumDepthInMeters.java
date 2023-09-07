@@ -4,13 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
-public class GeodeticDatum extends Term {
-
-  public static final String TERM = DWC_PREFIX + "geodeticDatum";
+public class MaximumDepthInMeters extends Term {
+  public static final String TERM = DWC_PREFIX + "maximumDepthInMeters";
 
   private final List<String> dwcaTerms = List.of(TERM);
-  private final List<String> abcdTerms = List.of(
-      "abcd:gathering/siteCoordinateSets/siteCoordinates/0/coordinatesLatLong/spatialDatum");
+  private final List<String> abcdTerms = List.of("abcd:gathering/depth/measurementOrFactAtomised/upperValue/value");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {

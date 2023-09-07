@@ -173,7 +173,7 @@
           ]
         },
         "dwc:coordinateUncertaintyInMeters": {
-          "type": "integer",
+          "type": "number",
           "description": "https://rs.tdwg.org/dwc/terms/coordinateUncertaintyInMeters",
           "examples": [
             100
@@ -349,7 +349,7 @@
           "$comment": "Strange field, lowest and highest"
         },
         "dwc:highestBiostratigraphicZone": {
-          "type": "integer",
+          "type": "string",
           "description": "https://rs.tdwg.org/dwc/terms/highestBiostratigraphicZone",
           "examples": [
             "Blancan"

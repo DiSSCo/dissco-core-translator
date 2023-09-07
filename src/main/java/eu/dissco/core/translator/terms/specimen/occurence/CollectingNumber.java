@@ -4,12 +4,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
-public class Sex extends Term {
-  public static final String TERM = DWC_PREFIX + "sex";
+public class CollectingNumber extends Term {
 
-  private final List<String> dwcaTerms = List.of(TERM);
+  public static final String TERM = ODS_PREFIX + "collectingNumber";
 
-  private final List<String> abcdTerms = List.of("abcd:sex");
+  private final List<String> dwcaTerms = List.of("dwc:recordNumber", "dwc:fieldNumber");
+  private final List<String> abcdTerms = List.of("abcd:collectorsFieldNumber",
+      "abcd:gathering/code");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
