@@ -17,11 +17,7 @@ public class Modified extends Term {
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    var modified = searchJsonForStringTerm(unit, abcdUnitTerms);
-    if (modified == null) {
-      modified = searchJsonForLongTerm(unit, abcdUnitTerms);
-    }
-    return modified;
+    return searchJsonForStringTerm(unit, abcdUnitTerms);
   }
 
   @Override

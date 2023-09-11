@@ -3,7 +3,7 @@ package eu.dissco.core.translator.terms.specimen;
 import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.schema.DigitalSpecimen.OdsTopicDiscipline;
 import eu.dissco.core.translator.terms.Term;
-import eu.dissco.core.translator.terms.specimen.taxonomy.Kingdom;
+import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Kingdom;
 import java.util.List;
 
 public class TopicDiscipline extends Term {

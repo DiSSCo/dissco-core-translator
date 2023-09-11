@@ -1,11 +1,11 @@
-package eu.dissco.core.translator.terms.specimen.taxonomy;
+package eu.dissco.core.translator.terms.specimen.identification.taxonomy;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
 
-public class Order extends AbstractTaxonomy {
+public class Phylum extends AbstractTaxonomy {
 
-  public static final String TERM = DWC_PREFIX + "order";
+  public static final String TERM = DWC_PREFIX + "phylum";
 
   private final List<String> dwcaTerms = List.of(TERM);
 
@@ -16,12 +16,11 @@ public class Order extends AbstractTaxonomy {
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    return super.searchABCDSplitTerms(unit, List.of("ordo", "order"));
+    return super.searchABCDSplitTerms(unit, List.of("phylum", "divisio"));
   }
 
   @Override
   public String getTerm() {
     return TERM;
   }
-
 }

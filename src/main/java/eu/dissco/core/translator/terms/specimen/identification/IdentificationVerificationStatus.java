@@ -1,13 +1,16 @@
-package eu.dissco.core.translator.terms.specimen.taxonomy;
+package eu.dissco.core.translator.terms.specimen.identification;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
-public class Class extends AbstractTaxonomy {
+public class IdentificationVerificationStatus extends Term {
 
-  public static final String TERM = DWC_PREFIX + "class";
+  public static final String TERM = DWC_PREFIX + "identificationVerificationStatus";
 
   private final List<String> dwcaTerms = List.of(TERM);
+
+  private final List<String> abcdTerms = List.of("preferredFlag");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
@@ -16,7 +19,7 @@ public class Class extends AbstractTaxonomy {
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    return super.searchABCDSplitTerms(unit, List.of("classis", "class"));
+    return super.searchJsonForStringTerm(unit, abcdTerms);
   }
 
   @Override

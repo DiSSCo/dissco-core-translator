@@ -117,7 +117,7 @@
       ]
     },
     "dwc:maximumDepthInMeters": {
-      "type": "string",
+      "type": "integer",
       "description": "https://rs.tdwg.org/dwc/terms/maximumDepthInMeters",
       "examples": [
         340

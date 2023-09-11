@@ -1,4 +1,4 @@
-package eu.dissco.core.translator.terms.specimen.taxonomy;
+package eu.dissco.core.translator.terms.specimen.identification.taxonomy;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -6,7 +6,6 @@ import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 import java.util.Optional;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.tuple.Triple;
 
 public abstract class AbstractTaxonomy extends Term {
 
@@ -15,15 +14,11 @@ public abstract class AbstractTaxonomy extends Term {
   protected static final String IDENTIFICATION_EXTENSION = "dwc:Identification";
   protected static final String IDENTIFICATION_VERIFICATION_STATUS = "dwc:identificationVerificationStatus";
   private static final String IDENTIFICATION_INDEX = "ods:taxonIdentificationIndex";
-  private static final Triple<String, String, String> ABCD_TAXON_RANK =
-      Triple.of(
-          IDENTIFICATION,
-          "/result/taxonIdentified/higherTaxa/higherTaxon/",
+  private static final Pair<String, String> ABCD_TAXON_RANK =
+      Pair.of("result/taxonIdentified/higherTaxa/higherTaxon/",
           "/higherTaxonRank");
-  private static final Triple<String, String, String> ABCD_VALUE =
-      Triple.of(
-          IDENTIFICATION,
-          "/result/taxonIdentified/higherTaxa/higherTaxon/",
+  private static final Pair<String, String> ABCD_VALUE =
+      Pair.of("result/taxonIdentified/higherTaxa/higherTaxon/",
           "/higherTaxonName");
   private static final Pair<String, String> abcdPreferredFlag = Pair.of(IDENTIFICATION,
       "/preferredFlag");
@@ -105,12 +100,9 @@ public abstract class AbstractTaxonomy extends Term {
   }
 
   protected String searchABCDSplitTerms(JsonNode unit, List<String> searchTerms) {
-    var identificationIndex = getIdentificationIndexABCD(unit);
     return searchABCDSplitTerms(unit, searchTerms,
-        Pair.of(ABCD_TAXON_RANK.getLeft() + identificationIndex + ABCD_TAXON_RANK.getMiddle(),
-            ABCD_TAXON_RANK.getRight()),
-        Pair.of(ABCD_VALUE.getLeft() + identificationIndex + ABCD_VALUE.getMiddle(),
-            ABCD_VALUE.getRight()));
+        Pair.of(ABCD_TAXON_RANK.getLeft(), ABCD_TAXON_RANK.getRight()),
+        Pair.of(ABCD_VALUE.getLeft(), ABCD_VALUE.getRight()));
   }
 
   protected String searchABCDTerms(JsonNode unit, List<String> searchTerms) {

@@ -7,6 +7,7 @@ import java.util.List;
 public class SamplingProtocol extends Term {
   public static final String TERM = DWC_PREFIX + "samplingProtocol";
 
+  private final List<String> abcdTerms = List.of("abcd:gathering/method/value");
   private final List<String> dwcaTerms = List.of(TERM);
 
   @Override
@@ -14,6 +15,10 @@ public class SamplingProtocol extends Term {
     return super.searchJsonForStringTerm(unit, dwcaTerms);
   }
 
+  @Override
+  public String retrieveFromABCD(JsonNode unit) {
+    return super.searchJsonForStringTerm(unit, abcdTerms);
+  }
   @Override
   public String getTerm() {
     return TERM;

@@ -1,16 +1,14 @@
-package eu.dissco.core.translator.terms.specimen.occurence;
+package eu.dissco.core.translator.terms.specimen.location;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
-public class CollectingNumber extends Term {
+public class MinimumDistanceAboveSurfaceInMeters extends Term {
+  public static final String TERM = DWC_PREFIX + "minimumDistanceAboveSurfaceInMeters";
 
-  public static final String TERM = ODS_PREFIX + "collectingNumber";
-
-  private final List<String> dwcaTerms = List.of("dwc:recordNumber", "dwc:fieldNumber");
-  private final List<String> abcdTerms = List.of("abcd:collectorsFieldNumber",
-      "abcd:gathering/code");
+  private final List<String> dwcaTerms = List.of(TERM);
+  private final List<String> abcdTerms = List.of("abcd:gathering/height/measurementOrFactAtomised/lowerValue/value");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {

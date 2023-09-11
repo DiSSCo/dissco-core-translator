@@ -1,12 +1,11 @@
-package eu.dissco.core.translator.terms.specimen.taxonomy;
+package eu.dissco.core.translator.terms.specimen.identification.taxonomy;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
-public class NomenclaturalCode extends AbstractTaxonomy {
+public class TaxonomicStatus extends AbstractTaxonomy {
 
-  public static final String TERM = DWC_PREFIX + "nomenclaturalCode";
+  public static final String TERM = DWC_PREFIX + "taxonomicStatus";
 
   private final List<String> dwcaTerms = List.of(TERM);
 

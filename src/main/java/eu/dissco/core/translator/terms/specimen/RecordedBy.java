@@ -23,8 +23,8 @@ public class RecordedBy extends Term {
   public String retrieveFromABCD(JsonNode unit) {
     var value = combinePossibleValues(unit);
     if (value == null) {
-      if (unit.get("abcd:gathering/agents/gatheringAgentsText") != null) {
-        return unit.get("abcd:gathering/agents/gatheringAgentsText").asText();
+      if (unit.get("abcd:gathering/agents/gatheringAgentsText/value") != null) {
+        return unit.get("abcd:gathering/agents/gatheringAgentsText/value").asText();
       } else {
         return null;
       }
@@ -57,7 +57,7 @@ public class RecordedBy extends Term {
         iterateOverElements = false;
       }
     }
-    if (builder.length() != 0) {
+    if (!builder.isEmpty()) {
       return builder.toString();
     } else {
       return null;

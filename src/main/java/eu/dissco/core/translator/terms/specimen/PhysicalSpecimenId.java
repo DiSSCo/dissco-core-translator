@@ -9,7 +9,7 @@ public class PhysicalSpecimenId extends Term {
   public static final String TERM = ODS_PREFIX + "physicalSpecimenId";
 
   private final List<String> dwcaTerms = List.of("dwc:occurrenceID");
-  private final List<String> abcdTerms = List.of("abcd:unitID");
+  private final List<String> abcdTerms = List.of("abcd:unitGUID", "abcd:unitID");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {

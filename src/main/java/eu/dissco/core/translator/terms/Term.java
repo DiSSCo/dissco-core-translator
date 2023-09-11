@@ -22,26 +22,22 @@ public abstract class Term {
           "/areaName/value");
   private static final String MESSAGE = "No specific attributes retrieve specified for field: {}";
 
-  protected String searchJsonForStringTerm(JsonNode attributes, List<String> originalTerms, Class clazz) {
+  protected String searchJsonForStringTerm(JsonNode attributes, List<String> originalTerms) {
     for (var originalTerm : originalTerms) {
       var valueNode = attributes.get(originalTerm);
-      if (valueNode != null && valueNode.isTextual()) {
-        if (clazz.equals(Boolean.class)){
-          
+      if (valueNode != null) {
+        if (valueNode.isTextual()) {
+          return attributes.get(originalTerm).asText();
+        } else if (valueNode.isLong()) {
+          var longValue = attributes.get(originalTerm).asLong();
+          return String.valueOf(longValue);
+        } else if (valueNode.isBoolean()) {
+          var boolValue = attributes.get(originalTerm).asBoolean();
+          return String.valueOf(boolValue);
+        } else if (valueNode.isDouble() || valueNode.isBigDecimal()) {
+          var doubleValue = attributes.get(originalTerm).asDouble();
+          return String.valueOf(doubleValue);
         }
-        return attributes.get(originalTerm).asText();
-      }
-    }
-    log.debug("Term not found in any of these search fields: {}", originalTerms);
-    return null;
-  }
-
-  protected String searchJsonForLongTerm(JsonNode attributes, List<String> originalTerms) {
-    for (var originalTerm : originalTerms) {
-      var valueNode = attributes.get(originalTerm);
-      if (valueNode != null && valueNode.isLong()) {
-        var longValue = attributes.get(originalTerm).asLong();
-        return String.valueOf(longValue);
       }
     }
     log.debug("Term not found in any of these search fields: {}", originalTerms);
@@ -52,7 +48,7 @@ public abstract class Term {
     var builder = new StringBuilder();
     for (var abcdTerm : abcdTerms) {
       if (unit.get(abcdTerm) != null) {
-        if (builder.length() != 0) {
+        if (!builder.isEmpty()) {
           builder.append(" | ");
         }
         builder.append(unit.get(abcdTerm).asText());

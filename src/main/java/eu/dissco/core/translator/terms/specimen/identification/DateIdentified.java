@@ -1,13 +1,15 @@
-package eu.dissco.core.translator.terms.specimen.taxonomy;
+package eu.dissco.core.translator.terms.specimen.identification;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
-public class Genus extends AbstractTaxonomy {
-
-  public static final String TERM = DWC_PREFIX + "genus";
+public class DateIdentified extends Term {
+  public static final String TERM = DWC_PREFIX + "dateIdentified";
 
   private final List<String> dwcaTerms = List.of(TERM);
+
+  private final List<String> abcdTerms = List.of("date/dateText");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
@@ -16,12 +18,11 @@ public class Genus extends AbstractTaxonomy {
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    return super.searchABCDTerms(unit, List.of("/nameAtomised/botanical/genusOrMonomial"));
+    return super.searchJsonForStringTerm(unit, abcdTerms);
   }
 
   @Override
   public String getTerm() {
     return TERM;
   }
-
 }

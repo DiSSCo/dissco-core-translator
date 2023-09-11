@@ -1,22 +1,19 @@
-package eu.dissco.core.translator.terms.specimen.taxonomy;
+package eu.dissco.core.translator.terms.specimen.occurence;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
-public class IdentificationVerificationStatus extends Term {
-
-  public static final String TERM = DWC_PREFIX + "identificationVerificationStatus";
+public class Habitat extends Term {
+  public static final String TERM = DWC_PREFIX + "habitat";
 
   private final List<String> dwcaTerms = List.of(TERM);
-
-  private final List<String> abcdTerms = List.of("preferredFlag");
+  private final List<String> abcdTerms = List.of("abcd:gathering/biotope/text/value");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
     return super.searchJsonForStringTerm(unit, dwcaTerms);
   }
-
   @Override
   public String retrieveFromABCD(JsonNode unit) {
     return super.searchJsonForStringTerm(unit, abcdTerms);
@@ -26,5 +23,4 @@ public class IdentificationVerificationStatus extends Term {
   public String getTerm() {
     return TERM;
   }
-
 }
