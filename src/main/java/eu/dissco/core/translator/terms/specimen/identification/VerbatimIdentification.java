@@ -1,11 +1,12 @@
-package eu.dissco.core.translator.terms.specimen;
+package eu.dissco.core.translator.terms.specimen.identification;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
-public class DcTermsType extends Term {
-  public static final String TERM = "dcterms:type";
+public class VerbatimIdentification extends Term {
+
+  public static final String TERM = DWC_PREFIX + "verbatimIdentification";
 
   private final List<String> dwcaTerms = List.of(TERM);
 
@@ -13,6 +14,7 @@ public class DcTermsType extends Term {
   public String retrieveFromDWCA(JsonNode unit) {
     return super.searchJsonForStringTerm(unit, dwcaTerms);
   }
+
 
   @Override
   public String getTerm() {

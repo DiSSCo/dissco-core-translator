@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.dissco.core.translator.component.RorComponent;
 import eu.dissco.core.translator.exception.OrganisationNotRorId;
+import eu.dissco.core.translator.schema.Citations;
 import eu.dissco.core.translator.schema.DigitalSpecimen;
 import eu.dissco.core.translator.schema.DigitalSpecimen.OdsTopicDiscipline;
 import eu.dissco.core.translator.schema.Georeference;
@@ -24,10 +25,14 @@ import eu.dissco.core.translator.terms.specimen.RecordedBy;
 import eu.dissco.core.translator.terms.specimen.RightsHolder;
 import eu.dissco.core.translator.terms.specimen.TopicDiscipline;
 import eu.dissco.core.translator.terms.specimen.citation.BibliographicCitation;
+import eu.dissco.core.translator.terms.specimen.citation.CitationRemarks;
+import eu.dissco.core.translator.terms.specimen.citation.ReferenceIri;
 import eu.dissco.core.translator.terms.specimen.identification.DateIdentified;
+import eu.dissco.core.translator.terms.specimen.identification.IdentificationRemarks;
 import eu.dissco.core.translator.terms.specimen.identification.IdentificationVerificationStatus;
 import eu.dissco.core.translator.terms.specimen.identification.IdentifiedBy;
 import eu.dissco.core.translator.terms.specimen.identification.TypeStatus;
+import eu.dissco.core.translator.terms.specimen.identification.VerbatimIdentification;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Class;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Family;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Genus;
@@ -64,8 +69,14 @@ import eu.dissco.core.translator.terms.specimen.location.georeference.Coordinate
 import eu.dissco.core.translator.terms.specimen.location.georeference.CoordinateUncertaintyInMeters;
 import eu.dissco.core.translator.terms.specimen.location.georeference.DecimalLatitude;
 import eu.dissco.core.translator.terms.specimen.location.georeference.DecimalLongitude;
+import eu.dissco.core.translator.terms.specimen.location.georeference.FootprintSpatialFit;
+import eu.dissco.core.translator.terms.specimen.location.georeference.FootprintWkt;
 import eu.dissco.core.translator.terms.specimen.location.georeference.GeodeticDatum;
 import eu.dissco.core.translator.terms.specimen.location.georeference.GeoreferenceProtocol;
+import eu.dissco.core.translator.terms.specimen.location.georeference.GeoreferenceRemarks;
+import eu.dissco.core.translator.terms.specimen.location.georeference.GeoreferenceSources;
+import eu.dissco.core.translator.terms.specimen.location.georeference.GeoreferencedDate;
+import eu.dissco.core.translator.terms.specimen.location.georeference.PointRadiusSpatialFit;
 import eu.dissco.core.translator.terms.specimen.occurence.Behavior;
 import eu.dissco.core.translator.terms.specimen.occurence.DataGeneralizations;
 import eu.dissco.core.translator.terms.specimen.occurence.DateCollected;
@@ -114,6 +125,8 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class DigitalSpecimenDirector {
 
+  private static final String EXTENSION = "extensions";
+
   private final ObjectMapper mapper;
   private final TermMapper termMapper;
   private final RorComponent rorComponent;
@@ -134,20 +147,74 @@ public class DigitalSpecimenDirector {
   public DigitalSpecimen constructDigitalSpecimen(DigitalSpecimen ds, boolean dwc, JsonNode data)
       throws OrganisationNotRorId {
     assembleDigitalSpecimenTerms(data, ds, dwc);
-    assembleOccurrenceTerms(data, ds, dwc);
-    assembleIdentifications(data, ds, dwc);
-    assembleIdentifiers(data, ds);
-    assembleEntityRelationships(data, ds);
-    assembleCitations(data, ds, dwc);
+    ds.withOccurrences(assembleOccurrenceTerms(data, dwc));
+    ds.withDwcIdentification(assembleIdentifications(data, dwc));
+    ds.withIdentifiers(assembleIdentifiers(data));
+    ds.withEntityRelationships(assembleEntityRelationships(data));
+    ds.withCitations(assembleSpecimenCitations(data, dwc));
     return ds;
   }
 
-  private DigitalSpecimen assembleCitations(JsonNode data,
-      eu.dissco.core.translator.schema.DigitalSpecimen ds, boolean dwc) {
-    var citation = new eu.dissco.core.translator.schema.Citations()
-        .withBibliographicCitation(termMapper.retrieveTerm(new BibliographicCitation(), data, dwc));
-    ds.withCitations(List.of(citation));
-    return ds;
+  private List<Citations> assembleSpecimenCitations(JsonNode data, boolean dwc) {
+    List<Citations> citations;
+    if (dwc) {
+      citations = gatherDwcaCitations(data, dwc);
+    } else {
+      citations = gatherAbcdCitations(data, dwc, "abcd:unitReferences/unitReference/");
+    }
+    return citations;
+  }
+
+  private List<Citations> assembleIdentificationCitations(JsonNode data, boolean dwc) {
+    List<Citations> citations = List.of();
+    if (dwc) {
+      log.debug("Reference extension has been added to the occurence");
+    } else {
+      citations = gatherAbcdCitations(data, dwc, "references/reference/");
+    }
+    return citations;
+  }
+
+  private List<Citations> gatherAbcdCitations(JsonNode data,
+      boolean dwc, String subpath) {
+    var citations = new ArrayList<Citations>();
+    var iterateOverElements = true;
+    var count = 0;
+    while (iterateOverElements) {
+      var citationNode = getSubJsonAbcd(data, count, subpath);
+      if (!citationNode.isEmpty()) {
+        citations.add(createCitation(citationNode, dwc));
+        count++;
+      } else {
+        iterateOverElements = false;
+      }
+    }
+    return citations;
+  }
+
+  private Citations createCitation(JsonNode data,
+      boolean dwc) {
+    return new eu.dissco.core.translator.schema.Citations()
+        .withDctermsBibliographicCitation(
+            termMapper.retrieveTerm(new BibliographicCitation(), data, dwc))
+        .withCitationRemarks(termMapper.retrieveTerm(new CitationRemarks(), data, dwc))
+        .withReferenceIri(termMapper.retrieveTerm(new ReferenceIri(), data, dwc));
+  }
+
+  private List<eu.dissco.core.translator.schema.Citations> gatherDwcaCitations(JsonNode data,
+      boolean dwc) {
+    var citations = new ArrayList<Citations>();
+    if (data.get(EXTENSION) != null
+        && data.get(EXTENSION).get("gbif:Reference") != null) {
+      var references = data.get(EXTENSION).get("gbif:Reference");
+      for (int i = 0; i < references.size(); i++) {
+        var identification = references.get(i);
+        citations.add(createCitation(identification, dwc));
+      }
+    } else {
+      citations.add(createCitation(data, dwc));
+    }
+    return citations;
   }
 
   private DigitalSpecimen assembleDigitalSpecimenTerms(JsonNode data, DigitalSpecimen ds,
@@ -173,13 +240,12 @@ public class DigitalSpecimenDirector {
   }
 
 
-  private DigitalSpecimen assembleEntityRelationships(
-      JsonNode data, DigitalSpecimen ds) {
-    return ds;
+  private List<eu.dissco.core.translator.schema.EntityRelationships> assembleEntityRelationships(
+      JsonNode data) {
+    return List.of();
   }
 
-  private DigitalSpecimen assembleIdentifiers(JsonNode data,
-      DigitalSpecimen ds) {
+  private List<Identifiers> assembleIdentifiers(JsonNode data) {
     var identifiers = new ArrayList<Identifiers>();
     for (String identifierTerm : identifierTerms()) {
       if (data.get(identifierTerm) != null) {
@@ -189,17 +255,17 @@ public class DigitalSpecimenDirector {
         identifiers.add(identifier);
       }
     }
-    return ds.withIdentifiers(identifiers);
+    return identifiers;
   }
 
-  private DigitalSpecimen assembleIdentifications(JsonNode data, DigitalSpecimen ds, boolean dwc) {
+  private List<Identifications> assembleIdentifications(JsonNode data, boolean dwc) {
     List<Identifications> identifications = null;
     if (dwc) {
       identifications = gatherDwcaIdentifications(data, dwc);
     } else {
       identifications = gatherAbcdIdentifications(data, dwc);
     }
-    return ds.withDwcIdentification(identifications);
+    return identifications;
   }
 
   private List<eu.dissco.core.translator.schema.Identifications> gatherAbcdIdentifications(
@@ -208,7 +274,7 @@ public class DigitalSpecimenDirector {
     var iterateOverElements = true;
     var count = 0;
     while (iterateOverElements) {
-      var identificationNode = getIdentificationJson(data, count);
+      var identificationNode = getSubJsonAbcd(data, count, "abcd:identifications/identification/");
       if (!identificationNode.isEmpty()) {
         identifications.add(createIdentification(identificationNode, dwc));
         count++;
@@ -219,12 +285,12 @@ public class DigitalSpecimenDirector {
     return identifications;
   }
 
-  private JsonNode getIdentificationJson(JsonNode data, int count) {
+  private JsonNode getSubJsonAbcd(JsonNode data, int count, String path) {
     var identificationNode = mapper.createObjectNode();
     data.fields().forEachRemaining(field -> {
-      if (field.getKey().startsWith("abcd:identifications/identification/" + count)) {
+      if (field.getKey().startsWith(path + count)) {
         identificationNode.put(
-            field.getKey().replace("abcd:identifications/identification/" + count + "/", ""),
+            field.getKey().replace(path + count + "/", ""),
             field.getValue());
       }
     });
@@ -234,9 +300,9 @@ public class DigitalSpecimenDirector {
   private List<Identifications> gatherDwcaIdentifications(
       JsonNode data, boolean dwc) {
     var mappedIdentifications = new ArrayList<Identifications>();
-    if (data.get("extensions") != null
-        && data.get("extensions").get("dwc:Identification") != null) {
-      var identifications = data.get("extensions").get("dwc:Identification");
+    if (data.get(EXTENSION) != null
+        && data.get(EXTENSION).get("dwc:Identification") != null) {
+      var identifications = data.get(EXTENSION).get("dwc:Identification");
       for (int i = 0; i < identifications.size(); i++) {
         var identification = identifications.get(i);
         mappedIdentifications.add(createIdentification(identification, dwc));
@@ -269,27 +335,32 @@ public class DigitalSpecimenDirector {
         .withDwcTypeStatus(termMapper.retrieveTerm(new TypeStatus(), data, dwc))
         .withDwcDateIdentified(termMapper.retrieveTerm(new DateIdentified(), data, dwc))
         .withDwcIdentifiedBy(termMapper.retrieveTerm(new IdentifiedBy(), data, dwc))
-        .withTaxonIdentifications(List.of(mappedTaxonIdentification));
+        .withDwcIdentificationRemarks(
+            termMapper.retrieveTerm(new IdentificationRemarks(), data, dwc))
+        .withDwcVerbatimIdentification(
+            termMapper.retrieveTerm(new VerbatimIdentification(), data, dwc))
+        .withTaxonIdentifications(List.of(mappedTaxonIdentification))
+        .withCitations(assembleIdentificationCitations(data, dwc));
   }
 
-  private eu.dissco.core.translator.schema.DigitalSpecimen assembleOccurrenceTerms(JsonNode data,
-      eu.dissco.core.translator.schema.DigitalSpecimen ds, boolean dwc) {
+
+  private List<eu.dissco.core.translator.schema.Occurrences> assembleOccurrenceTerms(JsonNode data,
+      boolean dwc) {
     var georeference = new Georeference()
         .withDwcDecimalLatitude(
-            termMapper.retrieveTerm(new DecimalLatitude(), data, dwc) != null ? Double.valueOf(
-                termMapper.retrieveTerm(new DecimalLatitude(), data, dwc)) : null)
-        .withDwcDecimalLongitude(
-            termMapper.retrieveTerm(new DecimalLongitude(), data, dwc) != null ? Double.valueOf(
-                termMapper.retrieveTerm(new DecimalLongitude(), data, dwc)) : null)
+            parseToDouble(new DecimalLatitude(), data, dwc))
+        .withDwcDecimalLongitude(parseToDouble(new DecimalLongitude(), data, dwc))
         .withDwcGeodeticDatum(termMapper.retrieveTerm(new GeodeticDatum(), data, dwc))
         .withDwcGeoreferenceProtocol(termMapper.retrieveTerm(new GeoreferenceProtocol(), data, dwc))
-        .withDwcCoordinatePrecision(
-            termMapper.retrieveTerm(new CoordinatePrecision(), data, dwc) != null ? Double.valueOf(
-                termMapper.retrieveTerm(new CoordinatePrecision(), data, dwc)) : null)
-        .withDwcCoordinateUncertaintyInMeters(
-            termMapper.retrieveTerm(new CoordinateUncertaintyInMeters(), data, dwc) != null
-                ? Double.valueOf(
-                termMapper.retrieveTerm(new CoordinateUncertaintyInMeters(), data, dwc)) : null);
+        .withDwcCoordinatePrecision(parseToDouble(new CoordinatePrecision(), data, dwc))
+        .withDwcCoordinateUncertaintyInMeters(parseToDouble(new CoordinateUncertaintyInMeters(), data, dwc))
+        .withDwcFootprintSpatialFit(parseToInteger(new FootprintSpatialFit(), data, dwc))
+        .withDwcFootprintSrs(termMapper.retrieveTerm(new FootprintSpatialFit(), data, dwc))
+        .withDwcFootprintWkt(termMapper.retrieveTerm(new FootprintWkt(), data, dwc))
+        .withDwcGeodeticDatum(termMapper.retrieveTerm(new GeoreferencedDate(), data, dwc))
+        .withDwcGeoreferenceRemarks(termMapper.retrieveTerm(new GeoreferenceRemarks(), data, dwc))
+        .withDwcGeoreferenceSources(termMapper.retrieveTerm(new GeoreferenceSources(), data, dwc))
+        .withDwcPointRadiusSpatialFit(parseToInteger(new PointRadiusSpatialFit(), data, dwc));
     var geologicalContext = new eu.dissco.core.translator.schema.GeologicalContext()
         .withDwcLowestBiostratigraphicZone(
             termMapper.retrieveTerm(new LowestBiostratigraphicZone(), data, dwc))
@@ -326,14 +397,12 @@ public class DigitalSpecimenDirector {
         .withDwcStateProvince(termMapper.retrieveTerm(new StateProvince(), data, dwc))
         .withDwcWaterBody(termMapper.retrieveTerm(new WaterBody(), data, dwc))
         .withDwcHigherGeography(termMapper.retrieveTerm(new HigherGeography(), data, dwc))
-        .withDwcMaximumDepthInMeters(parseToInteger(termMapper.retrieveTerm(new MaximumDepthInMeters(), data, dwc)))
-        .withDwcMaximumDistanceAboveSurfaceInMeters(parseToInteger(
-            termMapper.retrieveTerm(new MaximumDistanceAboveSurfaceInMeters(), data, dwc)))
-        .withDwcMaximumElevationInMeters(parseToInteger(
-            termMapper.retrieveTerm(new MaximumElevationInMeters(), data, dwc)))
-        .withDwcMinimumDepthInMeters(parseToInteger(termMapper.retrieveTerm(new MinimumDepthInMeters(), data, dwc)))
-        .withDwcMinimumDistanceAboveSurfaceInMeters(parseToInteger(termMapper.retrieveTerm(new MinimumDistanceAboveSurfaceInMeters(), data, dwc)))
-        .withDwcMinimumElevationInMeters(parseToInteger(termMapper.retrieveTerm(new MinimumElevationInMeters(), data, dwc)))
+        .withDwcMaximumDepthInMeters(parseToDouble(new MaximumDepthInMeters(), data, dwc))
+        .withDwcMaximumDistanceAboveSurfaceInMeters(parseToDouble(new MaximumDistanceAboveSurfaceInMeters(), data, dwc))
+        .withDwcMaximumElevationInMeters(parseToDouble(new MaximumElevationInMeters(), data, dwc))
+        .withDwcMinimumDepthInMeters(parseToDouble(new MinimumDepthInMeters(), data, dwc))
+        .withDwcMinimumDistanceAboveSurfaceInMeters(parseToDouble(new MinimumDistanceAboveSurfaceInMeters(), data, dwc))
+        .withDwcMinimumElevationInMeters(parseToDouble(new MinimumElevationInMeters(), data, dwc))
         .withDwcVerticalDatum(termMapper.retrieveTerm(new VerticalDatum(), data, dwc))
         .withDwcLocationAccordingTo(termMapper.retrieveTerm(new LocationAccordingTo(), data, dwc))
         .withDwcLocationRemarks(termMapper.retrieveTerm(new LocationRemarks(), data, dwc))
@@ -372,16 +441,29 @@ public class DigitalSpecimenDirector {
         .withLocation(location)
         .withAssertions(assertions);
 
-    return ds.withOccurrences(List.of(occurrence));
+    return List.of(occurrence);
   }
 
-  private Integer parseToInteger(String value) {
+  private Integer parseToInteger(Term term, JsonNode data, boolean dwc) {
+    var value = termMapper.retrieveTerm(term, data, dwc);
     try {
       if (value != null) {
         return Integer.valueOf(value);
       }
     } catch (NumberFormatException ex) {
-      log.warn("Unable to parse value: {} to a number", value);
+      log.warn("Unable to parse value: {} to an integer for term: {}", value, term.getTerm());
+    }
+    return null;
+  }
+
+  private Double parseToDouble(Term term, JsonNode data, boolean dwc) {
+    var value = termMapper.retrieveTerm(term, data, dwc);
+    try {
+      if (value != null) {
+        return Double.valueOf(value);
+      }
+    } catch (NumberFormatException ex) {
+      log.warn("Unable to parse value: {} to a double for term: {}", value, term.getTerm());
     }
     return null;
   }

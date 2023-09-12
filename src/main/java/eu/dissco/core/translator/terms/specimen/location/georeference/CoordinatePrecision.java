@@ -5,13 +5,20 @@ import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
 public class CoordinatePrecision extends Term {
+
   public static final String TERM = DWC_PREFIX + "coordinatePrecision";
-
   private final List<String> dwcaTerms = List.of(TERM);
-
+  private final List<String> abcdTerms = List.of(
+      "abcd:gathering/siteCoordinateSets/siteCoordinates/0/coordinatesLatLong/iSOAccuracy",
+      "abcd:gathering/siteCoordinateSets/siteCoordinates/0/coordinatesLatLong/accuracyStatement");
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
     return super.searchJsonForStringTerm(unit, dwcaTerms);
+  }
+
+  @Override
+  public String retrieveFromABCD(JsonNode unit) {
+    return super.searchJsonForStringTerm(unit, abcdTerms);
   }
 
   @Override

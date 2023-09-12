@@ -1,11 +1,11 @@
-package eu.dissco.core.translator.terms.specimen;
+package eu.dissco.core.translator.terms.specimen.identification.taxonomy;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
-public class DcTermsType extends Term {
-  public static final String TERM = "dcterms:type";
+public class TaxonRemarks extends AbstractTaxonomy{
+
+  public static final String TERM = DWC_PREFIX + "taxonRemarks";
 
   private final List<String> dwcaTerms = List.of(TERM);
 

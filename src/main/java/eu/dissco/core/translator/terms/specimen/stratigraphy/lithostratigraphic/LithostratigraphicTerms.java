@@ -1,15 +1,17 @@
-package eu.dissco.core.translator.terms.specimen.location.georeference;
+package eu.dissco.core.translator.terms.specimen.stratigraphy.lithostratigraphic;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
-public class CoordinateUncertaintyInMeters extends Term {
+public class LithostratigraphicTerms extends Term {
+  public static final String TERM = DWC_PREFIX + "lithostratigraphicTerms";
 
-  public static final String TERM = DWC_PREFIX + "coordinateUncertaintyInMeters";
   private final List<String> dwcaTerms = List.of(TERM);
+  // Take the first lithostratigraphicAttribution we can find
   private final List<String> abcdTerms = List.of(
-      "abcd:gathering/siteCoordinateSets/siteCoordinates/0/coordinatesLatLong/coordinateErrorDistanceInMeters");
+      "abcd:gathering/stratigraphy/lithostratigraphicTerms/lithostratigraphicTerm/0/term");
+
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
     return super.searchJsonForStringTerm(unit, dwcaTerms);
