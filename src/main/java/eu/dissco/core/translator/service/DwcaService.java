@@ -28,6 +28,7 @@ import eu.dissco.core.translator.terms.Term;
 import eu.dissco.core.translator.terms.TermMapper;
 import eu.dissco.core.translator.terms.media.AccessUri;
 import eu.dissco.core.translator.terms.media.Format;
+import eu.dissco.core.translator.terms.media.MediaHost;
 import eu.dissco.core.translator.terms.media.MediaType;
 import eu.dissco.core.translator.terms.specimen.DwcaId;
 import eu.dissco.core.translator.terms.specimen.OrganisationId;
@@ -174,24 +175,25 @@ public class DwcaService implements WebClientService {
   private void processMedia(String recordId, JsonNode fullDigitalSpecimen)
       throws JsonProcessingException {
     var extensions = fullDigitalSpecimen.get(EXTENSIONS);
+    var mediaHost = termMapper.retrieveFromDWCA(new OrganisationId(), fullDigitalSpecimen);
     if (fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA) != null) {
-      publishAssociatedMedia(recordId, fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA).asText());
+      publishAssociatedMedia(recordId, fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA).asText(), mediaHost);
     } else if (extensions != null) {
       if (extensions.get(GBIF_MULTIMEDIA) != null) {
         var imageArray = extensions.get(GBIF_MULTIMEDIA);
         if (imageArray.isArray() && imageArray.size() > 0) {
-          extractMultiMedia(recordId, imageArray);
+          extractMultiMedia(recordId, imageArray, mediaHost);
         }
       } else if (extensions.get(AC_MULTIMEDIA) != null) {
         var imageArray = extensions.get(AC_MULTIMEDIA);
         if (imageArray.isArray() && imageArray.size() > 0) {
-          extractMultiMedia(recordId, imageArray);
+          extractMultiMedia(recordId, imageArray, mediaHost);
         }
       }
     }
   }
 
-  private void extractMultiMedia(String recordId, JsonNode imageArray)
+  private void extractMultiMedia(String recordId, JsonNode imageArray, String mediaHost)
       throws JsonProcessingException {
     for (var image : imageArray) {
       var type = termMapper.retrieveFromDWCA(new MediaType(), image);
@@ -199,13 +201,13 @@ public class DwcaService implements WebClientService {
       var digitalMediaObject = new DigitalMediaObject(
           type,
           recordId,
-          harmonizeMedia(image),
+          harmonizeMedia(image, mediaHost),
           image);
       publishDigitalMediaObject(digitalMediaObject);
     }
   }
 
-  private void publishAssociatedMedia(String recordId, String associatedMedia)
+  private void publishAssociatedMedia(String recordId, String associatedMedia, String mediaHost)
       throws JsonProcessingException {
     log.debug("Digital Specimen: {}, has associatedMedia {}", recordId,
         associatedMedia);
@@ -214,16 +216,17 @@ public class DwcaService implements WebClientService {
       var digitalMediaObject = new DigitalMediaObject(
           UNKNOWN,
           recordId,
-          harmonizeAssociatedMedia(mediaUrl),
+          harmonizeAssociatedMedia(mediaUrl, mediaHost),
           null);
       publishDigitalMediaObject(digitalMediaObject);
     }
   }
 
-  private JsonNode harmonizeAssociatedMedia(String mediaUrl) {
+  private JsonNode harmonizeAssociatedMedia(String mediaUrl, String mediaHost) {
     var attributes = mapper.createObjectNode();
     attributes.put(AccessUri.TERM, mediaUrl);
     attributes.put(SourceSystemId.TERM, webClientProperties.getSourceSystemId());
+    attributes.put(MediaHost.TERM, mediaHost);
     return attributes;
   }
 
@@ -372,12 +375,13 @@ public class DwcaService implements WebClientService {
     log.info("Finished posting extensions archive to database");
   }
 
-  private JsonNode harmonizeMedia(JsonNode media) {
+  private JsonNode harmonizeMedia(JsonNode media, String mediaHost) {
     var attributes = mapper.createObjectNode();
     attributes.put(AccessUri.TERM, termMapper.retrieveFromDWCA(new AccessUri(), media));
     attributes.put(SourceSystemId.TERM, webClientProperties.getSourceSystemId());
     attributes.put(Format.TERM, termMapper.retrieveFromDWCA(new Format(), media));
     attributes.put(License.TERM, termMapper.retrieveFromDWCA(new License(), media));
+    attributes.put(MediaHost.TERM, mediaHost);
     return attributes;
   }
 
