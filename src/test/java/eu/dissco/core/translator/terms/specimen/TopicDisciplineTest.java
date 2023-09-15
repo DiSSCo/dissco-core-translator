@@ -50,11 +50,9 @@ class TopicDisciplineTest {
     var unit = MAPPER.createObjectNode();
     unit.put("abcd:recordBasis", basisOfRecord);
     unit.put(
-        "abcd:identifications/identification/0/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonRank",
-        "regnum");
+        "result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonRank", "regnum");
     unit.put(
-        "abcd:identifications/identification/0/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonName",
-        kingdom);
+        "result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonName", kingdom);
 
     // When
     var result = topicDiscipline.retrieveFromABCD(unit);

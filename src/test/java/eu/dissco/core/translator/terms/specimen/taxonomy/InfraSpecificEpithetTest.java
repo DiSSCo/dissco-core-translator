@@ -31,13 +31,8 @@ class InfraSpecificEpithetTest {
     // Given
     var unit = MAPPER.createObjectNode();
     unit.put(
-        "abcd:identifications/identification/0/result/taxonIdentified/nameAtomised/botanical/genusOrMonomial",
-        "Fridericia Mart.");
-    unit.put("abcd:identifications/identification/0/preferredFlag", false);
-    unit.put(
-        "abcd:identifications/identification/1/result/taxonIdentified/nameAtomised/botanical/infraspecificEpithet",
+        "result/taxonIdentified/scientificName/nameAtomised/botanical/infraspecificEpithet",
         "thyrsoidea");
-    unit.put("abcd:identifications/identification/1/preferredFlag", true);
 
     // When
     var result = infraSpecificEpithet.retrieveFromABCD(unit);

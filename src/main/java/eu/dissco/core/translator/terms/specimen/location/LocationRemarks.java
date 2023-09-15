@@ -5,6 +5,7 @@ import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
 public class LocationRemarks extends Term {
+
   public static final String TERM = DWC_PREFIX + "locationRemarks";
 
   private final List<String> dwcaTerms = List.of(TERM);
@@ -12,12 +13,12 @@ public class LocationRemarks extends Term {
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
-    return super.searchJsonForStringTerm(unit, dwcaTerms);
+    return super.searchJsonForTerm(unit, dwcaTerms);
   }
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    return super.searchJsonForStringTerm(unit, abcdTerms);
+    return super.searchJsonForTerm(unit, abcdTerms);
   }
 
   @Override

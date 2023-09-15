@@ -29,23 +29,11 @@ class GenusTest {
   @Test
   void testRetrieveFromDWCAExtensionNoVerified() {
     // Given
-    var unit = MAPPER.createObjectNode();
-    var extension = MAPPER.createObjectNode();
-    var identificationUnverified = MAPPER.createObjectNode();
-    identificationUnverified.put("dwc:genus", "Rhinopoma");
-    identificationUnverified.put("dwc:identificationVerificationStatus", "0");
     var identificationVerified = MAPPER.createObjectNode();
     identificationVerified.put("dwc:genus", "Rhinopoma");
-    identificationVerified.put("dwc:identificationVerificationStatus", "1");
-    var identifications = MAPPER.createArrayNode();
-    identifications.add(identificationUnverified);
-    identifications.add(identificationVerified);
-    extension.set("dwc:Identification", identifications);
-    unit.set("extensions", extension);
-    unit.put("ods:taxonIdentificationIndex", "1");
 
     // When
-    var result = genus.retrieveFromDWCA(unit);
+    var result = genus.retrieveFromDWCA(identificationVerified);
 
     // Then
     assertThat(result).isEqualTo("Rhinopoma");
@@ -56,32 +44,8 @@ class GenusTest {
     // Given
     var unit = MAPPER.createObjectNode();
     unit.put(
-        "abcd:identifications/identification/0/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonRank",
-        "classis");
-    unit.put(
-        "abcd:identifications/identification/0/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonName",
-        "Eurotatoria");
-    unit.put(
-        "abcd:identifications/identification/0/result/taxonIdentified/nameAtomised/botanical/genusOrMonomial",
-        "Fridericia Mart.");
-    unit.put("abcd:identifications/identification/0/preferredFlag", false);
-    unit.put(
-        "abcd:identifications/identification/1/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonRank",
-        "classis");
-    unit.put(
-        "abcd:identifications/identification/1/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonName",
-        "Mammalia");
-    unit.put(
-        "abcd:identifications/identification/1/result/taxonIdentified/higherTaxa/higherTaxon/1/higherTaxonRank",
-        "regnum");
-    unit.put(
-        "abcd:identifications/identification/1/result/taxonIdentified/higherTaxa/higherTaxon/1/higherTaxonName",
-        "Animalia");
-    unit.put(
-        "abcd:identifications/identification/1/result/taxonIdentified/nameAtomised/botanical/genusOrMonomial",
+        "result/taxonIdentified/scientificName/nameAtomised/botanical/genusOrMonomial",
         "Arrabidaea");
-
-    unit.put("abcd:identifications/identification/1/preferredFlag", true);
 
     // When
     var result = genus.retrieveFromABCD(unit);

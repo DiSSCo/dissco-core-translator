@@ -12,12 +12,7 @@ public class PhysicalSpecimenCollection extends Term {
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
-    return super.searchJsonForStringTerm(unit, dwcaTerms);
-  }
-  @Override
-  public eu.dissco.core.translator.schema.DigitalSpecimen retrieveFromDWCANew(
-      eu.dissco.core.translator.schema.DigitalSpecimen ds, JsonNode unit) {
-    return ds.withDwcCollectionId(super.searchJsonForStringTerm(unit, dwcaTerms));
+    return super.searchJsonForTerm(unit, dwcaTerms);
   }
 
   @Override

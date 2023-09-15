@@ -47,7 +47,7 @@ class CollectorTest {
   void testRetrieveFromABCDGatheringAgentsText() {
     // Given
     var unit = MAPPER.createObjectNode();
-    unit.put("abcd:gathering/agents/gatheringAgentsText", COLLECTOR_NAME);
+    unit.put("abcd:gathering/agents/gatheringAgentsText/value", COLLECTOR_NAME);
 
     // When
     var result = collector.retrieveFromABCD(unit);

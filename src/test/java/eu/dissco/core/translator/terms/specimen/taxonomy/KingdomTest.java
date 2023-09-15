@@ -31,11 +31,9 @@ class KingdomTest {
     // Given
     var unit = MAPPER.createObjectNode();
     unit.put(
-        "abcd:identifications/identification/0/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonRank",
-        "regnum");
+        "result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonRank", "regnum");
     unit.put(
-        "abcd:identifications/identification/0/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonName",
-        "Plantae");
+        "result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonName", "Plantae");
 
     // When
     var result = kingdom.retrieveFromABCD(unit);

@@ -5,13 +5,27 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.dissco.core.translator.component.RorComponent;
 import eu.dissco.core.translator.exception.OrganisationNotRorId;
 import eu.dissco.core.translator.schema.Citations;
+import eu.dissco.core.translator.schema.DigitalEntity;
+import eu.dissco.core.translator.schema.DigitalEntity.DctermsType;
 import eu.dissco.core.translator.schema.DigitalSpecimen;
+import eu.dissco.core.translator.schema.DigitalSpecimen.OdsPhysicalSpecimenIdType;
 import eu.dissco.core.translator.schema.DigitalSpecimen.OdsTopicDiscipline;
+import eu.dissco.core.translator.schema.EntityRelationships;
 import eu.dissco.core.translator.schema.Georeference;
 import eu.dissco.core.translator.schema.Identifications;
 import eu.dissco.core.translator.schema.Identifiers;
 import eu.dissco.core.translator.schema.Occurrences.DwcOccurrenceStatus;
 import eu.dissco.core.translator.schema.TaxonIdentification;
+import eu.dissco.core.translator.terms.media.AccessUri;
+import eu.dissco.core.translator.terms.media.Created;
+import eu.dissco.core.translator.terms.media.Creator;
+import eu.dissco.core.translator.terms.media.Description;
+import eu.dissco.core.translator.terms.media.Format;
+import eu.dissco.core.translator.terms.media.MediaAssertions;
+import eu.dissco.core.translator.terms.media.MediaType;
+import eu.dissco.core.translator.terms.media.Rights;
+import eu.dissco.core.translator.terms.media.Source;
+import eu.dissco.core.translator.terms.media.WebStatement;
 import eu.dissco.core.translator.terms.specimen.AccessRights;
 import eu.dissco.core.translator.terms.specimen.BasisOfRecord;
 import eu.dissco.core.translator.terms.specimen.DatasetName;
@@ -75,6 +89,7 @@ import eu.dissco.core.translator.terms.specimen.location.georeference.GeodeticDa
 import eu.dissco.core.translator.terms.specimen.location.georeference.GeoreferenceProtocol;
 import eu.dissco.core.translator.terms.specimen.location.georeference.GeoreferenceRemarks;
 import eu.dissco.core.translator.terms.specimen.location.georeference.GeoreferenceSources;
+import eu.dissco.core.translator.terms.specimen.location.georeference.GeoreferencedBy;
 import eu.dissco.core.translator.terms.specimen.location.georeference.GeoreferencedDate;
 import eu.dissco.core.translator.terms.specimen.location.georeference.PointRadiusSpatialFit;
 import eu.dissco.core.translator.terms.specimen.occurence.Behavior;
@@ -127,6 +142,7 @@ public class DigitalSpecimenDirector {
 
   private static final String EXTENSION = "extensions";
 
+
   private final ObjectMapper mapper;
   private final TermMapper termMapper;
   private final RorComponent rorComponent;
@@ -141,6 +157,8 @@ public class DigitalSpecimenDirector {
     list.add("abcd:unitIDNumeric");
     list.add("abcd:unitGUID");
     list.add("abcd:recordURI");
+    list.add("dcterms:identifier");
+    list.add("abcd:id");
     return list;
   }
 
@@ -150,8 +168,8 @@ public class DigitalSpecimenDirector {
     ds.withOccurrences(assembleOccurrenceTerms(data, dwc));
     ds.withDwcIdentification(assembleIdentifications(data, dwc));
     ds.withIdentifiers(assembleIdentifiers(data));
-    ds.withEntityRelationships(assembleEntityRelationships(data));
     ds.withCitations(assembleSpecimenCitations(data, dwc));
+    ds.withEntityRelationships(assembleDigitalSpecimenEntityRelationships(ds));
     return ds;
   }
 
@@ -240,9 +258,31 @@ public class DigitalSpecimenDirector {
   }
 
 
-  private List<eu.dissco.core.translator.schema.EntityRelationships> assembleEntityRelationships(
-      JsonNode data) {
-    return List.of();
+  private List<eu.dissco.core.translator.schema.EntityRelationships> assembleDigitalSpecimenEntityRelationships(
+      DigitalSpecimen ds) {
+    var relationships = new ArrayList<EntityRelationships>();
+    relationships.add(new EntityRelationships().withEntityRelationshipType("hasOrganisationId")
+        .withObjectEntityIri(ds.getDwcInstitutionId()));
+    relationships.add(new EntityRelationships().withEntityRelationshipType("hasSourceSystemId")
+        .withObjectEntityIri(ds.getOdsSourceSystem()));
+    if (ds.getOdsPhysicalSpecimenIdType().equals(OdsPhysicalSpecimenIdType.RESOLVABLE)) {
+      relationships.add(
+          new EntityRelationships().withEntityRelationshipType("hasPhysicalIdentifier")
+              .withObjectEntityIri(ds.getOdsPhysicalSpecimenId()));
+    }
+    if (ds.getDctermsLicense().startsWith("http")) {
+      relationships.add(new EntityRelationships().withEntityRelationshipType("hasLicense")
+          .withObjectEntityIri(ds.getDctermsLicense()));
+    }
+    if (ds.getCitations() != null) {
+      for (Citations citation : ds.getCitations()) {
+        if (citation.getReferenceIri() != null) {
+          relationships.add(new EntityRelationships().withEntityRelationshipType("hasReference")
+              .withObjectEntityIri(citation.getReferenceIri()));
+        }
+      }
+    }
+    return relationships;
   }
 
   private List<Identifiers> assembleIdentifiers(JsonNode data) {
@@ -353,8 +393,10 @@ public class DigitalSpecimenDirector {
         .withDwcGeodeticDatum(termMapper.retrieveTerm(new GeodeticDatum(), data, dwc))
         .withDwcGeoreferenceProtocol(termMapper.retrieveTerm(new GeoreferenceProtocol(), data, dwc))
         .withDwcCoordinatePrecision(parseToDouble(new CoordinatePrecision(), data, dwc))
-        .withDwcCoordinateUncertaintyInMeters(parseToDouble(new CoordinateUncertaintyInMeters(), data, dwc))
+        .withDwcCoordinateUncertaintyInMeters(
+            parseToDouble(new CoordinateUncertaintyInMeters(), data, dwc))
         .withDwcFootprintSpatialFit(parseToInteger(new FootprintSpatialFit(), data, dwc))
+        .withDwcGeoreferencedBy(termMapper.retrieveTerm(new GeoreferencedBy(), data, dwc))
         .withDwcFootprintSrs(termMapper.retrieveTerm(new FootprintSpatialFit(), data, dwc))
         .withDwcFootprintWkt(termMapper.retrieveTerm(new FootprintWkt(), data, dwc))
         .withDwcGeodeticDatum(termMapper.retrieveTerm(new GeoreferencedDate(), data, dwc))
@@ -398,10 +440,12 @@ public class DigitalSpecimenDirector {
         .withDwcWaterBody(termMapper.retrieveTerm(new WaterBody(), data, dwc))
         .withDwcHigherGeography(termMapper.retrieveTerm(new HigherGeography(), data, dwc))
         .withDwcMaximumDepthInMeters(parseToDouble(new MaximumDepthInMeters(), data, dwc))
-        .withDwcMaximumDistanceAboveSurfaceInMeters(parseToDouble(new MaximumDistanceAboveSurfaceInMeters(), data, dwc))
+        .withDwcMaximumDistanceAboveSurfaceInMeters(
+            parseToDouble(new MaximumDistanceAboveSurfaceInMeters(), data, dwc))
         .withDwcMaximumElevationInMeters(parseToDouble(new MaximumElevationInMeters(), data, dwc))
         .withDwcMinimumDepthInMeters(parseToDouble(new MinimumDepthInMeters(), data, dwc))
-        .withDwcMinimumDistanceAboveSurfaceInMeters(parseToDouble(new MinimumDistanceAboveSurfaceInMeters(), data, dwc))
+        .withDwcMinimumDistanceAboveSurfaceInMeters(
+            parseToDouble(new MinimumDistanceAboveSurfaceInMeters(), data, dwc))
         .withDwcMinimumElevationInMeters(parseToDouble(new MinimumElevationInMeters(), data, dwc))
         .withDwcVerticalDatum(termMapper.retrieveTerm(new VerticalDatum(), data, dwc))
         .withDwcLocationAccordingTo(termMapper.retrieveTerm(new LocationAccordingTo(), data, dwc))
@@ -475,4 +519,59 @@ public class DigitalSpecimenDirector {
       throw new OrganisationNotRorId(organisationId + " is not a valid ror");
     }
   }
+
+  public eu.dissco.core.translator.schema.DigitalEntity constructDigitalMediaObjects(boolean dwc,
+      JsonNode mediaRecord, String organisationId) throws OrganisationNotRorId {
+    var digitalMedioObject = new DigitalEntity()
+        .withDwcInstitutionId(organisationId)
+        .withDwcInstitutionName(rorComponent.getRoRId(minifyOrganisationId(organisationId)))
+        .withAcAccessUri(termMapper.retrieveTerm(new AccessUri(), mediaRecord, dwc))
+        .withDctermsLicense(termMapper.retrieveTerm(new License(), mediaRecord, dwc))
+        .withDctermsFormat(termMapper.retrieveTerm(new Format(), mediaRecord, dwc))
+        .withDctermsType(termMapper.retrieveTerm(new MediaType(), mediaRecord, dwc) != null
+            ? DctermsType.fromValue(termMapper.retrieveTerm(new MediaType(), mediaRecord, dwc))
+            : null)
+        .withXmpRightsWebStatement(termMapper.retrieveTerm(new WebStatement(), mediaRecord, dwc))
+        .withDctermsRights(termMapper.retrieveTerm(new Rights(), mediaRecord, dwc))
+        .withDctermsAccessRights(
+            termMapper.retrieveTerm(new eu.dissco.core.translator.terms.media.AccessRights(),
+                mediaRecord, dwc))
+        .withDctermsRightsHolder(
+            termMapper.retrieveTerm(new eu.dissco.core.translator.terms.media.RightsHolder(),
+                mediaRecord, dwc))
+        .withDctermsSource(termMapper.retrieveTerm(new Source(), mediaRecord, dwc))
+        .withDctermsCreator(termMapper.retrieveTerm(new Creator(), mediaRecord, dwc))
+        .withDctermsCreated(termMapper.retrieveTerm(new Created(), mediaRecord, dwc))
+        .withDctermsModified(
+            termMapper.retrieveTerm(new eu.dissco.core.translator.terms.media.Modified(),
+                mediaRecord, dwc))
+        .withDctermsDescription(termMapper.retrieveTerm(new Description(), mediaRecord, dwc))
+        .withIdentifiers(assembleIdentifiers(mediaRecord))
+        .withAssertions(new MediaAssertions().gatherAssertions(mediaRecord, dwc));
+    digitalMedioObject.withEntityRelationships(
+        assembleDigitalMediaObjectEntityRelationships(digitalMedioObject));
+    return digitalMedioObject;
+  }
+
+  private List<EntityRelationships> assembleDigitalMediaObjectEntityRelationships(
+      eu.dissco.core.translator.schema.DigitalEntity digitalMediaObject) {
+    var relationships = new ArrayList<EntityRelationships>();
+    relationships.add(new EntityRelationships().withEntityRelationshipType("hasUrl")
+        .withObjectEntityIri(digitalMediaObject.getAcAccessUri()));
+    relationships.add(new EntityRelationships().withEntityRelationshipType("hasOrganisationId")
+        .withObjectEntityIri(digitalMediaObject.getDwcInstitutionId()));
+    if (digitalMediaObject.getDctermsLicense().startsWith("http")) {
+      relationships.add(
+          new EntityRelationships().withEntityRelationshipType("hasLicense")
+              .withObjectEntityIri(digitalMediaObject.getDctermsLicense()));
+    }
+    if (digitalMediaObject.getDctermsSource().startsWith("http")) {
+      relationships.add(new EntityRelationships().withEntityRelationshipType("hasSource")
+          .withObjectEntityIri(digitalMediaObject.getDctermsLicense()));
+    }
+    return relationships;
+  }
+
 }
+
+

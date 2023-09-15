@@ -13,12 +13,12 @@ public class EventRemark extends Term {
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
-    return super.searchJsonForStringTerm(unit, dwcaTerms);
+    return super.searchJsonForTerm(unit, dwcaTerms);
   }
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    return super.searchJsonForStringTerm(unit, abcdTerms);
+    return super.searchJsonForTerm(unit, abcdTerms);
   }
 
   @Override

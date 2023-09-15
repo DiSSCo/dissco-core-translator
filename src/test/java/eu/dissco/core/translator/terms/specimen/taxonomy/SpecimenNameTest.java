@@ -30,45 +30,15 @@ class SpecimenNameTest {
   @Test
   void testRetrieveFromDWCAExtension() {
     // Given
-    var unit = MAPPER.createObjectNode();
-    var extension = MAPPER.createObjectNode();
-    var identificationUnverified = MAPPER.createObjectNode();
-    identificationUnverified.put("dwc:scientificName", "SpecimenNameUnVerified");
-    identificationUnverified.put("dwc:identificationVerificationStatus", "0");
     var identificationVerified = MAPPER.createObjectNode();
     identificationVerified.put("dwc:scientificName", "SpecimenNameVerified");
     identificationVerified.put("dwc:identificationVerificationStatus", "1");
-    var identifications = MAPPER.createArrayNode();
-    identifications.add(identificationVerified);
-    identifications.add(identificationUnverified);
-    extension.set("dwc:Identification", identifications);
-    unit.set("extensions", extension);
 
     // When
-    var result = specimenName.retrieveFromDWCA(unit);
+    var result = specimenName.retrieveFromDWCA(identificationVerified);
 
     // Then
     assertThat(result).isEqualTo("SpecimenNameVerified");
-  }
-
-  @Test
-  void testRetrieveFromDWCAExtensionNoVerified() {
-    // Given
-    var unit = MAPPER.createObjectNode();
-    var extension = MAPPER.createObjectNode();
-    var identificationUnverified = MAPPER.createObjectNode();
-    identificationUnverified.put("dwc:scientificName", "SpecimenNameUnVerified");
-    identificationUnverified.put("dwc:identificationVerificationStatus", "0");
-    var identifications = MAPPER.createArrayNode();
-    identifications.add(identificationUnverified);
-    extension.set("dwc:Identification", identifications);
-    unit.set("extensions", extension);
-
-    // When
-    var result = specimenName.retrieveFromDWCA(unit);
-
-    // Then
-    assertThat(result).isNull();
   }
 
   @Test
@@ -77,7 +47,7 @@ class SpecimenNameTest {
     var specimenNameString = "SpecimenName";
     var unit = MAPPER.createObjectNode();
     unit.put(
-        "abcd-efg:identifications/identification/0/result/mineralRockIdentified/classifiedName/fullScientificNameString",
+        "result/mineralRockIdentified/classifiedName/fullScientificNameString",
         specimenNameString);
 
     // When
@@ -92,20 +62,8 @@ class SpecimenNameTest {
     // Given
     var unit = MAPPER.createObjectNode();
     unit.put(
-        "abcd:identifications/identification/0/preferredFlag", false);
-    unit.put(
-        "abcd:identifications/identification/0/result/taxonIdentified/scientificName/fullScientificNameString",
-        "Arrabidaea chica (Humb. & Bonpl.) B.Verl.");
-    unit.put(
-        "abcd:identifications/identification/1/preferredFlag", true);
-    unit.put(
-        "abcd:identifications/identification/1/result/taxonIdentified/scientificName/fullScientificNameString",
+        "result/taxonIdentified/scientificName/fullScientificNameString",
         "Bignonia chica Humb. & Bonpl.");
-    unit.put(
-        "abcd:identifications/identification/2/preferredFlag", false);
-    unit.put(
-        "abcd:identifications/identification/2/result/taxonIdentified/scientificName/fullScientificNameString",
-        "Arrabidaea chica var. thyrsoidea Bureau");
 
     // When
     var result = specimenName.retrieveFromABCD(unit);
@@ -120,7 +78,7 @@ class SpecimenNameTest {
     var specimenNameString = "SpecimenName";
     var unit = MAPPER.createObjectNode();
     unit.put(
-        "abcd:identifications/identification/0/result/taxonIdentified/scientificName/fullScientificNameString",
+        "result/taxonIdentified/scientificName/fullScientificNameString",
         specimenNameString);
 
     // When

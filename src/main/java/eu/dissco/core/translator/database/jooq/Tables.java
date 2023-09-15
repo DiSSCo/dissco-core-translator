@@ -11,16 +11,16 @@ import eu.dissco.core.translator.database.jooq.tables.SourceSystem;
 /**
  * Convenience access to all tables in public.
  */
-@SuppressWarnings({ "all", "unchecked", "rawtypes" })
+@SuppressWarnings({"all", "unchecked", "rawtypes"})
 public class Tables {
 
-    /**
-     * The table <code>public.mapping</code>.
-     */
-    public static final Mapping MAPPING = Mapping.MAPPING;
+  /**
+   * The table <code>public.mapping</code>.
+   */
+  public static final Mapping MAPPING = Mapping.MAPPING;
 
-    /**
-     * The table <code>public.source_system</code>.
-     */
-    public static final SourceSystem SOURCE_SYSTEM = SourceSystem.SOURCE_SYSTEM;
+  /**
+   * The table <code>public.source_system</code>.
+   */
+  public static final SourceSystem SOURCE_SYSTEM = SourceSystem.SOURCE_SYSTEM;
 }

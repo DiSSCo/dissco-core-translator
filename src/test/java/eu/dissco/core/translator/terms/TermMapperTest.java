@@ -40,7 +40,7 @@ class TermMapperTest {
         Map.of(OrganisationId.TERM, "https://ror.org/02y22ws83"));
 
     // When
-    var result = termMapper.retrieveFromDWCA(organisationId, mock(JsonNode.class));
+    var result = termMapper.retrieveTerm(new OrganisationId(), mock(JsonNode.class), true);
 
     // Then
     assertThat(result).isEqualTo("https://ror.org/02y22ws83");
@@ -57,7 +57,7 @@ class TermMapperTest {
     unit.put("dwc:collectionID", "TestCollection");
 
     // When
-    var result = termMapper.retrieveFromDWCA(physicalSpecimenCollection, unit);
+    var result = termMapper.retrieveTerm(physicalSpecimenCollection, unit, true);
 
     // Then
     assertThat(result).isEqualTo("TestCollection");
@@ -71,7 +71,7 @@ class TermMapperTest {
     var attributes = mock(JsonNode.class);
 
     // When
-    termMapper.retrieveFromDWCA(physicalSpecimenCollection, attributes);
+    termMapper.retrieveTerm(physicalSpecimenCollection, attributes, true);
 
     // Then
     then(physicalSpecimenCollection).should().retrieveFromDWCA(attributes);
@@ -85,7 +85,7 @@ class TermMapperTest {
         Map.of(OrganisationId.TERM, "https://ror.org/02y22ws83"));
 
     // When
-    var result = termMapper.retrieveFromABCD(organisationId, mock(JsonNode.class));
+    var result = termMapper.retrieveTerm(organisationId, mock(JsonNode.class), false);
 
     // Then
     assertThat(result).isEqualTo("https://ror.org/02y22ws83");
@@ -101,7 +101,7 @@ class TermMapperTest {
         Map.of(PhysicalSpecimenId.TERM, abcdTerm));
 
     // When
-    var result = termMapper.retrieveFromABCD(new PhysicalSpecimenId(), attributes);
+    var result = termMapper.retrieveTerm(new PhysicalSpecimenId(), attributes, false);
 
     // Then
     assertThat(result).isEqualTo("123456");
@@ -115,7 +115,7 @@ class TermMapperTest {
     var attributes = mock(JsonNode.class);
 
     // When
-    termMapper.retrieveFromABCD(physicalSpecimenCollection, attributes);
+    termMapper.retrieveTerm(physicalSpecimenCollection, attributes, false);
 
     // Then
     then(physicalSpecimenCollection).should().retrieveFromABCD(attributes);

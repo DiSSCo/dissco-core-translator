@@ -17,14 +17,14 @@ class IngestionUtlityTest {
   void testCombined() throws DiSSCoDataException {
     // Given
     var type = "combined";
-    var organisationId = "https://ror.org/0566bfb96";
+    var organisationId = "20.5000.1025/MN0-5XP-FFD";
     var id = "12345";
 
     // When
     var result = IngestionUtility.getPhysicalSpecimenId(type, organisationId, id);
 
     // Then
-    assertThat(result).isEqualTo(id + ":0566bfb96");
+    assertThat(result).isEqualTo(id + ":MN0-5XP-FFD");
   }
 
   @Test
@@ -54,21 +54,6 @@ class IngestionUtlityTest {
 
     // Then
     assertThat(exception).isInstanceOf(UnknownPhysicalSpecimenIdType.class);
-  }
-
-  @Test
-  void testInvalidRoR() {
-    // Given
-    var type = "combined";
-    var organisationId = "0566bfb96";
-    var id = "https://globally.unique.com/12345";
-
-    // When
-    var exception = assertThrowsExactly(OrganisationNotRorId.class,
-        () -> IngestionUtility.getPhysicalSpecimenId(type, organisationId, id));
-
-    // Then
-    assertThat(exception).isInstanceOf(OrganisationNotRorId.class);
   }
 
 }

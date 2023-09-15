@@ -3,7 +3,7 @@ package eu.dissco.core.translator.terms.specimen.identification.taxonomy;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
 
-public class VernacularName extends AbstractTaxonomy{
+public class VernacularName extends AbstractTaxonomy {
 
   public static final String TERM = DWC_PREFIX + "vernacularName";
 
@@ -11,7 +11,7 @@ public class VernacularName extends AbstractTaxonomy{
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
-    return super.searchJsonForStringTerm(unit, dwcaTerms);
+    return super.searchJsonForTerm(unit, dwcaTerms);
   }
 
   @Override

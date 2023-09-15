@@ -16,23 +16,18 @@ import efg.MineralRockIdentifiedType;
 import efg.MultiMediaObject;
 import efg.Unit;
 import eu.dissco.core.translator.Profiles;
-import eu.dissco.core.translator.component.RorComponent;
 import eu.dissco.core.translator.domain.DigitalMediaObject;
-import eu.dissco.core.translator.domain.DigitalMediaObjectEvent;
 import eu.dissco.core.translator.domain.DigitalSpecimen;
 import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
 import eu.dissco.core.translator.domain.Enrichment;
 import eu.dissco.core.translator.exception.DiSSCoDataException;
 import eu.dissco.core.translator.exception.DisscoEfgParsingException;
+import eu.dissco.core.translator.exception.OrganisationNotRorId;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
 import eu.dissco.core.translator.terms.DigitalSpecimenDirector;
-import eu.dissco.core.translator.terms.License;
-import eu.dissco.core.translator.terms.SourceSystemId;
 import eu.dissco.core.translator.terms.TermMapper;
-import eu.dissco.core.translator.terms.media.AccessUri;
-import eu.dissco.core.translator.terms.media.Format;
 import eu.dissco.core.translator.terms.media.MediaType;
 import eu.dissco.core.translator.terms.specimen.OrganisationId;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenId;
@@ -92,7 +87,6 @@ public class BioCaseService implements WebClientService {
   private final TermMapper termMapper;
   private final KafkaService kafkaService;
   private final EnrichmentProperties enrichmentProperties;
-  private final RorComponent rorComponent;
   private final DigitalSpecimenDirector digitalSpecimenDirector;
 
   private boolean isAcceptedBasisOfRecord(Unit unit) {
@@ -196,21 +190,22 @@ public class BioCaseService implements WebClientService {
           var physicalSpecimenId = getPhysicalSpecimenId(physicalSpecimenIdType, organisationId,
               termMapper.retrieveTerm(new PhysicalSpecimenId(), unitAttributes, false));
           var ds = new eu.dissco.core.translator.schema.DigitalSpecimen()
-              .withOdsPhysicalSpecimenIdType(convertToPhysicalSpecimenIdTypeEnum(physicalSpecimenIdType))
+              .withOdsPhysicalSpecimenIdType(
+                  convertToPhysicalSpecimenIdTypeEnum(physicalSpecimenIdType))
               .withDwcInstitutionId(organisationId)
               .withOdsPhysicalSpecimenId(physicalSpecimenId)
-              .withOdsSourceSystem(webClientProperties.getSourceSystemId());
-          var digitalSpecimen =  new DigitalSpecimen(
+              .withOdsSourceSystem("https://hdl.handle.net/" + webClientProperties.getSourceSystemId());
+          var digitalSpecimen = new DigitalSpecimen(
               physicalSpecimenId,
               termMapper.retrieveTerm(new Type(), unitAttributes, false),
               digitalSpecimenDirector.constructDigitalSpecimen(ds, false, unitAttributes),
-              cleanupRedundantFields(unitAttributes)
+              cleanupRedundantFields(unitAttributes),
+              processDigitalMediaObjects(physicalSpecimenId, unit, organisationId)
           );
           log.debug("Result digital Specimen: {}", digitalSpecimen);
           kafkaService.sendMessage("digital-specimen",
               mapper.writeValueAsString(
                   new DigitalSpecimenEvent(enrichmentServices(false), digitalSpecimen)));
-          processDigitalMediaObjects(physicalSpecimenId, unit);
         } catch (DiSSCoDataException e) {
           log.error("Encountered data issue with record: {}", unitAttributes, e);
         }
@@ -351,39 +346,29 @@ public class BioCaseService implements WebClientService {
     return data;
   }
 
-  private void processDigitalMediaObjects(String physicalSpecimenId, Unit unit)
-      throws JsonProcessingException {
+  private List<DigitalMediaObject> processDigitalMediaObjects(String physicalSpecimenId,
+      Unit unit, String organisationId) throws OrganisationNotRorId {
+    var digitalMediaObjects = new ArrayList<DigitalMediaObject>();
     if (unit.getMultiMediaObjects() != null && !unit.getMultiMediaObjects().getMultiMediaObject()
         .isEmpty()) {
       for (MultiMediaObject media : unit.getMultiMediaObjects().getMultiMediaObject()) {
-        processDigitalMediaObject(physicalSpecimenId, media);
+        digitalMediaObjects.add(processDigitalMediaObject(physicalSpecimenId, media, organisationId));
       }
     }
+    return digitalMediaObjects;
   }
 
-  private void processDigitalMediaObject(String physicalSpecimenId, MultiMediaObject media)
-      throws JsonProcessingException {
+  private DigitalMediaObject processDigitalMediaObject(String physicalSpecimenId,
+      MultiMediaObject media, String organisationId) throws OrganisationNotRorId {
     var attributes = getData(mapper.valueToTree(media));
     var digitalMediaObject = new DigitalMediaObject(
         termMapper.retrieveTerm(new MediaType(), attributes, false),
         physicalSpecimenId,
-        harmonizeMedia(attributes),
+        digitalSpecimenDirector.constructDigitalMediaObjects(false, attributes, organisationId),
         attributes
     );
     log.debug("Result digital media object: {}", digitalMediaObject);
-    kafkaService.sendMessage("digital-media-object",
-        mapper.writeValueAsString(
-            new DigitalMediaObjectEvent(enrichmentServices(true), digitalMediaObject)));
-  }
-
-  private JsonNode harmonizeMedia(JsonNode mediaAttributes) {
-    var attributes = mapper.createObjectNode();
-    attributes.put(AccessUri.TERM,
-        termMapper.retrieveTerm(new AccessUri(), mediaAttributes, false));
-    attributes.put(SourceSystemId.TERM, webClientProperties.getSourceSystemId());
-    attributes.put(Format.TERM, termMapper.retrieveTerm(new Format(), mediaAttributes, false));
-    attributes.put(License.TERM, termMapper.retrieveTerm(new License(), mediaAttributes, false));
-    return attributes;
+    return digitalMediaObject;
   }
 
   private List<String> enrichmentServices(boolean multiMediaObject) {

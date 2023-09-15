@@ -17,7 +17,7 @@ public class HasMedia extends Term {
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
-    var result = super.searchJsonForStringTerm(unit, dwcaTerms);
+    var result = super.searchJsonForTerm(unit, dwcaTerms);
     if (result != null) {
       return String.valueOf(true);
     } else if (unit.get("extensions") != null) {
@@ -36,7 +36,7 @@ public class HasMedia extends Term {
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    var result = super.searchJsonForStringTerm(unit, abcdTerms);
+    var result = super.searchJsonForTerm(unit, abcdTerms);
     return toBoolean(result);
   }
 

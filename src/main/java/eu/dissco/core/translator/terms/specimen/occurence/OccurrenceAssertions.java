@@ -30,10 +30,14 @@ public class OccurrenceAssertions extends Term {
       var measurementOrFactExtension = data.get("extensions").get("dwc:MeasurementOrFact");
       for (var jsonNode : measurementOrFactExtension) {
         var assertion = new eu.dissco.core.translator.schema.Assertions()
-            .withAssertionUnit(super.searchJsonForStringTerm(jsonNode, List.of("dwc:measurementUnit")))
-            .withAssertionType(super.searchJsonForStringTerm(jsonNode, List.of("dwc:measurementType")))
+            .withAssertionUnit(
+                super.searchJsonForTerm(jsonNode, List.of("dwc:measurementUnit")))
+            .withAssertionType(
+                super.searchJsonForTerm(jsonNode, List.of("dwc:measurementType")))
             .withAssertionValue(
-                super.searchJsonForStringTerm(jsonNode, List.of("dwc:measurementValue")));
+                super.searchJsonForTerm(jsonNode, List.of("dwc:measurementValue")))
+            .withAssertionRemarks(
+                super.searchJsonForTerm(jsonNode, List.of("dwc:measurementRemarks")));
         assertions.add(assertion);
       }
     }

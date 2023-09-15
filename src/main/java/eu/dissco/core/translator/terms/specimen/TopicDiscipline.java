@@ -18,28 +18,6 @@ public class TopicDiscipline extends Term {
   private static final List<String> EARTH_SYSTEM_BASIS_OF_RECORD = List.of("ROCK", "MINERAL",
       "ROCKSPECIMEN", "ROCK SPECIMEN", "MINERALSPECIMEN", "MINERAL SPECIMEN");
 
-  @Override
-  public String retrieveFromDWCA(JsonNode unit) {
-    var basisOfRecord = new BasisOfRecord().retrieveFromDWCA(unit);
-    var kingdom = new Kingdom().retrieveFromDWCA(unit);
-    return getCategory(basisOfRecord, kingdom);
-  }
-
-  @Override
-  public String retrieveFromABCD(JsonNode unit) {
-    var basisOfRecord = new BasisOfRecord().retrieveFromABCD(unit);
-    var kingdom = new Kingdom().retrieveFromABCD(unit);
-    return getCategory(basisOfRecord, kingdom);
-  }
-
-  @Override
-  public eu.dissco.core.translator.schema.DigitalSpecimen retrieveFromDWCANew(
-      eu.dissco.core.translator.schema.DigitalSpecimen ds, JsonNode unit) {
-    var basisOfRecord = new BasisOfRecord().retrieveFromDWCA(unit);
-    var kingdom = new Kingdom().retrieveFromDWCA(unit);
-    return ds.withOdsTopicDiscipline(OdsTopicDiscipline.fromValue(getCategory(basisOfRecord, kingdom)));
-  }
-
   private static String getCategory(String basisOfRecord, String kingdom) {
     if (basisOfRecord != null) {
       var harBasisOfRecord = basisOfRecord.trim().toUpperCase();
@@ -47,9 +25,9 @@ public class TopicDiscipline extends Term {
         return "Palaeontology";
       } else if (EXTRATERRESTRIAL_BASIS_OF_RECORD.contains(harBasisOfRecord)) {
         return "Astrogeology";
-      } else if (EARTH_SYSTEM_BASIS_OF_RECORD.contains(harBasisOfRecord)){
+      } else if (EARTH_SYSTEM_BASIS_OF_RECORD.contains(harBasisOfRecord)) {
         return "Earth System";
-      } else if (kingdom != null){
+      } else if (kingdom != null) {
         var harKingdom = kingdom.trim().toUpperCase();
         switch (harKingdom) {
           case "ANIMALIA" -> {
@@ -73,7 +51,19 @@ public class TopicDiscipline extends Term {
     }
   }
 
+  @Override
+  public String retrieveFromDWCA(JsonNode unit) {
+    var basisOfRecord = new BasisOfRecord().retrieveFromDWCA(unit);
+    var kingdom = new Kingdom().retrieveFromDWCA(unit);
+    return getCategory(basisOfRecord, kingdom);
+  }
 
+  @Override
+  public String retrieveFromABCD(JsonNode unit) {
+    var basisOfRecord = new BasisOfRecord().retrieveFromABCD(unit);
+    var kingdom = new Kingdom().retrieveFromABCD(unit);
+    return getCategory(basisOfRecord, kingdom);
+  }
 
   @Override
   public String getTerm() {

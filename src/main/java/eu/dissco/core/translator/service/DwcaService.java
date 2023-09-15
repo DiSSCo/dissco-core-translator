@@ -14,12 +14,12 @@ import eu.dissco.core.translator.domain.DigitalSpecimen;
 import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
 import eu.dissco.core.translator.domain.Enrichment;
 import eu.dissco.core.translator.exception.DiSSCoDataException;
+import eu.dissco.core.translator.exception.OrganisationNotRorId;
 import eu.dissco.core.translator.properties.DwcaProperties;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.DwcaRepository;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
-import eu.dissco.core.translator.schema.DigitalSpecimen.OdsPhysicalSpecimenIdType;
 import eu.dissco.core.translator.terms.DigitalSpecimenDirector;
 import eu.dissco.core.translator.terms.License;
 import eu.dissco.core.translator.terms.SourceSystemId;
@@ -70,6 +70,7 @@ public class DwcaService implements WebClientService {
   private static final String AC_MULTIMEDIA = "http://rs.tdwg.org/ac/terms/Multimedia";
   private static final String UNKNOWN = "Unknown";
   private static final String EXTENSIONS = "extensions";
+
 
   private final ObjectMapper mapper;
   private final WebClientProperties webClientProperties;
@@ -138,7 +139,7 @@ public class DwcaService implements WebClientService {
           for (var recordValue : extensionValue) {
             jsonArrayNode.add(recordValue);
           }
-          var extensionArray = (ObjectNode) specimenValue.getValue().get(EXTENSIONS);
+          var extensionArray = (ObjectNode) specimenValue.getValue().get("extensions");
           extensionArray.set(extension.getRowType().prefixedName(), jsonArrayNode);
         }
       }
@@ -158,7 +159,6 @@ public class DwcaService implements WebClientService {
                 digitalSpecimen);
             kafkaService.sendMessage("digital-specimen",
                 mapper.writeValueAsString(translatorEvent));
-            processMedia(digitalSpecimen.id(), fullRecord);
           } catch (DiSSCoDataException e) {
             log.error("Encountered data issue with record: {}", fullRecord, e);
           }
@@ -167,91 +167,92 @@ public class DwcaService implements WebClientService {
     }
   }
 
-  private void processMedia(String recordId, JsonNode fullDigitalSpecimen)
-      throws JsonProcessingException {
+  private List<DigitalMediaObject> processMedia(String recordId, JsonNode fullDigitalSpecimen,
+      String organisationId) throws OrganisationNotRorId {
     var extensions = fullDigitalSpecimen.get(EXTENSIONS);
     if (fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA) != null) {
-      publishAssociatedMedia(recordId, fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA).asText());
+      return publishAssociatedMedia(recordId,
+          fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA).asText(), organisationId);
     } else if (extensions != null) {
       if (extensions.get(GBIF_MULTIMEDIA) != null) {
         var imageArray = extensions.get(GBIF_MULTIMEDIA);
         if (imageArray.isArray() && !imageArray.isEmpty()) {
-          extractMultiMedia(recordId, imageArray);
+          return extractMultiMedia(recordId, imageArray, organisationId);
         }
       } else if (extensions.get(AC_MULTIMEDIA) != null) {
         var imageArray = extensions.get(AC_MULTIMEDIA);
         if (imageArray.isArray() && !imageArray.isEmpty()) {
-          extractMultiMedia(recordId, imageArray);
+          return extractMultiMedia(recordId, imageArray, organisationId);
         }
       }
     }
+    return List.of();
   }
 
-  private void extractMultiMedia(String recordId, JsonNode imageArray)
-      throws JsonProcessingException {
+  private List<DigitalMediaObject> extractMultiMedia(String recordId, JsonNode imageArray,
+      String organisationId) throws OrganisationNotRorId {
+    var digitalMediaObjects = new ArrayList<DigitalMediaObject>();
     for (var image : imageArray) {
       var type = termMapper.retrieveTerm(new MediaType(), image, true);
       log.debug("Type of digitalMediaObject is: {}", type);
       var digitalMediaObject = new DigitalMediaObject(
           type,
           recordId,
-          harmonizeMedia(image),
+          digitalSpecimenDirector.constructDigitalMediaObjects(true, image, organisationId),
           image);
-      publishDigitalMediaObject(digitalMediaObject);
+      digitalMediaObjects.add(digitalMediaObject);
     }
+    return digitalMediaObjects;
   }
 
-  private void publishAssociatedMedia(String recordId, String associatedMedia)
-      throws JsonProcessingException {
+  private List<DigitalMediaObject> publishAssociatedMedia(String recordId, String associatedMedia,
+      String organisationId) throws OrganisationNotRorId {
     log.debug("Digital Specimen: {}, has associatedMedia {}", recordId,
         associatedMedia);
     String[] mediaUrls = associatedMedia.split("\\|");
+    var digitalMediaObjects = new ArrayList<DigitalMediaObject>();
     for (var mediaUrl : mediaUrls) {
       var digitalMediaObject = new DigitalMediaObject(
           UNKNOWN,
           recordId,
-          harmonizeAssociatedMedia(mediaUrl),
+          digitalSpecimenDirector.constructDigitalMediaObjects(true, mapper.valueToTree(mediaUrl),
+              organisationId),
           null);
-      publishDigitalMediaObject(digitalMediaObject);
+      digitalMediaObjects.add(digitalMediaObject);
     }
-  }
-
-  private JsonNode harmonizeAssociatedMedia(String mediaUrl) {
-    var attributes = mapper.createObjectNode();
-    attributes.put(AccessUri.TERM, mediaUrl);
-    attributes.put(SourceSystemId.TERM, webClientProperties.getSourceSystemId());
-    return attributes;
+    return digitalMediaObjects;
   }
 
   private DigitalSpecimen createDigitalSpecimen(JsonNode fullRecord) throws DiSSCoDataException {
     var physicalSpecimenIdType = termMapper.retrieveTerm(new PhysicalSpecimenIdType(),
         fullRecord, true);
     var organisationId = termMapper.retrieveTerm(new OrganisationId(), fullRecord, true);
-    var physicalSpecimenId = getPhysicalSpecimenId(physicalSpecimenIdType, organisationId,
+    var physicalSpecimenId = getPhysicalSpecimenId(physicalSpecimenIdType,
+        webClientProperties.getSourceSystemId(),
         termMapper.retrieveTerm(new PhysicalSpecimenId(), fullRecord, true));
     var ds = new eu.dissco.core.translator.schema.DigitalSpecimen()
         .withOdsPhysicalSpecimenIdType(convertToPhysicalSpecimenIdTypeEnum(physicalSpecimenIdType))
         .withDwcInstitutionId(organisationId)
         .withOdsPhysicalSpecimenId(physicalSpecimenId)
-        .withOdsSourceSystem(webClientProperties.getSourceSystemId());
+        .withOdsSourceSystem("https://hdl.handle.net/" + webClientProperties.getSourceSystemId());
     return new DigitalSpecimen(
         physicalSpecimenId,
         termMapper.retrieveTerm(new Type(), fullRecord, true),
         digitalSpecimenDirector.constructDigitalSpecimen(ds, true, fullRecord),
-        cleanupRedundantFields(fullRecord)
+        fullRecord,
+        processMedia(physicalSpecimenId, fullRecord, organisationId)
     );
   }
 
-
-  private JsonNode cleanupRedundantFields(JsonNode fullRecord) {
-    var originalData = (ObjectNode) fullRecord.deepCopy();
-    originalData.remove("ods:taxonIdentificationIndex");
-    ObjectNode extensions = (ObjectNode) originalData.get(EXTENSIONS);
-    if (extensions != null) {
-      extensions.remove(List.of(GBIF_MULTIMEDIA, AC_MULTIMEDIA));
-    }
-    return originalData;
-  }
+//  private JsonNode cleanupRedundantFields(JsonNode fullRecord) {
+//    var originalData = (ObjectNode) fullRecord.deepCopy();
+//    originalData.remove("ods:taxonIdentificationIndex");
+//    ObjectNode extensions = (ObjectNode) originalData.get(EXTENSIONS);
+//    if (extensions != null) {
+//      extensions.remove(List.of(GBIF_MULTIMEDIA, AC_MULTIMEDIA));
+//    }
+//    return originalData;
+//  }
 
   private boolean recordNeedsToBeIgnored(JsonNode fullRecord, String recordId) {
     var basisOfRecord = fullRecord.get(DwcTerm.basisOfRecord.prefixedName());

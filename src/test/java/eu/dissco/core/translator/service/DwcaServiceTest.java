@@ -16,6 +16,7 @@ import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.DwcaRepository;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
+import eu.dissco.core.translator.terms.DigitalSpecimenDirector;
 import eu.dissco.core.translator.terms.TermMapper;
 import eu.dissco.core.translator.terms.specimen.OrganisationId;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenIdType;
@@ -68,7 +69,7 @@ class DwcaServiceTest {
   @Mock
   private DwcaRepository dwcaRepository;
   @Mock
-  private RorComponent rorComponent;
+  private DigitalSpecimenDirector digitalSpecimenDirector;
 
 
   private DwcaService service;
@@ -81,26 +82,17 @@ class DwcaServiceTest {
   @BeforeEach
   void setup() {
     this.service = new DwcaService(MAPPER, webClientProperties, webClient, dwcaProperties,
-        kafkaService, termMapper, enrichmentProperties, repository, dwcaRepository, rorComponent);
+        kafkaService, termMapper, enrichmentProperties, repository, dwcaRepository, digitalSpecimenDirector);
 
     // Given
     givenEndpoint();
   }
 
-  private void setupTermMapper() {
-    given(termMapper.retrieveFromDWCA(any(), any())).willReturn("someValue");
-    given(termMapper.retrieveFromDWCA(any(OrganisationId.class), any())).willReturn("https://ror.org/03srysw20");
-    given(termMapper.retrieveFromDWCA(any(PhysicalSpecimenIdType.class), any())).willReturn(
-        "cetaf");
-  }
-
   @Test
   void testRetrieveData() throws IOException {
     // Given
-    setupTermMapper();
     givenDWCA("/dwca-rbins.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(9));
-    given(rorComponent.getRoRId(anyString())).willReturn("organisationName");
 
     // When
     service.retrieveData();
@@ -129,12 +121,10 @@ class DwcaServiceTest {
   void testRetrieveDataWithGbifMedia() throws IOException {
     // Given
     givenDWCA("/dwca-kew-gbif-media.zip");
-    setupTermMapper();
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(19));
     given(dwcaRepository.getRecords(anyList(), eq("ABC-DDD-ASD_dwc:Identification"))).willReturn(
         Map.of());
     given(dwcaRepository.getRecords(anyList(), eq("ABC-DDD-ASD_gbif:Multimedia"))).willReturn(givenImageMap(19));
-    given(rorComponent.getRoRId(anyString())).willReturn("organisationName");
 
     // When
     service.retrieveData();
@@ -162,10 +152,8 @@ class DwcaServiceTest {
   void testRetrieveDataWithAcMedia() throws IOException {
     // Given
     givenDWCA("/dwca-naturalis-ac-media.zip");
-    setupTermMapper();
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(14));
     given(dwcaRepository.getRecords(anyList(), eq("ABC-DDD-ASD_http://rs.tdwg.org/ac/terms/Multimedia"))).willReturn(givenImageMap(14));
-    given(rorComponent.getRoRId(anyString())).willReturn("organisationName");
 
     // When
     service.retrieveData();
@@ -182,9 +170,7 @@ class DwcaServiceTest {
   void testRetrieveDataWithAssociatedMedia() throws IOException {
     // Given
     givenDWCA("/dwca-lux-associated-media.zip");
-    setupTermMapper();
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMapWithMedia(20));
-    given(rorComponent.getRoRId(anyString())).willReturn("organisationName");
 
     // When
     service.retrieveData();

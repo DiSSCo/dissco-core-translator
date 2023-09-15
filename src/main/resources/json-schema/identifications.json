@@ -81,6 +81,12 @@
       "description": "Unclear yet",
       "$comment": "Unknown what this field should be"
     },
+    "citations": {
+      "type": "array",
+      "items": {
+        "$ref": "citations.json"
+      }
+    },
     "taxonIdentifications": {
       "type": "array",
       "items": {

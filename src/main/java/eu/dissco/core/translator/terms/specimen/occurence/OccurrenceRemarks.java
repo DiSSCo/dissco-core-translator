@@ -12,12 +12,12 @@ public class OccurrenceRemarks extends Term {
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
-    return super.searchJsonForStringTerm(unit, dwcaTerms);
+    return super.searchJsonForTerm(unit, dwcaTerms);
   }
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    return searchJsonForStringTerm(unit, abcdUnitTerms);
+    return searchJsonForTerm(unit, abcdUnitTerms);
   }
 
   @Override

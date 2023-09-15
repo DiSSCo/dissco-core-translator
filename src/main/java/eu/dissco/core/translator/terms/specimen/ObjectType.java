@@ -12,18 +12,14 @@ public class ObjectType extends Term {
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
-    return super.searchJsonForStringTerm(unit, dwcaTerms);
+    return super.searchJsonForTerm(unit, dwcaTerms);
   }
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    return super.searchJsonForStringTerm(unit, abcdTerms);
+    return super.searchJsonForTerm(unit, abcdTerms);
   }
-  @Override
-  public eu.dissco.core.translator.schema.DigitalSpecimen retrieveFromDWCANew(
-      eu.dissco.core.translator.schema.DigitalSpecimen ds, JsonNode unit) {
-    return ds.withDwcPreparations(super.searchJsonForStringTerm(unit, dwcaTerms));
-  }
+
   @Override
   public String getTerm() {
     return TERM;

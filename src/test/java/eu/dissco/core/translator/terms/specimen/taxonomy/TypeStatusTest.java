@@ -31,17 +31,11 @@ class TypeStatusTest {
   @Test
   void testRetrieveFromDWCAInExtension() {
     // Given
-    var unit = MAPPER.createObjectNode();
-    var array = MAPPER.createArrayNode();
     var extension = MAPPER.createObjectNode();
     extension.put("dwc:typeStatus", STATUS);
-    array.add(extension);
-    var extensions = MAPPER.createObjectNode();
-    extensions.set("dwc:Identification", array);
-    unit.set("extensions", extensions);
 
     // When
-    var result = typeStatus.retrieveFromDWCA(unit);
+    var result = typeStatus.retrieveFromDWCA(extension);
 
     // Then
     assertThat(result).isEqualTo(STATUS);

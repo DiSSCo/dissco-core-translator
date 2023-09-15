@@ -8,16 +8,17 @@ public class Genus extends AbstractTaxonomy {
   public static final String TERM = DWC_PREFIX + "genus";
 
   private final List<String> dwcaTerms = List.of(TERM);
-  private final List<String> abcdTerms = List.of("result/taxonIdentified/scientificName/nameAtomised/botanical/genusOrMonomial");
+  private final List<String> abcdTerms = List.of(
+      "result/taxonIdentified/scientificName/nameAtomised/botanical/genusOrMonomial");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
-    return super.searchJsonForStringTerm(unit, dwcaTerms);
+    return super.searchJsonForTerm(unit, dwcaTerms);
   }
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    return searchJsonForStringTerm(unit, abcdTerms);
+    return searchJsonForTerm(unit, abcdTerms);
   }
 
   @Override

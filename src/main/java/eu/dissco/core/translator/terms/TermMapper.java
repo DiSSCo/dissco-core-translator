@@ -3,28 +3,40 @@ package eu.dissco.core.translator.terms;
 import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.component.MappingComponent;
 import eu.dissco.core.translator.terms.specimen.BasisOfRecord;
-import eu.dissco.core.translator.terms.specimen.occurence.FieldNumber;
-import eu.dissco.core.translator.terms.specimen.RecordedBy;
 import eu.dissco.core.translator.terms.specimen.DatasetId;
-import eu.dissco.core.translator.terms.specimen.occurence.DateCollected;
 import eu.dissco.core.translator.terms.specimen.HasMedia;
 import eu.dissco.core.translator.terms.specimen.LivingOrPreserved;
 import eu.dissco.core.translator.terms.specimen.Modified;
 import eu.dissco.core.translator.terms.specimen.ObjectType;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenCollection;
+import eu.dissco.core.translator.terms.specimen.RecordedBy;
 import eu.dissco.core.translator.terms.specimen.TopicDiscipline;
+import eu.dissco.core.translator.terms.specimen.identification.TypeStatus;
+import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Class;
+import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Family;
+import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Genus;
+import eu.dissco.core.translator.terms.specimen.identification.taxonomy.InfraspecificEpithet;
+import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Kingdom;
+import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Order;
+import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Phylum;
+import eu.dissco.core.translator.terms.specimen.identification.taxonomy.ScientificNameAuthorship;
+import eu.dissco.core.translator.terms.specimen.identification.taxonomy.SpecificEpithet;
+import eu.dissco.core.translator.terms.specimen.identification.taxonomy.SpecimenName;
+import eu.dissco.core.translator.terms.specimen.identification.taxonomy.TaxonRank;
 import eu.dissco.core.translator.terms.specimen.location.Continent;
 import eu.dissco.core.translator.terms.specimen.location.Country;
 import eu.dissco.core.translator.terms.specimen.location.CountryCode;
 import eu.dissco.core.translator.terms.specimen.location.County;
-import eu.dissco.core.translator.terms.specimen.location.georeference.DecimalLatitude;
-import eu.dissco.core.translator.terms.specimen.location.georeference.DecimalLongitude;
-import eu.dissco.core.translator.terms.specimen.location.georeference.GeodeticDatum;
 import eu.dissco.core.translator.terms.specimen.location.Island;
 import eu.dissco.core.translator.terms.specimen.location.IslandGroup;
 import eu.dissco.core.translator.terms.specimen.location.Locality;
 import eu.dissco.core.translator.terms.specimen.location.StateProvince;
 import eu.dissco.core.translator.terms.specimen.location.WaterBody;
+import eu.dissco.core.translator.terms.specimen.location.georeference.DecimalLatitude;
+import eu.dissco.core.translator.terms.specimen.location.georeference.DecimalLongitude;
+import eu.dissco.core.translator.terms.specimen.location.georeference.GeodeticDatum;
+import eu.dissco.core.translator.terms.specimen.occurence.DateCollected;
+import eu.dissco.core.translator.terms.specimen.occurence.FieldNumber;
 import eu.dissco.core.translator.terms.specimen.stratigraphy.biostratigraphic.HighestBiostratigraphicZone;
 import eu.dissco.core.translator.terms.specimen.stratigraphy.biostratigraphic.LowestBiostratigraphicZone;
 import eu.dissco.core.translator.terms.specimen.stratigraphy.chronostratigraphic.EarliestAgeOrLowestStage;
@@ -41,18 +53,6 @@ import eu.dissco.core.translator.terms.specimen.stratigraphy.lithostratigraphic.
 import eu.dissco.core.translator.terms.specimen.stratigraphy.lithostratigraphic.Formation;
 import eu.dissco.core.translator.terms.specimen.stratigraphy.lithostratigraphic.Group;
 import eu.dissco.core.translator.terms.specimen.stratigraphy.lithostratigraphic.Member;
-import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Class;
-import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Family;
-import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Genus;
-import eu.dissco.core.translator.terms.specimen.identification.taxonomy.InfraspecificEpithet;
-import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Kingdom;
-import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Order;
-import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Phylum;
-import eu.dissco.core.translator.terms.specimen.identification.taxonomy.ScientificNameAuthorship;
-import eu.dissco.core.translator.terms.specimen.identification.taxonomy.SpecificEpithet;
-import eu.dissco.core.translator.terms.specimen.identification.taxonomy.SpecimenName;
-import eu.dissco.core.translator.terms.specimen.identification.taxonomy.TaxonRank;
-import eu.dissco.core.translator.terms.specimen.identification.TypeStatus;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -160,14 +160,11 @@ public class TermMapper {
         return value.asText();
       }
     }
-    if (dwc){
+    if (dwc) {
       return term.retrieveFromDWCA(unit);
     } else {
       return term.retrieveFromABCD(unit);
     }
   }
 
-  public String retrieveFromABCD(Term term, JsonNode dataset, JsonNode unit) {
-    return term.retrieveFromABCD(dataset, unit);
-  }
 }

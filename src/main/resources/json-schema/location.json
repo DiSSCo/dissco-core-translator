@@ -74,7 +74,7 @@
       ]
     },
     "dwc:minimumElevationInMeters": {
-      "type": "integer",
+      "type": "number",
       "description": "https://rs.tdwg.org/dwc/terms/minimumElevationInMeters",
       "examples": [
         -100
@@ -88,14 +88,14 @@
       ]
     },
     "dwc:maximumElevationInMeters": {
-      "type": "integer",
+      "type": "number",
       "description": "https://rs.tdwg.org/dwc/terms/maximumElevationInMeters",
       "examples": [
         205
       ]
     },
     "dwc:minimumDistanceAboveSurfaceInMeters": {
-      "type": "integer",
+      "type": "number",
       "description": "https://rs.tdwg.org/dwc/terms/minimumDistanceAboveSurfaceInMeters",
       "examples": [
         -1,
@@ -103,21 +103,21 @@
       ]
     },
     "dwc:maximumDistanceAboveSurfaceInMeters": {
-      "type": "integer",
+      "type": "number",
       "description": "https://rs.tdwg.org/dwc/terms/maximumDistanceAboveSurfaceInMeters",
       "examples": [
         4.2
       ]
     },
     "dwc:minimumDepthInMeters": {
-      "type": "integer",
+      "type": "number",
       "description": "https://rs.tdwg.org/dwc/terms/minimumDepthInMeters",
       "examples": [
         50
       ]
     },
     "dwc:maximumDepthInMeters": {
-      "type": "integer",
+      "type": "number",
       "description": "https://rs.tdwg.org/dwc/terms/maximumDepthInMeters",
       "examples": [
         340

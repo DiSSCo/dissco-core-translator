@@ -8,16 +8,17 @@ public class Modified extends Term {
 
   public static final String TERM = "dcterms:modified";
   private final List<String> dwcaTerms = List.of(TERM);
-  private final List<String> abcdUnitTerms = List.of("abcd:hasDateModified", "abcd:dateLastEdited", "abcd:revisionData/dateModified");
+  private final List<String> abcdUnitTerms = List.of("abcd:hasDateModified", "abcd:dateLastEdited",
+      "abcd:revisionData/dateModified");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
-    return super.searchJsonForStringTerm(unit, dwcaTerms);
+    return super.searchJsonForTerm(unit, dwcaTerms);
   }
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    return searchJsonForStringTerm(unit, abcdUnitTerms);
+    return searchJsonForTerm(unit, abcdUnitTerms);
   }
 
   @Override

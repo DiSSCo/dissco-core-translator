@@ -11,7 +11,7 @@ public record DigitalMediaObject(
     @JsonProperty(PhysicalSpecimenId.TERM)
     String physicalSpecimenId,
     @JsonProperty("ods:attributes")
-    JsonNode attributes,
+    eu.dissco.core.translator.schema.DigitalEntity attributes,
     @JsonProperty("ods:originalAttributes")
     JsonNode originalAttributes) {
 

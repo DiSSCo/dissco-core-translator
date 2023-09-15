@@ -22,7 +22,7 @@ public abstract class Term {
           "/areaName/value");
   private static final String MESSAGE = "No specific attributes retrieve specified for field: {}";
 
-  protected String searchJsonForStringTerm(JsonNode attributes, List<String> originalTerms) {
+  protected String searchJsonForTerm(JsonNode attributes, List<String> originalTerms) {
     for (var originalTerm : originalTerms) {
       var valueNode = attributes.get(originalTerm);
       if (valueNode != null) {
@@ -37,6 +37,9 @@ public abstract class Term {
         } else if (valueNode.isDouble() || valueNode.isBigDecimal()) {
           var doubleValue = attributes.get(originalTerm).asDouble();
           return String.valueOf(doubleValue);
+        } else if (valueNode.isInt() || valueNode.isBigInteger()) {
+          var intValue = attributes.get(originalTerm).asInt();
+          return String.valueOf(intValue);
         }
       }
     }
@@ -68,19 +71,9 @@ public abstract class Term {
     return null;
   }
 
-  public String retrieveFromABCD(JsonNode dataset, JsonNode unit) {
-    log.debug(MESSAGE, getTerm());
-    return null;
-  }
-
   public String retrieveFromDWCA(JsonNode unit) {
     log.debug(MESSAGE, getTerm());
     return null;
-  }
-
-  public DigitalSpecimen retrieveFromDWCANew(DigitalSpecimen ds, JsonNode unit) {
-    log.debug(MESSAGE, getTerm());
-    return ds;
   }
 
   protected String searchABCDSplitTerms(JsonNode unit, List<String> searchTerms,

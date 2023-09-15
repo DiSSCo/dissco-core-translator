@@ -31,10 +31,10 @@ class PhylumTest {
     // Given
     var unit = MAPPER.createObjectNode();
     unit.put(
-        "abcd:identifications/identification/0/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonRank",
+        "result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonRank",
         "phylum");
     unit.put(
-        "abcd:identifications/identification/0/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonName",
+        "result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonName",
         "Chordata");
 
     // When

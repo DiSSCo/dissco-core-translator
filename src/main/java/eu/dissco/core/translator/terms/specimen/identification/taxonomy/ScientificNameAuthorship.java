@@ -13,12 +13,12 @@ public class ScientificNameAuthorship extends AbstractTaxonomy {
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
-    return super.searchJsonForStringTerm(unit, dwcaTerms);
+    return super.searchJsonForTerm(unit, dwcaTerms);
   }
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    return searchJsonForStringTerm(unit, abcdTerms);
+    return searchJsonForTerm(unit, abcdTerms);
   }
 
   @Override

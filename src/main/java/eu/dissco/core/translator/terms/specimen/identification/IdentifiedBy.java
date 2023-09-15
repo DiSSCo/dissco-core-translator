@@ -5,6 +5,7 @@ import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
 public class IdentifiedBy extends Term {
+
   public static final String TERM = DWC_PREFIX + "identifiedBy";
 
   private final List<String> dwcaTerms = List.of(TERM);
@@ -13,12 +14,12 @@ public class IdentifiedBy extends Term {
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
-    return super.searchJsonForStringTerm(unit, dwcaTerms);
+    return super.searchJsonForTerm(unit, dwcaTerms);
   }
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    return super.searchJsonForStringTerm(unit, abcdTerms);
+    return super.searchJsonForTerm(unit, abcdTerms);
   }
 
   @Override

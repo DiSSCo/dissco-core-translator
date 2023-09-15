@@ -30,13 +30,12 @@ class ModifiedTest {
   void testRetrieveFromABCD() {
     // Given
     String modifiedString = "1674553668909";
-    var dataset = MAPPER.createObjectNode();
-    dataset.put("abcd:metadata/revisionData/dateModified", "1604521759000");
     var unit = MAPPER.createObjectNode();
     unit.put("abcd:dateLastEdited", modifiedString);
+    unit.put("abcd:metadata/revisionData/dateModified", "1604521759000");
 
     // When
-    var result = modified.retrieveFromABCD(dataset, unit);
+    var result = modified.retrieveFromABCD(unit);
 
     // Then
     assertThat(result).isEqualTo(modifiedString);
@@ -45,12 +44,11 @@ class ModifiedTest {
   @Test
   void testRetrieveFromABCDFromMeta() {
     // Given
-    var dataset = MAPPER.createObjectNode();
-    dataset.put("abcd:metadata/revisionData/dateModified", "1604521759000");
     var unit = MAPPER.createObjectNode();
+    unit.put("abcd:revisionData/dateModified", "1604521759000");
 
     // When
-    var result = modified.retrieveFromABCD(dataset, unit);
+    var result = modified.retrieveFromABCD(unit);
 
     // Then
     assertThat(result).isEqualTo("1604521759000");
@@ -59,12 +57,11 @@ class ModifiedTest {
   @Test
   void testRetrieveFromABCDFromMetaLong() {
     // Given
-    var dataset = MAPPER.createObjectNode();
-    dataset.put("abcd:metadata/revisionData/dateModified", 1604521759000L);
     var unit = MAPPER.createObjectNode();
+    unit.put("abcd:revisionData/dateModified", 1604521759000L);
 
     // When
-    var result = modified.retrieveFromABCD(dataset, unit);
+    var result = modified.retrieveFromABCD(unit);
 
     // Then
     assertThat(result).isEqualTo("1604521759000");

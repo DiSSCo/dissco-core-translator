@@ -14,6 +14,7 @@ import eu.dissco.core.translator.component.RorComponent;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
+import eu.dissco.core.translator.terms.DigitalSpecimenDirector;
 import eu.dissco.core.translator.terms.TermMapper;
 import eu.dissco.core.translator.terms.specimen.OrganisationId;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenIdType;
@@ -57,7 +58,7 @@ class BioCaseServiceTest {
   @Mock
   private EnrichmentProperties enrichmentProperties;
   @Mock
-  private RorComponent rorComponent;
+  private DigitalSpecimenDirector digitalSpecimenDirector;
   private BioCaseService service;
 
   @BeforeEach
@@ -66,15 +67,10 @@ class BioCaseServiceTest {
     configuration.setTemplateLoader(
         new FileTemplateLoader(new ClassPathResource("templates").getFile()));
     service = new BioCaseService(mapper, properties, webClient, repository, configuration, factory,
-        termMapper, kafkaService, enrichmentProperties, rorComponent);
+        termMapper, kafkaService, enrichmentProperties, digitalSpecimenDirector);
 
     // Given
     givenJsonWebclient();
-    given(termMapper.retrieveFromABCD(any(), any(JsonNode.class))).willReturn("someValue");
-    given(termMapper.retrieveFromABCD(any(PhysicalSpecimenIdType.class), any(JsonNode.class)))
-        .willReturn("cetaf");
-    given(termMapper.retrieveFromABCD(any(OrganisationId.class), any(JsonNode.class))).willReturn(
-        "https://ror.org/03srysw20");
   }
 
   @Test
@@ -86,7 +82,6 @@ class BioCaseServiceTest {
             Mono.just(loadResourceFile("biocase/geocase-record-dropped.xml")))
         .willReturn(Mono.just(loadResourceFile("biocase/biocase-206-response.xml")));
     given(properties.getItemsPerRequest()).willReturn(100);
-    given(rorComponent.getRoRId(anyString())).willReturn("organisationName");
 
     // When
     service.retrieveData();
@@ -104,7 +99,6 @@ class BioCaseServiceTest {
     given(responseSpec.bodyToMono(any(Class.class))).willReturn(
         Mono.just(loadResourceFile("biocase/biocase-206-with-media.xml")));
     given(properties.getItemsPerRequest()).willReturn(101);
-    given(rorComponent.getRoRId(anyString())).willReturn("organisationName");
 
     // When
     service.retrieveData();

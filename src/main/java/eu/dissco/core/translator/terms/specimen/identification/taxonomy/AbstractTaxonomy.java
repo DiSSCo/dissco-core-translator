@@ -24,14 +24,14 @@ public abstract class AbstractTaxonomy extends Term {
       "/preferredFlag");
 
   protected String getTaxonFromDWCA(JsonNode unit, List<String> dwcaTerms) {
-    var result = super.searchJsonForStringTerm(unit, dwcaTerms);
+    var result = super.searchJsonForTerm(unit, dwcaTerms);
     if (result != null) {
       return result;
     } else if (unit.get(EXTENSIONS) != null
         && unit.get(EXTENSIONS).get(IDENTIFICATION_EXTENSION) != null) {
       var identificationIndex = getIdentificationIndexDWCA(unit);
       if (identificationIndex != null) {
-        return searchJsonForStringTerm(
+        return searchJsonForTerm(
             unit.get(EXTENSIONS).get(IDENTIFICATION_EXTENSION)
                 .get(Integer.parseInt(identificationIndex)), dwcaTerms);
       }
@@ -109,7 +109,7 @@ public abstract class AbstractTaxonomy extends Term {
     var identificationIndex = getIdentificationIndexABCD(unit);
     var terms = searchTerms.stream().map(
         term -> IDENTIFICATION + identificationIndex + "/result/taxonIdentified" + term).toList();
-    return searchJsonForStringTerm(unit, terms);
+    return searchJsonForTerm(unit, terms);
   }
 
   protected String getStringAtIndex(Pair<String, String> string, int numberFound) {

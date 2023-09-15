@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 public class MediaType extends Term {
 
   public static final String TERM = "dcterms:type";
-  private static final String IMAGE_OBJECT = "2DImageObject";
 
   private final List<String> dwcaTerms = List.of(TERM, "dc:type");
   private final List<String> imageFormats = List.of("IMAGE/JPG", "JPG", "IMAGE/JPEG",
@@ -17,7 +16,7 @@ public class MediaType extends Term {
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
-    var recoveredType = super.searchJsonForStringTerm(unit, dwcaTerms);
+    var recoveredType = super.searchJsonForTerm(unit, dwcaTerms);
     if (recoveredType == null) {
       var format = new Format().retrieveFromDWCA(unit);
       return checkFormat(format);
@@ -29,13 +28,13 @@ public class MediaType extends Term {
   private String parseToOdsType(String recoveredType) {
     switch (recoveredType) {
       case "StillImage", "Image" -> {
-        return IMAGE_OBJECT;
+        return "StillImage";
       }
       case "Sound" -> {
-        return "AudioObject";
+        return "Sound";
       }
       case "MovingImage" -> {
-        return "VideoObject";
+        return "MovingImage";
       }
       default -> {
         return null;
@@ -49,7 +48,7 @@ public class MediaType extends Term {
     if (format != null) {
       format = format.toUpperCase();
       if (imageFormats.contains(format)) {
-        return IMAGE_OBJECT;
+        return "StillImage";
       } else {
         log.warn("Unable to determine media type of digital media object");
         return null;
@@ -62,13 +61,13 @@ public class MediaType extends Term {
   private String checkFormat(String format) {
     if (format != null) {
       if (imageFormats.contains(format) || format.startsWith("image")) {
-        return IMAGE_OBJECT;
+        return "StillImage";
       }
       if (format.startsWith("audio")) {
-        return "AudioObject";
+        return "Sound";
       }
       if (format.startsWith("video")) {
-        return "VideoObject";
+        return "MovingImage";
       }
     }
     log.info("Unable to determine type based on format");

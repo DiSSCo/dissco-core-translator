@@ -29,17 +29,11 @@ class FamilyTest {
   @Test
   void testRetrieveFromDWCAExtensionNoVerified() {
     // Given
-    var unit = MAPPER.createObjectNode();
-    var extension = MAPPER.createObjectNode();
     var identification = MAPPER.createObjectNode();
     identification.put("dwc:family", "Soricidae");
-    var identifications = MAPPER.createArrayNode();
-    identifications.add(identification);
-    extension.set("dwc:Identification", identifications);
-    unit.set("extensions", extension);
 
     // When
-    var result = family.retrieveFromDWCA(unit);
+    var result = family.retrieveFromDWCA(identification);
 
     // Then
     assertThat(result).isEqualTo("Soricidae");
@@ -50,10 +44,10 @@ class FamilyTest {
     // Given
     var unit = MAPPER.createObjectNode();
     unit.put(
-        "abcd:identifications/identification/0/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonRank",
+        "result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonRank",
         "familia");
     unit.put(
-        "abcd:identifications/identification/0/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonName",
+        "result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonName",
         "BIGNONIACEAE");
 
     // When

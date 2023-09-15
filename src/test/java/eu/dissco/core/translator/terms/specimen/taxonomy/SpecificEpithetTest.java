@@ -31,15 +31,7 @@ class SpecificEpithetTest {
     // Given
     var unit = MAPPER.createObjectNode();
     unit.put(
-        "abcd:identifications/identification/0/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonRank",
-        "classis");
-    unit.put(
-        "abcd:identifications/identification/0/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonName",
-        "Eurotatoria");
-    unit.put(
-        "abcd:identifications/identification/0/result/taxonIdentified/nameAtomised/botanical/firstEpithet",
-        "bogotensis");
-    unit.put("abcd:identifications/identification/0/preferredFlag", true);
+        "result/taxonIdentified/scientificName/nameAtomised/botanical/firstEpithet", "bogotensis");
 
     // When
     var result = specificEpithet.retrieveFromABCD(unit);
