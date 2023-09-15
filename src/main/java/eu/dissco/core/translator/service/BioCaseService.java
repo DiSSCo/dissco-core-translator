@@ -210,7 +210,7 @@ public class BioCaseService implements WebClientService {
           kafkaService.sendMessage("digital-specimen",
               mapper.writeValueAsString(
                   new DigitalSpecimenEvent(enrichmentServices(false), digitalSpecimen)));
-          processDigitalMediaObjects(physicalSpecimenId, unit);
+          processDigitalMediaObjects(physicalSpecimenId, unit, organisationId);
         } catch (DiSSCoDataException e) {
           log.error("Encountered data issue with record: {}", unitAttributes, e);
         }
@@ -370,23 +370,23 @@ public class BioCaseService implements WebClientService {
     return data;
   }
 
-  private void processDigitalMediaObjects(String physicalSpecimenId, Unit unit)
+  private void processDigitalMediaObjects(String physicalSpecimenId, Unit unit, String organisationId)
       throws JsonProcessingException {
     if (unit.getMultiMediaObjects() != null && !unit.getMultiMediaObjects().getMultiMediaObject()
         .isEmpty()) {
       for (MultiMediaObject media : unit.getMultiMediaObjects().getMultiMediaObject()) {
-        processDigitalMediaObject(physicalSpecimenId, media);
+        processDigitalMediaObject(physicalSpecimenId, media, organisationId);
       }
     }
   }
 
-  private void processDigitalMediaObject(String physicalSpecimenId, MultiMediaObject media)
+  private void processDigitalMediaObject(String physicalSpecimenId, MultiMediaObject media, String organisationId)
       throws JsonProcessingException {
     var attributes = getData(mapper.valueToTree(media));
     var digitalMediaObject = new DigitalMediaObject(
         termMapper.retrieveFromABCD(new MediaType(), attributes),
         physicalSpecimenId,
-        harmonizeMedia(attributes),
+        harmonizeMedia(attributes, organisationId),
         attributes
     );
     log.debug("Result digital media object: {}", digitalMediaObject);
@@ -395,12 +395,13 @@ public class BioCaseService implements WebClientService {
             new DigitalMediaObjectEvent(enrichmentServices(true), digitalMediaObject)));
   }
 
-  private JsonNode harmonizeMedia(JsonNode mediaAttributes) {
+  private JsonNode harmonizeMedia(JsonNode mediaAttributes, String organisationId) {
     var attributes = mapper.createObjectNode();
     attributes.put(AccessUri.TERM, termMapper.retrieveFromABCD(new AccessUri(), mediaAttributes));
     attributes.put(SourceSystemId.TERM, webClientProperties.getSourceSystemId());
     attributes.put(Format.TERM, termMapper.retrieveFromABCD(new Format(), mediaAttributes));
     attributes.put(License.TERM, termMapper.retrieveFromABCD(new License(), mediaAttributes));
+    attributes.put(OrganisationId.TERM, organisationId);
     return attributes;
   }
 

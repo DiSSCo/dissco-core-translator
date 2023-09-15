@@ -174,24 +174,25 @@ public class DwcaService implements WebClientService {
   private void processMedia(String recordId, JsonNode fullDigitalSpecimen)
       throws JsonProcessingException {
     var extensions = fullDigitalSpecimen.get(EXTENSIONS);
+    var orgId = termMapper.retrieveFromDWCA(new OrganisationId(), fullDigitalSpecimen);
     if (fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA) != null) {
-      publishAssociatedMedia(recordId, fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA).asText());
+      publishAssociatedMedia(recordId, fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA).asText(), orgId);
     } else if (extensions != null) {
       if (extensions.get(GBIF_MULTIMEDIA) != null) {
         var imageArray = extensions.get(GBIF_MULTIMEDIA);
         if (imageArray.isArray() && imageArray.size() > 0) {
-          extractMultiMedia(recordId, imageArray);
+          extractMultiMedia(recordId, imageArray, orgId);
         }
       } else if (extensions.get(AC_MULTIMEDIA) != null) {
         var imageArray = extensions.get(AC_MULTIMEDIA);
         if (imageArray.isArray() && imageArray.size() > 0) {
-          extractMultiMedia(recordId, imageArray);
+          extractMultiMedia(recordId, imageArray, orgId);
         }
       }
     }
   }
 
-  private void extractMultiMedia(String recordId, JsonNode imageArray)
+  private void extractMultiMedia(String recordId, JsonNode imageArray, String orgId)
       throws JsonProcessingException {
     for (var image : imageArray) {
       var type = termMapper.retrieveFromDWCA(new MediaType(), image);
@@ -199,13 +200,13 @@ public class DwcaService implements WebClientService {
       var digitalMediaObject = new DigitalMediaObject(
           type,
           recordId,
-          harmonizeMedia(image),
+          harmonizeMedia(image, orgId),
           image);
       publishDigitalMediaObject(digitalMediaObject);
     }
   }
 
-  private void publishAssociatedMedia(String recordId, String associatedMedia)
+  private void publishAssociatedMedia(String recordId, String associatedMedia, String orgId)
       throws JsonProcessingException {
     log.debug("Digital Specimen: {}, has associatedMedia {}", recordId,
         associatedMedia);
@@ -214,16 +215,17 @@ public class DwcaService implements WebClientService {
       var digitalMediaObject = new DigitalMediaObject(
           UNKNOWN,
           recordId,
-          harmonizeAssociatedMedia(mediaUrl),
+          harmonizeAssociatedMedia(mediaUrl, orgId),
           null);
       publishDigitalMediaObject(digitalMediaObject);
     }
   }
 
-  private JsonNode harmonizeAssociatedMedia(String mediaUrl) {
+  private JsonNode harmonizeAssociatedMedia(String mediaUrl, String orgId) {
     var attributes = mapper.createObjectNode();
     attributes.put(AccessUri.TERM, mediaUrl);
     attributes.put(SourceSystemId.TERM, webClientProperties.getSourceSystemId());
+    attributes.put(OrganisationId.TERM, orgId);
     return attributes;
   }
 
@@ -372,12 +374,13 @@ public class DwcaService implements WebClientService {
     log.info("Finished posting extensions archive to database");
   }
 
-  private JsonNode harmonizeMedia(JsonNode media) {
+  private JsonNode harmonizeMedia(JsonNode media, String orgId) {
     var attributes = mapper.createObjectNode();
     attributes.put(AccessUri.TERM, termMapper.retrieveFromDWCA(new AccessUri(), media));
     attributes.put(SourceSystemId.TERM, webClientProperties.getSourceSystemId());
     attributes.put(Format.TERM, termMapper.retrieveFromDWCA(new Format(), media));
     attributes.put(License.TERM, termMapper.retrieveFromDWCA(new License(), media));
+    attributes.put(OrganisationId.TERM, orgId);
     return attributes;
   }
 
