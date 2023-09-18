@@ -2,7 +2,7 @@ package eu.dissco.core.translator.terms;
 
 
 import com.fasterxml.jackson.databind.JsonNode;
-import eu.dissco.core.translator.schema.DigitalSpecimen;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
@@ -62,6 +62,18 @@ public abstract class Term {
     } else {
       return builder.toString();
     }
+  }
+
+  protected JsonNode getSubJsonAbcd(ObjectMapper mapper, JsonNode data, int count, String path) {
+    var identificationNode = mapper.createObjectNode();
+    data.fields().forEachRemaining(field -> {
+      if (field.getKey().startsWith(path + count)) {
+        identificationNode.put(
+            field.getKey().replace(path + count + "/", ""),
+            field.getValue());
+      }
+    });
+    return identificationNode;
   }
 
   public abstract String getTerm();

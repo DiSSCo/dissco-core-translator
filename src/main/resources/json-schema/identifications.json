@@ -3,6 +3,10 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
   "properties": {
+    "dwc:identificationID": {
+      "type": "string",
+      "description": "Check DWC terms"
+    },
     "???:identificationType": {
       "type": "string",
       "description": "Unclear yet",
@@ -92,6 +96,10 @@
       "items": {
         "type": "object",
         "properties": {
+          "dwc:taxonID": {
+            "type": "string",
+            "description": "See DWC Terms"
+          },
           "dwc:scientificName": {
             "type": "string",
             "description": "https://rs.tdwg.org/dwc/terms/scientificName",
@@ -111,6 +119,13 @@
             "description": "https://rs.tdwg.org/dwc/terms/nameAccordingTo",
             "examples": [
               "Plants of the World Online"
+            ]
+          },
+          "dwc:namePublishedInYear":{
+            "type": "string",
+            "description": "",
+            "examples": [
+              ""
             ]
           },
           "dwc:taxonRank": {

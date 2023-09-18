@@ -9,16 +9,15 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import eu.dissco.core.translator.component.RorComponent;
 import eu.dissco.core.translator.properties.DwcaProperties;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.DwcaRepository;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
-import eu.dissco.core.translator.terms.DigitalSpecimenDirector;
+import eu.dissco.core.translator.terms.DigitalObjectDirector;
 import eu.dissco.core.translator.terms.TermMapper;
-import eu.dissco.core.translator.terms.specimen.OrganisationId;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenIdType;
 import java.io.File;
 import java.io.IOException;
@@ -69,7 +68,7 @@ class DwcaServiceTest {
   @Mock
   private DwcaRepository dwcaRepository;
   @Mock
-  private DigitalSpecimenDirector digitalSpecimenDirector;
+  private DigitalObjectDirector digitalSpecimenDirector;
 
 
   private DwcaService service;
@@ -82,7 +81,8 @@ class DwcaServiceTest {
   @BeforeEach
   void setup() {
     this.service = new DwcaService(MAPPER, webClientProperties, webClient, dwcaProperties,
-        kafkaService, termMapper, enrichmentProperties, repository, dwcaRepository, digitalSpecimenDirector);
+        kafkaService, termMapper, enrichmentProperties, repository, dwcaRepository,
+        digitalSpecimenDirector);
 
     // Given
     givenEndpoint();
@@ -93,6 +93,8 @@ class DwcaServiceTest {
     // Given
     givenDWCA("/dwca-rbins.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(9));
+    given(termMapper.retrieveTerm(any(PhysicalSpecimenIdType.class), any(JsonNode.class),
+        eq(true))).willReturn("resolvable");
 
     // When
     service.retrieveData();
@@ -101,7 +103,6 @@ class DwcaServiceTest {
     then(dwcaRepository).should(times(2)).createTable(anyString());
     then(dwcaRepository).should(times(21)).postRecords(anyString(), anyList());
     then(kafkaService).should(times(9)).sendMessage(eq("digital-specimen"), anyString());
-    then(kafkaService).should(times(0)).sendMessage(eq("digital-media-object"), anyString());
     cleanup("src/test/resources/dwca/test/dwca-rbins.zip");
   }
 
@@ -124,7 +125,10 @@ class DwcaServiceTest {
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(19));
     given(dwcaRepository.getRecords(anyList(), eq("ABC-DDD-ASD_dwc:Identification"))).willReturn(
         Map.of());
-    given(dwcaRepository.getRecords(anyList(), eq("ABC-DDD-ASD_gbif:Multimedia"))).willReturn(givenImageMap(19));
+    given(dwcaRepository.getRecords(anyList(), eq("ABC-DDD-ASD_gbif:Multimedia"))).willReturn(
+        givenImageMap(19));
+    given(termMapper.retrieveTerm(any(PhysicalSpecimenIdType.class), any(JsonNode.class),
+        eq(true))).willReturn("resolvable");
 
     // When
     service.retrieveData();
@@ -133,7 +137,6 @@ class DwcaServiceTest {
     then(dwcaRepository).should(times(3)).createTable(anyString());
     then(dwcaRepository).should(times(19)).postRecords(anyString(), anyList());
     then(kafkaService).should(times(19)).sendMessage(eq("digital-specimen"), anyString());
-    then(kafkaService).should(times(19)).sendMessage(eq("digital-media-object"), anyString());
     cleanup("src/test/resources/dwca/test/dwca-kew-gbif-media.zip");
   }
 
@@ -153,7 +156,10 @@ class DwcaServiceTest {
     // Given
     givenDWCA("/dwca-naturalis-ac-media.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(14));
-    given(dwcaRepository.getRecords(anyList(), eq("ABC-DDD-ASD_http://rs.tdwg.org/ac/terms/Multimedia"))).willReturn(givenImageMap(14));
+    given(dwcaRepository.getRecords(anyList(),
+        eq("ABC-DDD-ASD_http://rs.tdwg.org/ac/terms/Multimedia"))).willReturn(givenImageMap(14));
+    given(termMapper.retrieveTerm(any(PhysicalSpecimenIdType.class), any(JsonNode.class),
+        eq(true))).willReturn("resolvable");
 
     // When
     service.retrieveData();
@@ -162,7 +168,6 @@ class DwcaServiceTest {
     then(dwcaRepository).should(times(2)).createTable(anyString());
     then(dwcaRepository).should(times(2)).postRecords(anyString(), anyList());
     then(kafkaService).should(times(14)).sendMessage(eq("digital-specimen"), anyString());
-    then(kafkaService).should(times(14)).sendMessage(eq("digital-media-object"), anyString());
     cleanup("src/test/resources/dwca/test/dwca-naturalis-ac-media.zip");
   }
 
@@ -170,7 +175,10 @@ class DwcaServiceTest {
   void testRetrieveDataWithAssociatedMedia() throws IOException {
     // Given
     givenDWCA("/dwca-lux-associated-media.zip");
-    given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMapWithMedia(20));
+    given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(
+        givenSpecimenMapWithMedia(20));
+    given(termMapper.retrieveTerm(any(PhysicalSpecimenIdType.class), any(JsonNode.class),
+        eq(true))).willReturn("resolvable");
 
     // When
     service.retrieveData();
@@ -179,7 +187,6 @@ class DwcaServiceTest {
     then(dwcaRepository).should(times(1)).createTable(anyString());
     then(dwcaRepository).should(times(1)).postRecords(anyString(), anyList());
     then(kafkaService).should(times(20)).sendMessage(eq("digital-specimen"), anyString());
-    then(kafkaService).should(times(40)).sendMessage(eq("digital-media-object"), anyString());
     cleanup("src/test/resources/dwca/test/dwca-lux-associated-media.zip");
   }
 

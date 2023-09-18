@@ -7,7 +7,6 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import efg.DataSets.DataSet;
 import eu.dissco.core.translator.component.MappingComponent;
 import eu.dissco.core.translator.terms.specimen.OrganisationId;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenCollection;
@@ -35,7 +34,6 @@ class TermMapperTest {
   @Test
   void testRetrieveFromDWCADefault() {
     // Given
-    var organisationId = new OrganisationId();
     given(mappingComponent.getDefaultMappings()).willReturn(
         Map.of(OrganisationId.TERM, "https://ror.org/02y22ws83"));
 

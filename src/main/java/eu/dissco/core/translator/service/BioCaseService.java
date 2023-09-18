@@ -26,7 +26,7 @@ import eu.dissco.core.translator.exception.OrganisationNotRorId;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
-import eu.dissco.core.translator.terms.DigitalSpecimenDirector;
+import eu.dissco.core.translator.terms.DigitalObjectDirector;
 import eu.dissco.core.translator.terms.TermMapper;
 import eu.dissco.core.translator.terms.media.MediaType;
 import eu.dissco.core.translator.terms.specimen.OrganisationId;
@@ -87,7 +87,7 @@ public class BioCaseService implements WebClientService {
   private final TermMapper termMapper;
   private final KafkaService kafkaService;
   private final EnrichmentProperties enrichmentProperties;
-  private final DigitalSpecimenDirector digitalSpecimenDirector;
+  private final DigitalObjectDirector digitalSpecimenDirector;
 
   private boolean isAcceptedBasisOfRecord(Unit unit) {
     var recordBasis = unit.getRecordBasis();
@@ -183,7 +183,7 @@ public class BioCaseService implements WebClientService {
     unitAttributes.setAll(datasetAttribute);
     if (isAcceptedBasisOfRecord(unit)) {
       var physicalSpecimenIdType = termMapper.retrieveTerm(new PhysicalSpecimenIdType(),
-          unitAttributes, true);
+          unitAttributes, false);
       var organisationId = termMapper.retrieveTerm(new OrganisationId(), unitAttributes, false);
       if (physicalSpecimenIdType != null) {
         try {
@@ -194,7 +194,8 @@ public class BioCaseService implements WebClientService {
                   convertToPhysicalSpecimenIdTypeEnum(physicalSpecimenIdType))
               .withDwcInstitutionId(organisationId)
               .withOdsPhysicalSpecimenId(physicalSpecimenId)
-              .withOdsSourceSystem("https://hdl.handle.net/" + webClientProperties.getSourceSystemId());
+              .withOdsSourceSystem(
+                  "https://hdl.handle.net/" + webClientProperties.getSourceSystemId());
           var digitalSpecimen = new DigitalSpecimen(
               physicalSpecimenId,
               termMapper.retrieveTerm(new Type(), unitAttributes, false),
@@ -352,7 +353,8 @@ public class BioCaseService implements WebClientService {
     if (unit.getMultiMediaObjects() != null && !unit.getMultiMediaObjects().getMultiMediaObject()
         .isEmpty()) {
       for (MultiMediaObject media : unit.getMultiMediaObjects().getMultiMediaObject()) {
-        digitalMediaObjects.add(processDigitalMediaObject(physicalSpecimenId, media, organisationId));
+        digitalMediaObjects.add(
+            processDigitalMediaObject(physicalSpecimenId, media, organisationId));
       }
     }
     return digitalMediaObjects;

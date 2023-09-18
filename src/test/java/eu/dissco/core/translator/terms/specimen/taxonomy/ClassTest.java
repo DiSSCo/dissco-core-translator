@@ -36,7 +36,6 @@ class ClassTest {
     unit.put(
         "result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonName", "Mammalia");
 
-
     // When
     var result = classTax.retrieveFromABCD(unit);
 

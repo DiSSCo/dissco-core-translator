@@ -6,7 +6,7 @@ import java.util.List;
 
 public class Created extends Term {
 
-  public static final String TERM = "dcterms:creator";
+  public static final String TERM = "dcterms:created";
   private final List<String> dwcaTerms = List.of(TERM);
   private final List<String> abcdTerms = List.of("abcd:createdDate");
 

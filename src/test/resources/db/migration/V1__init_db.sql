@@ -1,4 +1,4 @@
-CREATE TABLE public.new_mapping (
+CREATE TABLE public.mapping (
 	id text NOT NULL,
 	"version" int4 NOT NULL,
 	"name" text NOT NULL,
@@ -10,7 +10,7 @@ CREATE TABLE public.new_mapping (
 	CONSTRAINT new_mapping_pk PRIMARY KEY (id, version)
 );
 
-CREATE TABLE public.new_source_system (
+CREATE TABLE public.source_system (
 	id text NOT NULL,
 	"name" text NOT NULL,
 	endpoint text NOT NULL,

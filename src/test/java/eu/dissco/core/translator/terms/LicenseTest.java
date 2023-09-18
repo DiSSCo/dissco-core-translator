@@ -3,11 +3,6 @@ package eu.dissco.core.translator.terms;
 import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import efg.ContentMetadata;
-import efg.DataSets.DataSet;
-import efg.IPRStatements;
-import efg.IPRStatements.Licenses;
-import efg.Statement;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;

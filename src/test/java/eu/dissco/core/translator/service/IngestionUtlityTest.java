@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import eu.dissco.core.translator.exception.DiSSCoDataException;
-import eu.dissco.core.translator.exception.OrganisationNotRorId;
 import eu.dissco.core.translator.exception.UnknownPhysicalSpecimenIdType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

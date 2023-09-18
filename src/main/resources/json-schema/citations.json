@@ -3,7 +3,22 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
   "properties": {
-    "???:citationType": {
+    "dcterms:type": {
+      "type": "string",
+      "description": "Unclear yet",
+      "$comment": "Unknown what this field should be"
+    },
+    "dcterms:date": {
+      "type": "string",
+      "description": "Unclear yet",
+      "$comment": "Unknown what this field should be"
+    },
+    "dcterms:title": {
+      "type": "string",
+      "description": "Unclear yet",
+      "$comment": "Unknown what this field should be"
+    },
+    "dcterms:creator": {
       "type": "string",
       "description": "Unclear yet",
       "$comment": "Unknown what this field should be"

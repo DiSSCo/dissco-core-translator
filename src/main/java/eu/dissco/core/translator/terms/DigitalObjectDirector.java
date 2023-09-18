@@ -40,8 +40,12 @@ import eu.dissco.core.translator.terms.specimen.RightsHolder;
 import eu.dissco.core.translator.terms.specimen.TopicDiscipline;
 import eu.dissco.core.translator.terms.specimen.citation.BibliographicCitation;
 import eu.dissco.core.translator.terms.specimen.citation.CitationRemarks;
+import eu.dissco.core.translator.terms.specimen.citation.Date;
 import eu.dissco.core.translator.terms.specimen.citation.ReferenceIri;
+import eu.dissco.core.translator.terms.specimen.citation.Title;
+import eu.dissco.core.translator.terms.specimen.citation.Type;
 import eu.dissco.core.translator.terms.specimen.identification.DateIdentified;
+import eu.dissco.core.translator.terms.specimen.identification.IdentificationId;
 import eu.dissco.core.translator.terms.specimen.identification.IdentificationRemarks;
 import eu.dissco.core.translator.terms.specimen.identification.IdentificationVerificationStatus;
 import eu.dissco.core.translator.terms.specimen.identification.IdentifiedBy;
@@ -51,12 +55,14 @@ import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Class;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Family;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Genus;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Kingdom;
+import eu.dissco.core.translator.terms.specimen.identification.taxonomy.NamePublishedInYear;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.NomenclaturalCode;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Order;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Phylum;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.ScientificNameAuthorship;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.SpecificEpithet;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.SpecimenName;
+import eu.dissco.core.translator.terms.specimen.identification.taxonomy.TaxonId;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.TaxonRank;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.TaxonomicStatus;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.VernacularName;
@@ -138,10 +144,9 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class DigitalSpecimenDirector {
+public class DigitalObjectDirector {
 
   private static final String EXTENSION = "extensions";
-
 
   private final ObjectMapper mapper;
   private final TermMapper termMapper;
@@ -186,7 +191,7 @@ public class DigitalSpecimenDirector {
   private List<Citations> assembleIdentificationCitations(JsonNode data, boolean dwc) {
     List<Citations> citations = List.of();
     if (dwc) {
-      log.debug("Reference extension has been added to the occurence");
+      log.debug("Reference extension has been added to the occurrence");
     } else {
       citations = gatherAbcdCitations(data, dwc, "references/reference/");
     }
@@ -216,7 +221,13 @@ public class DigitalSpecimenDirector {
         .withDctermsBibliographicCitation(
             termMapper.retrieveTerm(new BibliographicCitation(), data, dwc))
         .withCitationRemarks(termMapper.retrieveTerm(new CitationRemarks(), data, dwc))
-        .withReferenceIri(termMapper.retrieveTerm(new ReferenceIri(), data, dwc));
+        .withReferenceIri(termMapper.retrieveTerm(new ReferenceIri(), data, dwc))
+        .withDctermsCreator(
+            termMapper.retrieveTerm(new eu.dissco.core.translator.terms.specimen.citation.Creator(),
+                data, dwc))
+        .withDctermsType(termMapper.retrieveTerm(new Type(), data, dwc))
+        .withDctermsDate(termMapper.retrieveTerm(new Date(), data, dwc))
+        .withDctermsTitle(termMapper.retrieveTerm(new Title(), data, dwc));
   }
 
   private List<eu.dissco.core.translator.schema.Citations> gatherDwcaCitations(JsonNode data,
@@ -257,7 +268,6 @@ public class DigitalSpecimenDirector {
     return ds;
   }
 
-
   private List<eu.dissco.core.translator.schema.EntityRelationships> assembleDigitalSpecimenEntityRelationships(
       DigitalSpecimen ds) {
     var relationships = new ArrayList<EntityRelationships>();
@@ -270,7 +280,7 @@ public class DigitalSpecimenDirector {
           new EntityRelationships().withEntityRelationshipType("hasPhysicalIdentifier")
               .withObjectEntityIri(ds.getOdsPhysicalSpecimenId()));
     }
-    if (ds.getDctermsLicense().startsWith("http")) {
+    if (ds.getDctermsLicense() != null && ds.getDctermsLicense().startsWith("http")) {
       relationships.add(new EntityRelationships().withEntityRelationshipType("hasLicense")
           .withObjectEntityIri(ds.getDctermsLicense()));
     }
@@ -355,6 +365,7 @@ public class DigitalSpecimenDirector {
 
   private Identifications createIdentification(JsonNode data, boolean dwc) {
     var mappedTaxonIdentification = new TaxonIdentification()
+        .withDwcTaxonID(termMapper.retrieveTerm(new TaxonId(), data, dwc))
         .withDwcKingdom(termMapper.retrieveTerm(new Kingdom(), data, dwc))
         .withDwcTaxonRank(termMapper.retrieveTerm(new TaxonRank(), data, dwc))
         .withDwcGenus(termMapper.retrieveTerm(new Genus(), data, dwc))
@@ -362,6 +373,7 @@ public class DigitalSpecimenDirector {
         .withDwcScientificName(termMapper.retrieveTerm(new SpecimenName(), data, dwc))
         .withDwcScientificNameAuthorship(
             termMapper.retrieveTerm(new ScientificNameAuthorship(), data, dwc))
+        .withDwcNamePublishedInYear(termMapper.retrieveTerm(new NamePublishedInYear(), data, dwc))
         .withDwcClass(termMapper.retrieveTerm(new Class(), data, dwc))
         .withDwcFamily(termMapper.retrieveTerm(new Family(), data, dwc))
         .withDwcPhylum(termMapper.retrieveTerm(new Phylum(), data, dwc))
@@ -370,6 +382,7 @@ public class DigitalSpecimenDirector {
         .withDwcNomenclaturalCode(termMapper.retrieveTerm(new NomenclaturalCode(), data, dwc))
         .withDwcVernacularName(termMapper.retrieveTerm(new VernacularName(), data, dwc));
     return new Identifications()
+        .withDwcIdentificationID(termMapper.retrieveTerm(new IdentificationId(), data, dwc))
         .withDwcIdentificationVerificationStatus(Boolean.valueOf(
             termMapper.retrieveTerm(new IdentificationVerificationStatus(), data, dwc)))
         .withDwcTypeStatus(termMapper.retrieveTerm(new TypeStatus(), data, dwc))
@@ -452,7 +465,7 @@ public class DigitalSpecimenDirector {
         .withDwcLocationRemarks(termMapper.retrieveTerm(new LocationRemarks(), data, dwc))
         .withGeoreference(georeference)
         .withGeologicalContext(geologicalContext);
-    var assertions = new OccurrenceAssertions().gatherOccurrenceAssertions(data, dwc);
+    var assertions = new OccurrenceAssertions().gatherOccurrenceAssertions(mapper, data, dwc);
     var occurrence = new eu.dissco.core.translator.schema.Occurrences()
         .withDwcFieldNumber(termMapper.retrieveTerm(new FieldNumber(), data, dwc))
         .withDwcEventDate(termMapper.retrieveTerm(new DateCollected(), data, dwc))
@@ -565,7 +578,8 @@ public class DigitalSpecimenDirector {
           new EntityRelationships().withEntityRelationshipType("hasLicense")
               .withObjectEntityIri(digitalMediaObject.getDctermsLicense()));
     }
-    if (digitalMediaObject.getDctermsSource().startsWith("http")) {
+    if (digitalMediaObject.getDctermsSource() != null && digitalMediaObject.getDctermsSource()
+        .startsWith("http")) {
       relationships.add(new EntityRelationships().withEntityRelationshipType("hasSource")
           .withObjectEntityIri(digitalMediaObject.getDctermsLicense()));
     }

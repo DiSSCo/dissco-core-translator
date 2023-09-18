@@ -1,12 +1,12 @@
-package eu.dissco.core.translator.terms.media;
+package eu.dissco.core.translator.terms.specimen.identification.taxonomy;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
-public class Modified extends Term {
+public class NamePublishedInYear extends AbstractTaxonomy {
 
-  public static final String TERM = "dcterms:modified";
+  public static final String TERM = DWC_PREFIX + "namePublishedInYear";
+
   private final List<String> dwcaTerms = List.of(TERM);
 
   @Override

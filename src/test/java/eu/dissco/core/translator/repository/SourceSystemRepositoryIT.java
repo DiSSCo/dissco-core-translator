@@ -5,7 +5,6 @@ import static eu.dissco.core.translator.TestUtils.SOURCE_SYSTEM_ID;
 import static eu.dissco.core.translator.database.jooq.Tables.SOURCE_SYSTEM;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import eu.dissco.core.translator.database.jooq.Tables;
 import java.time.Instant;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
