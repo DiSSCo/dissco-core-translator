@@ -64,6 +64,7 @@ import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Specific
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.SpecimenName;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.TaxonId;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.TaxonRank;
+import eu.dissco.core.translator.terms.specimen.identification.taxonomy.TaxonRemarks;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.TaxonomicStatus;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.VernacularName;
 import eu.dissco.core.translator.terms.specimen.location.Continent;
@@ -380,6 +381,7 @@ public class DigitalObjectDirector {
         .withDwcSpecificEpithet(termMapper.retrieveTerm(new SpecificEpithet(), data, dwc))
         .withDwcTaxonomicStatus(termMapper.retrieveTerm(new TaxonomicStatus(), data, dwc))
         .withDwcNomenclaturalCode(termMapper.retrieveTerm(new NomenclaturalCode(), data, dwc))
+        .withDwcTaxonRemarks(termMapper.retrieveTerm(new TaxonRemarks(), data, dwc))
         .withDwcVernacularName(termMapper.retrieveTerm(new VernacularName(), data, dwc));
     return new Identifications()
         .withDwcIdentificationID(termMapper.retrieveTerm(new IdentificationId(), data, dwc))

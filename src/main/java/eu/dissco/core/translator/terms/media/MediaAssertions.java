@@ -8,7 +8,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 public class MediaAssertions {
 
-  List<Pair<Term, String>> abcdMediaAssertions = List.of(Pair.of(new FileSize(), "kb"),
+  private final List<Pair<Term, String>> abcdMediaAssertions = List.of(Pair.of(new FileSize(), "kb"),
       Pair.of(new PixelXDimension(), "pixel"), Pair.of(new PixelYDimension(), "pixel"));
 
   public List<eu.dissco.core.translator.schema.Assertions> gatherAssertions(JsonNode data,

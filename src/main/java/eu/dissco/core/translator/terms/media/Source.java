@@ -7,7 +7,7 @@ import java.util.List;
 public class Source extends Term {
 
   public static final String TERM = "dcterms:source";
-  private final List<String> dwcaTerms = List.of(TERM);
+  private final List<String> dwcaTerms = List.of(TERM, "dc:source");
   private final List<String> abcdTerms = List.of("abcd:productURI");
 
   @Override
