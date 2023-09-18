@@ -10,44 +10,29 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class RightsTest {
 
-  private final Creator creator = new Creator();
+  private final Rights rights = new Rights();
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var creatorString = "Sam Leeflang";
+    var rightsString = "Some rights";
     var unit = MAPPER.createObjectNode();
-    unit.put("dcterms:creator", creatorString);
+    unit.put("dc:rights", rightsString);
 
     // When
-    var result = creator.retrieveFromDWCA(unit);
+    var result = rights.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(creatorString);
+    assertThat(result).isEqualTo(rightsString);
   }
-
-  @Test
-  void testRetrieveFromAbcd() {
-    // Given
-    var createdString = "Sam Leeflang";
-    var unit = MAPPER.createObjectNode();
-    unit.put("abcd:creator", createdString);
-
-    // When
-    var result = creator.retrieveFromABCD(unit);
-
-    // Then
-    assertThat(result).isEqualTo(createdString);
-  }
-
 
   @Test
   void testGetTerm() {
     // When
-    var result = creator.getTerm();
+    var result = rights.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(Creator.TERM);
+    assertThat(result).isEqualTo(Rights.TERM);
   }
 
 }

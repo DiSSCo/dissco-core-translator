@@ -3,29 +3,43 @@ package eu.dissco.core.translator.terms.media;
 import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class Created {
+class CreatedTest {
 
   private final Created created = new Created();
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var accessUriString = "https://accessuri.eu/image_1";
+    var createdString = "18-09-2023";
     var unit = MAPPER.createObjectNode();
-    unit.put("ac:accessRights", accessUriString);
+    unit.put("dcterms:created", createdString);
 
     // When
-    var result = accessRights.retrieveFromDWCA(unit);
+    var result = created.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(accessUriString);
+    assertThat(result).isEqualTo(createdString);
   }
+
+  @Test
+  void testRetrieveFromAbcd() {
+    // Given
+    var createdString = "18-09-2023";
+    var unit = MAPPER.createObjectNode();
+    unit.put("abcd:createdDate", createdString);
+
+    // When
+    var result = created.retrieveFromABCD(unit);
+
+    // Then
+    assertThat(result).isEqualTo(createdString);
+  }
+
 
   @Test
   void testGetTerm() {
@@ -33,7 +47,7 @@ class Created {
     var result = created.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(AccessRights.TERM);
+    assertThat(result).isEqualTo(Created.TERM);
   }
 
 }

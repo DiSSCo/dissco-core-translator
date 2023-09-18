@@ -10,29 +10,29 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class RightsHolderTest {
 
-  private final Rights rights = new Rights();
+  private final RightsHolder rightsHolder = new RightsHolder();
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var rightsString = "Some rights";
+    var rightsHolderString = "The rightsHolder";
     var unit = MAPPER.createObjectNode();
-    unit.put("dc:rights", rightsString);
+    unit.put("dcterms:rightsHolder", rightsHolderString);
 
     // When
-    var result = rights.retrieveFromDWCA(unit);
+    var result = rightsHolder.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(rightsString);
+    assertThat(result).isEqualTo(rightsHolderString);
   }
 
   @Test
   void testGetTerm() {
     // When
-    var result = rights.getTerm();
+    var result = rightsHolder.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(Rights.TERM);
+    assertThat(result).isEqualTo(RightsHolder.TERM);
   }
 
 }

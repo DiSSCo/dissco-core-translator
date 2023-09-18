@@ -10,29 +10,29 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class TypeTest {
 
-  private final Title title = new Title();
+  private final Type type = new Type();
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var titleString = "A good title";
+    var typeString = "Publication";
     var unit = MAPPER.createObjectNode();
-    unit.put("dcterms:title", titleString);
+    unit.put("dcterms:type", typeString);
 
     // When
-    var result = title.retrieveFromDWCA(unit);
+    var result = type.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(titleString);
+    assertThat(result).isEqualTo(typeString);
   }
 
   @Test
   void testGetTerm() {
     // When
-    var result = title.getTerm();
+    var result = type.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(Title.TERM);
+    assertThat(result).isEqualTo(Type.TERM);
   }
 
 }

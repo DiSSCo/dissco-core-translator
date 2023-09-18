@@ -10,41 +10,41 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class IdentificationRemarksTest {
 
-  private final DateIdentified dateIdentified = new DateIdentified();
+  private final IdentificationRemarks identificationRemarks = new IdentificationRemarks();
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var dateIdentifiedString = "18-09-2023";
+    var identificationRemarkString = "A remark about the identification";
     var unit = MAPPER.createObjectNode();
-    unit.put("dwc:dateIdentified", dateIdentifiedString);
+    unit.put("dwc:identificationRemarks", identificationRemarkString);
 
     // When
-    var result = dateIdentified.retrieveFromDWCA(unit);
+    var result = identificationRemarks.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(dateIdentifiedString);
+    assertThat(result).isEqualTo(identificationRemarkString);
   }
   @Test
   void testRetrieveFromABCD() {
     // Given
-    var dateIdentifiedString = "18-09-2023";
+    var identificationRemarkString = "A remark about the identification";
     var unit = MAPPER.createObjectNode();
-    unit.put("date/dateText", dateIdentifiedString);
+    unit.put("notes/value", identificationRemarkString);
 
     // When
-    var result = dateIdentified.retrieveFromABCD(unit);
+    var result = identificationRemarks.retrieveFromABCD(unit);
 
     // Then
-    assertThat(result).isEqualTo(dateIdentifiedString);
+    assertThat(result).isEqualTo(identificationRemarkString);
   }
   @Test
   void testGetTerm() {
     // When
-    var result = dateIdentified.getTerm();
+    var result = identificationRemarks.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(DateIdentified.TERM);
+    assertThat(result).isEqualTo(IdentificationRemarks.TERM);
   }
 
 }

@@ -8,31 +8,32 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class AccessRightsTest {
+class WebStatementTest {
 
-  private final AccessRights accessRights = new AccessRights();
+  private final WebStatement webStatement = new WebStatement();
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var accessRightsString = "Description of accessRights";
+    var webStatementString = "Some statement";
     var unit = MAPPER.createObjectNode();
-    unit.put("dcterms:accessRights", accessRightsString);
+    unit.put("xmpRights:webStatement", webStatementString);
 
     // When
-    var result = accessRights.retrieveFromDWCA(unit);
+    var result = webStatement.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(accessRightsString);
+    assertThat(result).isEqualTo(webStatementString);
   }
+
 
   @Test
   void testGetTerm() {
     // When
-    var result = accessRights.getTerm();
+    var result = webStatement.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(AccessRights.TERM);
+    assertThat(result).isEqualTo(WebStatement.TERM);
   }
 
 }

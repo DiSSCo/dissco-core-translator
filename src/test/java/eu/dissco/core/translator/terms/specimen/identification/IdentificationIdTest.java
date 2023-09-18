@@ -10,41 +10,28 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class IdentificationIdTest {
 
-  private final DateIdentified dateIdentified = new DateIdentified();
+  private final IdentificationId identificationId = new IdentificationId();
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var dateIdentifiedString = "18-09-2023";
+    var identificationIdString = "NBC-31249";
     var unit = MAPPER.createObjectNode();
-    unit.put("dwc:dateIdentified", dateIdentifiedString);
+    unit.put("dwc:identificationID", identificationIdString);
 
     // When
-    var result = dateIdentified.retrieveFromDWCA(unit);
+    var result = identificationId.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(dateIdentifiedString);
-  }
-  @Test
-  void testRetrieveFromABCD() {
-    // Given
-    var dateIdentifiedString = "18-09-2023";
-    var unit = MAPPER.createObjectNode();
-    unit.put("date/dateText", dateIdentifiedString);
-
-    // When
-    var result = dateIdentified.retrieveFromABCD(unit);
-
-    // Then
-    assertThat(result).isEqualTo(dateIdentifiedString);
+    assertThat(result).isEqualTo(identificationIdString);
   }
   @Test
   void testGetTerm() {
     // When
-    var result = dateIdentified.getTerm();
+    var result = identificationId.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(DateIdentified.TERM);
+    assertThat(result).isEqualTo(IdentificationId.TERM);
   }
 
 }

@@ -10,44 +10,44 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class PixelXDimensionTest {
 
-  private final FileSize fileSize = new FileSize();
+  private final PixelXDimension pixelXDimension = new PixelXDimension();
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var fileSizeString = "38";
+    var pixelXDimensionString = "500";
     var unit = MAPPER.createObjectNode();
-    unit.put("dcterms:extent", fileSizeString);
+    unit.put("exif:PixelXDimension", pixelXDimensionString);
 
     // When
-    var result = fileSize.retrieveFromDWCA(unit);
+    var result = pixelXDimension.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(fileSizeString);
+    assertThat(result).isEqualTo(pixelXDimensionString);
   }
 
   @Test
   void testRetrieveFromAbcd() {
     // Given
-    var fileSizeString = "38";
+    var pixelXDimensionString = "500";
     var unit = MAPPER.createObjectNode();
-    unit.put("abcd:fileSize", fileSizeString);
+    unit.put("abcd:imageSize/width", pixelXDimensionString);
 
     // When
-    var result = fileSize.retrieveFromABCD(unit);
+    var result = pixelXDimension.retrieveFromABCD(unit);
 
     // Then
-    assertThat(result).isEqualTo(fileSizeString);
+    assertThat(result).isEqualTo(pixelXDimensionString);
   }
 
 
   @Test
   void testGetTerm() {
     // When
-    var result = fileSize.getTerm();
+    var result = pixelXDimension.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(FileSize.TERM);
+    assertThat(result).isEqualTo(PixelXDimension.TERM);
   }
 
 }

@@ -10,31 +10,31 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class CreatorTest {
 
-  private final Created created = new Created();
+  private final Creator creator = new Creator();
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var createdString = "18-09-2023";
+    var creatorString = "Sam Leeflang";
     var unit = MAPPER.createObjectNode();
-    unit.put("dcterms:created", createdString);
+    unit.put("dcterms:creator", creatorString);
 
     // When
-    var result = created.retrieveFromDWCA(unit);
+    var result = creator.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(createdString);
+    assertThat(result).isEqualTo(creatorString);
   }
 
   @Test
   void testRetrieveFromAbcd() {
     // Given
-    var createdString = "18-09-2023";
+    var createdString = "Sam Leeflang";
     var unit = MAPPER.createObjectNode();
-    unit.put("abcd:createdDate", createdString);
+    unit.put("abcd:creator", createdString);
 
     // When
-    var result = created.retrieveFromABCD(unit);
+    var result = creator.retrieveFromABCD(unit);
 
     // Then
     assertThat(result).isEqualTo(createdString);
@@ -44,10 +44,10 @@ class CreatorTest {
   @Test
   void testGetTerm() {
     // When
-    var result = created.getTerm();
+    var result = creator.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(Created.TERM);
+    assertThat(result).isEqualTo(Creator.TERM);
   }
 
 }

@@ -10,44 +10,44 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class PixelYDimensionTest {
 
-  private final PixelXDimension pixelXDimension = new PixelXDimension();
+  private final PixelYDimension pixelYDimension = new PixelYDimension();
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var pixelXDimensionString = "500";
+    var pixelyDimensionString = "1500";
     var unit = MAPPER.createObjectNode();
-    unit.put("exif:PixelXDimension", pixelXDimensionString);
+    unit.put("exif:PixelYDimension", pixelyDimensionString);
 
     // When
-    var result = pixelXDimension.retrieveFromDWCA(unit);
+    var result = pixelYDimension.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(pixelXDimensionString);
+    assertThat(result).isEqualTo(pixelyDimensionString);
   }
 
   @Test
   void testRetrieveFromAbcd() {
     // Given
-    var pixelXDimensionString = "500";
+    var pixelyDimensionString = "1500";
     var unit = MAPPER.createObjectNode();
-    unit.put("abcd:imageSize/width", pixelXDimensionString);
+    unit.put("abcd:imageSize/height", pixelyDimensionString);
 
     // When
-    var result = pixelXDimension.retrieveFromABCD(unit);
+    var result = pixelYDimension.retrieveFromABCD(unit);
 
     // Then
-    assertThat(result).isEqualTo(pixelXDimensionString);
+    assertThat(result).isEqualTo(pixelyDimensionString);
   }
 
 
   @Test
   void testGetTerm() {
     // When
-    var result = pixelXDimension.getTerm();
+    var result = pixelYDimension.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(PixelXDimension.TERM);
+    assertThat(result).isEqualTo(PixelYDimension.TERM);
   }
 
 }

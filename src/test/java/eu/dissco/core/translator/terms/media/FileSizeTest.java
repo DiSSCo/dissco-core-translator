@@ -8,46 +8,46 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class FileSize {
+class FileSizeTest {
 
-  private final Description description = new Description();
+  private final FileSize fileSize = new FileSize();
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var descriptionString = "An image of a plant";
+    var fileSizeString = "38";
     var unit = MAPPER.createObjectNode();
-    unit.put("dcterms:extent", descriptionString);
+    unit.put("dcterms:extent", fileSizeString);
 
     // When
-    var result = description.retrieveFromDWCA(unit);
+    var result = fileSize.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(descriptionString);
+    assertThat(result).isEqualTo(fileSizeString);
   }
 
   @Test
   void testRetrieveFromAbcd() {
     // Given
-    var descriptionString = "An image of a plant";
+    var fileSizeString = "38";
     var unit = MAPPER.createObjectNode();
-    unit.put("abcd:context/value", descriptionString);
+    unit.put("abcd:fileSize", fileSizeString);
 
     // When
-    var result = description.retrieveFromABCD(unit);
+    var result = fileSize.retrieveFromABCD(unit);
 
     // Then
-    assertThat(result).isEqualTo(descriptionString);
+    assertThat(result).isEqualTo(fileSizeString);
   }
 
 
   @Test
   void testGetTerm() {
     // When
-    var result = description.getTerm();
+    var result = fileSize.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(Description.TERM);
+    assertThat(result).isEqualTo(FileSize.TERM);
   }
 
 }

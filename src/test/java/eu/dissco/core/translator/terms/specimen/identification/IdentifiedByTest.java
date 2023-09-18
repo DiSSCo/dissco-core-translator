@@ -10,41 +10,41 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class IdentifiedByTest {
 
-  private final DateIdentified dateIdentified = new DateIdentified();
+  private final IdentifiedBy identifiedBy = new IdentifiedBy();
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var dateIdentifiedString = "18-09-2023";
+    var identifiedByString = "Sam Leeflang";
     var unit = MAPPER.createObjectNode();
-    unit.put("dwc:dateIdentified", dateIdentifiedString);
+    unit.put("dwc:identifiedBy", identifiedByString);
 
     // When
-    var result = dateIdentified.retrieveFromDWCA(unit);
+    var result = identifiedBy.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(dateIdentifiedString);
+    assertThat(result).isEqualTo(identifiedByString);
   }
   @Test
   void testRetrieveFromABCD() {
     // Given
-    var dateIdentifiedString = "18-09-2023";
+    var identifiedByString = "Sam Leeflang";
     var unit = MAPPER.createObjectNode();
-    unit.put("date/dateText", dateIdentifiedString);
+    unit.put("identifiers/identifier/0/personName/fullName", identifiedByString);
 
     // When
-    var result = dateIdentified.retrieveFromABCD(unit);
+    var result = identifiedBy.retrieveFromABCD(unit);
 
     // Then
-    assertThat(result).isEqualTo(dateIdentifiedString);
+    assertThat(result).isEqualTo(identifiedByString);
   }
   @Test
   void testGetTerm() {
     // When
-    var result = dateIdentified.getTerm();
+    var result = identifiedBy.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(DateIdentified.TERM);
+    assertThat(result).isEqualTo(IdentifiedBy.TERM);
   }
 
 }

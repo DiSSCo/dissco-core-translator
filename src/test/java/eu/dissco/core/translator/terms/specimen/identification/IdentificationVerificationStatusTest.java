@@ -10,41 +10,43 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class IdentificationVerificationStatusTest {
 
-  private final IdentificationRemarks identificationRemarks = new IdentificationRemarks();
+  private final IdentificationVerificationStatus identificationVerificationStatus = new IdentificationVerificationStatus();
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var identificationRemarkString = "A remark about the identification";
+    var identificationVerificationStatusString = "1";
     var unit = MAPPER.createObjectNode();
-    unit.put("dwc:identificationRemarks", identificationRemarkString);
+    unit.put("dwc:identificationVerificationStatus", identificationVerificationStatusString);
 
     // When
-    var result = identificationRemarks.retrieveFromDWCA(unit);
+    var result = identificationVerificationStatus.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(identificationRemarkString);
+    assertThat(result).isEqualTo("true");
   }
+
   @Test
   void testRetrieveFromABCD() {
     // Given
-    var identificationRemarkString = "A remark about the identification";
+    var identificationVerificationStatusString = "true";
     var unit = MAPPER.createObjectNode();
-    unit.put("notes/value", identificationRemarkString);
+    unit.put("preferredFlag", identificationVerificationStatusString);
 
     // When
-    var result = identificationRemarks.retrieveFromABCD(unit);
+    var result = identificationVerificationStatus.retrieveFromABCD(unit);
 
     // Then
-    assertThat(result).isEqualTo(identificationRemarkString);
+    assertThat(result).isEqualTo(identificationVerificationStatusString);
   }
+
   @Test
   void testGetTerm() {
     // When
-    var result = identificationRemarks.getTerm();
+    var result = identificationVerificationStatus.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(IdentificationRemarks.TERM);
+    assertThat(result).isEqualTo(IdentificationVerificationStatus.TERM);
   }
 
 }

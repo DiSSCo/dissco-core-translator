@@ -10,41 +10,28 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class VerbatimIdentificationTest {
 
-  private final IdentifiedBy identifiedBy = new IdentifiedBy();
+  private final VerbatimIdentification verbatimIdentification = new VerbatimIdentification();
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var identifiedByString = "Sam Leeflang";
+    var verbatimIdentificationString = "A verbatim identification";
     var unit = MAPPER.createObjectNode();
-    unit.put("dwc:identifiedBy", identifiedByString);
+    unit.put("dwc:verbatimIdentification", verbatimIdentificationString);
 
     // When
-    var result = identifiedBy.retrieveFromDWCA(unit);
+    var result = verbatimIdentification.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(identifiedByString);
-  }
-  @Test
-  void testRetrieveFromABCD() {
-    // Given
-    var identifiedByString = "Sam Leeflang";
-    var unit = MAPPER.createObjectNode();
-    unit.put("identifiers/identifier/0/personName/fullName", identifiedByString);
-
-    // When
-    var result = identifiedBy.retrieveFromABCD(unit);
-
-    // Then
-    assertThat(result).isEqualTo(identifiedByString);
+    assertThat(result).isEqualTo(verbatimIdentificationString);
   }
   @Test
   void testGetTerm() {
     // When
-    var result = identifiedBy.getTerm();
+    var result = verbatimIdentification.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(IdentifiedBy.TERM);
+    assertThat(result).isEqualTo(VerbatimIdentification.TERM);
   }
 
 }

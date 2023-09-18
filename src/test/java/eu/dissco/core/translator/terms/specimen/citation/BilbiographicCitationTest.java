@@ -11,29 +11,41 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class BilbiographicCitationTest {
 
-  private final Continent continent = new Continent();
+  private final BibliographicCitation bibliographicCitation = new BibliographicCitation();
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var continentString = "Europe";
+    var bibliographicCitationString = "A new bibliographic citation";
     var unit = MAPPER.createObjectNode();
-    unit.put("dwc:continent", continentString);
+    unit.put("dcterms:bibliographicCitation", bibliographicCitationString);
 
     // When
-    var result = continent.retrieveFromDWCA(unit);
+    var result = bibliographicCitation.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(continentString);
+    assertThat(result).isEqualTo(bibliographicCitationString);
   }
+  @Test
+  void testRetrieveFromABCD() {
+    // Given
+    var bibliographicCitationString = "A new bibliographic citation";
+    var unit = MAPPER.createObjectNode();
+    unit.put("titleCitation", bibliographicCitationString);
 
+    // When
+    var result = bibliographicCitation.retrieveFromABCD(unit);
+
+    // Then
+    assertThat(result).isEqualTo(bibliographicCitationString);
+  }
   @Test
   void testGetTerm() {
     // When
-    var result = continent.getTerm();
+    var result = bibliographicCitation.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(Continent.TERM);
+    assertThat(result).isEqualTo(BibliographicCitation.TERM);
   }
 
 }

@@ -10,44 +10,44 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class SourceTest {
 
-  private final PixelYDimension pixelYDimension = new PixelYDimension();
+  private final Source source = new Source();
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var pixelyDimensionString = "1500";
+    var sourceString = "https://geocollections.info/file/168145";
     var unit = MAPPER.createObjectNode();
-    unit.put("exif:PixelYDimension", pixelyDimensionString);
+    unit.put("dcterms:source", sourceString);
 
     // When
-    var result = pixelYDimension.retrieveFromDWCA(unit);
+    var result = source.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(pixelyDimensionString);
+    assertThat(result).isEqualTo(sourceString);
   }
 
   @Test
   void testRetrieveFromAbcd() {
     // Given
-    var pixelyDimensionString = "1500";
+    var sourceString = "https://geocollections.info/file/168145";
     var unit = MAPPER.createObjectNode();
-    unit.put("abcd:imageSize/height", pixelyDimensionString);
+    unit.put("abcd:productURI", sourceString);
 
     // When
-    var result = pixelYDimension.retrieveFromABCD(unit);
+    var result = source.retrieveFromABCD(unit);
 
     // Then
-    assertThat(result).isEqualTo(pixelyDimensionString);
+    assertThat(result).isEqualTo(sourceString);
   }
 
 
   @Test
   void testGetTerm() {
     // When
-    var result = pixelYDimension.getTerm();
+    var result = source.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(PixelYDimension.TERM);
+    assertThat(result).isEqualTo(Source.TERM);
   }
 
 }

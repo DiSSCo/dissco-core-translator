@@ -10,44 +10,30 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class ModifiedTest {
 
-  private final Created created = new Created();
+  private final Modified modified = new Modified();
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var createdString = "18-09-2023";
+    var modifiedString = "18-09-2023";
     var unit = MAPPER.createObjectNode();
-    unit.put("dcterms:created", createdString);
+    unit.put("dcterms:modified", modifiedString);
 
     // When
-    var result = created.retrieveFromDWCA(unit);
+    var result = modified.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(createdString);
-  }
-
-  @Test
-  void testRetrieveFromAbcd() {
-    // Given
-    var createdString = "18-09-2023";
-    var unit = MAPPER.createObjectNode();
-    unit.put("abcd:createdDate", createdString);
-
-    // When
-    var result = created.retrieveFromABCD(unit);
-
-    // Then
-    assertThat(result).isEqualTo(createdString);
+    assertThat(result).isEqualTo(modifiedString);
   }
 
 
   @Test
   void testGetTerm() {
     // When
-    var result = created.getTerm();
+    var result = modified.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(Created.TERM);
+    assertThat(result).isEqualTo(Modified.TERM);
   }
 
 }

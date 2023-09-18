@@ -10,29 +10,29 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class DateTest {
 
-  private final Creator creator = new Creator();
+  private final Date date = new Date();
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var creatorString = "S. Leeflang";
+    var dateString = "18-09-2023";
     var unit = MAPPER.createObjectNode();
-    unit.put("dcterms:creator", creatorString);
+    unit.put("dcterms:date", dateString);
 
     // When
-    var result = creator.retrieveFromDWCA(unit);
+    var result = date.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(creatorString);
+    assertThat(result).isEqualTo(dateString);
   }
 
   @Test
   void testGetTerm() {
     // When
-    var result = creator.getTerm();
+    var result = date.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(Creator.TERM);
+    assertThat(result).isEqualTo(Date.TERM);
   }
 
 }

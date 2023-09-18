@@ -10,41 +10,29 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class ReferenceIriTest {
 
-  private final CitationRemarks citationRemarks = new CitationRemarks();
+  private final ReferenceIri referenceIri = new ReferenceIri();
 
-  @Test
-  void testRetrieveFromDWCA() {
-    // Given
-    var citationRemarksString = "A new citation remark";
-    var unit = MAPPER.createObjectNode();
-    unit.put("dwc:taxonRemarks", citationRemarksString);
-
-    // When
-    var result = citationRemarks.retrieveFromDWCA(unit);
-
-    // Then
-    assertThat(result).isEqualTo(citationRemarksString);
-  }
   @Test
   void testRetrieveFromABCD() {
     // Given
-    var citationRemarksString = "A new citation remark";
+    var referenceIriString = "https://iri-to-reference.com";
     var unit = MAPPER.createObjectNode();
-    unit.put("citationDetail", citationRemarksString);
+    unit.put("uri", referenceIriString);
 
     // When
-    var result = citationRemarks.retrieveFromABCD(unit);
+    var result = referenceIri.retrieveFromABCD(unit);
 
     // Then
-    assertThat(result).isEqualTo(citationRemarksString);
+    assertThat(result).isEqualTo(referenceIriString);
   }
+
   @Test
   void testGetTerm() {
     // When
-    var result = citationRemarks.getTerm();
+    var result = referenceIri.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(CitationRemarks.TERM);
+    assertThat(result).isEqualTo(ReferenceIri.TERM);
   }
 
 }

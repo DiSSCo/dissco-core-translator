@@ -1,4 +1,4 @@
-package eu.dissco.core.translator.terms.specimen.taxonomy;
+package eu.dissco.core.translator.terms.specimen.identification.taxonomy;
 
 import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static org.assertj.core.api.Assertions.assertThat;

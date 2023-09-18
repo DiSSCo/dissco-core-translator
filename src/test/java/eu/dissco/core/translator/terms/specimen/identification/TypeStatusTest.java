@@ -3,6 +3,7 @@ package eu.dissco.core.translator.terms.specimen.identification;
 import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import eu.dissco.core.translator.terms.specimen.identification.taxonomy.TaxonomicStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -10,41 +11,29 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class TypeStatusTest {
 
-  private final IdentifiedBy identifiedBy = new IdentifiedBy();
+  private final TypeStatus typeStatus = new TypeStatus();
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var identifiedByString = "Sam Leeflang";
+    var typeStatusString = "holotype";
     var unit = MAPPER.createObjectNode();
-    unit.put("dwc:identifiedBy", identifiedByString);
+    unit.put("dwc:typeStatus", typeStatusString);
 
     // When
-    var result = identifiedBy.retrieveFromDWCA(unit);
+    var result = typeStatus.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(identifiedByString);
+    assertThat(result).isEqualTo(typeStatusString);
   }
-  @Test
-  void testRetrieveFromABCD() {
-    // Given
-    var identifiedByString = "Sam Leeflang";
-    var unit = MAPPER.createObjectNode();
-    unit.put("identifiers/identifier/0/personName/fullName", identifiedByString);
 
-    // When
-    var result = identifiedBy.retrieveFromABCD(unit);
-
-    // Then
-    assertThat(result).isEqualTo(identifiedByString);
-  }
   @Test
   void testGetTerm() {
     // When
-    var result = identifiedBy.getTerm();
+    var result = typeStatus.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(IdentifiedBy.TERM);
+    assertThat(result).isEqualTo(TypeStatus.TERM);
   }
 
 }

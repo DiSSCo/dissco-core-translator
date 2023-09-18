@@ -10,44 +10,44 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class DescriptionTest {
 
-  private final Creator creator = new Creator();
+  private final Description description = new Description();
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var creatorString = "Sam Leeflang";
+    var descriptionString = "An image of a plant";
     var unit = MAPPER.createObjectNode();
-    unit.put("dcterms:creator", creatorString);
+    unit.put("dcterms:description", descriptionString);
 
     // When
-    var result = creator.retrieveFromDWCA(unit);
+    var result = description.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(creatorString);
+    assertThat(result).isEqualTo(descriptionString);
   }
 
   @Test
   void testRetrieveFromAbcd() {
     // Given
-    var createdString = "Sam Leeflang";
+    var descriptionString = "An image of a plant";
     var unit = MAPPER.createObjectNode();
-    unit.put("abcd:creator", createdString);
+    unit.put("abcd:context/value", descriptionString);
 
     // When
-    var result = creator.retrieveFromABCD(unit);
+    var result = description.retrieveFromABCD(unit);
 
     // Then
-    assertThat(result).isEqualTo(createdString);
+    assertThat(result).isEqualTo(descriptionString);
   }
 
 
   @Test
   void testGetTerm() {
     // When
-    var result = creator.getTerm();
+    var result = description.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(Creator.TERM);
+    assertThat(result).isEqualTo(Description.TERM);
   }
 
 }
