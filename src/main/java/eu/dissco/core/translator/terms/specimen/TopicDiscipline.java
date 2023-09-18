@@ -17,16 +17,30 @@ public class TopicDiscipline extends Term {
   private static final List<String> EARTH_SYSTEM_BASIS_OF_RECORD = List.of("ROCK", "MINERAL",
       "ROCKSPECIMEN", "ROCK SPECIMEN", "MINERALSPECIMEN", "MINERAL SPECIMEN");
 
-  private static String getCategory(String basisOfRecord, String kingdom) {
+  @Override
+  public String retrieveFromDWCA(JsonNode unit) {
+    var basisOfRecord = new BasisOfRecord().retrieveFromDWCA(unit);
+    var kingdom = new Kingdom().retrieveFromDWCA(unit);
+    return getDiscipline(basisOfRecord, kingdom);
+  }
+
+  @Override
+  public String retrieveFromABCD(JsonNode unit) {
+    var basisOfRecord = new BasisOfRecord().retrieveFromABCD(unit);
+    var kingdom = new Kingdom().retrieveFromABCD(unit);
+    return getDiscipline(basisOfRecord, kingdom);
+  }
+
+  private static String getDiscipline(String basisOfRecord, String kingdom) {
     if (basisOfRecord != null) {
       var harBasisOfRecord = basisOfRecord.trim().toUpperCase();
       if (FOSSIL_BASIS_OF_RECORD.contains(harBasisOfRecord)) {
         return "Palaeontology";
       } else if (EXTRATERRESTRIAL_BASIS_OF_RECORD.contains(harBasisOfRecord)) {
         return "Astrogeology";
-      } else if (EARTH_SYSTEM_BASIS_OF_RECORD.contains(harBasisOfRecord)) {
-        return "Earth System";
-      } else if (kingdom != null) {
+      } else if (EARTH_SYSTEM_BASIS_OF_RECORD.contains(harBasisOfRecord)){
+        return "Geology";
+      } else if (kingdom != null){
         var harKingdom = kingdom.trim().toUpperCase();
         switch (harKingdom) {
           case "ANIMALIA" -> {

@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.1.0</version>
+    <version>3.1.2</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
   <groupId>eu.dissco.core</groupId>
@@ -21,6 +21,7 @@
     <jaxb2-maven-plugin.version>3.1.0</jaxb2-maven-plugin.version>
     <jakarta.activation-api.version>2.1.0</jakarta.activation-api.version>
     <jakarta.xml.bind-api.version>4.0.0</jakarta.xml.bind-api.version>
+    <spring-kafka.version>3.0.10</spring-kafka.version>
     <mockito-inline.version>5.2.0</mockito-inline.version>
     <testcontainers.version>1.17.5</testcontainers.version>
     <sonar.organization>dissco</sonar.organization>
@@ -78,6 +79,12 @@
     <dependency>
       <groupId>org.springframework.kafka</groupId>
       <artifactId>spring-kafka</artifactId>
+    </dependency>
+    <!-- Overwrite kafka client snappy version as it contains high prio security issues (24-07-2023) -->
+    <dependency>
+      <groupId>org.xerial.snappy</groupId>
+      <artifactId>snappy-java</artifactId>
+      <version>1.1.10.3</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>

@@ -44,6 +44,19 @@ class TopicDisciplineTest {
     assertThat(result).isEqualTo(expected);
   }
 
+  private static Stream<Arguments> arguments() {
+    return Stream.of(
+        Arguments.of("FossilSpecimen", null, "Palaeontology"),
+        Arguments.of("MeteoriteSpecimen", null, "Astrogeology"),
+        Arguments.of("RockSpecimen", null, "Geology"),
+        Arguments.of("PreservedSpecimen", "Animalia", "Zoology"),
+        Arguments.of("PreservedSpecimen", "Plantae", "Botany"),
+        Arguments.of("PreservedSpecimen", "Bacteria", "Microbiology"),
+        Arguments.of("PreservedSpecimen", "incertae sedis", "Unclassified"),
+        Arguments.of("Other", null, "Unclassified")
+    );
+  }
+
   @ParameterizedTest
   @MethodSource("arguments")
   void testRetrieveFromABCD(String basisOfRecord, String kingdom, String expected) {
