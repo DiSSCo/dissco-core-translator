@@ -65,20 +65,6 @@ public class TopicDiscipline extends Term {
   }
 
   @Override
-  public String retrieveFromDWCA(JsonNode unit) {
-    var basisOfRecord = new BasisOfRecord().retrieveFromDWCA(unit);
-    var kingdom = new Kingdom().retrieveFromDWCA(unit);
-    return getCategory(basisOfRecord, kingdom);
-  }
-
-  @Override
-  public String retrieveFromABCD(JsonNode unit) {
-    var basisOfRecord = new BasisOfRecord().retrieveFromABCD(unit);
-    var kingdom = new Kingdom().retrieveFromABCD(unit);
-    return getCategory(basisOfRecord, kingdom);
-  }
-
-  @Override
   public String getTerm() {
     return TERM;
   }

@@ -165,7 +165,6 @@ public class DwcaService implements WebClientService {
   private List<DigitalMediaObject> processMedia(String recordId, JsonNode fullDigitalSpecimen,
       String organisationId) throws OrganisationNotRorId {
     var extensions = fullDigitalSpecimen.get(EXTENSIONS);
-    var orgId = termMapper.retrieveFromDWCA(new OrganisationId(), fullDigitalSpecimen);
     if (fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA) != null) {
       return publishAssociatedMedia(recordId,
           fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA).asText(), organisationId);
