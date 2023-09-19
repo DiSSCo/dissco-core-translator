@@ -9,9 +9,10 @@ public class LifeStage extends Term {
   public static final String TERM = DWC_PREFIX + "lifeStage";
 
   private final List<String> dwcaTerms = List.of(TERM);
-  private final List<String> abcdTerms = List.of("abcd:mycologicalUnit/mycologicalSexualStage",
-      "mycologicalUnit/mycologicalLiveStages/0/mycologicalLiveStage",
-      "zoologicalUnit/phasesOrStages/0/phaseOrStage");
+  private final List<String> abcdTerms = List.of(
+      "abcd:unit/mycologicalUnit/mycologicalSexualStage",
+      "abcd:unit/mycologicalUnit/mycologicalLiveStages/0/mycologicalLiveStage/value",
+      "abcd:unit/zoologicalUnit/phasesOrStages/0/phaseOrStage/value");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {

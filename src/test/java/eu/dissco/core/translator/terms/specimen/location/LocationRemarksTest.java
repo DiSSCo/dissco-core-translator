@@ -8,45 +8,44 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class CountyTest {
+class LocationRemarksTest {
 
-  private static final String COUNTY_STRING = "Northumberland";
-  private final County county = new County();
+  private static final String LOCATION_REMARKS_STRING = "Remarks about the location";
+  private final LocationRemarks locationRemarks = new LocationRemarks();
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
     var unit = MAPPER.createObjectNode();
-    unit.put("dwc:county", COUNTY_STRING);
+    unit.put("dwc:locationRemarks", LOCATION_REMARKS_STRING);
 
     // When
-    var result = county.retrieveFromDWCA(unit);
+    var result = locationRemarks.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(COUNTY_STRING);
+    assertThat(result).isEqualTo(LOCATION_REMARKS_STRING);
   }
 
   @Test
   void testRetrieveFromABCD() {
     // Given
     var unit = MAPPER.createObjectNode();
-    unit.put("abcd:gathering/namedAreas/namedArea/0/areaClass/value", "County");
-    unit.put("abcd:gathering/namedAreas/namedArea/0/areaName/value", COUNTY_STRING);
+    unit.put("abcd:gathering/areaDetail/value",
+        LOCATION_REMARKS_STRING);
 
     // When
-    var result = county.retrieveFromABCD(unit);
+    var result = locationRemarks.retrieveFromABCD(unit);
 
     // Then
-    assertThat(result).isEqualTo(COUNTY_STRING);
+    assertThat(result).isEqualTo(LOCATION_REMARKS_STRING);
   }
 
   @Test
   void testGetTerm() {
     // When
-    var result = county.getTerm();
+    var result = locationRemarks.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(County.TERM);
+    assertThat(result).isEqualTo(LocationRemarks.TERM);
   }
-
 }

@@ -120,11 +120,6 @@
       "type": "string",
       "description": "Modification date for specimen information"
     },
-    "dcterms:type": {
-      "type": "string",
-      "description": "The underlying type",
-      "$comment": "Switch this to enum as it is a controlled vocabulary"
-    },
     "dwc:basisOfRecord": {
       "type": "string",
       "description": "The basis for the record",

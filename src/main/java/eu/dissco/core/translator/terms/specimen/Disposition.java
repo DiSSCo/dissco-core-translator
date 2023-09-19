@@ -9,16 +9,10 @@ public class Disposition extends Term {
   public static final String TERM = DWC_PREFIX + "disposition";
 
   private final List<String> dwcaTerms = List.of(TERM);
-  private final List<String> abcdTerms = List.of("abcd:recordBasis");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
     return super.searchJsonForTerm(unit, dwcaTerms);
-  }
-
-  @Override
-  public String retrieveFromABCD(JsonNode unit) {
-    return super.searchJsonForTerm(unit, abcdTerms);
   }
 
   @Override

@@ -8,22 +8,22 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class CollectorTest {
+class RecordedByTest {
 
-  private static final String COLLECTOR_NAME = "Fricke, Ronald";
-  private final RecordedBy collector = new RecordedBy();
+  private static final String RECORDED_BY_STRING = "Fricke, Ronald";
+  private final RecordedBy recordedBy = new RecordedBy();
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
     var unit = MAPPER.createObjectNode();
-    unit.put("dwc:recordedBy", COLLECTOR_NAME);
+    unit.put("dwc:recordedBy", RECORDED_BY_STRING);
 
     // When
-    var result = collector.retrieveFromDWCA(unit);
+    var result = recordedBy.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(COLLECTOR_NAME);
+    assertThat(result).isEqualTo(RECORDED_BY_STRING);
   }
 
   @Test
@@ -31,29 +31,29 @@ class CollectorTest {
     // Given
     var collectorName2 = "Troschel, Hans-Julius";
     var unit = MAPPER.createObjectNode();
-    unit.put("abcd:gathering/agents/gatheringAgent/0/person/fullName", COLLECTOR_NAME);
+    unit.put("abcd:gathering/agents/gatheringAgent/0/person/fullName", RECORDED_BY_STRING);
     unit.put("abcd:gathering/agents/gatheringAgent/0/person/agentText", "Tom");
     unit.put("abcd:gathering/agents/gatheringAgent/1/person/agentText", collectorName2);
     unit.put("abcd:gathering/agents/gatheringAgentsText", "Sam Leeflang");
 
     // When
-    var result = collector.retrieveFromABCD(unit);
+    var result = recordedBy.retrieveFromABCD(unit);
 
     // Then
-    assertThat(result).isEqualTo(COLLECTOR_NAME + " | " + collectorName2);
+    assertThat(result).isEqualTo(RECORDED_BY_STRING + " | " + collectorName2);
   }
 
   @Test
   void testRetrieveFromABCDGatheringAgentsText() {
     // Given
     var unit = MAPPER.createObjectNode();
-    unit.put("abcd:gathering/agents/gatheringAgentsText/value", COLLECTOR_NAME);
+    unit.put("abcd:gathering/agents/gatheringAgentsText/value", RECORDED_BY_STRING);
 
     // When
-    var result = collector.retrieveFromABCD(unit);
+    var result = recordedBy.retrieveFromABCD(unit);
 
     // Then
-    assertThat(result).isEqualTo(COLLECTOR_NAME);
+    assertThat(result).isEqualTo(RECORDED_BY_STRING);
   }
 
   @Test
@@ -62,7 +62,7 @@ class CollectorTest {
     var unit = MAPPER.createObjectNode();
 
     // When
-    var result = collector.retrieveFromABCD(unit);
+    var result = recordedBy.retrieveFromABCD(unit);
 
     // Then
     assertThat(result).isNull();
@@ -71,7 +71,7 @@ class CollectorTest {
   @Test
   void testGetTerm() {
     // When
-    var result = collector.getTerm();
+    var result = recordedBy.getTerm();
 
     // Then
     assertThat(result).isEqualTo(RecordedBy.TERM);

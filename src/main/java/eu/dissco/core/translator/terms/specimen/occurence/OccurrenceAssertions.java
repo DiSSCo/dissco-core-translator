@@ -28,7 +28,7 @@ public class OccurrenceAssertions extends Term {
     var count = 0;
     while (iterateOverElements) {
       var assertionNode = getSubJsonAbcd(mapper, data, count,
-          "abcd:measurementsOrFacts/measurementOrFact");
+          "abcd:measurementsOrFacts/measurementOrFact/");
       if (!assertionNode.isEmpty()) {
         assertions.add(createOccurrenceAssertion(assertionNode));
         count++;
@@ -47,7 +47,6 @@ public class OccurrenceAssertions extends Term {
             List.of("measurementOrFactAtomised/unitOfMeasurement")))
         .withAssertionType(
             super.searchJsonForTerm(assertionNode, List.of("measurementOrFactAtomised/parameter")))
-        .withAssertionByAgentName(super.searchJsonForTerm(assertionNode, List.of("/measuredBy")))
         .withAssertionRemarks(
             super.searchJsonForTerm(assertionNode, List.of("measurementOrFactText/value")))
         .withAssertionValue(super.searchJsonForTerm(assertionNode,

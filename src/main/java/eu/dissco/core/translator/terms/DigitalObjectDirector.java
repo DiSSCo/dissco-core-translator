@@ -29,7 +29,6 @@ import eu.dissco.core.translator.terms.media.WebStatement;
 import eu.dissco.core.translator.terms.specimen.AccessRights;
 import eu.dissco.core.translator.terms.specimen.BasisOfRecord;
 import eu.dissco.core.translator.terms.specimen.DatasetName;
-import eu.dissco.core.translator.terms.specimen.DcTermsType;
 import eu.dissco.core.translator.terms.specimen.Disposition;
 import eu.dissco.core.translator.terms.specimen.LivingOrPreserved;
 import eu.dissco.core.translator.terms.specimen.Modified;
@@ -55,6 +54,7 @@ import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Class;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Family;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Genus;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Kingdom;
+import eu.dissco.core.translator.terms.specimen.identification.taxonomy.NameAccordingTo;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.NamePublishedInYear;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.NomenclaturalCode;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Order;
@@ -91,6 +91,7 @@ import eu.dissco.core.translator.terms.specimen.location.georeference.Coordinate
 import eu.dissco.core.translator.terms.specimen.location.georeference.DecimalLatitude;
 import eu.dissco.core.translator.terms.specimen.location.georeference.DecimalLongitude;
 import eu.dissco.core.translator.terms.specimen.location.georeference.FootprintSpatialFit;
+import eu.dissco.core.translator.terms.specimen.location.georeference.FootprintSrs;
 import eu.dissco.core.translator.terms.specimen.location.georeference.FootprintWkt;
 import eu.dissco.core.translator.terms.specimen.location.georeference.GeodeticDatum;
 import eu.dissco.core.translator.terms.specimen.location.georeference.GeoreferenceProtocol;
@@ -259,7 +260,6 @@ public class DigitalObjectDirector {
         .withDctermsModified(termMapper.retrieveTerm(new Modified(), data, dwc))
         .withDwcInstitutionName(
             rorComponent.getRoRId(minifyOrganisationId(ds.getDwcInstitutionId())))
-        .withDctermsType(termMapper.retrieveTerm(new DcTermsType(), data, dwc))
         .withDwcRecordedBy(termMapper.retrieveTerm(new RecordedBy(), data, dwc))
         .withDwcBasisOfRecord(termMapper.retrieveTerm(new BasisOfRecord(), data, dwc))
         .withDctermsAccessRights(termMapper.retrieveTerm(new AccessRights(), data, dwc))
@@ -378,6 +378,7 @@ public class DigitalObjectDirector {
         .withDwcClass(termMapper.retrieveTerm(new Class(), data, dwc))
         .withDwcFamily(termMapper.retrieveTerm(new Family(), data, dwc))
         .withDwcPhylum(termMapper.retrieveTerm(new Phylum(), data, dwc))
+        .withDwcNameAccordingTo(termMapper.retrieveTerm(new NameAccordingTo(), data, dwc))
         .withDwcSpecificEpithet(termMapper.retrieveTerm(new SpecificEpithet(), data, dwc))
         .withDwcTaxonomicStatus(termMapper.retrieveTerm(new TaxonomicStatus(), data, dwc))
         .withDwcNomenclaturalCode(termMapper.retrieveTerm(new NomenclaturalCode(), data, dwc))
@@ -410,6 +411,7 @@ public class DigitalObjectDirector {
         .withDwcCoordinatePrecision(parseToDouble(new CoordinatePrecision(), data, dwc))
         .withDwcCoordinateUncertaintyInMeters(
             parseToDouble(new CoordinateUncertaintyInMeters(), data, dwc))
+        .withDwcFootprintSrs(termMapper.retrieveTerm(new FootprintSrs(), data, dwc))
         .withDwcFootprintSpatialFit(parseToInteger(new FootprintSpatialFit(), data, dwc))
         .withDwcGeoreferencedBy(termMapper.retrieveTerm(new GeoreferencedBy(), data, dwc))
         .withDwcFootprintSrs(termMapper.retrieveTerm(new FootprintSpatialFit(), data, dwc))

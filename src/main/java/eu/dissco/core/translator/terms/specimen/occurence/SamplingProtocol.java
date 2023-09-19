@@ -7,9 +7,9 @@ import java.util.List;
 public class SamplingProtocol extends Term {
 
   public static final String TERM = DWC_PREFIX + "samplingProtocol";
-
-  private final List<String> abcdTerms = List.of("abcd:gathering/method/value");
   private final List<String> dwcaTerms = List.of(TERM);
+  private final List<String> abcdTerms = List.of("abcd:gathering/method/value");
+
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {

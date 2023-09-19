@@ -11,7 +11,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.component.RorComponent;
 import eu.dissco.core.translator.exception.OrganisationNotRorId;
+import eu.dissco.core.translator.schema.DigitalEntity.DctermsType;
 import eu.dissco.core.translator.schema.DigitalSpecimen.OdsPhysicalSpecimenIdType;
+import eu.dissco.core.translator.terms.media.MediaType;
 import eu.dissco.core.translator.terms.specimen.LivingOrPreserved;
 import eu.dissco.core.translator.terms.specimen.TopicDiscipline;
 import eu.dissco.core.translator.terms.specimen.occurence.OccurrenceStatus;
@@ -87,6 +89,40 @@ class DigitalObjectDirectorTest {
     assertThat(result.getIdentifiers()).asList().hasSize(3);
     assertThat(result.getCitations()).asList().hasSize(2);
     assertThat(result.getDwcIdentification()).asList().hasSize(2);
+  }
+
+  @Test
+  void testConstructDwcaDigitalMediaObject() throws JsonProcessingException, OrganisationNotRorId {
+    // Given
+    var specimenJson = givenDwcaMediaObject();
+    given(rorComponent.getRoRId(anyString())).willReturn("National Museum of Natural History");
+    given(termMapper.retrieveTerm(any(Term.class), eq(specimenJson), eq(true))).willReturn(
+        "a mapped term");
+    given(
+        termMapper.retrieveTerm(any(MediaType.class), eq(specimenJson), eq(true))).willReturn(
+        "StillImage");
+
+    // When
+    var result = director.constructDigitalMediaObjects(true, specimenJson,
+        "https://ror.org/0443cwa12");
+
+    // Then
+    assertThat(result).isNotNull();
+    assertThat(result.getEntityRelationships()).asList().hasSize(2);
+    assertThat(result.getIdentifiers()).asList().hasSize(2);
+  }
+
+  private JsonNode givenDwcaMediaObject() throws JsonProcessingException {
+    return MAPPER.readTree("""
+              {
+                        "dwca:ID": "http://coldb.mnhn.fr/catalognumber/mnhn/ec/ec12801",
+                        "dcterms:type": "StillImage",
+                        "dcterms:format": "image/jpeg",
+                        "dcterms:creator": "Antoine Mantilleri",
+                        "dcterms:license": "cc-by-nc-nd",
+                        "dcterms:identifier": "https://mediaphoto.mnhn.fr/media/1622116345730PeXvxZIhEfm1vcVV"
+                      }
+        """);
   }
 
   private eu.dissco.core.translator.schema.DigitalSpecimen givenDigitalSpecimen() {
