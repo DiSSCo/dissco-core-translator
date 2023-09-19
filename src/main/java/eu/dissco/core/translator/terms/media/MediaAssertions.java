@@ -8,16 +8,16 @@ import org.apache.commons.lang3.tuple.Pair;
 
 public class MediaAssertions {
 
-  private final List<Pair<Term, String>> abcdMediaAssertions = List.of(Pair.of(new FileSize(), "kb"),
+  private final List<Pair<Term, String>> abcdMediaAssertions = List.of(
+      Pair.of(new FileSize(), "kb"),
       Pair.of(new PixelXDimension(), "pixel"), Pair.of(new PixelYDimension(), "pixel"));
 
   public List<eu.dissco.core.translator.schema.Assertions> gatherAssertions(JsonNode data,
       boolean dwc) {
-    if (dwc) {
-      return gatherOccurrenceAssertionsForDwc(data);
-    } else {
+    if (!dwc) {
       return gatherOccurrenceAssertionsForABCD(data);
     }
+    return List.of();
   }
 
   private List<eu.dissco.core.translator.schema.Assertions> gatherOccurrenceAssertionsForABCD(
@@ -34,10 +34,5 @@ public class MediaAssertions {
       }
     }
     return assertions;
-  }
-
-  private List<eu.dissco.core.translator.schema.Assertions> gatherOccurrenceAssertionsForDwc(
-      JsonNode data) {
-    return null;
   }
 }

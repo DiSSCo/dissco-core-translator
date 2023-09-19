@@ -68,7 +68,7 @@ public abstract class Term {
     var identificationNode = mapper.createObjectNode();
     data.fields().forEachRemaining(field -> {
       if (field.getKey().startsWith(path + count)) {
-        identificationNode.put(
+        identificationNode.set(
             field.getKey().replace(path + count + "/", ""),
             field.getValue());
       }
