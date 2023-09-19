@@ -18,6 +18,6 @@ public record DigitalSpecimen(
     JsonNode originalAttributes,
 
     @JsonProperty("ods:digitalMediaObjects")
-    List<DigitalMediaObject> digitalMediaObjects) {
+    List<DigitalMediaObjectEvent> digitalMediaObjectEvents) {
 
 }

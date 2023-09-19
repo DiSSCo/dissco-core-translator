@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import eu.dissco.core.translator.Profiles;
 import eu.dissco.core.translator.domain.DigitalMediaObject;
+import eu.dissco.core.translator.domain.DigitalMediaObjectEvent;
 import eu.dissco.core.translator.domain.DigitalSpecimen;
 import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
 import eu.dissco.core.translator.domain.Enrichment;
@@ -162,7 +163,7 @@ public class DwcaService implements WebClientService {
     }
   }
 
-  private List<DigitalMediaObject> processMedia(String recordId, JsonNode fullDigitalSpecimen,
+  private List<DigitalMediaObjectEvent> processMedia(String recordId, JsonNode fullDigitalSpecimen,
       String organisationId) throws OrganisationNotRorId {
     var extensions = fullDigitalSpecimen.get(EXTENSIONS);
     if (fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA) != null) {
@@ -184,35 +185,39 @@ public class DwcaService implements WebClientService {
     return List.of();
   }
 
-  private List<DigitalMediaObject> extractMultiMedia(String recordId, JsonNode imageArray,
+  private List<DigitalMediaObjectEvent> extractMultiMedia(String recordId, JsonNode imageArray,
       String organisationId) throws OrganisationNotRorId {
-    var digitalMediaObjects = new ArrayList<DigitalMediaObject>();
+    var digitalMediaObjectEvents = new ArrayList<DigitalMediaObjectEvent>();
     for (var image : imageArray) {
       var type = termMapper.retrieveTerm(new MediaType(), image, true);
       log.debug("Type of digitalMediaObject is: {}", type);
-      var digitalMediaObject = new DigitalMediaObject(
-          type,
-          recordId,
-          digitalSpecimenDirector.constructDigitalMediaObjects(true, image, organisationId),
-          image);
-      digitalMediaObjects.add(digitalMediaObject);
+      var digitalMediaObject = new DigitalMediaObjectEvent(enrichmentServices(true),
+          new DigitalMediaObject(
+              type,
+              recordId,
+              digitalSpecimenDirector.constructDigitalMediaObjects(true, image, organisationId),
+              image));
+      digitalMediaObjectEvents.add(digitalMediaObject);
     }
-    return digitalMediaObjects;
+    return digitalMediaObjectEvents;
   }
 
-  private List<DigitalMediaObject> publishAssociatedMedia(String recordId, String associatedMedia,
+  private List<DigitalMediaObjectEvent> publishAssociatedMedia(String recordId,
+      String associatedMedia,
       String organisationId) throws OrganisationNotRorId {
     log.debug("Digital Specimen: {}, has associatedMedia {}", recordId,
         associatedMedia);
     String[] mediaUrls = associatedMedia.split("\\|");
-    var digitalMediaObjects = new ArrayList<DigitalMediaObject>();
+    var digitalMediaObjects = new ArrayList<DigitalMediaObjectEvent>();
     for (var mediaUrl : mediaUrls) {
-      var digitalMediaObject = new DigitalMediaObject(
-          UNKNOWN,
-          recordId,
-          digitalSpecimenDirector.constructDigitalMediaObjects(true, mapper.valueToTree(mediaUrl),
-              organisationId),
-          null);
+      var digitalMediaObject = new DigitalMediaObjectEvent(enrichmentServices(true),
+          new DigitalMediaObject(
+              UNKNOWN,
+              recordId,
+              digitalSpecimenDirector.constructDigitalMediaObjects(true,
+                  mapper.valueToTree(mediaUrl),
+                  organisationId),
+              null));
       digitalMediaObjects.add(digitalMediaObject);
     }
     return digitalMediaObjects;

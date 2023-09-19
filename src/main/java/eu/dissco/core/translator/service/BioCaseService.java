@@ -17,6 +17,7 @@ import efg.MultiMediaObject;
 import efg.Unit;
 import eu.dissco.core.translator.Profiles;
 import eu.dissco.core.translator.domain.DigitalMediaObject;
+import eu.dissco.core.translator.domain.DigitalMediaObjectEvent;
 import eu.dissco.core.translator.domain.DigitalSpecimen;
 import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
 import eu.dissco.core.translator.domain.Enrichment;
@@ -347,30 +348,31 @@ public class BioCaseService implements WebClientService {
     return data;
   }
 
-  private List<DigitalMediaObject> processDigitalMediaObjects(String physicalSpecimenId,
+  private List<DigitalMediaObjectEvent> processDigitalMediaObjects(String physicalSpecimenId,
       Unit unit, String organisationId) throws OrganisationNotRorId {
-    var digitalMediaObjects = new ArrayList<DigitalMediaObject>();
+    var digitalMediaObjectEvents = new ArrayList<DigitalMediaObjectEvent>();
     if (unit.getMultiMediaObjects() != null && !unit.getMultiMediaObjects().getMultiMediaObject()
         .isEmpty()) {
       for (MultiMediaObject media : unit.getMultiMediaObjects().getMultiMediaObject()) {
-        digitalMediaObjects.add(
+        digitalMediaObjectEvents.add(
             processDigitalMediaObject(physicalSpecimenId, media, organisationId));
       }
     }
-    return digitalMediaObjects;
+    return digitalMediaObjectEvents;
   }
 
-  private DigitalMediaObject processDigitalMediaObject(String physicalSpecimenId,
+  private DigitalMediaObjectEvent processDigitalMediaObject(String physicalSpecimenId,
       MultiMediaObject media, String organisationId) throws OrganisationNotRorId {
     var attributes = getData(mapper.valueToTree(media));
-    var digitalMediaObject = new DigitalMediaObject(
-        termMapper.retrieveTerm(new MediaType(), attributes, false),
-        physicalSpecimenId,
-        digitalSpecimenDirector.constructDigitalMediaObjects(false, attributes, organisationId),
-        attributes
-    );
-    log.debug("Result digital media object: {}", digitalMediaObject);
-    return digitalMediaObject;
+    var digitalMediaObjectEvent = new DigitalMediaObjectEvent(enrichmentServices(true),
+        new DigitalMediaObject(
+            termMapper.retrieveTerm(new MediaType(), attributes, false),
+            physicalSpecimenId,
+            digitalSpecimenDirector.constructDigitalMediaObjects(false, attributes, organisationId),
+            attributes
+        ));
+    log.debug("Result digital media object: {}", digitalMediaObjectEvent);
+    return digitalMediaObjectEvent;
   }
 
   private List<String> enrichmentServices(boolean multiMediaObject) {
