@@ -17,7 +17,7 @@ public record DigitalSpecimen(
     @JsonProperty("ods:originalAttributes")
     JsonNode originalAttributes,
 
-    @JsonProperty("ods:digitalMediaoBjects")
+    @JsonProperty("ods:digitalMediaObjects")
     List<DigitalMediaObject> digitalMediaObjects) {
 
 }
