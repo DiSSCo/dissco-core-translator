@@ -21,7 +21,7 @@ class MediaAssertionsTest {
     var result = assertions.gatherAssertions(unit, true);
 
     // Then
-    assertThat(result).isNull();
+    assertThat(result).isEmpty();
   }
 
   @Test
