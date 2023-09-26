@@ -5,9 +5,9 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class SpecimenName extends AbstractTaxonomy {
+public class ScientificName extends AbstractTaxonomy {
 
-  public static final String TERM = ODS_PREFIX + "specimenName";
+  public static final String TERM = DWC_PREFIX + "scientificName";
   private final List<String> dwcaTerms = List.of("dwc:scientificName");
   private final List<String> abcdTerms = List.of(
       "result/taxonIdentified/scientificName/fullScientificNameString",

@@ -9,7 +9,6 @@ import eu.dissco.core.translator.schema.DigitalEntity;
 import eu.dissco.core.translator.schema.DigitalEntity.DctermsType;
 import eu.dissco.core.translator.schema.DigitalSpecimen;
 import eu.dissco.core.translator.schema.DigitalSpecimen.OdsPhysicalSpecimenIdType;
-import eu.dissco.core.translator.schema.DigitalSpecimen.OdsTopicDiscipline;
 import eu.dissco.core.translator.schema.EntityRelationships;
 import eu.dissco.core.translator.schema.Georeference;
 import eu.dissco.core.translator.schema.Identifications;
@@ -31,12 +30,16 @@ import eu.dissco.core.translator.terms.specimen.BasisOfRecord;
 import eu.dissco.core.translator.terms.specimen.DatasetName;
 import eu.dissco.core.translator.terms.specimen.Disposition;
 import eu.dissco.core.translator.terms.specimen.LivingOrPreserved;
+import eu.dissco.core.translator.terms.specimen.MarkedAsType;
 import eu.dissco.core.translator.terms.specimen.Modified;
 import eu.dissco.core.translator.terms.specimen.ObjectType;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenCollection;
 import eu.dissco.core.translator.terms.specimen.RecordedBy;
 import eu.dissco.core.translator.terms.specimen.RightsHolder;
+import eu.dissco.core.translator.terms.specimen.SpecimenName;
 import eu.dissco.core.translator.terms.specimen.TopicDiscipline;
+import eu.dissco.core.translator.terms.specimen.TopicDomain;
+import eu.dissco.core.translator.terms.specimen.TopicOrigin;
 import eu.dissco.core.translator.terms.specimen.citation.BibliographicCitation;
 import eu.dissco.core.translator.terms.specimen.citation.CitationRemarks;
 import eu.dissco.core.translator.terms.specimen.citation.Date;
@@ -59,9 +62,9 @@ import eu.dissco.core.translator.terms.specimen.identification.taxonomy.NamePubl
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.NomenclaturalCode;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Order;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Phylum;
+import eu.dissco.core.translator.terms.specimen.identification.taxonomy.ScientificName;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.ScientificNameAuthorship;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.SpecificEpithet;
-import eu.dissco.core.translator.terms.specimen.identification.taxonomy.SpecimenName;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.TaxonId;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.TaxonRank;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.TaxonRemarks;
@@ -177,7 +180,16 @@ public class DigitalObjectDirector {
     ds.withIdentifiers(assembleIdentifiers(data));
     ds.withCitations(assembleSpecimenCitations(data, dwc));
     ds.withEntityRelationships(assembleDigitalSpecimenEntityRelationships(ds));
+    setCalculatedFields(ds);
     return ds;
+  }
+
+  private void setCalculatedFields(eu.dissco.core.translator.schema.DigitalSpecimen ds) {
+    ds.setOdsTopicDiscipline(new TopicDiscipline().calculate(ds));
+    ds.setOdsTopicOrigin(new TopicOrigin().calculate(ds));
+    ds.setOdsTopicDomain(new TopicDomain().calculate(ds));
+    ds.setOdsSpecimenName(new SpecimenName().calculate(ds));
+    ds.setOdsMarkedAsType(new MarkedAsType().calculate(ds));
   }
 
   private List<Citations> assembleSpecimenCitations(JsonNode data, boolean dwc) {
@@ -251,9 +263,7 @@ public class DigitalObjectDirector {
   private DigitalSpecimen assembleDigitalSpecimenTerms(JsonNode data, DigitalSpecimen ds,
       boolean dwc)
       throws OrganisationNotRorId {
-    ds.withOdsTopicDiscipline(
-            OdsTopicDiscipline.fromValue(termMapper.retrieveTerm(new TopicDiscipline(), data, dwc)))
-        .withDctermsLicense(termMapper.retrieveTerm(new License(), data, dwc))
+    ds.withDctermsLicense(termMapper.retrieveTerm(new License(), data, dwc))
         .withOdsLivingOrPreserved(termMapper.retrieveTerm(new LivingOrPreserved(), data, dwc))
         .withDwcPreparations(termMapper.retrieveTerm(new ObjectType(), data, dwc))
         .withDwcCollectionId(termMapper.retrieveTerm(new PhysicalSpecimenCollection(), data, dwc))
@@ -371,7 +381,7 @@ public class DigitalObjectDirector {
         .withDwcTaxonRank(termMapper.retrieveTerm(new TaxonRank(), data, dwc))
         .withDwcGenus(termMapper.retrieveTerm(new Genus(), data, dwc))
         .withDwcOrder(termMapper.retrieveTerm(new Order(), data, dwc))
-        .withDwcScientificName(termMapper.retrieveTerm(new SpecimenName(), data, dwc))
+        .withDwcScientificName(termMapper.retrieveTerm(new ScientificName(), data, dwc))
         .withDwcScientificNameAuthorship(
             termMapper.retrieveTerm(new ScientificNameAuthorship(), data, dwc))
         .withDwcNamePublishedInYear(termMapper.retrieveTerm(new NamePublishedInYear(), data, dwc))
@@ -419,7 +429,7 @@ public class DigitalObjectDirector {
         .withDwcGeodeticDatum(termMapper.retrieveTerm(new GeoreferencedDate(), data, dwc))
         .withDwcGeoreferenceRemarks(termMapper.retrieveTerm(new GeoreferenceRemarks(), data, dwc))
         .withDwcGeoreferenceSources(termMapper.retrieveTerm(new GeoreferenceSources(), data, dwc))
-        .withDwcPointRadiusSpatialFit(parseToInteger(new PointRadiusSpatialFit(), data, dwc));
+        .withDwcPointRadiusSpatialFit(parseToDouble(new PointRadiusSpatialFit(), data, dwc));
     var geologicalContext = new eu.dissco.core.translator.schema.GeologicalContext()
         .withDwcLowestBiostratigraphicZone(
             termMapper.retrieveTerm(new LowestBiostratigraphicZone(), data, dwc))

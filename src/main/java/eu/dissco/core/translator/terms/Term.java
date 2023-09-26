@@ -111,4 +111,16 @@ public abstract class Term {
     log.debug("No value found for division: {}", searchTerms);
     return null;
   }
+
+  protected eu.dissco.core.translator.schema.Identifications retrieveAcceptedIdentification(
+      eu.dissco.core.translator.schema.DigitalSpecimen ds) {
+    if (ds.getDwcIdentification() != null && !ds.getDwcIdentification().isEmpty()) {
+      for (var identification : ds.getDwcIdentification()) {
+        if (Boolean.TRUE.equals(identification.getDwcIdentificationVerificationStatus())) {
+          return identification;
+        }
+      }
+    }
+    return null;
+  }
 }

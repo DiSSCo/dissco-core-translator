@@ -188,7 +188,7 @@
           ]
         },
         "dwc:pointRadiusSpatialFit": {
-          "type": "integer",
+          "type": "number",
           "description": "https://rs.tdwg.org/dwc/terms/pointRadiusSpatialFit",
           "examples": [
             1.5708
@@ -251,7 +251,7 @@
             "Assumed distance by road (Hwy. 101)"
           ]
         },
-        "preferredSpatialRepresentation": {
+        "???:preferredSpatialRepresentation": {
           "type": "string",
           "$comment": "Not part of DWC"
         }

@@ -46,8 +46,6 @@ class DigitalObjectDirectorTest {
     given(rorComponent.getRoRId(anyString())).willReturn("Tallinn University of Technology");
     given(termMapper.retrieveTerm(any(Term.class), eq(specimenJson), eq(false))).willReturn(
         "a mapped term");
-    given(termMapper.retrieveTerm(any(TopicDiscipline.class), eq(specimenJson),
-        eq(false))).willReturn("Unclassified");
     given(termMapper.retrieveTerm(any(LivingOrPreserved.class), eq(specimenJson),
         eq(false))).willReturn("present");
     given(termMapper.retrieveTerm(any(OccurrenceStatus.class), eq(specimenJson),
@@ -72,9 +70,6 @@ class DigitalObjectDirectorTest {
     given(rorComponent.getRoRId(anyString())).willReturn("National Museum of Natural History");
     given(termMapper.retrieveTerm(any(Term.class), eq(specimenJson), eq(true))).willReturn(
         "a mapped term");
-    given(
-        termMapper.retrieveTerm(any(TopicDiscipline.class), eq(specimenJson), eq(true))).willReturn(
-        "Unclassified");
     given(termMapper.retrieveTerm(any(LivingOrPreserved.class), eq(specimenJson),
         eq(true))).willReturn("present");
     given(termMapper.retrieveTerm(any(OccurrenceStatus.class), eq(specimenJson),

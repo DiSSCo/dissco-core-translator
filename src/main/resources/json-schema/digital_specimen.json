@@ -89,7 +89,7 @@
         "Anthropology",
         "Botany",
         "Astrogeology",
-        "Earth System",
+        "Earth Geology",
         "Microbiology",
         "Palaeontology",
         "Zoology",
@@ -101,6 +101,17 @@
         "Botany"
       ],
       "$comment": "Do we need to add 'UNKNOWN'?"
+    },
+    "ods:markedAsType": {
+      "type": "boolean",
+      "description": "The specimen is marked as a type specimen"
+    },
+    "ods:specimenName": {
+      "type": "string",
+      "description": "The accepted specimen name of the digital specimen",
+      "example": [
+        "Roptrocerus typographi (Györfi, 1952)"
+      ]
     },
     "ods:sourceSystem": {
       "type": "string",

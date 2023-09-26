@@ -3,15 +3,14 @@ package eu.dissco.core.translator.terms.specimen.identification.taxonomy;
 import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import eu.dissco.core.translator.terms.specimen.identification.taxonomy.SpecimenName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class SpecimenNameTest {
+class ScientificNameTest {
 
-  private final SpecimenName specimenName = new SpecimenName();
+  private final ScientificName scientificname = new ScientificName();
 
   @Test
   void testRetrieveFromDWCA() {
@@ -21,7 +20,7 @@ class SpecimenNameTest {
     unit.put("dwc:scientificName", specimenNameString);
 
     // When
-    var result = specimenName.retrieveFromDWCA(unit);
+    var result = scientificname.retrieveFromDWCA(unit);
 
     // Then
     assertThat(result).isEqualTo(specimenNameString);
@@ -32,10 +31,9 @@ class SpecimenNameTest {
     // Given
     var identificationVerified = MAPPER.createObjectNode();
     identificationVerified.put("dwc:scientificName", "SpecimenNameVerified");
-    identificationVerified.put("dwc:identificationVerificationStatus", "1");
 
     // When
-    var result = specimenName.retrieveFromDWCA(identificationVerified);
+    var result = scientificname.retrieveFromDWCA(identificationVerified);
 
     // Then
     assertThat(result).isEqualTo("SpecimenNameVerified");
@@ -51,7 +49,7 @@ class SpecimenNameTest {
         specimenNameString);
 
     // When
-    var result = specimenName.retrieveFromABCD(unit);
+    var result = scientificname.retrieveFromABCD(unit);
 
     // Then
     assertThat(result).isEqualTo(specimenNameString);
@@ -66,7 +64,7 @@ class SpecimenNameTest {
         "Bignonia chica Humb. & Bonpl.");
 
     // When
-    var result = specimenName.retrieveFromABCD(unit);
+    var result = scientificname.retrieveFromABCD(unit);
 
     // Then
     assertThat(result).isEqualTo("Bignonia chica Humb. & Bonpl.");
@@ -82,7 +80,7 @@ class SpecimenNameTest {
         specimenNameString);
 
     // When
-    var result = specimenName.retrieveFromABCD(unit);
+    var result = scientificname.retrieveFromABCD(unit);
 
     // Then
     assertThat(result).isEqualTo(specimenNameString);
@@ -94,7 +92,7 @@ class SpecimenNameTest {
     var unit = MAPPER.createObjectNode();
 
     // When
-    var result = specimenName.retrieveFromABCD(unit);
+    var result = scientificname.retrieveFromABCD(unit);
 
     // Then
     assertThat(result).isNull();
@@ -104,10 +102,10 @@ class SpecimenNameTest {
   @Test
   void testGetTerm() {
     // When
-    var result = specimenName.getTerm();
+    var result = scientificname.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(SpecimenName.TERM);
+    assertThat(result).isEqualTo(ScientificName.TERM);
   }
 
 }

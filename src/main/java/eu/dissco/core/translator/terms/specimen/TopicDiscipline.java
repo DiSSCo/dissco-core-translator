@@ -1,14 +1,12 @@
 package eu.dissco.core.translator.terms.specimen;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import eu.dissco.core.translator.schema.DigitalSpecimen.OdsTopicDiscipline;
 import eu.dissco.core.translator.terms.Term;
-import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Kingdom;
 import java.util.List;
 
 public class TopicDiscipline extends Term {
 
   public static final String TERM = ODS_PREFIX + "topicDiscipline";
-  private static final String UNCLASSIFIED = "Unclassified";
 
   private static final List<String> FOSSIL_BASIS_OF_RECORD = List.of("FOSSILSPECIMEN",
       "FOSSIL SPECIMEN", "FOSSIL");
@@ -17,50 +15,47 @@ public class TopicDiscipline extends Term {
   private static final List<String> EARTH_SYSTEM_BASIS_OF_RECORD = List.of("ROCK", "MINERAL",
       "ROCKSPECIMEN", "ROCK SPECIMEN", "MINERALSPECIMEN", "MINERAL SPECIMEN");
 
-  @Override
-  public String retrieveFromDWCA(JsonNode unit) {
-    var basisOfRecord = new BasisOfRecord().retrieveFromDWCA(unit);
-    var kingdom = new Kingdom().retrieveFromDWCA(unit);
-    return getDiscipline(basisOfRecord, kingdom);
+  public OdsTopicDiscipline calculate(eu.dissco.core.translator.schema.DigitalSpecimen ds) {
+    var basisOfRecord = ds.getDwcBasisOfRecord();
+    var acceptedIdentification = retrieveAcceptedIdentification(ds);
+    if (acceptedIdentification != null && acceptedIdentification.getTaxonIdentifications() != null
+        && !acceptedIdentification.getTaxonIdentifications().isEmpty()) {
+      return getDiscipline(basisOfRecord,
+          acceptedIdentification.getTaxonIdentifications().get(0).getDwcKingdom());
+    }
+    return getDiscipline(basisOfRecord, null);
   }
 
-  @Override
-  public String retrieveFromABCD(JsonNode unit) {
-    var basisOfRecord = new BasisOfRecord().retrieveFromABCD(unit);
-    var kingdom = new Kingdom().retrieveFromABCD(unit);
-    return getDiscipline(basisOfRecord, kingdom);
-  }
-
-  private static String getDiscipline(String basisOfRecord, String kingdom) {
+  private OdsTopicDiscipline getDiscipline(String basisOfRecord, String kingdom) {
     if (basisOfRecord != null) {
       var harBasisOfRecord = basisOfRecord.trim().toUpperCase();
       if (FOSSIL_BASIS_OF_RECORD.contains(harBasisOfRecord)) {
-        return "Palaeontology";
+        return OdsTopicDiscipline.PALAEONTOLOGY;
       } else if (EXTRATERRESTRIAL_BASIS_OF_RECORD.contains(harBasisOfRecord)) {
-        return "Astrogeology";
-      } else if (EARTH_SYSTEM_BASIS_OF_RECORD.contains(harBasisOfRecord)){
-        return "Geology";
-      } else if (kingdom != null){
-        var harKingdom = kingdom.trim().toUpperCase();
-        switch (harKingdom) {
+        return OdsTopicDiscipline.ASTROGEOLOGY;
+      } else if (EARTH_SYSTEM_BASIS_OF_RECORD.contains(harBasisOfRecord)) {
+        return OdsTopicDiscipline.EARTH_GEOLOGY;
+      } else if (kingdom != null) {
+        var harmonisedKingdom = kingdom.trim().toUpperCase();
+        switch (harmonisedKingdom) {
           case "ANIMALIA" -> {
-            return "Zoology";
+            return OdsTopicDiscipline.ZOOLOGY;
           }
           case "PLANTAE" -> {
-            return "Botany";
+            return OdsTopicDiscipline.BOTANY;
           }
           case "BACTERIA" -> {
-            return "Microbiology";
+            return OdsTopicDiscipline.MICROBIOLOGY;
           }
           default -> {
-            return UNCLASSIFIED;
+            return OdsTopicDiscipline.UNCLASSIFIED;
           }
         }
       } else {
-        return UNCLASSIFIED;
+        return OdsTopicDiscipline.UNCLASSIFIED;
       }
     } else {
-      return UNCLASSIFIED;
+      return OdsTopicDiscipline.UNCLASSIFIED;
     }
   }
 

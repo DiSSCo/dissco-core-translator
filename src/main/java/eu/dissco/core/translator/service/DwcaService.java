@@ -26,7 +26,6 @@ import eu.dissco.core.translator.terms.media.MediaType;
 import eu.dissco.core.translator.terms.specimen.OrganisationId;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenId;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenIdType;
-import eu.dissco.core.translator.terms.specimen.Type;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
@@ -149,10 +148,10 @@ public class DwcaService implements WebClientService {
         var recordId = fullRecord.get(DwcaTerm.ID.prefixedName()).asText();
         if (!recordNeedsToBeIgnored(fullRecord, recordId)) {
           try {
-            var digitalSpecimen = createDigitalSpecimen(fullRecord);
-            log.debug("Digital Specimen: {}", digitalSpecimen);
+            var digitalObjects = createDigitalObjects(fullRecord);
+            log.debug("Digital Specimen: {}", digitalObjects);
             var translatorEvent = new DigitalSpecimenEvent(enrichmentServices(false),
-                digitalSpecimen);
+                digitalObjects.getLeft(), digitalObjects.getRight());
             kafkaService.sendMessage("digital-specimen",
                 mapper.writeValueAsString(translatorEvent));
           } catch (DiSSCoDataException e) {
@@ -223,7 +222,7 @@ public class DwcaService implements WebClientService {
     return digitalMediaObjects;
   }
 
-  private DigitalSpecimen createDigitalSpecimen(JsonNode fullRecord) throws DiSSCoDataException {
+  private Pair<DigitalSpecimen, List<DigitalMediaObjectEvent>> createDigitalObjects(JsonNode fullRecord) throws DiSSCoDataException {
     var physicalSpecimenIdType = termMapper.retrieveTerm(new PhysicalSpecimenIdType(),
         fullRecord, true);
     var organisationId = termMapper.retrieveTerm(new OrganisationId(), fullRecord, true);
@@ -235,11 +234,11 @@ public class DwcaService implements WebClientService {
         .withDwcInstitutionId(organisationId)
         .withOdsPhysicalSpecimenId(physicalSpecimenId)
         .withOdsSourceSystem("https://hdl.handle.net/" + webClientProperties.getSourceSystemId());
-    return new DigitalSpecimen(
+    return Pair.of(new DigitalSpecimen(
         physicalSpecimenId,
-        termMapper.retrieveTerm(new Type(), fullRecord, true),
+        DS_TYPE,
         digitalSpecimenDirector.constructDigitalSpecimen(ds, true, fullRecord),
-        cleanupRedundantFields(fullRecord),
+        cleanupRedundantFields(fullRecord)),
         processMedia(physicalSpecimenId, fullRecord, organisationId)
     );
   }

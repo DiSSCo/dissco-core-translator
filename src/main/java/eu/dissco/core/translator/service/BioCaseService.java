@@ -33,7 +33,6 @@ import eu.dissco.core.translator.terms.media.MediaType;
 import eu.dissco.core.translator.terms.specimen.OrganisationId;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenId;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenIdType;
-import eu.dissco.core.translator.terms.specimen.Type;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 import jakarta.xml.bind.JAXBContext;
@@ -199,15 +198,17 @@ public class BioCaseService implements WebClientService {
                   "https://hdl.handle.net/" + webClientProperties.getSourceSystemId());
           var digitalSpecimen = new DigitalSpecimen(
               physicalSpecimenId,
-              termMapper.retrieveTerm(new Type(), unitAttributes, false),
+              DS_TYPE,
               digitalSpecimenDirector.constructDigitalSpecimen(ds, false, unitAttributes),
-              cleanupRedundantFields(unitAttributes),
-              processDigitalMediaObjects(physicalSpecimenId, unit, organisationId)
+              cleanupRedundantFields(unitAttributes)
           );
+          var digitalMediaObjects = processDigitalMediaObjects(physicalSpecimenId, unit,
+              organisationId);
           log.debug("Result digital Specimen: {}", digitalSpecimen);
           kafkaService.sendMessage("digital-specimen",
               mapper.writeValueAsString(
-                  new DigitalSpecimenEvent(enrichmentServices(false), digitalSpecimen)));
+                  new DigitalSpecimenEvent(enrichmentServices(false), digitalSpecimen,
+                      digitalMediaObjects)));
         } catch (DiSSCoDataException e) {
           log.error("Encountered data issue with record: {}", unitAttributes, e);
         }
