@@ -35,6 +35,7 @@ import eu.dissco.core.translator.terms.specimen.BasisOfRecord;
 import eu.dissco.core.translator.terms.specimen.CollectionId;
 import eu.dissco.core.translator.terms.specimen.DatasetName;
 import eu.dissco.core.translator.terms.specimen.Disposition;
+import eu.dissco.core.translator.terms.specimen.HasMedia;
 import eu.dissco.core.translator.terms.specimen.LivingOrPreserved;
 import eu.dissco.core.translator.terms.specimen.MarkedAsType;
 import eu.dissco.core.translator.terms.specimen.Modified;
@@ -291,6 +292,7 @@ public class DigitalObjectDirector {
         .withOdsPhysicalSpecimenIdType(physicalSpecimenIdTypeHarmonised)
         .withDwcInstitutionId(organisationId)
         .withOdsPhysicalSpecimenId(physicalSpecimenId)
+        .withOdsHasMedia(parseToBoolean(new HasMedia(), data, dwc))
         .withOdsSourceSystem(
             "https://hdl.handle.net/" + webClientProperties.getSourceSystemId())
         .withOdsLivingOrPreserved(
@@ -587,6 +589,18 @@ public class DigitalObjectDirector {
       }
     } catch (NumberFormatException ex) {
       log.warn("Unable to parse value: {} to a double for term: {}", value, term.getTerm());
+    }
+    return null;
+  }
+
+  private Boolean parseToBoolean(Term term, JsonNode data, boolean dwc) {
+    var value = termMapper.retrieveTerm(term, data, dwc);
+    try {
+      if (value != null) {
+        return Boolean.valueOf(value);
+      }
+    } catch (NumberFormatException ex) {
+      log.warn("Unable to parse value: {} to a boolean for term: {}", value, term.getTerm());
     }
     return null;
   }

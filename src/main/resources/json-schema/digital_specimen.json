@@ -111,6 +111,10 @@
       "type": "boolean",
       "description": "The specimen is marked as a type specimen"
     },
+    "ods:hasMedia": {
+      "type": "boolean",
+      "description": "Indicates if there are any media objects attached to this specimen"
+    },
     "ods:specimenName": {
       "type": "string",
       "description": "The accepted specimen name of the digital specimen",
