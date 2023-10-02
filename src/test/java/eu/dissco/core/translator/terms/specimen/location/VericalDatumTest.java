@@ -26,6 +26,7 @@ class VericalDatumTest {
     // Then
     assertThat(result).isEqualTo(VERTICAL_DATUM_STRING);
   }
+
   @Test
   void testGetTerm() {
     // When

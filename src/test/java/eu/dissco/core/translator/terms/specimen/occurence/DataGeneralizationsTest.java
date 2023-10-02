@@ -26,6 +26,7 @@ class DataGeneralizationsTest {
     // Then
     assertThat(result).isEqualTo(DATA_GENERALIZATIONS_STRING);
   }
+
   @Test
   void testGetTerm() {
     // When

@@ -18,7 +18,6 @@ import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
 import eu.dissco.core.translator.terms.DigitalObjectDirector;
 import eu.dissco.core.translator.terms.TermMapper;
-import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenIdType;
 import freemarker.cache.FileTemplateLoader;
 import freemarker.template.Configuration;
 import java.io.IOException;

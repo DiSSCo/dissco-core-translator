@@ -25,6 +25,7 @@ class IdentificationRemarksTest {
     // Then
     assertThat(result).isEqualTo(identificationRemarkString);
   }
+
   @Test
   void testRetrieveFromABCD() {
     // Given
@@ -38,6 +39,7 @@ class IdentificationRemarksTest {
     // Then
     assertThat(result).isEqualTo(identificationRemarkString);
   }
+
   @Test
   void testGetTerm() {
     // When

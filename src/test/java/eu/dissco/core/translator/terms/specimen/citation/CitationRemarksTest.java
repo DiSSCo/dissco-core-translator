@@ -25,6 +25,7 @@ class CitationRemarksTest {
     // Then
     assertThat(result).isEqualTo(citationRemarksString);
   }
+
   @Test
   void testRetrieveFromABCD() {
     // Given
@@ -38,6 +39,7 @@ class CitationRemarksTest {
     // Then
     assertThat(result).isEqualTo(citationRemarksString);
   }
+
   @Test
   void testGetTerm() {
     // When

@@ -9,6 +9,7 @@ public class EarliestPeriodOrLowestSystem extends AbstractChronoStratigraphy {
   private final List<String> dwcaTerms = List.of(TERM);
 
   private final List<String> abcdSplitTerms = List.of("System");
+
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
     return super.searchJsonForTerm(unit, dwcaTerms);

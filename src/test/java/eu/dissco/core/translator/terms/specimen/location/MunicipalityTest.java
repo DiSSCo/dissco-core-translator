@@ -39,6 +39,7 @@ class MunicipalityTest {
     // Then
     assertThat(result).isEqualTo(MUNICIPALITY_STRING);
   }
+
   @Test
   void testGetTerm() {
     // When

@@ -1,7 +1,7 @@
 package eu.dissco.core.translator.terms.specimen;
 
-import eu.dissco.core.translator.schema.DigitalSpecimen.OdsTopicDomain;
 import eu.dissco.core.translator.schema.DigitalSpecimen;
+import eu.dissco.core.translator.schema.DigitalSpecimen.OdsTopicDomain;
 import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 

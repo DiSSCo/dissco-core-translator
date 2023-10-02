@@ -15,7 +15,7 @@ class SpecimenNameTest {
   private final SpecimenName specimenName = new SpecimenName();
 
   @Test
-  void testRetrieveFromDWCA() {
+  void testRetrieve() {
     // Given
     var ds = new eu.dissco.core.translator.schema.DigitalSpecimen()
         .withDwcIdentification(List.of(

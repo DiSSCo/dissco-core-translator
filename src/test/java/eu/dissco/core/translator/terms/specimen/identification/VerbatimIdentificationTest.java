@@ -25,6 +25,7 @@ class VerbatimIdentificationTest {
     // Then
     assertThat(result).isEqualTo(verbatimIdentificationString);
   }
+
   @Test
   void testGetTerm() {
     // When

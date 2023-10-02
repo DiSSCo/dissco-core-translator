@@ -8,8 +8,8 @@ import static org.mockito.Mockito.mock;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.component.MappingComponent;
-import eu.dissco.core.translator.terms.specimen.OrganisationId;
 import eu.dissco.core.translator.terms.specimen.CollectionId;
+import eu.dissco.core.translator.terms.specimen.OrganisationId;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenId;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;

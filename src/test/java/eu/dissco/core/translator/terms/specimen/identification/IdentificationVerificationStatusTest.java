@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -24,6 +26,20 @@ class IdentificationVerificationStatusTest {
 
     // Then
     assertThat(result).isEqualTo("true");
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"0", "some other value"})
+  void testRetrieveFromDWCAFalse(String identificationVerificationStatusString) {
+    // Given
+    var unit = MAPPER.createObjectNode();
+    unit.put("dwc:identificationVerificationStatus", identificationVerificationStatusString);
+
+    // When
+    var result = identificationVerificationStatus.retrieveFromDWCA(unit);
+
+    // Then
+    assertThat(result).isEqualTo("false");
   }
 
   @Test

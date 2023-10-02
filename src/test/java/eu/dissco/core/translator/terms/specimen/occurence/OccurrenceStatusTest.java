@@ -26,6 +26,7 @@ class OccurrenceStatusTest {
     // Then
     assertThat(result).isEqualTo(OCCURRENCE_STATUS_STRING);
   }
+
   @Test
   void testGetTerm() {
     // When

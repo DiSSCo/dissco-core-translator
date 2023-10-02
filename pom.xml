@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.1.2</version>
+    <version>3.1.4</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
   <groupId>eu.dissco.core</groupId>
@@ -19,11 +19,11 @@
     <dwca-io.version>2.16</dwca-io.version>
     <commons-beanutils.version>1.9.4</commons-beanutils.version>
     <jaxb2-maven-plugin.version>3.1.0</jaxb2-maven-plugin.version>
-    <jakarta.activation-api.version>2.1.0</jakarta.activation-api.version>
-    <jakarta.xml.bind-api.version>4.0.0</jakarta.xml.bind-api.version>
-    <spring-kafka.version>3.0.10</spring-kafka.version>
+    <jakarta.activation-api.version>2.1.2</jakarta.activation-api.version>
+    <jakarta.xml.bind-api.version>4.0.1</jakarta.xml.bind-api.version>
+    <snappy-java.version>1.1.10.5</snappy-java.version>
     <mockito-inline.version>5.2.0</mockito-inline.version>
-    <testcontainers.version>1.17.5</testcontainers.version>
+    <testcontainers.version>1.19.0</testcontainers.version>
     <sonar.organization>dissco</sonar.organization>
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     <sonar.coverage.jacoco.xmlReportPaths>../app-it/target/site/jacoco-aggregate/jacoco.xml
@@ -80,11 +80,11 @@
       <groupId>org.springframework.kafka</groupId>
       <artifactId>spring-kafka</artifactId>
     </dependency>
-    <!-- Overwrite kafka client snappy version as it contains high prio security issues (24-07-2023) -->
+    <!-- Overwrite kafka client snappy version as it contains high prio security issues (02-10-2023) -->
     <dependency>
       <groupId>org.xerial.snappy</groupId>
       <artifactId>snappy-java</artifactId>
-      <version>1.1.10.3</version>
+      <version>${snappy-java.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>

@@ -9,6 +9,7 @@ public class EarliestEonOrLowestEonothem extends AbstractChronoStratigraphy {
   private final List<String> dwcaTerms = List.of(TERM);
 
   private final List<String> abcdSplitTerms = List.of("Eonothem");
+
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
     return super.searchJsonForTerm(unit, dwcaTerms);

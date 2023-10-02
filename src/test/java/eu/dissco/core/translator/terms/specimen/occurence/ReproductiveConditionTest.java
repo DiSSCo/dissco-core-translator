@@ -26,6 +26,7 @@ class ReproductiveConditionTest {
     // Then
     assertThat(result).isEqualTo(REPRODUCTIVE_CONDITION_STRING);
   }
+
   @Test
   void testGetTerm() {
     // When

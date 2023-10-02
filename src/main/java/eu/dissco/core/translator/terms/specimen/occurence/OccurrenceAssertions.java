@@ -45,7 +45,8 @@ public class OccurrenceAssertions extends Term {
         .withAssertionUnit(super.searchJsonForTerm(assertionNode,
             List.of("measurementOrFactAtomised/unitOfMeasurement")))
         .withAssertionType(
-            super.searchJsonForTerm(assertionNode, List.of("measurementOrFactAtomised/parameter/value")))
+            super.searchJsonForTerm(assertionNode,
+                List.of("measurementOrFactAtomised/parameter/value")))
         .withAssertionRemarks(
             super.searchJsonForTerm(assertionNode, List.of("measurementOrFactText/value")))
         .withAssertionValue(super.searchJsonForTerm(assertionNode,

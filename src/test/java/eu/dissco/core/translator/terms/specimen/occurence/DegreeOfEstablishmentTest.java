@@ -26,6 +26,7 @@ class DegreeOfEstablishmentTest {
     // Then
     assertThat(result).isEqualTo(DEGREE_OF_ESTABLISHMENT_STRING);
   }
+
   @Test
   void testGetTerm() {
     // When

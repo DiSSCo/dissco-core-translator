@@ -3,7 +3,6 @@ package eu.dissco.core.translator.terms.specimen.occurence;
 import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.jooq.impl.QOM.Or;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -27,6 +26,7 @@ class OrganismQuantityTest {
     // Then
     assertThat(result).isEqualTo(ORGANISM_QUANTITY_STRING);
   }
+
   @Test
   void testGetTerm() {
     // When

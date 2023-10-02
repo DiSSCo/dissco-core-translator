@@ -3,8 +3,6 @@ package eu.dissco.core.translator.terms.specimen;
 import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.apache.kafka.common.protocol.types.Field.Str;
-import org.jooq.impl.QOM.Right;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;

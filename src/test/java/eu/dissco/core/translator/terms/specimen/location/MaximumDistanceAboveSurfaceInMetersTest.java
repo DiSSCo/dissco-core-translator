@@ -17,7 +17,8 @@ class MaximumDistanceAboveSurfaceInMetersTest {
   void testRetrieveFromDWCA() {
     // Given
     var unit = MAPPER.createObjectNode();
-    unit.put("dwc:maximumDistanceAboveSurfaceInMeters", MAXIMUM_DISTANCE_ABOVE_SURFACE_IN_METERS_STRING);
+    unit.put("dwc:maximumDistanceAboveSurfaceInMeters",
+        MAXIMUM_DISTANCE_ABOVE_SURFACE_IN_METERS_STRING);
 
     // When
     var result = maximumDistanceAboveSurfaceInMeters.retrieveFromDWCA(unit);

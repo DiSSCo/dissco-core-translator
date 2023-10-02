@@ -26,6 +26,7 @@ class EstablishmentMeansTest {
     // Then
     assertThat(result).isEqualTo(ESTABLISHMENT_MEANS_STRING);
   }
+
   @Test
   void testGetTerm() {
     // When

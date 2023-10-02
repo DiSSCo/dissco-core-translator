@@ -3,7 +3,6 @@ package eu.dissco.core.translator.terms.specimen.identification.taxonomy;
 import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Genus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;

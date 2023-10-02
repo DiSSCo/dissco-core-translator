@@ -26,6 +26,7 @@ class GeoreferenceVerificationStatusTest {
     // Then
     assertThat(result).isEqualTo(GEOREFERENCE_VERIFICATION_STATUS_STRING);
   }
+
   @Test
   void testGetTerm() {
     // When

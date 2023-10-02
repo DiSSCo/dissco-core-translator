@@ -26,6 +26,7 @@ class WaterBodyTest {
     // Then
     assertThat(result).isEqualTo(WATER_BODY_STRING);
   }
+
   @Test
   void testRetrieveFromABCD() {
     // Given
@@ -39,6 +40,7 @@ class WaterBodyTest {
     // Then
     assertThat(result).isEqualTo(WATER_BODY_STRING);
   }
+
   @Test
   void testGetTerm() {
     // When

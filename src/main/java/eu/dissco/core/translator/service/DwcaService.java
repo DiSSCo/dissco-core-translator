@@ -19,8 +19,6 @@ import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.DwcaRepository;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
 import eu.dissco.core.translator.terms.DigitalObjectDirector;
-import eu.dissco.core.translator.terms.TermMapper;
-import eu.dissco.core.translator.terms.media.MediaType;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;

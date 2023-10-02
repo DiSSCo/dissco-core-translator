@@ -53,7 +53,8 @@ class OccurrenceAssertionsTest {
     unit.put(
         "abcd:measurementsOrFacts/measurementOrFact/0/measurementOrFactAtomised/unitOfMeasurement",
         UNIT);
-    unit.put("abcd:measurementsOrFacts/measurementOrFact/0/measurementOrFactAtomised/parameter/value",
+    unit.put(
+        "abcd:measurementsOrFacts/measurementOrFact/0/measurementOrFactAtomised/parameter/value",
         TYPE);
     unit.put("abcd:measurementsOrFacts/measurementOrFact/0/measurementOrFactText/value", REMARK);
     unit.put("abcd:measurementsOrFacts/measurementOrFact/0/measurementOrFactAtomised/lowerValue",

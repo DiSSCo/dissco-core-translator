@@ -26,6 +26,7 @@ class SampleSizeUnitTest {
     // Then
     assertThat(result).isEqualTo(SAMPLE_SIZE_UNIT_STRING);
   }
+
   @Test
   void testGetTerm() {
     // When

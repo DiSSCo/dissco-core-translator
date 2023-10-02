@@ -25,6 +25,7 @@ class IdentifiedByTest {
     // Then
     assertThat(result).isEqualTo(identifiedByString);
   }
+
   @Test
   void testRetrieveFromABCD() {
     // Given
@@ -38,6 +39,7 @@ class IdentifiedByTest {
     // Then
     assertThat(result).isEqualTo(identifiedByString);
   }
+
   @Test
   void testGetTerm() {
     // When

@@ -26,6 +26,7 @@ class HabitatTest {
     // Then
     assertThat(result).isEqualTo(HABITAT_STRING);
   }
+
   @Test
   void testRetrieveFromABCD() {
     // Given
@@ -38,6 +39,7 @@ class HabitatTest {
     // Then
     assertThat(result).isEqualTo(HABITAT_STRING);
   }
+
   @Test
   void testGetTerm() {
     // When

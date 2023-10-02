@@ -21,7 +21,6 @@ import eu.dissco.core.translator.repository.DwcaRepository;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
 import eu.dissco.core.translator.terms.DigitalObjectDirector;
 import eu.dissco.core.translator.terms.TermMapper;
-import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenIdType;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -191,7 +190,6 @@ class DwcaServiceTest {
         .willReturn(TestUtils.givenDigitalSpecimen());
     given(fdoProperties.getDigitalMediaObjectType()).willReturn("Doi of the digital media object");
     given(fdoProperties.getDigitalSpecimenType()).willReturn("Doi of the digital specimen");
-
 
     // When
     service.retrieveData();

@@ -25,6 +25,7 @@ class IdentificationIdTest {
     // Then
     assertThat(result).isEqualTo(identificationIdString);
   }
+
   @Test
   void testGetTerm() {
     // When

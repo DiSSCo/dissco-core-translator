@@ -1,6 +1,5 @@
 package eu.dissco.core.translator.terms.specimen;
 
-import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import eu.dissco.core.translator.schema.DigitalSpecimen.OdsTopicOrigin;

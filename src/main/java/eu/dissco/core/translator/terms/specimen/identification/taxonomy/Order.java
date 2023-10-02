@@ -9,6 +9,7 @@ public class Order extends AbstractTaxonomy {
 
   private final List<String> dwcaTerms = List.of(TERM);
   private final List<String> abcdSplitTerms = List.of("ordo", "order");
+
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
     return super.searchJsonForTerm(unit, dwcaTerms);

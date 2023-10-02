@@ -26,6 +26,7 @@ class BehaviorTest {
     // Then
     assertThat(result).isEqualTo(BEHAVIOR_STRING);
   }
+
   @Test
   void testGetTerm() {
     // When

@@ -16,8 +16,8 @@ public class MarkedAsType extends Term {
     var acceptedIdentification = retrieveAcceptedIdentification(ds);
     if (acceptedIdentification != null) {
       var dcwTypeStatus = acceptedIdentification.getDwcTypeStatus();
-      if (dcwTypeStatus != null){
-        return !NOT_TYPE_STATUS.contains(dcwTypeStatus.toLowerCase());
+      if (dcwTypeStatus != null) {
+        return !NOT_TYPE_STATUS.contains(dcwTypeStatus.trim().toLowerCase());
       }
     }
     return null;

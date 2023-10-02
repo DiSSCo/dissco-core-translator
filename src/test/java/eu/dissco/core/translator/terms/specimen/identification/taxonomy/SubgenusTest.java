@@ -31,7 +31,8 @@ class SubgenusTest {
     // Given
     var subgenusString = "A new subgenus";
     var unit = MAPPER.createObjectNode();
-    unit.put("result/taxonIdentified/scientificName/nameAtomised/zoological/subgenus", subgenusString);
+    unit.put("result/taxonIdentified/scientificName/nameAtomised/zoological/subgenus",
+        subgenusString);
 
     // When
     var result = subgenus.retrieveFromABCD(unit);

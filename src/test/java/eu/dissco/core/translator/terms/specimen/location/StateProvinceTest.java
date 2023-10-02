@@ -3,14 +3,14 @@ package eu.dissco.core.translator.terms.specimen.location;
 import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.apache.kafka.common.protocol.types.Field.Str;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class StateProvinceTest {
-private static final String STATE_PROVINCE_STRING = "Brittany";
+
+  private static final String STATE_PROVINCE_STRING = "Brittany";
   private final StateProvince stateProvince = new StateProvince();
 
   @Test
@@ -25,6 +25,7 @@ private static final String STATE_PROVINCE_STRING = "Brittany";
     // Then
     assertThat(result).isEqualTo(STATE_PROVINCE_STRING);
   }
+
   @Test
   void testRetrieveFromABCD() {
     // Given
@@ -38,6 +39,7 @@ private static final String STATE_PROVINCE_STRING = "Brittany";
     // Then
     assertThat(result).isEqualTo(STATE_PROVINCE_STRING);
   }
+
   @Test
   void testGetTerm() {
     // When
