@@ -1,6 +1,7 @@
 package eu.dissco.core.translator.terms.specimen.location.georeference;
 
 import static eu.dissco.core.translator.TestUtils.MAPPER;
+import static eu.dissco.core.translator.TestUtils.MOCK_DATE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
@@ -10,21 +11,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class GeoreferencedDateTest {
 
-  private static final String GEOREFERENCED_DATE = "1809-02-12";
-
   private final GeoreferencedDate georeferencedDate = new GeoreferencedDate();
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
     var unit = MAPPER.createObjectNode();
-    unit.put("dwc:georeferencedDate", GEOREFERENCED_DATE);
+    unit.put("dwc:georeferencedDate", MOCK_DATE);
 
     // When
     var result = georeferencedDate.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(GEOREFERENCED_DATE);
+    assertThat(result).isEqualTo(MOCK_DATE);
   }
 
   @Test

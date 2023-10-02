@@ -1,12 +1,13 @@
 package eu.dissco.core.translator.terms.specimen;
 
+import eu.dissco.core.translator.schema.DigitalSpecimen;
 import eu.dissco.core.translator.terms.Term;
 
 public class SpecimenName extends Term {
 
   public static final String TERM = ODS_PREFIX + "specimenName";
 
-  public String calculate(eu.dissco.core.translator.schema.DigitalSpecimen ds) {
+  public String calculate(DigitalSpecimen ds) {
     var acceptedIdentification = retrieveAcceptedIdentification(ds);
     if (acceptedIdentification != null && acceptedIdentification.getTaxonIdentifications() != null
         && !acceptedIdentification.getTaxonIdentifications().isEmpty()) {

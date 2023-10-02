@@ -7,6 +7,7 @@ public class LatestEonOrHighestEonothem extends AbstractChronoStratigraphy {
 
   public static final String TERM = DWC_PREFIX + "latestEonOrHighestEonothem";
   private final List<String> dwcaTerms = List.of(TERM);
+  private final List<String> abcdSplitTerms = List.of("Eonothem");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
@@ -15,7 +16,7 @@ public class LatestEonOrHighestEonothem extends AbstractChronoStratigraphy {
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    return super.searchABCDSplitTerms(unit, List.of("Eonothem"));
+    return super.searchABCDSplitTerms(unit, abcdSplitTerms);
   }
 
   @Override

@@ -1,6 +1,7 @@
 package eu.dissco.core.translator.terms.specimen;
 
 import eu.dissco.core.translator.schema.DigitalSpecimen.OdsTopicDiscipline;
+import eu.dissco.core.translator.schema.DigitalSpecimen;
 import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
@@ -15,7 +16,7 @@ public class TopicDiscipline extends Term {
   private static final List<String> EARTH_SYSTEM_BASIS_OF_RECORD = List.of("ROCK", "MINERAL",
       "ROCKSPECIMEN", "ROCK SPECIMEN", "MINERALSPECIMEN", "MINERAL SPECIMEN");
 
-  public OdsTopicDiscipline calculate(eu.dissco.core.translator.schema.DigitalSpecimen ds) {
+  public OdsTopicDiscipline calculate(DigitalSpecimen ds) {
     var basisOfRecord = ds.getDwcBasisOfRecord();
     var acceptedIdentification = retrieveAcceptedIdentification(ds);
     if (acceptedIdentification != null && acceptedIdentification.getTaxonIdentifications() != null
@@ -34,7 +35,7 @@ public class TopicDiscipline extends Term {
       } else if (EXTRATERRESTRIAL_BASIS_OF_RECORD.contains(harBasisOfRecord)) {
         return OdsTopicDiscipline.ASTROGEOLOGY;
       } else if (EARTH_SYSTEM_BASIS_OF_RECORD.contains(harBasisOfRecord)) {
-        return OdsTopicDiscipline.EARTH_GEOLOGY;
+        return OdsTopicDiscipline.GEOLOGY;
       } else if (kingdom != null) {
         var harmonisedKingdom = kingdom.trim().toUpperCase();
         switch (harmonisedKingdom) {

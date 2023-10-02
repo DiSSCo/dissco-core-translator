@@ -18,7 +18,6 @@ public class ScientificName extends AbstractTaxonomy {
     return super.searchJsonForTerm(unit, dwcaTerms);
   }
 
-
   @Override
   public String retrieveFromABCD(JsonNode unit) {
     return searchJsonForTerm(unit, abcdTerms);

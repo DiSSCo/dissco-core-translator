@@ -15,12 +15,15 @@ public class TermMapper {
 
   public String retrieveTerm(Term term, JsonNode unit, boolean dwc) {
     var termName = term.getTerm();
-    if (mapping.getDefaultMappings().containsKey(termName)) {
-      return mapping.getDefaultMappings().get(termName);
+    if (mapping.getDefaults().containsKey(termName)) {
+      return mapping.getDefaults().get(termName);
     } else if (mapping.getFieldMappings().containsKey(termName)) {
       var value = unit.get(mapping.getFieldMappings().get(termName));
       if (value != null && value.isTextual()) {
         return value.asText();
+      } else {
+        log.info("No value for the specific field mapping for term: {} with mapping: {}",
+            term.getTerm(), value);
       }
     }
     if (dwc) {

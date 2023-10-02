@@ -1,14 +1,15 @@
-package eu.dissco.core.translator.terms.specimen.stratigraphy.chronostratigraphic;
+package eu.dissco.core.translator.terms.specimen.identification.taxonomy;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
 
-public class EarliestEpochOrLowestSeries extends AbstractChronoStratigraphy {
+public class Subfamily extends AbstractTaxonomy {
 
-  public static final String TERM = DWC_PREFIX + "earliestEpochOrLowestSeries";
+  public static final String TERM = DWC_PREFIX + "subfamily";
+
   private final List<String> dwcaTerms = List.of(TERM);
+  private final List<String> abcdSplitTerms = List.of("subfamilia", "subfamily");
 
-  private final List<String> abcdSplitTerms = List.of("SubSeries", "SubSerie", "Series", "Serie");
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
     return super.searchJsonForTerm(unit, dwcaTerms);

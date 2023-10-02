@@ -1,6 +1,7 @@
 package eu.dissco.core.translator.terms.specimen.identification;
 
 import static eu.dissco.core.translator.TestUtils.MAPPER;
+import static eu.dissco.core.translator.TestUtils.MOCK_DATE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import eu.dissco.core.translator.terms.specimen.citation.BibliographicCitation;
@@ -16,28 +17,26 @@ class DateIdentifiedTest {
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var dateIdentifiedString = "18-09-2023";
     var unit = MAPPER.createObjectNode();
-    unit.put("dwc:dateIdentified", dateIdentifiedString);
+    unit.put("dwc:dateIdentified", MOCK_DATE);
 
     // When
     var result = dateIdentified.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(dateIdentifiedString);
+    assertThat(result).isEqualTo(MOCK_DATE);
   }
   @Test
   void testRetrieveFromABCD() {
     // Given
-    var dateIdentifiedString = "18-09-2023";
     var unit = MAPPER.createObjectNode();
-    unit.put("date/dateText", dateIdentifiedString);
+    unit.put("date/dateText", MOCK_DATE);
 
     // When
     var result = dateIdentified.retrieveFromABCD(unit);
 
     // Then
-    assertThat(result).isEqualTo(dateIdentifiedString);
+    assertThat(result).isEqualTo(MOCK_DATE);
   }
   @Test
   void testGetTerm() {

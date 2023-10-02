@@ -1,9 +1,6 @@
 package eu.dissco.core.translator.service;
 
 
-import static eu.dissco.core.translator.service.IngestionUtility.convertToPhysicalSpecimenIdTypeEnum;
-import static eu.dissco.core.translator.service.IngestionUtility.getPhysicalSpecimenId;
-
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -18,21 +15,17 @@ import efg.Unit;
 import eu.dissco.core.translator.Profiles;
 import eu.dissco.core.translator.domain.DigitalMediaObject;
 import eu.dissco.core.translator.domain.DigitalMediaObjectEvent;
-import eu.dissco.core.translator.domain.DigitalSpecimen;
 import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
+import eu.dissco.core.translator.domain.DigitalSpecimenWrapper;
 import eu.dissco.core.translator.domain.Enrichment;
 import eu.dissco.core.translator.exception.DiSSCoDataException;
 import eu.dissco.core.translator.exception.DisscoEfgParsingException;
 import eu.dissco.core.translator.exception.OrganisationNotRorId;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
+import eu.dissco.core.translator.properties.FdoProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
 import eu.dissco.core.translator.terms.DigitalObjectDirector;
-import eu.dissco.core.translator.terms.TermMapper;
-import eu.dissco.core.translator.terms.media.MediaType;
-import eu.dissco.core.translator.terms.specimen.OrganisationId;
-import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenId;
-import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenIdType;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 import jakarta.xml.bind.JAXBContext;
@@ -84,10 +77,10 @@ public class BioCaseService implements WebClientService {
   private final SourceSystemRepository repository;
   private final Configuration configuration;
   private final XMLInputFactory xmlFactory;
-  private final TermMapper termMapper;
   private final KafkaService kafkaService;
   private final EnrichmentProperties enrichmentProperties;
   private final DigitalObjectDirector digitalSpecimenDirector;
+  private final FdoProperties fdoProperties;
 
   private boolean isAcceptedBasisOfRecord(Unit unit) {
     var recordBasis = unit.getRecordBasis();
@@ -182,44 +175,29 @@ public class BioCaseService implements WebClientService {
     var datasetAttribute = getData(mapper.valueToTree(dataset.getMetadata()));
     unitAttributes.setAll(datasetAttribute);
     if (isAcceptedBasisOfRecord(unit)) {
-      var physicalSpecimenIdType = termMapper.retrieveTerm(new PhysicalSpecimenIdType(),
-          unitAttributes, false);
-      var organisationId = termMapper.retrieveTerm(new OrganisationId(), unitAttributes, false);
-      if (physicalSpecimenIdType != null) {
-        try {
-          var physicalSpecimenId = getPhysicalSpecimenId(physicalSpecimenIdType, organisationId,
-              termMapper.retrieveTerm(new PhysicalSpecimenId(), unitAttributes, false));
-          var ds = new eu.dissco.core.translator.schema.DigitalSpecimen()
-              .withOdsPhysicalSpecimenIdType(
-                  convertToPhysicalSpecimenIdTypeEnum(physicalSpecimenIdType))
-              .withDwcInstitutionId(organisationId)
-              .withOdsPhysicalSpecimenId(physicalSpecimenId)
-              .withOdsSourceSystem(
-                  "https://hdl.handle.net/" + webClientProperties.getSourceSystemId());
-          var digitalSpecimen = new DigitalSpecimen(
-              physicalSpecimenId,
-              DS_TYPE,
-              digitalSpecimenDirector.constructDigitalSpecimen(ds, false, unitAttributes),
-              cleanupRedundantFields(unitAttributes)
-          );
-          var digitalMediaObjects = processDigitalMediaObjects(physicalSpecimenId, unit,
-              organisationId);
-          log.debug("Result digital Specimen: {}", digitalSpecimen);
-          kafkaService.sendMessage("digital-specimen",
-              mapper.writeValueAsString(
-                  new DigitalSpecimenEvent(enrichmentServices(false), digitalSpecimen,
-                      digitalMediaObjects)));
-        } catch (DiSSCoDataException e) {
-          log.error("Encountered data issue with record: {}", unitAttributes, e);
-        }
-      } else {
-        log.warn("Ignoring record with id: {} as we cannot determine the physicalSpecimenIdType",
-            termMapper.retrieveTerm(new PhysicalSpecimenId(), unitAttributes, false));
+      try {
+        var attributes = digitalSpecimenDirector.assembleDigitalSpecimenTerm(unitAttributes, false);
+        var digitalSpecimen = new DigitalSpecimenWrapper(
+            attributes.getOdsNormalisedPhysicalSpecimenId(),
+            fdoProperties.getDigitalSpecimenType(),
+            attributes,
+            cleanupRedundantFields(unitAttributes)
+        );
+        var digitalMediaObjects = processDigitalMediaObjects(
+            attributes.getOdsNormalisedPhysicalSpecimenId(), unit,
+            attributes.getDwcInstitutionId());
+        log.debug("Result digital Specimen: {}", digitalSpecimen);
+        kafkaService.sendMessage("digital-specimen",
+            mapper.writeValueAsString(
+                new DigitalSpecimenEvent(
+                    enrichmentServices(false),
+                    digitalSpecimen,
+                    digitalMediaObjects)));
+      } catch (DiSSCoDataException e) {
+        log.error("Encountered data issue with record: {}", unitAttributes, e);
       }
     } else {
-      log.info("Record with id: {} and record basis: {} is ignored ",
-          termMapper.retrieveTerm(new PhysicalSpecimenId(), unitAttributes, false),
-          unit.getRecordBasis());
+      log.info("Record with record basis: {} is ignored ", unit.getRecordBasis());
     }
   }
 
@@ -367,9 +345,9 @@ public class BioCaseService implements WebClientService {
     var attributes = getData(mapper.valueToTree(media));
     var digitalMediaObjectEvent = new DigitalMediaObjectEvent(enrichmentServices(true),
         new DigitalMediaObject(
-            termMapper.retrieveTerm(new MediaType(), attributes, false),
+            fdoProperties.getDigitalMediaObjectType(),
             physicalSpecimenId,
-            digitalSpecimenDirector.constructDigitalMediaObjects(false, attributes, organisationId),
+            digitalSpecimenDirector.assembleDigitalMediaObjects(false, attributes, organisationId),
             attributes
         ));
     log.debug("Result digital media object: {}", digitalMediaObjectEvent);

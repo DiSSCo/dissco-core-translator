@@ -6,7 +6,7 @@ import java.util.List;
 
 public class AccessRights extends Term {
 
-  public static final String TERM = "dcterms:accessRights";
+  public static final String TERM = DCTERMS_PREFIX + "accessRights";
 
   private final List<String> dwcaTerms = List.of(TERM);
 

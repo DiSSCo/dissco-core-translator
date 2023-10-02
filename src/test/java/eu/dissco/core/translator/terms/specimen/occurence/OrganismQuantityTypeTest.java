@@ -25,6 +25,21 @@ class OrganismQuantityTypeTest {
     // Then
     assertThat(result).isEqualTo("individuals");
   }
+
+  @Test
+  void testRetrieveFromDWCAIsEmpty() {
+    // Given
+    var organismQuantityTypeString = "Some nice quantitative type";
+    var unit = MAPPER.createObjectNode();
+    unit.put("dwc:organismQuantityType", organismQuantityTypeString);
+
+    // When
+    var result = organismQuantityType.retrieveFromDWCA(unit);
+
+    // Then
+    assertThat(result).isEqualTo(organismQuantityTypeString);
+  }
+
   @Test
   void testGetTerm() {
     // When

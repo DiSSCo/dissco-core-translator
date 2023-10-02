@@ -37,9 +37,13 @@
       "minimum": 0,
       "maximum": 3
     },
-    "ods:physicalSpecimenId": {
+    "ods:normalisedPhysicalSpecimenId": {
       "type": "string",
       "description": "The physical specimen identifier of the object. When locally unique this is a combination between source-system-id and the local identifier"
+    },
+    "ods:physicalSpecimenId": {
+      "type": "string",
+      "description": "The physical specimen identifier of the object. Taken over as-is"
     },
     "ods:physicalSpecimenIdType": {
       "type": "string",
@@ -89,12 +93,13 @@
         "Anthropology",
         "Botany",
         "Astrogeology",
-        "Earth Geology",
+        "Geology",
         "Microbiology",
         "Palaeontology",
         "Zoology",
-        "Environment",
-        "Other Bio/Geodiversity",
+        "Ecology",
+        "Other Biodiversity",
+        "Other Geodiversity",
         "Unclassified"
       ],
       "example": [
@@ -120,7 +125,11 @@
     },
     "ods:livingOrPreserved": {
       "type": "string",
-      "description": "Whether the specimen is living or preserved"
+      "description": "Whether the specimen is living or preserved",
+      "enum": [
+        "Living",
+        "Preserved"
+      ]
     },
     "dcterms:license": {
       "type": "string",

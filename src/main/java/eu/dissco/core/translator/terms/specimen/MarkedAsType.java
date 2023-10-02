@@ -1,5 +1,6 @@
 package eu.dissco.core.translator.terms.specimen;
 
+import eu.dissco.core.translator.schema.DigitalSpecimen;
 import eu.dissco.core.translator.terms.Term;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -11,7 +12,7 @@ public class MarkedAsType extends Term {
   private static final Set<String> NOT_TYPE_STATUS = new HashSet<>(
       Arrays.asList("false", "specimen", ""));
 
-  public Boolean calculate(eu.dissco.core.translator.schema.DigitalSpecimen ds) {
+  public Boolean calculate(DigitalSpecimen ds) {
     var acceptedIdentification = retrieveAcceptedIdentification(ds);
     if (acceptedIdentification != null) {
       var dcwTypeStatus = acceptedIdentification.getDwcTypeStatus();

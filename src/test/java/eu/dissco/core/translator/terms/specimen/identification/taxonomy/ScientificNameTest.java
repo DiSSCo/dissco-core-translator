@@ -15,15 +15,15 @@ class ScientificNameTest {
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var specimenNameString = "SpecimenName";
+    var scientificNameString = "SpecimenName";
     var unit = MAPPER.createObjectNode();
-    unit.put("dwc:scientificName", specimenNameString);
+    unit.put("dwc:scientificName", scientificNameString);
 
     // When
     var result = scientificname.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(specimenNameString);
+    assertThat(result).isEqualTo(scientificNameString);
   }
 
   @Test
@@ -42,17 +42,17 @@ class ScientificNameTest {
   @Test
   void testRetrieveFromABCDEFG() {
     // Given
-    var specimenNameString = "SpecimenName";
+    var scientificNameString = "SpecimenName";
     var unit = MAPPER.createObjectNode();
     unit.put(
         "result/mineralRockIdentified/classifiedName/fullScientificNameString",
-        specimenNameString);
+        scientificNameString);
 
     // When
     var result = scientificname.retrieveFromABCD(unit);
 
     // Then
-    assertThat(result).isEqualTo(specimenNameString);
+    assertThat(result).isEqualTo(scientificNameString);
   }
 
   @Test
@@ -62,28 +62,15 @@ class ScientificNameTest {
     unit.put(
         "result/taxonIdentified/scientificName/fullScientificNameString",
         "Bignonia chica Humb. & Bonpl.");
+    unit.put(
+        "result/mineralRockIdentified/classifiedName/fullScientificNameString",
+        "Another specimen name");
 
     // When
     var result = scientificname.retrieveFromABCD(unit);
 
     // Then
     assertThat(result).isEqualTo("Bignonia chica Humb. & Bonpl.");
-  }
-
-  @Test
-  void testRetrieveFromABCD() {
-    // Given
-    var specimenNameString = "SpecimenName";
-    var unit = MAPPER.createObjectNode();
-    unit.put(
-        "result/taxonIdentified/scientificName/fullScientificNameString",
-        specimenNameString);
-
-    // When
-    var result = scientificname.retrieveFromABCD(unit);
-
-    // Then
-    assertThat(result).isEqualTo(specimenNameString);
   }
 
   @Test

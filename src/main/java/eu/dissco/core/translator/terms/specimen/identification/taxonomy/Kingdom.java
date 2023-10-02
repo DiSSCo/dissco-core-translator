@@ -8,6 +8,7 @@ public class Kingdom extends AbstractTaxonomy {
   public static final String TERM = DWC_PREFIX + "kingdom";
 
   private final List<String> dwcaTerms = List.of(TERM);
+  private final List<String> abcdSplitTerms = List.of("regnum", "kingdom");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
@@ -16,7 +17,7 @@ public class Kingdom extends AbstractTaxonomy {
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    return super.searchABCDSplitTerms(unit, List.of("regnum", "kingdom"));
+    return super.searchABCDSplitTerms(unit, abcdSplitTerms);
   }
 
   @Override

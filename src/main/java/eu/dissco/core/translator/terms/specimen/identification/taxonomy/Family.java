@@ -8,6 +8,7 @@ public class Family extends AbstractTaxonomy {
   public static final String TERM = DWC_PREFIX + "family";
 
   private final List<String> dwcaTerms = List.of(TERM);
+  private final List<String> abcdSplitTerms = List.of("familia", "family");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
@@ -16,7 +17,7 @@ public class Family extends AbstractTaxonomy {
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    return super.searchABCDSplitTerms(unit, List.of("familia", "family"));
+    return super.searchABCDSplitTerms(unit, abcdSplitTerms);
   }
 
   @Override

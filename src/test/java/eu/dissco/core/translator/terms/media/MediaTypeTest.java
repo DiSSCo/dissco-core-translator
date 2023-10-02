@@ -22,7 +22,8 @@ class MediaTypeTest {
         Arguments.of("Image", "StillImage"),
         Arguments.of("Sound", "Sound"),
         Arguments.of("MovingImage", "MovingImage"),
-        Arguments.of("RandomString", null)
+        Arguments.of("RandomString", null),
+        Arguments.of(null, null)
     );
   }
 
@@ -31,7 +32,8 @@ class MediaTypeTest {
         Arguments.of("image/jpeg", "StillImage"),
         Arguments.of("audio/example", "Sound"),
         Arguments.of("video/example", "MovingImage"),
-        Arguments.of("RandomString", null)
+        Arguments.of("RandomString", null),
+        Arguments.of(null, null)
     );
   }
 

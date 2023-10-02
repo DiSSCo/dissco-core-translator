@@ -1,53 +1,51 @@
 package eu.dissco.core.translator.terms.specimen.occurence;
 
 import static eu.dissco.core.translator.TestUtils.MAPPER;
+import static eu.dissco.core.translator.TestUtils.MOCK_DATE;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import eu.dissco.core.translator.terms.specimen.occurence.DateCollected;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class DateCollectedTest {
+class EventDateTest {
 
-  private static final String DATE = "1924-11-20";
-
-  private final DateCollected dateCollected = new DateCollected();
+  private final EventDate eventData = new EventDate();
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
     var unit = MAPPER.createObjectNode();
-    unit.put("dwc:eventDate", DATE);
+    unit.put("dwc:eventDate", MOCK_DATE);
 
     // When
-    var result = dateCollected.retrieveFromDWCA(unit);
+    var result = eventData.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(DATE);
+    assertThat(result).isEqualTo(MOCK_DATE);
   }
 
   @Test
   void testRetrieveFromABCD() {
     // Given
     var unit = MAPPER.createObjectNode();
-    unit.put("abcd:gathering/dateTime/isodateTimeBegin", DATE);
+    unit.put("abcd:gathering/dateTime/isodateTimeBegin", MOCK_DATE);
 
     // When
-    var result = dateCollected.retrieveFromABCD(unit);
+    var result = eventData.retrieveFromABCD(unit);
 
     // Then
-    assertThat(result).isEqualTo(DATE);
+    assertThat(result).isEqualTo(MOCK_DATE);
   }
 
   @Test
   void testGetTerm() {
     // When
-    var result = dateCollected.getTerm();
+    var result = eventData.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(DateCollected.TERM);
+    assertThat(result).isEqualTo(EventDate.TERM);
   }
 
 }

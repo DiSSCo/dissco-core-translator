@@ -2,6 +2,7 @@ package eu.dissco.core.translator.terms;
 
 import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -11,15 +12,18 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.component.RorComponent;
 import eu.dissco.core.translator.exception.OrganisationNotRorId;
-import eu.dissco.core.translator.schema.DigitalEntity.DctermsType;
+import eu.dissco.core.translator.exception.UnknownPhysicalSpecimenIdType;
+import eu.dissco.core.translator.properties.FdoProperties;
+import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.schema.DigitalSpecimen.OdsPhysicalSpecimenIdType;
-import eu.dissco.core.translator.terms.media.MediaType;
-import eu.dissco.core.translator.terms.specimen.LivingOrPreserved;
-import eu.dissco.core.translator.terms.specimen.TopicDiscipline;
-import eu.dissco.core.translator.terms.specimen.occurence.OccurrenceStatus;
+import eu.dissco.core.translator.terms.specimen.OrganisationId;
+import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenIdType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -30,53 +34,70 @@ class DigitalObjectDirectorTest {
   private TermMapper termMapper;
   @Mock
   private RorComponent rorComponent;
+  @Mock
+  private WebClientProperties webClientProperties;
+  @Mock
+  private FdoProperties fdoProperties;
 
   private DigitalObjectDirector director;
 
   @BeforeEach
   void setup() {
-    director = new DigitalObjectDirector(MAPPER, termMapper, rorComponent);
+    director = new DigitalObjectDirector(MAPPER, termMapper, rorComponent, webClientProperties,
+        fdoProperties);
   }
 
   @Test
-  void testConstructAbcdDigitalSpecimen() throws JsonProcessingException, OrganisationNotRorId {
+  void testConstructAbcdDigitalSpecimen() throws Exception {
     // Given
     var specimenJson = givenAbcdSpecimenJson();
-    var ds = givenDigitalSpecimen();
-    given(rorComponent.getRoRId(anyString())).willReturn("Tallinn University of Technology");
+    given(rorComponent.getRorName(anyString())).willReturn("Tallinn University of Technology");
     given(termMapper.retrieveTerm(any(Term.class), eq(specimenJson), eq(false))).willReturn(
         "a mapped term");
-    given(termMapper.retrieveTerm(any(LivingOrPreserved.class), eq(specimenJson),
-        eq(false))).willReturn("present");
-    given(termMapper.retrieveTerm(any(OccurrenceStatus.class), eq(specimenJson),
-        eq(false))).willReturn("present");
+    given(termMapper.retrieveTerm(any(OrganisationId.class), eq(specimenJson), eq(false)))
+        .willReturn("https://ror.org/0443cwa12");
+    given(termMapper.retrieveTerm(any(PhysicalSpecimenIdType.class), eq(specimenJson), eq(false)))
+        .willReturn(OdsPhysicalSpecimenIdType.RESOLVABLE.value());
 
     // When
-    var result = director.constructDigitalSpecimen(ds, false, specimenJson);
+    var result = director.assembleDigitalSpecimenTerm(specimenJson, false);
 
     // Then
     assertThat(result).isNotNull();
-    assertThat(result.getEntityRelationships()).asList().hasSize(3);
+    assertThat(result.getEntityRelationships()).asList().hasSize(4);
     assertThat(result.getIdentifiers()).asList().hasSize(4);
     assertThat(result.getCitations()).asList().hasSize(1);
     assertThat(result.getDwcIdentification()).asList().hasSize(1);
   }
 
+  @ParameterizedTest
+  @ValueSource(strings = {"An Unknown PhysicalSpecimenIdType"})
+  @NullSource
+  void testConstructAbcdDigitalSpecimenUnknownIdType(String value) throws Exception {
+    // Given
+    var specimenJson = givenAbcdSpecimenJson();
+    given(termMapper.retrieveTerm(any(PhysicalSpecimenIdType.class), eq(specimenJson), eq(false)))
+        .willReturn(value);
+
+    // When / Then
+    assertThrowsExactly(UnknownPhysicalSpecimenIdType.class,
+        () -> director.assembleDigitalSpecimenTerm(specimenJson, false));
+  }
+
   @Test
-  void testConstructDwcaDigitalSpecimen() throws JsonProcessingException, OrganisationNotRorId {
+  void testConstructDwcaDigitalSpecimen() throws Exception {
     // Given
     var specimenJson = givenDwcaSpecimenJson();
-    var ds = givenDigitalSpecimen();
-    given(rorComponent.getRoRId(anyString())).willReturn("National Museum of Natural History");
+    given(rorComponent.getRorName(anyString())).willReturn("National Museum of Natural History");
     given(termMapper.retrieveTerm(any(Term.class), eq(specimenJson), eq(true))).willReturn(
         "a mapped term");
-    given(termMapper.retrieveTerm(any(LivingOrPreserved.class), eq(specimenJson),
-        eq(true))).willReturn("present");
-    given(termMapper.retrieveTerm(any(OccurrenceStatus.class), eq(specimenJson),
-        eq(true))).willReturn("present");
+    given(termMapper.retrieveTerm(any(OrganisationId.class), eq(specimenJson), eq(true)))
+        .willReturn("https://ror.org/0443cwa12");
+    given(termMapper.retrieveTerm(any(PhysicalSpecimenIdType.class), eq(specimenJson), eq(true)))
+        .willReturn(OdsPhysicalSpecimenIdType.LOCAL.value());
 
     // When
-    var result = director.constructDigitalSpecimen(ds, true, specimenJson);
+    var result = director.assembleDigitalSpecimenTerm(specimenJson, true);
 
     // Then
     assertThat(result).isNotNull();
@@ -90,20 +111,17 @@ class DigitalObjectDirectorTest {
   void testConstructDwcaDigitalMediaObject() throws JsonProcessingException, OrganisationNotRorId {
     // Given
     var specimenJson = givenDwcaMediaObject();
-    given(rorComponent.getRoRId(anyString())).willReturn("National Museum of Natural History");
+    given(rorComponent.getRorName(anyString())).willReturn("National Museum of Natural History");
     given(termMapper.retrieveTerm(any(Term.class), eq(specimenJson), eq(true))).willReturn(
         "a mapped term");
-    given(
-        termMapper.retrieveTerm(any(MediaType.class), eq(specimenJson), eq(true))).willReturn(
-        "StillImage");
 
     // When
-    var result = director.constructDigitalMediaObjects(true, specimenJson,
+    var result = director.assembleDigitalMediaObjects(true, specimenJson,
         "https://ror.org/0443cwa12");
 
     // Then
     assertThat(result).isNotNull();
-    assertThat(result.getEntityRelationships()).asList().hasSize(2);
+    assertThat(result.getEntityRelationships()).asList().hasSize(3);
     assertThat(result.getIdentifiers()).asList().hasSize(2);
   }
 
@@ -118,12 +136,6 @@ class DigitalObjectDirectorTest {
                         "dcterms:identifier": "https://mediaphoto.mnhn.fr/media/1622116345730PeXvxZIhEfm1vcVV"
                       }
         """);
-  }
-
-  private eu.dissco.core.translator.schema.DigitalSpecimen givenDigitalSpecimen() {
-    return new eu.dissco.core.translator.schema.DigitalSpecimen()
-        .withOdsPhysicalSpecimenIdType(OdsPhysicalSpecimenIdType.RESOLVABLE)
-        .withDwcInstitutionId("https://ror.org/0443cwa12");
   }
 
   private JsonNode givenDwcaSpecimenJson() throws JsonProcessingException {

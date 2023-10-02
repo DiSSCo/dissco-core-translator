@@ -26,7 +26,7 @@ class TopicDisciplineTest {
         Arguments.of(givenDigitalSpecimen("MeteoriteSpecimen", null),
             OdsTopicDiscipline.ASTROGEOLOGY),
         Arguments.of(givenDigitalSpecimen("RockSpecimen", null),
-            OdsTopicDiscipline.EARTH_GEOLOGY),
+            OdsTopicDiscipline.GEOLOGY),
         Arguments.of(givenDigitalSpecimen("PreservedSpecimen", "Animalia"),
             OdsTopicDiscipline.ZOOLOGY),
         Arguments.of(givenDigitalSpecimen("PreservedSpecimen", "Plantae"),

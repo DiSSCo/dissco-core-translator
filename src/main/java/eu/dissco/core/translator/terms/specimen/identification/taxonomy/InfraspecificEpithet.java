@@ -5,7 +5,6 @@ import java.util.List;
 
 public class InfraspecificEpithet extends AbstractTaxonomy {
 
-
   public static final String TERM = DWC_PREFIX + "infraspecificEpithet";
 
   private final List<String> dwcaTerms = List.of(TERM);

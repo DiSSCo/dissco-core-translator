@@ -8,6 +8,7 @@ public class EarliestPeriodOrLowestSystem extends AbstractChronoStratigraphy {
   public static final String TERM = DWC_PREFIX + "earliestPeriodOrLowestSystem";
   private final List<String> dwcaTerms = List.of(TERM);
 
+  private final List<String> abcdSplitTerms = List.of("System");
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
     return super.searchJsonForTerm(unit, dwcaTerms);
@@ -15,7 +16,7 @@ public class EarliestPeriodOrLowestSystem extends AbstractChronoStratigraphy {
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    return super.searchABCDSplitTerms(unit, List.of("System"));
+    return super.searchABCDSplitTerms(unit, abcdSplitTerms);
   }
 
   @Override

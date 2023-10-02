@@ -1,6 +1,7 @@
 package eu.dissco.core.translator.terms.specimen;
 
 import eu.dissco.core.translator.schema.DigitalSpecimen.OdsTopicDomain;
+import eu.dissco.core.translator.schema.DigitalSpecimen;
 import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
@@ -15,7 +16,7 @@ public class TopicDomain extends Term {
   private static final List<String> EARTH_SYSTEM_BASIS_OF_RECORD = List.of("ROCK", "MINERAL",
       "ROCKSPECIMEN", "ROCK SPECIMEN", "MINERALSPECIMEN", "MINERAL SPECIMEN");
 
-  public OdsTopicDomain calculate(eu.dissco.core.translator.schema.DigitalSpecimen ds) {
+  public OdsTopicDomain calculate(DigitalSpecimen ds) {
     var basisOfRecord = ds.getDwcBasisOfRecord();
     if (basisOfRecord != null) {
       var harBasisOfRecord = basisOfRecord.trim().toUpperCase();

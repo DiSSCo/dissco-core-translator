@@ -2,6 +2,7 @@ package eu.dissco.core.translator.service;
 
 import static eu.dissco.core.translator.TestUtils.loadResourceFile;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -10,7 +11,9 @@ import static org.mockito.Mockito.times;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.dissco.core.translator.TestUtils;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
+import eu.dissco.core.translator.properties.FdoProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
 import eu.dissco.core.translator.terms.DigitalObjectDirector;
@@ -57,6 +60,8 @@ class BioCaseServiceTest {
   private EnrichmentProperties enrichmentProperties;
   @Mock
   private DigitalObjectDirector digitalSpecimenDirector;
+  @Mock
+  private FdoProperties fdoProperties;
   private BioCaseService service;
 
   @BeforeEach
@@ -65,14 +70,15 @@ class BioCaseServiceTest {
     configuration.setTemplateLoader(
         new FileTemplateLoader(new ClassPathResource("templates").getFile()));
     service = new BioCaseService(mapper, properties, webClient, repository, configuration, factory,
-        termMapper, kafkaService, enrichmentProperties, digitalSpecimenDirector);
+        kafkaService, enrichmentProperties, digitalSpecimenDirector, fdoProperties);
 
     // Given
     givenJsonWebclient();
+    given(fdoProperties.getDigitalSpecimenType()).willReturn("Doi of the digital specimen");
   }
 
   @Test
-  void testRetrieveData206() throws IOException {
+  void testRetrieveData206() throws Exception {
     // Given
     given(properties.getSourceSystemId()).willReturn("ABC-DDD-ASD");
     given(repository.getEndpoint(anyString())).willReturn("https://endpoint.com");
@@ -80,8 +86,8 @@ class BioCaseServiceTest {
             Mono.just(loadResourceFile("biocase/geocase-record-dropped.xml")))
         .willReturn(Mono.just(loadResourceFile("biocase/biocase-206-response.xml")));
     given(properties.getItemsPerRequest()).willReturn(100);
-    given(termMapper.retrieveTerm(any(PhysicalSpecimenIdType.class), any(JsonNode.class),
-        eq(false))).willReturn("resolvable");
+    given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
+        .willReturn(TestUtils.givenDigitalSpecimen());
 
     // When
     service.retrieveData();
@@ -92,15 +98,16 @@ class BioCaseServiceTest {
   }
 
   @Test
-  void testRetrieveDataWithMedia206() throws IOException {
+  void testRetrieveDataWithMedia206() throws Exception {
     // Given
     given(properties.getSourceSystemId()).willReturn("ABC-DDD-ASD");
     given(repository.getEndpoint(anyString())).willReturn("https://endpoint.com");
     given(responseSpec.bodyToMono(any(Class.class))).willReturn(
         Mono.just(loadResourceFile("biocase/biocase-206-with-media.xml")));
     given(properties.getItemsPerRequest()).willReturn(101);
-    given(termMapper.retrieveTerm(any(PhysicalSpecimenIdType.class), any(JsonNode.class),
-        eq(false))).willReturn("resolvable");
+    given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
+        .willReturn(TestUtils.givenDigitalSpecimen());
+    given(fdoProperties.getDigitalMediaObjectType()).willReturn("Doi of the digital media object");
 
     // When
     service.retrieveData();
