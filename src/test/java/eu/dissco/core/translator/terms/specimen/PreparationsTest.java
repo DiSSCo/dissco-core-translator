@@ -8,9 +8,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class ObjectTypeTest {
+class PreparationsTest {
 
-  private final ObjectType objectType = new ObjectType();
+  private final Preparations preparations = new Preparations();
 
   @Test
   void testRetrieveFromDWCA() {
@@ -20,7 +20,7 @@ class ObjectTypeTest {
     unit.put("dwc:preparations", objectTypeString);
 
     // When
-    var result = objectType.retrieveFromDWCA(unit);
+    var result = preparations.retrieveFromDWCA(unit);
 
     // Then
     assertThat(result).isEqualTo(objectTypeString);
@@ -34,7 +34,7 @@ class ObjectTypeTest {
     unit.put("abcd:kindOfUnit/0/value", objectTypeString);
 
     // When
-    var result = objectType.retrieveFromABCD(unit);
+    var result = preparations.retrieveFromABCD(unit);
 
     // Then
     assertThat(result).isEqualTo(objectTypeString);
@@ -43,10 +43,10 @@ class ObjectTypeTest {
   @Test
   void testGetTerm() {
     // When
-    var result = objectType.getTerm();
+    var result = preparations.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(ObjectType.TERM);
+    assertThat(result).isEqualTo(Preparations.TERM);
   }
 
 }

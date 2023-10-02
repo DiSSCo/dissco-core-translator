@@ -12,6 +12,8 @@ public abstract class Term {
 
   protected static final String ODS_PREFIX = "ods:";
   protected static final String DWC_PREFIX = "dwc:";
+  protected static final String DCTERMS_PREFIX = "dcterms:";
+  protected static final String ABCD_PREFIX = "abcd:";
   protected static final Pair<String, String> ABCD_NAMED_AREA_KEY =
       Pair.of(
           "abcd:gathering/namedAreas/namedArea/",
@@ -109,6 +111,18 @@ public abstract class Term {
       }
     }
     log.debug("No value found for division: {}", searchTerms);
+    return null;
+  }
+
+  protected eu.dissco.core.translator.schema.Identifications retrieveAcceptedIdentification(
+      eu.dissco.core.translator.schema.DigitalSpecimen ds) {
+    if (ds.getDwcIdentification() != null && !ds.getDwcIdentification().isEmpty()) {
+      for (var identification : ds.getDwcIdentification()) {
+        if (Boolean.TRUE.equals(identification.getDwcIdentificationVerificationStatus())) {
+          return identification;
+        }
+      }
+    }
     return null;
   }
 }

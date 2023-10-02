@@ -9,7 +9,7 @@ import static org.mockito.Mockito.mock;
 import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.component.MappingComponent;
 import eu.dissco.core.translator.terms.specimen.OrganisationId;
-import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenCollection;
+import eu.dissco.core.translator.terms.specimen.CollectionId;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenId;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,7 +34,7 @@ class TermMapperTest {
   @Test
   void testRetrieveFromDWCADefault() {
     // Given
-    given(mappingComponent.getDefaultMappings()).willReturn(
+    given(mappingComponent.getDefaults()).willReturn(
         Map.of(OrganisationId.TERM, "https://ror.org/02y22ws83"));
 
     // When
@@ -47,10 +47,10 @@ class TermMapperTest {
   @Test
   void testRetrieveFromDWCAFieldMapping() {
     // Given
-    var physicalSpecimenCollection = new PhysicalSpecimenCollection();
+    var physicalSpecimenCollection = new CollectionId();
     var dwcaTerm = "dwc:collectionID";
     given(mappingComponent.getFieldMappings()).willReturn(
-        Map.of(PhysicalSpecimenCollection.TERM, dwcaTerm));
+        Map.of(CollectionId.TERM, dwcaTerm));
     var unit = MAPPER.createObjectNode();
     unit.put("dwc:collectionID", "TestCollection");
 
@@ -64,22 +64,22 @@ class TermMapperTest {
   @Test
   void testRetrieveFromDWCANoMapping() {
     // Given
-    var physicalSpecimenCollection = mock(PhysicalSpecimenCollection.class);
-    given(physicalSpecimenCollection.getTerm()).willReturn(PhysicalSpecimenCollection.TERM);
+    var collectionId = mock(CollectionId.class);
+    given(collectionId.getTerm()).willReturn(CollectionId.TERM);
     var attributes = mock(JsonNode.class);
 
     // When
-    termMapper.retrieveTerm(physicalSpecimenCollection, attributes, true);
+    termMapper.retrieveTerm(collectionId, attributes, true);
 
     // Then
-    then(physicalSpecimenCollection).should().retrieveFromDWCA(attributes);
+    then(collectionId).should().retrieveFromDWCA(attributes);
   }
 
   @Test
   void testRetrieveFromABCDDefault() {
     // Given
     var organisationId = new OrganisationId();
-    given(mappingComponent.getDefaultMappings()).willReturn(
+    given(mappingComponent.getDefaults()).willReturn(
         Map.of(OrganisationId.TERM, "https://ror.org/02y22ws83"));
 
     // When
@@ -108,8 +108,8 @@ class TermMapperTest {
   @Test
   void testRetrieveFromABCDNoMapping() {
     // Given
-    var physicalSpecimenCollection = mock(PhysicalSpecimenCollection.class);
-    given(physicalSpecimenCollection.getTerm()).willReturn(PhysicalSpecimenCollection.TERM);
+    var physicalSpecimenCollection = mock(CollectionId.class);
+    given(physicalSpecimenCollection.getTerm()).willReturn(CollectionId.TERM);
     var attributes = mock(JsonNode.class);
 
     // When

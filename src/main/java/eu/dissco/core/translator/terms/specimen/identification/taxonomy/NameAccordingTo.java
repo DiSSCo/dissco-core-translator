@@ -9,7 +9,6 @@ public class NameAccordingTo extends AbstractTaxonomy {
 
   private final List<String> dwcaTerms = List.of(TERM);
 
-
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
     return super.searchJsonForTerm(unit, dwcaTerms);

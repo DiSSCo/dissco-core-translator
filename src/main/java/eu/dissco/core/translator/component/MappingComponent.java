@@ -6,12 +6,14 @@ import eu.dissco.core.translator.repository.MappingRepository;
 import jakarta.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
+@Getter
 @RequiredArgsConstructor
 public class MappingComponent {
 
@@ -32,14 +34,6 @@ public class MappingComponent {
     var defaultObject = objectNode.get("defaults");
     defaultObject.iterator().forEachRemaining(node -> node.fields()
         .forEachRemaining(field -> defaults.put(field.getKey(), field.getValue().asText())));
-  }
-
-  public Map<String, String> getFieldMappings() {
-    return fieldMappings;
-  }
-
-  public Map<String, String> getDefaultMappings() {
-    return defaults;
   }
 
 }

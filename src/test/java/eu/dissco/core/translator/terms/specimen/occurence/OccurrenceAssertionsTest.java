@@ -1,6 +1,7 @@
 package eu.dissco.core.translator.terms.specimen.occurence;
 
 import static eu.dissco.core.translator.TestUtils.MAPPER;
+import static eu.dissco.core.translator.TestUtils.MOCK_DATE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
@@ -14,7 +15,6 @@ class OccurrenceAssertionsTest {
   private static final String UNIT = "meters";
   private static final String TYPE = "full length";
   private static final String VALUE = "2.5";
-  private static final String DATE = "19/09/2023";
   private static final String REMARK = "Measurement of the full length10";
   private final OccurrenceAssertions occurrenceAssertions = new OccurrenceAssertions();
 
@@ -53,19 +53,19 @@ class OccurrenceAssertionsTest {
     unit.put(
         "abcd:measurementsOrFacts/measurementOrFact/0/measurementOrFactAtomised/unitOfMeasurement",
         UNIT);
-    unit.put("abcd:measurementsOrFacts/measurementOrFact/0/measurementOrFactAtomised/parameter",
+    unit.put("abcd:measurementsOrFacts/measurementOrFact/0/measurementOrFactAtomised/parameter/value",
         TYPE);
     unit.put("abcd:measurementsOrFacts/measurementOrFact/0/measurementOrFactText/value", REMARK);
     unit.put("abcd:measurementsOrFacts/measurementOrFact/0/measurementOrFactAtomised/lowerValue",
         VALUE);
     unit.put(
         "abcd:measurementsOrFacts/measurementOrFact/0/measurementOrFactAtomised/MeasurementDateTime",
-        DATE);
+        MOCK_DATE);
 
     var expected = new eu.dissco.core.translator.schema.Assertions()
         .withAssertionUnit(UNIT).withAssertionType(TYPE).withAssertionValue(VALUE)
         .withAssertionByAgentName(
-            MEASURED_BY).withAssertionMadeDate(DATE).withAssertionRemarks(REMARK);
+            MEASURED_BY).withAssertionMadeDate(MOCK_DATE).withAssertionRemarks(REMARK);
     // When
     var result = occurrenceAssertions.gatherOccurrenceAssertions(MAPPER, unit, false);
 

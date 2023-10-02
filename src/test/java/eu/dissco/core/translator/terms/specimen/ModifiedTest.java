@@ -1,6 +1,7 @@
 package eu.dissco.core.translator.terms.specimen;
 
 import static eu.dissco.core.translator.TestUtils.MAPPER;
+import static eu.dissco.core.translator.TestUtils.MOCK_DATE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
@@ -15,7 +16,7 @@ class ModifiedTest {
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var licenseString = "23-03-1989";
+    var licenseString = MOCK_DATE;
     var unit = MAPPER.createObjectNode();
     unit.put("dcterms:modified", licenseString);
 

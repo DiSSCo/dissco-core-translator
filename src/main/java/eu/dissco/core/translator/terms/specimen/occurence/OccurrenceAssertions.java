@@ -21,8 +21,7 @@ public class OccurrenceAssertions extends Term {
   }
 
   private List<eu.dissco.core.translator.schema.Assertions> gatherOccurrenceAssertionsForABCD(
-      ObjectMapper mapper,
-      JsonNode data) {
+      ObjectMapper mapper, JsonNode data) {
     var assertions = new ArrayList<Assertions>();
     var iterateOverElements = true;
     var count = 0;
@@ -46,7 +45,7 @@ public class OccurrenceAssertions extends Term {
         .withAssertionUnit(super.searchJsonForTerm(assertionNode,
             List.of("measurementOrFactAtomised/unitOfMeasurement")))
         .withAssertionType(
-            super.searchJsonForTerm(assertionNode, List.of("measurementOrFactAtomised/parameter")))
+            super.searchJsonForTerm(assertionNode, List.of("measurementOrFactAtomised/parameter/value")))
         .withAssertionRemarks(
             super.searchJsonForTerm(assertionNode, List.of("measurementOrFactText/value")))
         .withAssertionValue(super.searchJsonForTerm(assertionNode,

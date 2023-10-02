@@ -1,6 +1,7 @@
 package eu.dissco.core.translator.terms.media;
 
 import static eu.dissco.core.translator.TestUtils.MAPPER;
+import static eu.dissco.core.translator.TestUtils.MOCK_DATE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
@@ -15,29 +16,27 @@ class CreatedTest {
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var createdString = "18-09-2023";
     var unit = MAPPER.createObjectNode();
-    unit.put("dcterms:created", createdString);
+    unit.put("dcterms:created", MOCK_DATE);
 
     // When
     var result = created.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(createdString);
+    assertThat(result).isEqualTo(MOCK_DATE);
   }
 
   @Test
   void testRetrieveFromAbcd() {
     // Given
-    var createdString = "18-09-2023";
     var unit = MAPPER.createObjectNode();
-    unit.put("abcd:createdDate", createdString);
+    unit.put("abcd:createdDate", MOCK_DATE);
 
     // When
     var result = created.retrieveFromABCD(unit);
 
     // Then
-    assertThat(result).isEqualTo(createdString);
+    assertThat(result).isEqualTo(MOCK_DATE);
   }
 
 

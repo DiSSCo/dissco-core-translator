@@ -17,7 +17,7 @@ public class RorComponent {
   private final WebClient webClient;
 
   @Cacheable("ror")
-  public String getRoRId(String ror) {
+  public String getRorName(String ror) {
     log.info("Requesting organisation details for organisation: {} with ror", ror);
     String url = "https://api.ror.org/organizations/" + ror;
     var response = webClient.get().uri(url).retrieve().bodyToMono(JsonNode.class)

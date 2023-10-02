@@ -4,11 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
-public class ObjectType extends Term {
+public class NormalisedPhysicalSpecimenId extends Term {
 
-  public static final String TERM = ODS_PREFIX + "objectType";
-  private final List<String> dwcaTerms = List.of("dwc:preparations");
-  private final List<String> abcdTerms = List.of("abcd:kindOfUnit/0/value");
+  public static final String TERM = ODS_PREFIX + "physicalSpecimenId";
+
+  private final List<String> dwcaTerms = List.of("dwc:occurrenceID");
+  private final List<String> abcdTerms = List.of("abcd:unitGUID", "abcd:unitID");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {

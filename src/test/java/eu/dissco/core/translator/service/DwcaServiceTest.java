@@ -2,6 +2,7 @@ package eu.dissco.core.translator.service;
 
 import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -11,8 +12,10 @@ import static org.mockito.Mockito.times;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import eu.dissco.core.translator.TestUtils;
 import eu.dissco.core.translator.properties.DwcaProperties;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
+import eu.dissco.core.translator.properties.FdoProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.DwcaRepository;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
@@ -69,6 +72,8 @@ class DwcaServiceTest {
   private DwcaRepository dwcaRepository;
   @Mock
   private DigitalObjectDirector digitalSpecimenDirector;
+  @Mock
+  private FdoProperties fdoProperties;
 
 
   private DwcaService service;
@@ -81,20 +86,21 @@ class DwcaServiceTest {
   @BeforeEach
   void setup() {
     this.service = new DwcaService(MAPPER, webClientProperties, webClient, dwcaProperties,
-        kafkaService, termMapper, enrichmentProperties, repository, dwcaRepository,
-        digitalSpecimenDirector);
+        kafkaService, enrichmentProperties, repository, dwcaRepository,
+        digitalSpecimenDirector, fdoProperties);
 
     // Given
     givenEndpoint();
   }
 
   @Test
-  void testRetrieveData() throws IOException {
+  void testRetrieveData() throws Exception {
     // Given
     givenDWCA("/dwca-rbins.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(9));
-    given(termMapper.retrieveTerm(any(PhysicalSpecimenIdType.class), any(JsonNode.class),
-        eq(true))).willReturn("resolvable");
+    given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
+        .willReturn(TestUtils.givenDigitalSpecimen());
+    given(fdoProperties.getDigitalSpecimenType()).willReturn("Doi of the digital specimen");
 
     // When
     service.retrieveData();
@@ -119,7 +125,7 @@ class DwcaServiceTest {
   }
 
   @Test
-  void testRetrieveDataWithGbifMedia() throws IOException {
+  void testRetrieveDataWithGbifMedia() throws Exception {
     // Given
     givenDWCA("/dwca-kew-gbif-media.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(19));
@@ -127,8 +133,10 @@ class DwcaServiceTest {
         Map.of());
     given(dwcaRepository.getRecords(anyList(), eq("ABC-DDD-ASD_gbif:Multimedia"))).willReturn(
         givenImageMap(19));
-    given(termMapper.retrieveTerm(any(PhysicalSpecimenIdType.class), any(JsonNode.class),
-        eq(true))).willReturn("resolvable");
+    given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
+        .willReturn(TestUtils.givenDigitalSpecimen());
+    given(fdoProperties.getDigitalMediaObjectType()).willReturn("Doi of the digital media object");
+    given(fdoProperties.getDigitalSpecimenType()).willReturn("Doi of the digital specimen");
 
     // When
     service.retrieveData();
@@ -152,14 +160,16 @@ class DwcaServiceTest {
   }
 
   @Test
-  void testRetrieveDataWithAcMedia() throws IOException {
+  void testRetrieveDataWithAcMedia() throws Exception {
     // Given
     givenDWCA("/dwca-naturalis-ac-media.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(14));
     given(dwcaRepository.getRecords(anyList(),
         eq("ABC-DDD-ASD_http://rs.tdwg.org/ac/terms/Multimedia"))).willReturn(givenImageMap(14));
-    given(termMapper.retrieveTerm(any(PhysicalSpecimenIdType.class), any(JsonNode.class),
-        eq(true))).willReturn("resolvable");
+    given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
+        .willReturn(TestUtils.givenDigitalSpecimen());
+    given(fdoProperties.getDigitalMediaObjectType()).willReturn("Doi of the digital media object");
+    given(fdoProperties.getDigitalSpecimenType()).willReturn("Doi of the digital specimen");
 
     // When
     service.retrieveData();
@@ -172,13 +182,16 @@ class DwcaServiceTest {
   }
 
   @Test
-  void testRetrieveDataWithAssociatedMedia() throws IOException {
+  void testRetrieveDataWithAssociatedMedia() throws Exception {
     // Given
     givenDWCA("/dwca-lux-associated-media.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(
         givenSpecimenMapWithMedia(20));
-    given(termMapper.retrieveTerm(any(PhysicalSpecimenIdType.class), any(JsonNode.class),
-        eq(true))).willReturn("resolvable");
+    given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
+        .willReturn(TestUtils.givenDigitalSpecimen());
+    given(fdoProperties.getDigitalMediaObjectType()).willReturn("Doi of the digital media object");
+    given(fdoProperties.getDigitalSpecimenType()).willReturn("Doi of the digital specimen");
+
 
     // When
     service.retrieveData();
