@@ -17,7 +17,7 @@ public class KafkaService {
   public void sendMessage(String topic, String event) {
     CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(topic, event);
     future.whenComplete((result, ex) -> {
-      if (ex != null){
+      if (ex != null) {
         log.error("Unable to send message: {}", event, ex);
       }
     });

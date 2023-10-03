@@ -1,8 +1,11 @@
 package eu.dissco.core.translator.terms.specimen;
 
-import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import eu.dissco.core.translator.schema.DigitalSpecimen;
+import eu.dissco.core.translator.schema.DigitalSpecimen.OdsTopicDiscipline;
+import eu.dissco.core.translator.schema.TaxonIdentification;
+import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,51 +16,52 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class TopicDisciplineTest {
+
   private final TopicDiscipline topicDiscipline = new TopicDiscipline();
-
-  @ParameterizedTest
-  @MethodSource("arguments")
-  void testRetrieveFromDWCA(String basisOfRecord, String kingdom, String expected) {
-    // Given
-    var unit = MAPPER.createObjectNode();
-    unit.put("dwc:basisOfRecord", basisOfRecord);
-    unit.put("dwc:kingdom", kingdom);
-
-    // When
-    var result = topicDiscipline.retrieveFromDWCA(unit);
-
-    // Then
-    assertThat(result).isEqualTo(expected);
-  }
 
   private static Stream<Arguments> arguments() {
     return Stream.of(
-        Arguments.of("FossilSpecimen", null, "Palaeontology"),
-        Arguments.of("MeteoriteSpecimen", null, "Astrogeology"),
-        Arguments.of("RockSpecimen", null, "Geology"),
-        Arguments.of("PreservedSpecimen", "Animalia", "Zoology"),
-        Arguments.of("PreservedSpecimen", "Plantae", "Botany"),
-        Arguments.of("PreservedSpecimen", "Bacteria", "Microbiology"),
-        Arguments.of("PreservedSpecimen", "incertae sedis", "Unclassified"),
-        Arguments.of("Other", null, "Unclassified")
+        Arguments.of(givenDigitalSpecimen("FossilSpecimen", null),
+            OdsTopicDiscipline.PALAEONTOLOGY),
+        Arguments.of(givenDigitalSpecimen("MeteoriteSpecimen", null),
+            OdsTopicDiscipline.ASTROGEOLOGY),
+        Arguments.of(givenDigitalSpecimen("RockSpecimen", null),
+            OdsTopicDiscipline.GEOLOGY),
+        Arguments.of(givenDigitalSpecimen("PreservedSpecimen", "Animalia"),
+            OdsTopicDiscipline.ZOOLOGY),
+        Arguments.of(givenDigitalSpecimen("PreservedSpecimen", "Plantae"),
+            OdsTopicDiscipline.BOTANY),
+        Arguments.of(givenDigitalSpecimen("PreservedSpecimen", "Bacteria"),
+            OdsTopicDiscipline.MICROBIOLOGY),
+        Arguments.of(givenDigitalSpecimen("PreservedSpecimen", "incertae sedis"),
+            OdsTopicDiscipline.UNCLASSIFIED),
+        Arguments.of(givenDigitalSpecimen("Other", null), OdsTopicDiscipline.UNCLASSIFIED)
     );
+  }
+
+  private static Object givenDigitalSpecimen(String basisOfRecord, String kingdom) {
+    return new DigitalSpecimen()
+        .withDwcBasisOfRecord(basisOfRecord)
+        .withDwcIdentification(List.of(
+                new eu.dissco.core.translator.schema.Identifications()
+                    .withDwcIdentificationVerificationStatus(false)
+                    .withTaxonIdentifications(
+                        List.of(new TaxonIdentification().withDwcKingdom("Unicorn Kingdom"))),
+                new eu.dissco.core.translator.schema.Identifications()
+                    .withDwcIdentificationVerificationStatus(true)
+                    .withTaxonIdentifications(
+                        List.of(new TaxonIdentification().withDwcKingdom(kingdom)))
+            )
+        );
   }
 
   @ParameterizedTest
   @MethodSource("arguments")
-  void testRetrieveFromABCD(String basisOfRecord, String kingdom, String expected) {
-    // Given
-    var unit = MAPPER.createObjectNode();
-    unit.put("abcd:recordBasis", basisOfRecord);
-    unit.put(
-        "abcd:identifications/identification/0/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonRank",
-        "regnum");
-    unit.put(
-        "abcd:identifications/identification/0/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonName",
-        kingdom);
+  void testRetrieveFromDWCA(eu.dissco.core.translator.schema.DigitalSpecimen ds,
+      OdsTopicDiscipline expected) {
 
     // When
-    var result = topicDiscipline.retrieveFromABCD(unit);
+    var result = topicDiscipline.calculate(ds);
 
     // Then
     assertThat(result).isEqualTo(expected);

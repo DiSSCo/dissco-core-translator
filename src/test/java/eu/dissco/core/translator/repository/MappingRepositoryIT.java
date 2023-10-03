@@ -57,7 +57,6 @@ class MappingRepositoryIT extends BaseRepositoryIT {
         .set(MAPPING.MAPPING_, JSONB.valueOf(mapping))
         .set(MAPPING.CREATED, Instant.parse("2022-09-16T08:25:01.00Z"))
         .set(MAPPING.CREATOR, "e2befba6-9324-4bb4-9f41-d7dfae4a44b0")
-        .set(MAPPING.SOURCEDATASTANDARD, "dwc")
         .execute();
 
     context.insertInto(SOURCE_SYSTEM)

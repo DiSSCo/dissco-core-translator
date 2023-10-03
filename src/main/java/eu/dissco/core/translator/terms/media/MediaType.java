@@ -9,15 +9,16 @@ import lombok.extern.slf4j.Slf4j;
 public class MediaType extends Term {
 
   public static final String TERM = "dcterms:type";
-  private static final String IMAGE_OBJECT = "2DImageObject";
-
+  private static final String STILL_IMAGE = "StillImage";
+  private static final String SOUND = "Sound";
+  private static final String MOVING_IMAGE = "MovingImage";
   private final List<String> dwcaTerms = List.of(TERM, "dc:type");
   private final List<String> imageFormats = List.of("IMAGE/JPG", "JPG", "IMAGE/JPEG",
       "JPEG", "IMAGE/PNG", "PNG", "IMAGE/TIF", "TIF");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
-    var recoveredType = super.searchJsonForStringTerm(unit, dwcaTerms);
+    var recoveredType = super.searchJsonForTerm(unit, dwcaTerms);
     if (recoveredType == null) {
       var format = new Format().retrieveFromDWCA(unit);
       return checkFormat(format);
@@ -28,14 +29,14 @@ public class MediaType extends Term {
 
   private String parseToOdsType(String recoveredType) {
     switch (recoveredType) {
-      case "StillImage", "Image" -> {
-        return IMAGE_OBJECT;
+      case STILL_IMAGE, "Image" -> {
+        return STILL_IMAGE;
       }
-      case "Sound" -> {
-        return "AudioObject";
+      case SOUND -> {
+        return SOUND;
       }
-      case "MovingImage" -> {
-        return "VideoObject";
+      case MOVING_IMAGE -> {
+        return MOVING_IMAGE;
       }
       default -> {
         return null;
@@ -49,7 +50,7 @@ public class MediaType extends Term {
     if (format != null) {
       format = format.toUpperCase();
       if (imageFormats.contains(format)) {
-        return IMAGE_OBJECT;
+        return STILL_IMAGE;
       } else {
         log.warn("Unable to determine media type of digital media object");
         return null;
@@ -62,13 +63,13 @@ public class MediaType extends Term {
   private String checkFormat(String format) {
     if (format != null) {
       if (imageFormats.contains(format) || format.startsWith("image")) {
-        return IMAGE_OBJECT;
+        return STILL_IMAGE;
       }
       if (format.startsWith("audio")) {
-        return "AudioObject";
+        return SOUND;
       }
       if (format.startsWith("video")) {
-        return "VideoObject";
+        return MOVING_IMAGE;
       }
     }
     log.info("Unable to determine type based on format");

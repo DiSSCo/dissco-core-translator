@@ -57,7 +57,8 @@ public class DwcaRepository {
   private Query recordToQuery(String tableName, Pair<String, JsonNode> dbRecord) {
     try {
       return context.insertInto(getTable(tableName)).set(idField, dbRecord.getLeft())
-          .set(dataField, JSONB.jsonb(mapper.writeValueAsString(dbRecord.getRight())));
+          .set(dataField,
+              JSONB.jsonb(mapper.writeValueAsString(dbRecord.getRight()).replace("\u0000", "")));
     } catch (JsonProcessingException e) {
       log.error("Unable to map JSON to JSONB, ignoring record: {}", dbRecord.getLeft(), e);
       return null;

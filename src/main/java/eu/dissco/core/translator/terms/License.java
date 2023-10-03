@@ -7,26 +7,17 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class License extends Term {
 
-  public static final String TERM = "dcterms:license";
+  public static final String TERM = DCTERMS_PREFIX + "license";
   private final List<String> dwcaTerms = List.of(TERM, "dc:license");
-  private final List<String> abcdUnitTerms = List.of("abcd:iprstatements/licenses/license/0/uri",
-      "abcd:iprstatements/licenses/license/0/text");
-  private final List<String> abcdMetaTerms = List.of(
-      "abcd:metadata/iprstatements/licenses/license/0/uri",
-      "abcd:metadata/iprstatements/licenses/license/0/text");
+  private final List<String> abcdUnitTerms = List.of(
+      "abcd:iprstatements/licenses/license/0/uri",
+      "abcd:iprstatements/licenses/license/0/text",
+      "abcd:ipr/licenses/license/0/uri",
+      "abcd:ipr/licenses/license/0/text");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
-    return super.searchJsonForStringTerm(unit, dwcaTerms);
-  }
-
-  @Override
-  public String retrieveFromABCD(JsonNode dataset, JsonNode unit) {
-    var license = searchJsonForStringTerm(unit, abcdUnitTerms);
-    if (license == null) {
-      license = searchJsonForStringTerm(dataset, abcdMetaTerms);
-    }
-    return license;
+    return super.searchJsonForTerm(unit, dwcaTerms);
   }
 
   @Override
@@ -34,4 +25,8 @@ public class License extends Term {
     return TERM;
   }
 
+  @Override
+  public String retrieveFromABCD(JsonNode unit) {
+    return searchJsonForTerm(unit, abcdUnitTerms);
+  }
 }

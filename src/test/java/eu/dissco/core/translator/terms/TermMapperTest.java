@@ -7,10 +7,9 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import efg.DataSets.DataSet;
 import eu.dissco.core.translator.component.MappingComponent;
+import eu.dissco.core.translator.terms.specimen.CollectionId;
 import eu.dissco.core.translator.terms.specimen.OrganisationId;
-import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenCollection;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenId;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,12 +34,11 @@ class TermMapperTest {
   @Test
   void testRetrieveFromDWCADefault() {
     // Given
-    var organisationId = new OrganisationId();
-    given(mappingComponent.getDefaultMappings()).willReturn(
+    given(mappingComponent.getDefaults()).willReturn(
         Map.of(OrganisationId.TERM, "https://ror.org/02y22ws83"));
 
     // When
-    var result = termMapper.retrieveFromDWCA(organisationId, mock(JsonNode.class));
+    var result = termMapper.retrieveTerm(new OrganisationId(), mock(JsonNode.class), true);
 
     // Then
     assertThat(result).isEqualTo("https://ror.org/02y22ws83");
@@ -49,15 +47,15 @@ class TermMapperTest {
   @Test
   void testRetrieveFromDWCAFieldMapping() {
     // Given
-    var physicalSpecimenCollection = new PhysicalSpecimenCollection();
+    var physicalSpecimenCollection = new CollectionId();
     var dwcaTerm = "dwc:collectionID";
     given(mappingComponent.getFieldMappings()).willReturn(
-        Map.of(PhysicalSpecimenCollection.TERM, dwcaTerm));
+        Map.of(CollectionId.TERM, dwcaTerm));
     var unit = MAPPER.createObjectNode();
     unit.put("dwc:collectionID", "TestCollection");
 
     // When
-    var result = termMapper.retrieveFromDWCA(physicalSpecimenCollection, unit);
+    var result = termMapper.retrieveTerm(physicalSpecimenCollection, unit, true);
 
     // Then
     assertThat(result).isEqualTo("TestCollection");
@@ -66,26 +64,26 @@ class TermMapperTest {
   @Test
   void testRetrieveFromDWCANoMapping() {
     // Given
-    var physicalSpecimenCollection = mock(PhysicalSpecimenCollection.class);
-    given(physicalSpecimenCollection.getTerm()).willReturn(PhysicalSpecimenCollection.TERM);
+    var collectionId = mock(CollectionId.class);
+    given(collectionId.getTerm()).willReturn(CollectionId.TERM);
     var attributes = mock(JsonNode.class);
 
     // When
-    termMapper.retrieveFromDWCA(physicalSpecimenCollection, attributes);
+    termMapper.retrieveTerm(collectionId, attributes, true);
 
     // Then
-    then(physicalSpecimenCollection).should().retrieveFromDWCA(attributes);
+    then(collectionId).should().retrieveFromDWCA(attributes);
   }
 
   @Test
   void testRetrieveFromABCDDefault() {
     // Given
     var organisationId = new OrganisationId();
-    given(mappingComponent.getDefaultMappings()).willReturn(
+    given(mappingComponent.getDefaults()).willReturn(
         Map.of(OrganisationId.TERM, "https://ror.org/02y22ws83"));
 
     // When
-    var result = termMapper.retrieveFromABCD(organisationId, mock(JsonNode.class));
+    var result = termMapper.retrieveTerm(organisationId, mock(JsonNode.class), false);
 
     // Then
     assertThat(result).isEqualTo("https://ror.org/02y22ws83");
@@ -101,7 +99,7 @@ class TermMapperTest {
         Map.of(PhysicalSpecimenId.TERM, abcdTerm));
 
     // When
-    var result = termMapper.retrieveFromABCD(new PhysicalSpecimenId(), attributes);
+    var result = termMapper.retrieveTerm(new PhysicalSpecimenId(), attributes, false);
 
     // Then
     assertThat(result).isEqualTo("123456");
@@ -110,12 +108,12 @@ class TermMapperTest {
   @Test
   void testRetrieveFromABCDNoMapping() {
     // Given
-    var physicalSpecimenCollection = mock(PhysicalSpecimenCollection.class);
-    given(physicalSpecimenCollection.getTerm()).willReturn(PhysicalSpecimenCollection.TERM);
+    var physicalSpecimenCollection = mock(CollectionId.class);
+    given(physicalSpecimenCollection.getTerm()).willReturn(CollectionId.TERM);
     var attributes = mock(JsonNode.class);
 
     // When
-    termMapper.retrieveFromABCD(physicalSpecimenCollection, attributes);
+    termMapper.retrieveTerm(physicalSpecimenCollection, attributes, false);
 
     // Then
     then(physicalSpecimenCollection).should().retrieveFromABCD(attributes);

@@ -7,15 +7,16 @@ public class LatestEraOrHighestErathem extends AbstractChronoStratigraphy {
 
   public static final String TERM = DWC_PREFIX + "latestEraOrHighestErathem";
   private final List<String> dwcaTerms = List.of(TERM);
+  private final List<String> abcdSplitTerms = List.of("Erathem");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
-    return super.searchJsonForStringTerm(unit, dwcaTerms);
+    return super.searchJsonForTerm(unit, dwcaTerms);
   }
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    return super.searchABCDSplitTerms(unit, List.of("Erathem"));
+    return super.searchABCDSplitTerms(unit, abcdSplitTerms);
   }
 
   @Override

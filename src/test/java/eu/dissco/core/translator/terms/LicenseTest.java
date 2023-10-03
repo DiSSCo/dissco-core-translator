@@ -3,11 +3,6 @@ package eu.dissco.core.translator.terms;
 import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import efg.ContentMetadata;
-import efg.DataSets.DataSet;
-import efg.IPRStatements;
-import efg.IPRStatements.Licenses;
-import efg.Statement;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -35,13 +30,12 @@ class LicenseTest {
   @Test
   void testRetrieveFromABCD() {
     // Given
-    var dataset = MAPPER.createObjectNode();
-    dataset.put("abcd:metadata/iprstatements/licenses/license/0/uri", "Another License");
     var unit = MAPPER.createObjectNode();
     unit.put("abcd:iprstatements/licenses/license/0/uri", LICENSE_STRING);
+    unit.put("abcd:metadata/iprstatements/licenses/license/0/uri", "Another License");
 
     // When
-    var result = license.retrieveFromABCD(dataset, unit);
+    var result = license.retrieveFromABCD(unit);
 
     // Then
     assertThat(result).isEqualTo(LICENSE_STRING);
@@ -50,12 +44,11 @@ class LicenseTest {
   @Test
   void testRetrieveFromABCDMetadata() {
     // Given
-    var dataset = MAPPER.createObjectNode();
-    dataset.put("abcd:metadata/iprstatements/licenses/license/0/text", "Another License");
     var unit = MAPPER.createObjectNode();
+    unit.put("abcd:iprstatements/licenses/license/0/text", "Another License");
 
     // When
-    var result = license.retrieveFromABCD(dataset, unit);
+    var result = license.retrieveFromABCD(unit);
 
     // Then
     assertThat(result).isEqualTo("Another License");

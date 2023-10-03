@@ -8,17 +8,17 @@ public class PhysicalSpecimenId extends Term {
 
   public static final String TERM = ODS_PREFIX + "physicalSpecimenId";
 
-  private final List<String> dwcaTerms = List.of("dwc:occurrenceID");
-  private final List<String> abcdTerms = List.of("abcd:unitID");
+  private final List<String> dwcaTerms = List.of("dwc:catalogNumber", "dwc:occurrenceID");
+  private final List<String> abcdTerms = List.of("abcd:unitGUID", "abcd:unitID");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
-    return super.searchJsonForStringTerm(unit, dwcaTerms);
+    return super.searchJsonForTerm(unit, dwcaTerms);
   }
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    return super.searchJsonForStringTerm(unit, abcdTerms);
+    return super.searchJsonForTerm(unit, abcdTerms);
   }
 
   @Override

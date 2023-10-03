@@ -42,7 +42,7 @@ class MappingComponentTest {
 
     // Then
     assertThat(mappingComponent.getFieldMappings()).isEqualTo(TERM_MAPPING);
-    assertThat(mappingComponent.getDefaultMappings()).isEqualTo(DEFAULT_MAPPING);
+    assertThat(mappingComponent.getDefaults()).isEqualTo(DEFAULT_MAPPING);
   }
 
 }

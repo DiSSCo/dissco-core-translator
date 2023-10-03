@@ -2,6 +2,7 @@ package eu.dissco.core.translator.service;
 
 import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -9,16 +10,17 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import eu.dissco.core.translator.component.RorComponent;
+import eu.dissco.core.translator.TestUtils;
 import eu.dissco.core.translator.properties.DwcaProperties;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
+import eu.dissco.core.translator.properties.FdoProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.DwcaRepository;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
+import eu.dissco.core.translator.terms.DigitalObjectDirector;
 import eu.dissco.core.translator.terms.TermMapper;
-import eu.dissco.core.translator.terms.specimen.OrganisationId;
-import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenIdType;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -68,7 +70,9 @@ class DwcaServiceTest {
   @Mock
   private DwcaRepository dwcaRepository;
   @Mock
-  private RorComponent rorComponent;
+  private DigitalObjectDirector digitalSpecimenDirector;
+  @Mock
+  private FdoProperties fdoProperties;
 
 
   private DwcaService service;
@@ -81,26 +85,21 @@ class DwcaServiceTest {
   @BeforeEach
   void setup() {
     this.service = new DwcaService(MAPPER, webClientProperties, webClient, dwcaProperties,
-        kafkaService, termMapper, enrichmentProperties, repository, dwcaRepository, rorComponent);
+        kafkaService, enrichmentProperties, repository, dwcaRepository,
+        digitalSpecimenDirector, fdoProperties);
 
     // Given
     givenEndpoint();
   }
 
-  private void setupTermMapper() {
-    given(termMapper.retrieveFromDWCA(any(), any())).willReturn("someValue");
-    given(termMapper.retrieveFromDWCA(any(OrganisationId.class), any())).willReturn("https://ror.org/03srysw20");
-    given(termMapper.retrieveFromDWCA(any(PhysicalSpecimenIdType.class), any())).willReturn(
-        "cetaf");
-  }
-
   @Test
-  void testRetrieveData() throws IOException {
+  void testRetrieveData() throws Exception {
     // Given
-    setupTermMapper();
     givenDWCA("/dwca-rbins.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(9));
-    given(rorComponent.getRoRId(anyString())).willReturn("organisationName");
+    given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
+        .willReturn(TestUtils.givenDigitalSpecimen());
+    given(fdoProperties.getDigitalSpecimenType()).willReturn("Doi of the digital specimen");
 
     // When
     service.retrieveData();
@@ -109,7 +108,6 @@ class DwcaServiceTest {
     then(dwcaRepository).should(times(2)).createTable(anyString());
     then(dwcaRepository).should(times(21)).postRecords(anyString(), anyList());
     then(kafkaService).should(times(9)).sendMessage(eq("digital-specimen"), anyString());
-    then(kafkaService).should(times(0)).sendMessage(eq("digital-media-object"), anyString());
     cleanup("src/test/resources/dwca/test/dwca-rbins.zip");
   }
 
@@ -126,15 +124,18 @@ class DwcaServiceTest {
   }
 
   @Test
-  void testRetrieveDataWithGbifMedia() throws IOException {
+  void testRetrieveDataWithGbifMedia() throws Exception {
     // Given
     givenDWCA("/dwca-kew-gbif-media.zip");
-    setupTermMapper();
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(19));
     given(dwcaRepository.getRecords(anyList(), eq("ABC-DDD-ASD_dwc:Identification"))).willReturn(
         Map.of());
-    given(dwcaRepository.getRecords(anyList(), eq("ABC-DDD-ASD_gbif:Multimedia"))).willReturn(givenImageMap(19));
-    given(rorComponent.getRoRId(anyString())).willReturn("organisationName");
+    given(dwcaRepository.getRecords(anyList(), eq("ABC-DDD-ASD_gbif:Multimedia"))).willReturn(
+        givenImageMap(19));
+    given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
+        .willReturn(TestUtils.givenDigitalSpecimen());
+    given(fdoProperties.getDigitalMediaObjectType()).willReturn("Doi of the digital media object");
+    given(fdoProperties.getDigitalSpecimenType()).willReturn("Doi of the digital specimen");
 
     // When
     service.retrieveData();
@@ -143,7 +144,6 @@ class DwcaServiceTest {
     then(dwcaRepository).should(times(3)).createTable(anyString());
     then(dwcaRepository).should(times(19)).postRecords(anyString(), anyList());
     then(kafkaService).should(times(19)).sendMessage(eq("digital-specimen"), anyString());
-    then(kafkaService).should(times(19)).sendMessage(eq("digital-media-object"), anyString());
     cleanup("src/test/resources/dwca/test/dwca-kew-gbif-media.zip");
   }
 
@@ -159,13 +159,16 @@ class DwcaServiceTest {
   }
 
   @Test
-  void testRetrieveDataWithAcMedia() throws IOException {
+  void testRetrieveDataWithAcMedia() throws Exception {
     // Given
     givenDWCA("/dwca-naturalis-ac-media.zip");
-    setupTermMapper();
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(14));
-    given(dwcaRepository.getRecords(anyList(), eq("ABC-DDD-ASD_http://rs.tdwg.org/ac/terms/Multimedia"))).willReturn(givenImageMap(14));
-    given(rorComponent.getRoRId(anyString())).willReturn("organisationName");
+    given(dwcaRepository.getRecords(anyList(),
+        eq("ABC-DDD-ASD_http://rs.tdwg.org/ac/terms/Multimedia"))).willReturn(givenImageMap(14));
+    given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
+        .willReturn(TestUtils.givenDigitalSpecimen());
+    given(fdoProperties.getDigitalMediaObjectType()).willReturn("Doi of the digital media object");
+    given(fdoProperties.getDigitalSpecimenType()).willReturn("Doi of the digital specimen");
 
     // When
     service.retrieveData();
@@ -174,17 +177,19 @@ class DwcaServiceTest {
     then(dwcaRepository).should(times(2)).createTable(anyString());
     then(dwcaRepository).should(times(2)).postRecords(anyString(), anyList());
     then(kafkaService).should(times(14)).sendMessage(eq("digital-specimen"), anyString());
-    then(kafkaService).should(times(14)).sendMessage(eq("digital-media-object"), anyString());
     cleanup("src/test/resources/dwca/test/dwca-naturalis-ac-media.zip");
   }
 
   @Test
-  void testRetrieveDataWithAssociatedMedia() throws IOException {
+  void testRetrieveDataWithAssociatedMedia() throws Exception {
     // Given
     givenDWCA("/dwca-lux-associated-media.zip");
-    setupTermMapper();
-    given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMapWithMedia(20));
-    given(rorComponent.getRoRId(anyString())).willReturn("organisationName");
+    given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(
+        givenSpecimenMapWithMedia(20));
+    given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
+        .willReturn(TestUtils.givenDigitalSpecimen());
+    given(fdoProperties.getDigitalMediaObjectType()).willReturn("Doi of the digital media object");
+    given(fdoProperties.getDigitalSpecimenType()).willReturn("Doi of the digital specimen");
 
     // When
     service.retrieveData();
@@ -193,7 +198,6 @@ class DwcaServiceTest {
     then(dwcaRepository).should(times(1)).createTable(anyString());
     then(dwcaRepository).should(times(1)).postRecords(anyString(), anyList());
     then(kafkaService).should(times(20)).sendMessage(eq("digital-specimen"), anyString());
-    then(kafkaService).should(times(40)).sendMessage(eq("digital-media-object"), anyString());
     cleanup("src/test/resources/dwca/test/dwca-lux-associated-media.zip");
   }
 

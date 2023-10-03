@@ -10,15 +10,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class PhysicalSpecimenCollectionTest {
 
-  private final PhysicalSpecimenCollection physicalSpecimenCollection = new PhysicalSpecimenCollection();
+  private final CollectionId physicalSpecimenCollection = new CollectionId();
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
     var collectionString = "collection-123456";
     var unit = MAPPER.createObjectNode();
-    unit.putNull("dwc:collectionID");
-    unit.put("dwc:collectionCode", collectionString);
+    unit.put("dwc:collectionID", collectionString);
 
     // When
     var result = physicalSpecimenCollection.retrieveFromDWCA(unit);
@@ -33,6 +32,6 @@ class PhysicalSpecimenCollectionTest {
     var result = physicalSpecimenCollection.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(PhysicalSpecimenCollection.TERM);
+    assertThat(result).isEqualTo(CollectionId.TERM);
   }
 }

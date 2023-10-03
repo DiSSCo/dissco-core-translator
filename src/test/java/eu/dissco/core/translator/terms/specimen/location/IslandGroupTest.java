@@ -10,20 +10,34 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class IslandGroupTest {
 
+  private static final String ISLAND_GROUP_STRING = "Harrison Islands";
   private final IslandGroup islandGroup = new IslandGroup();
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var islandGroupString = "Harrison Islands";
     var unit = MAPPER.createObjectNode();
-    unit.put("dwc:islandGroup", islandGroupString);
+    unit.put("dwc:islandGroup", ISLAND_GROUP_STRING);
 
     // When
     var result = islandGroup.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(islandGroupString);
+    assertThat(result).isEqualTo(ISLAND_GROUP_STRING);
+  }
+
+  @Test
+  void testRetrieveFromABCD() {
+    // Given
+    var unit = MAPPER.createObjectNode();
+    unit.put("abcd:gathering/namedAreas/namedArea/0/areaClass/value", "Island group");
+    unit.put("abcd:gathering/namedAreas/namedArea/0/areaName/value", ISLAND_GROUP_STRING);
+
+    // When
+    var result = islandGroup.retrieveFromABCD(unit);
+
+    // Then
+    assertThat(result).isEqualTo(ISLAND_GROUP_STRING);
   }
 
   @Test

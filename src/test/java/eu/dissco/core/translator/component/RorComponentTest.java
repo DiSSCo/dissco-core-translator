@@ -57,7 +57,7 @@ class RorComponentTest {
         mapper.readTree(loadResourceFile("ror/example-ror.json")));
 
     // When
-    var result = rorComponent.getRoRId(ROR);
+    var result = rorComponent.getRorName(ROR);
 
     // Then
     assertThat(result).isEqualTo(ORGANISATION_NAME);
@@ -71,7 +71,7 @@ class RorComponentTest {
         mapper.readTree(loadResourceFile("ror/response-invalid.json")));
 
     // When
-    var result = rorComponent.getRoRId(ROR);
+    var result = rorComponent.getRorName(ROR);
 
     // Then
     assertThat(result).isNull();
@@ -84,7 +84,7 @@ class RorComponentTest {
     given(jsonFuture.get()).willReturn(null);
 
     // When
-    var result = rorComponent.getRoRId(ROR);
+    var result = rorComponent.getRorName(ROR);
 
     // Then
     assertThat(result).isNull();

@@ -7,15 +7,16 @@ public class EarliestAgeOrLowestStage extends AbstractChronoStratigraphy {
 
   public static final String TERM = DWC_PREFIX + "earliestAgeOrLowestStage";
   private final List<String> dwcaTerms = List.of(TERM);
+  private final List<String> abcdSplitTerms = List.of("SubStage", "Stage");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
-    return super.searchJsonForStringTerm(unit, dwcaTerms);
+    return super.searchJsonForTerm(unit, dwcaTerms);
   }
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    return super.searchABCDSplitTerms(unit, List.of("SubStage", "Stage"));
+    return super.searchABCDSplitTerms(unit, abcdSplitTerms);
   }
 
   @Override

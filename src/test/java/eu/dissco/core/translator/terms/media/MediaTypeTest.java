@@ -18,26 +18,28 @@ class MediaTypeTest {
 
   private static Stream<Arguments> provideACTypes() {
     return Stream.of(
-        Arguments.of("StillImage", "2DImageObject"),
-        Arguments.of("Image", "2DImageObject"),
-        Arguments.of("Sound", "AudioObject"),
-        Arguments.of("MovingImage", "VideoObject"),
-        Arguments.of("RandomString", null)
+        Arguments.of("StillImage", "StillImage"),
+        Arguments.of("Image", "StillImage"),
+        Arguments.of("Sound", "Sound"),
+        Arguments.of("MovingImage", "MovingImage"),
+        Arguments.of("RandomString", null),
+        Arguments.of(null, null)
     );
   }
 
   private static Stream<Arguments> provideFormatTypes() {
     return Stream.of(
-        Arguments.of("image/jpeg", "2DImageObject"),
-        Arguments.of("audio/example", "AudioObject"),
-        Arguments.of("video/example", "VideoObject"),
-        Arguments.of("RandomString", null)
+        Arguments.of("image/jpeg", "StillImage"),
+        Arguments.of("audio/example", "Sound"),
+        Arguments.of("video/example", "MovingImage"),
+        Arguments.of("RandomString", null),
+        Arguments.of(null, null)
     );
   }
 
   private static Stream<Arguments> provideABCDFormats() {
     return Stream.of(
-        Arguments.of("image/jpeg", "2DImageObject"),
+        Arguments.of("image/jpeg", "StillImage"),
         Arguments.of("unknown/format", null),
         Arguments.of(null, null)
     );

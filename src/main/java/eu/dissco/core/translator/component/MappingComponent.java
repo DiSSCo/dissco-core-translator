@@ -6,6 +6,7 @@ import eu.dissco.core.translator.repository.MappingRepository;
 import jakarta.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -18,28 +19,22 @@ public class MappingComponent {
   private final WebClientProperties properties;
   private final MappingRepository repository;
 
+  @Getter
   private final Map<String, String> fieldMappings = new HashMap<>();
+  @Getter
   private final Map<String, String> defaults = new HashMap<>();
 
   @PostConstruct
   void setup() throws DisscoRepositoryException {
     var objectNode = repository.retrieveMapping(properties.getSourceSystemId());
     var mappingObject = objectNode.get("mapping");
-    if (mappingObject != null){
+    if (mappingObject != null) {
       mappingObject.iterator().forEachRemaining(node -> node.fields()
           .forEachRemaining(field -> fieldMappings.put(field.getKey(), field.getValue().asText())));
     }
     var defaultObject = objectNode.get("defaults");
     defaultObject.iterator().forEachRemaining(node -> node.fields()
         .forEachRemaining(field -> defaults.put(field.getKey(), field.getValue().asText())));
-  }
-
-  public Map<String, String> getFieldMappings() {
-    return fieldMappings;
-  }
-
-  public Map<String, String> getDefaultMappings() {
-    return defaults;
   }
 
 }

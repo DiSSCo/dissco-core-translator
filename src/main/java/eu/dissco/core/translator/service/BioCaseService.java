@@ -1,10 +1,6 @@
 package eu.dissco.core.translator.service;
 
 
-import static eu.dissco.core.translator.service.IngestionUtility.getPhysicalSpecimenId;
-import static eu.dissco.core.translator.service.IngestionUtility.minifyOrganisationId;
-import static eu.dissco.core.translator.terms.TermMapper.abcdHarmonisedTerms;
-
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -17,32 +13,19 @@ import efg.MineralRockIdentifiedType;
 import efg.MultiMediaObject;
 import efg.Unit;
 import eu.dissco.core.translator.Profiles;
-import eu.dissco.core.translator.component.RorComponent;
 import eu.dissco.core.translator.domain.DigitalMediaObject;
 import eu.dissco.core.translator.domain.DigitalMediaObjectEvent;
-import eu.dissco.core.translator.domain.DigitalSpecimen;
 import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
+import eu.dissco.core.translator.domain.DigitalSpecimenWrapper;
 import eu.dissco.core.translator.domain.Enrichment;
 import eu.dissco.core.translator.exception.DiSSCoDataException;
 import eu.dissco.core.translator.exception.DisscoEfgParsingException;
 import eu.dissco.core.translator.exception.OrganisationNotRorId;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
+import eu.dissco.core.translator.properties.FdoProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
-import eu.dissco.core.translator.terms.License;
-import eu.dissco.core.translator.terms.SourceSystemId;
-import eu.dissco.core.translator.terms.Term;
-import eu.dissco.core.translator.terms.TermMapper;
-import eu.dissco.core.translator.terms.media.AccessUri;
-import eu.dissco.core.translator.terms.media.Format;
-import eu.dissco.core.translator.terms.media.MediaType;
-import eu.dissco.core.translator.terms.specimen.DwcaId;
-import eu.dissco.core.translator.terms.specimen.Modified;
-import eu.dissco.core.translator.terms.specimen.OrganisationId;
-import eu.dissco.core.translator.terms.specimen.OrganisationName;
-import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenId;
-import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenIdType;
-import eu.dissco.core.translator.terms.specimen.Type;
+import eu.dissco.core.translator.terms.DigitalObjectDirector;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 import jakarta.xml.bind.JAXBContext;
@@ -94,10 +77,10 @@ public class BioCaseService implements WebClientService {
   private final SourceSystemRepository repository;
   private final Configuration configuration;
   private final XMLInputFactory xmlFactory;
-  private final TermMapper termMapper;
   private final KafkaService kafkaService;
   private final EnrichmentProperties enrichmentProperties;
-  private final RorComponent rorComponent;
+  private final DigitalObjectDirector digitalSpecimenDirector;
+  private final FdoProperties fdoProperties;
 
   private boolean isAcceptedBasisOfRecord(Unit unit) {
     var recordBasis = unit.getRecordBasis();
@@ -189,39 +172,32 @@ public class BioCaseService implements WebClientService {
   private void processUnit(DataSet dataset, Unit unit)
       throws JsonProcessingException, DisscoEfgParsingException {
     var unitAttributes = parseToJson(unit);
-    var datasetAttribute = getData(mapper.valueToTree(dataset));
+    var datasetAttribute = getData(mapper.valueToTree(dataset.getMetadata()));
+    unitAttributes.setAll(datasetAttribute);
     if (isAcceptedBasisOfRecord(unit)) {
-      var organisationId = termMapper.retrieveFromABCD(new OrganisationId(), unitAttributes);
-      var physicalSpecimenIdType = termMapper.retrieveFromABCD(new PhysicalSpecimenIdType(),
-          unitAttributes);
-      var id = termMapper.retrieveFromABCD(new PhysicalSpecimenId(), unitAttributes);
-      if (physicalSpecimenIdType != null) {
-        try {
-          var physicalSpecimenId = getPhysicalSpecimenId(physicalSpecimenIdType, organisationId,
-              id);
-          var digitalSpecimen = new DigitalSpecimen(
-              physicalSpecimenId,
-              termMapper.retrieveFromABCD(new Type(), unitAttributes),
-              harmonizeAttributes(datasetAttribute, unitAttributes, physicalSpecimenIdType,
-                  organisationId),
-              cleanupRedundantFields(unitAttributes)
-          );
-          log.debug("Result digital Specimen: {}", digitalSpecimen);
-          kafkaService.sendMessage("digital-specimen",
-              mapper.writeValueAsString(
-                  new DigitalSpecimenEvent(enrichmentServices(false), digitalSpecimen)));
-          processDigitalMediaObjects(physicalSpecimenId, unit, organisationId);
-        } catch (DiSSCoDataException e) {
-          log.error("Encountered data issue with record: {}", unitAttributes, e);
-        }
-      } else {
-        log.warn("Ignoring record with id: {} as we cannot determine the physicalSpecimenIdType",
-            termMapper.retrieveFromABCD(new PhysicalSpecimenId(), unitAttributes));
+      try {
+        var attributes = digitalSpecimenDirector.assembleDigitalSpecimenTerm(unitAttributes, false);
+        var digitalSpecimen = new DigitalSpecimenWrapper(
+            attributes.getOdsNormalisedPhysicalSpecimenId(),
+            fdoProperties.getDigitalSpecimenType(),
+            attributes,
+            cleanupRedundantFields(unitAttributes)
+        );
+        var digitalMediaObjects = processDigitalMediaObjects(
+            attributes.getOdsNormalisedPhysicalSpecimenId(), unit,
+            attributes.getDwcInstitutionId());
+        log.debug("Result digital Specimen: {}", digitalSpecimen);
+        kafkaService.sendMessage("digital-specimen",
+            mapper.writeValueAsString(
+                new DigitalSpecimenEvent(
+                    enrichmentServices(false),
+                    digitalSpecimen,
+                    digitalMediaObjects)));
+      } catch (DiSSCoDataException e) {
+        log.error("Encountered data issue with record: {}", unitAttributes, e);
       }
     } else {
-      log.info("Record with id: {} and record basis: {} is ignored ",
-          termMapper.retrieveFromABCD(new PhysicalSpecimenId(), unitAttributes),
-          unit.getRecordBasis());
+      log.info("Record with record basis: {} is ignored ", unit.getRecordBasis());
     }
   }
 
@@ -229,25 +205,6 @@ public class BioCaseService implements WebClientService {
     var unitData = getData(mapper.valueToTree(unit));
     extractEfgInformation(unit, unitData);
     return unitData;
-  }
-
-  private JsonNode harmonizeAttributes(ObjectNode datasetAttributes, ObjectNode unitAttributes,
-      String physicalSpecimenIdType, String organisationId) throws OrganisationNotRorId {
-    var attributes = mapper.createObjectNode();
-    attributes.put(PhysicalSpecimenIdType.TERM, physicalSpecimenIdType);
-    attributes.put(OrganisationId.TERM, organisationId);
-    attributes.put(OrganisationName.TERM,
-        rorComponent.getRoRId(minifyOrganisationId(organisationId)));
-    attributes.put(SourceSystemId.TERM, webClientProperties.getSourceSystemId());
-    attributes.put(DwcaId.TERM, (String) null);
-    attributes.put(License.TERM,
-        termMapper.retrieveFromABCD(new License(), datasetAttributes, unitAttributes));
-    attributes.put(Modified.TERM,
-        termMapper.retrieveFromABCD(new Modified(), datasetAttributes, unitAttributes));
-    for (Term term : abcdHarmonisedTerms()) {
-      attributes.put(term.getTerm(), termMapper.retrieveFromABCD(term, unitAttributes));
-    }
-    return attributes;
   }
 
   private void extractEfgInformation(Unit unit, ObjectNode unitAttributes)
@@ -357,9 +314,9 @@ public class BioCaseService implements WebClientService {
     unitData.remove("abcd:unitExtension");
   }
 
-  private JsonNode cleanupRedundantFields(ObjectNode unitData) {
+  private JsonNode cleanupRedundantFields(JsonNode unitData) {
     var multiMediaFields = new ArrayList<String>();
-    var data = unitData.deepCopy();
+    var data = (ObjectNode) unitData.deepCopy();
     data.remove("ods:taxonIdentificationIndex");
     data.fields().forEachRemaining(field -> {
       if (field.getKey().startsWith("abcd:multiMediaObjects")) {
@@ -370,39 +327,31 @@ public class BioCaseService implements WebClientService {
     return data;
   }
 
-  private void processDigitalMediaObjects(String physicalSpecimenId, Unit unit, String organisationId)
-      throws JsonProcessingException {
+  private List<DigitalMediaObjectEvent> processDigitalMediaObjects(String physicalSpecimenId,
+      Unit unit, String organisationId) throws OrganisationNotRorId {
+    var digitalMediaObjectEvents = new ArrayList<DigitalMediaObjectEvent>();
     if (unit.getMultiMediaObjects() != null && !unit.getMultiMediaObjects().getMultiMediaObject()
         .isEmpty()) {
       for (MultiMediaObject media : unit.getMultiMediaObjects().getMultiMediaObject()) {
-        processDigitalMediaObject(physicalSpecimenId, media, organisationId);
+        digitalMediaObjectEvents.add(
+            processDigitalMediaObject(physicalSpecimenId, media, organisationId));
       }
     }
+    return digitalMediaObjectEvents;
   }
 
-  private void processDigitalMediaObject(String physicalSpecimenId, MultiMediaObject media, String organisationId)
-      throws JsonProcessingException {
+  private DigitalMediaObjectEvent processDigitalMediaObject(String physicalSpecimenId,
+      MultiMediaObject media, String organisationId) throws OrganisationNotRorId {
     var attributes = getData(mapper.valueToTree(media));
-    var digitalMediaObject = new DigitalMediaObject(
-        termMapper.retrieveFromABCD(new MediaType(), attributes),
-        physicalSpecimenId,
-        harmonizeMedia(attributes, organisationId),
-        attributes
-    );
-    log.debug("Result digital media object: {}", digitalMediaObject);
-    kafkaService.sendMessage("digital-media-object",
-        mapper.writeValueAsString(
-            new DigitalMediaObjectEvent(enrichmentServices(true), digitalMediaObject)));
-  }
-
-  private JsonNode harmonizeMedia(JsonNode mediaAttributes, String organisationId) {
-    var attributes = mapper.createObjectNode();
-    attributes.put(AccessUri.TERM, termMapper.retrieveFromABCD(new AccessUri(), mediaAttributes));
-    attributes.put(SourceSystemId.TERM, webClientProperties.getSourceSystemId());
-    attributes.put(Format.TERM, termMapper.retrieveFromABCD(new Format(), mediaAttributes));
-    attributes.put(License.TERM, termMapper.retrieveFromABCD(new License(), mediaAttributes));
-    attributes.put(OrganisationId.TERM, organisationId);
-    return attributes;
+    var digitalMediaObjectEvent = new DigitalMediaObjectEvent(enrichmentServices(true),
+        new DigitalMediaObject(
+            fdoProperties.getDigitalMediaObjectType(),
+            physicalSpecimenId,
+            digitalSpecimenDirector.assembleDigitalMediaObjects(false, attributes, organisationId),
+            attributes
+        ));
+    log.debug("Result digital media object: {}", digitalMediaObjectEvent);
+    return digitalMediaObjectEvent;
   }
 
   private List<String> enrichmentServices(boolean multiMediaObject) {
