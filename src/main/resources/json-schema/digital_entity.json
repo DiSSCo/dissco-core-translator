@@ -29,7 +29,7 @@
     },
     "dcterms:type": {
       "type": "string",
-      "description": "https://purl.org/dc/terms/type, which matches the FDO type of the object",
+      "description": "https://purl.org/dc/terms/type",
       "enum": [
         "Collection",
         "Dataset",

@@ -13,14 +13,15 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-@Getter
 @RequiredArgsConstructor
 public class MappingComponent {
 
   private final WebClientProperties properties;
   private final MappingRepository repository;
 
+  @Getter
   private final Map<String, String> fieldMappings = new HashMap<>();
+  @Getter
   private final Map<String, String> defaults = new HashMap<>();
 
   @PostConstruct

@@ -459,7 +459,6 @@ public class DigitalObjectDirector {
         .withDwcFootprintSrs(termMapper.retrieveTerm(new FootprintSrs(), data, dwc))
         .withDwcFootprintSpatialFit(parseToInteger(new FootprintSpatialFit(), data, dwc))
         .withDwcGeoreferencedBy(termMapper.retrieveTerm(new GeoreferencedBy(), data, dwc))
-        .withDwcFootprintSpatialFit(parseToInteger(new FootprintSpatialFit(), data, dwc))
         .withDwcFootprintWkt(termMapper.retrieveTerm(new FootprintWkt(), data, dwc))
         .withDwcGeoreferencedDate(termMapper.retrieveTerm(new GeoreferencedDate(), data, dwc))
         .withDwcGeoreferenceRemarks(termMapper.retrieveTerm(new GeoreferenceRemarks(), data, dwc))
