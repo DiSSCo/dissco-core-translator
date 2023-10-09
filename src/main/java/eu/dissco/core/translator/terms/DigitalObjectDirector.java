@@ -661,7 +661,7 @@ public class DigitalObjectDirector {
     if (digitalMediaObject.getDctermsSource() != null && digitalMediaObject.getDctermsSource()
         .startsWith("http")) {
       relationships.add(new EntityRelationships().withEntityRelationshipType("hasSource")
-          .withObjectEntityIri(digitalMediaObject.getDctermsLicense()));
+          .withObjectEntityIri(digitalMediaObject.getDctermsSource()));
     }
     return relationships;
   }
