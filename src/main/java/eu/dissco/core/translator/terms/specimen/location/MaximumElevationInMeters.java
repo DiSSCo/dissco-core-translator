@@ -10,7 +10,7 @@ public class MaximumElevationInMeters extends Term {
 
   private final List<String> dwcaTerms = List.of(TERM);
   private final List<String> abcdTerms = List.of(
-      "abcd:gathering/altitude/measurementOrFactAtomised/upperValue/value");
+      "abcd:gathering/altitude/measurementOrFactAtomised/upperValue/value", "abcd:gathering/altitude/measurementOrFactText/value");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
