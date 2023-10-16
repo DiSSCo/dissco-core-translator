@@ -39,12 +39,12 @@ public class DwcaDigitalObjectDirector extends BaseDigitalObjectDirector {
   }
 
   @Override
-  protected void addStandardSpecificLogic(DigitalSpecimen ds, JsonNode data, boolean dwc) {
+  protected void addStandardSpecificLogic(DigitalSpecimen ds, JsonNode data) {
     log.debug("DWCA does not need to add any specific logic");
   }
 
   @Override
-  protected List<Citations> gatherCitations(JsonNode data, boolean dwc) {
+  protected List<Citations> assembleSpecimenCitations(JsonNode data, boolean dwc) {
     var citations = new ArrayList<Citations>();
     if (data.get(EXTENSION) != null
         && data.get(EXTENSION).get("gbif:Reference") != null) {
@@ -60,13 +60,13 @@ public class DwcaDigitalObjectDirector extends BaseDigitalObjectDirector {
   }
 
   @Override
-  protected List<Citations> gatherIdentificationCitations(JsonNode data, boolean dwc) {
+  protected List<Citations> assembleIdentificationCitations(JsonNode data, boolean dwc) {
     log.debug("DWCA does not have identification citations");
     return List.of();
   }
 
   @Override
-  protected List<Identifications> gatherIdentifications(JsonNode data, boolean dwc) {
+  protected List<Identifications> assembleIdentifications(JsonNode data, boolean dwc) {
     var mappedIdentifications = new ArrayList<Identifications>();
     if (data.get(EXTENSION) != null
         && data.get(EXTENSION).get("dwc:Identification") != null) {

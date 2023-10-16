@@ -181,33 +181,26 @@ public abstract class BaseDigitalObjectDirector {
     ds.withIdentifiers(assembleIdentifiers(data));
     ds.withCitations(assembleSpecimenCitations(data, dwc));
     ds.withEntityRelationships(assembleDigitalSpecimenEntityRelationships(ds));
-    setCalculatedFields(ds, data, dwc);
+    setCalculatedFields(ds, data);
     return ds;
   }
 
-  private void setCalculatedFields(DigitalSpecimen ds, JsonNode data, boolean dwc) {
+  private void setCalculatedFields(DigitalSpecimen ds, JsonNode data) {
     ds.setOdsTopicDiscipline(new TopicDiscipline().calculate(ds));
     ds.setOdsTopicOrigin(new TopicOrigin().calculate(ds));
     ds.setOdsTopicDomain(new TopicDomain().calculate(ds));
     ds.setOdsSpecimenName(new SpecimenName().calculate(ds));
     ds.setOdsMarkedAsType(new MarkedAsType().calculate(ds));
-    addStandardSpecificLogic(ds, data, dwc);
+    addStandardSpecificLogic(ds, data);
   }
 
-  protected abstract void addStandardSpecificLogic(
-      eu.dissco.core.translator.schema.DigitalSpecimen ds, JsonNode data, boolean dwc);
+  protected abstract void addStandardSpecificLogic(DigitalSpecimen ds, JsonNode data);
 
-  protected abstract List<Citations> gatherCitations(JsonNode data, boolean dwc);
+  protected abstract List<Citations> assembleSpecimenCitations(JsonNode data, boolean dwc);
 
-  private List<Citations> assembleSpecimenCitations(JsonNode data, boolean dwc) {
-    return gatherCitations(data, dwc);
-  }
+  protected abstract List<Citations> assembleIdentificationCitations(JsonNode data, boolean dwc);
 
-  protected abstract List<Citations> gatherIdentificationCitations(JsonNode data, boolean dwc);
-
-  private List<Citations> assembleIdentificationCitations(JsonNode data, boolean dwc) {
-    return gatherIdentificationCitations(data, dwc);
-  }
+  protected abstract List<Identifications> assembleIdentifications(JsonNode data, boolean dwc);
 
   protected Citations createCitation(JsonNode data,
       boolean dwc) {
@@ -298,12 +291,6 @@ public abstract class BaseDigitalObjectDirector {
     }
     return identifiers;
   }
-
-  private List<Identifications> assembleIdentifications(JsonNode data, boolean dwc) {
-    return gatherIdentifications(data, dwc);
-  }
-
-  protected abstract List<Identifications> gatherIdentifications(JsonNode data, boolean dwc);
 
   protected Identifications createIdentification(JsonNode data, boolean dwc) {
     var mappedTaxonIdentification = new TaxonIdentification()

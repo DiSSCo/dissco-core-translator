@@ -56,7 +56,6 @@ public class DwcaService implements WebClientService {
   private static final String DWC_ASSOCIATED_MEDIA = "dwc:associatedMedia";
   private static final String GBIF_MULTIMEDIA = "gbif:Multimedia";
   private static final String AC_MULTIMEDIA = "http://rs.tdwg.org/ac/terms/Multimedia";
-  private static final String UNKNOWN = "Unknown";
   private static final String EXTENSIONS = "extensions";
 
   private final ObjectMapper mapper;

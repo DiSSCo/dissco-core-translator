@@ -38,22 +38,22 @@ public class BiocaseDigitalObjectDirector extends BaseDigitalObjectDirector {
   }
 
   @Override
-  protected void addStandardSpecificLogic(DigitalSpecimen ds, JsonNode data, boolean dwc) {
+  protected void addStandardSpecificLogic(DigitalSpecimen ds, JsonNode data) {
     new AbcdTypeInformation().addTypeInformation(ds, data, mapper);
   }
 
   @Override
-  protected List<Citations> gatherCitations(JsonNode data, boolean dwc) {
+  protected List<Citations> assembleSpecimenCitations(JsonNode data, boolean dwc) {
     return getCitations(data, dwc, "abcd:unitReferences/unitReference/");
   }
 
   @Override
-  protected List<Citations> gatherIdentificationCitations(JsonNode data, boolean dwc) {
+  protected List<Citations> assembleIdentificationCitations(JsonNode data, boolean dwc) {
     return getCitations(data, dwc, "references/reference/");
   }
 
   @Override
-  protected List<Identifications> gatherIdentifications(JsonNode data, boolean dwc) {
+  protected List<Identifications> assembleIdentifications(JsonNode data, boolean dwc) {
     var identifications = new ArrayList<Identifications>();
     var iterateOverElements = true;
     var count = 0;
@@ -86,15 +86,15 @@ public class BiocaseDigitalObjectDirector extends BaseDigitalObjectDirector {
   }
 
   private JsonNode getSubJsonAbcd(JsonNode data, int count, String path) {
-    var identificationNode = mapper.createObjectNode();
+    var subNode = mapper.createObjectNode();
     data.fields().forEachRemaining(field -> {
       if (field.getKey().startsWith(path + count)) {
-        identificationNode.set(
+        subNode.set(
             field.getKey().replace(path + count + "/", ""),
             field.getValue());
       }
     });
-    return identificationNode;
+    return subNode;
   }
 }
 
