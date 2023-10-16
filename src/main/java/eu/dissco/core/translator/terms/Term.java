@@ -13,7 +13,6 @@ public abstract class Term {
   protected static final String ODS_PREFIX = "ods:";
   protected static final String DWC_PREFIX = "dwc:";
   protected static final String DCTERMS_PREFIX = "dcterms:";
-  protected static final String ABCD_PREFIX = "abcd:";
   protected static final Pair<String, String> ABCD_NAMED_AREA_KEY =
       Pair.of(
           "abcd:gathering/namedAreas/namedArea/",
@@ -67,15 +66,15 @@ public abstract class Term {
   }
 
   protected JsonNode getSubJsonAbcd(ObjectMapper mapper, JsonNode data, int count, String path) {
-    var identificationNode = mapper.createObjectNode();
+    var subNode = mapper.createObjectNode();
     data.fields().forEachRemaining(field -> {
       if (field.getKey().startsWith(path + count)) {
-        identificationNode.set(
+        subNode.set(
             field.getKey().replace(path + count + "/", ""),
             field.getValue());
       }
     });
-    return identificationNode;
+    return subNode;
   }
 
   public abstract String getTerm();

@@ -18,7 +18,7 @@ import eu.dissco.core.translator.properties.FdoProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.DwcaRepository;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
-import eu.dissco.core.translator.terms.DigitalObjectDirector;
+import eu.dissco.core.translator.terms.BaseDigitalObjectDirector;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
@@ -56,7 +56,6 @@ public class DwcaService implements WebClientService {
   private static final String DWC_ASSOCIATED_MEDIA = "dwc:associatedMedia";
   private static final String GBIF_MULTIMEDIA = "gbif:Multimedia";
   private static final String AC_MULTIMEDIA = "http://rs.tdwg.org/ac/terms/Multimedia";
-  private static final String UNKNOWN = "Unknown";
   private static final String EXTENSIONS = "extensions";
 
   private final ObjectMapper mapper;
@@ -67,7 +66,7 @@ public class DwcaService implements WebClientService {
   private final EnrichmentProperties enrichmentProperties;
   private final SourceSystemRepository repository;
   private final DwcaRepository dwcaRepository;
-  private final DigitalObjectDirector digitalSpecimenDirector;
+  private final BaseDigitalObjectDirector digitalSpecimenDirector;
   private final FdoProperties fdoProperties;
   private final List<String> allowedBasisOfRecord = List.of("PRESERVEDSPECIMEN", "FOSSIL", "OTHER",
       "ROCK", "MINERAL", "METEORITE", "FOSSILSPECIMEN", "LIVINGSPECIMEN", "MATERIALSAMPLE");

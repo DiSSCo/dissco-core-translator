@@ -164,30 +164,14 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class DigitalObjectDirector {
+public abstract class BaseDigitalObjectDirector {
 
-  private static final String EXTENSION = "extensions";
-
-  private final ObjectMapper mapper;
-  private final TermMapper termMapper;
+  protected final ObjectMapper mapper;
+  protected final TermMapper termMapper;
   private final RorComponent rorComponent;
   private final WebClientProperties webClientProperties;
   private final FdoProperties fdoProperties;
-
-  private static List<String> identifierTerms() {
-    var list = new ArrayList<String>();
-    list.add("dwc:occurrenceID");
-    list.add("dwca:ID");
-    list.add("dwc:catalogNumber");
-    list.add("dwc:otherCatalogNumbers");
-    list.add("abcd:id");
-    list.add("abcd:unitID");
-    list.add("abcd:unitIDNumeric");
-    list.add("abcd:unitGUID");
-    list.add("abcd:recordURI");
-    list.add("dcterms:identifier");
-    return list;
-  }
+  private final List<String> identifierTerms;
 
   public DigitalSpecimen assembleDigitalSpecimenTerm(JsonNode data, boolean dwc)
       throws OrganisationNotRorId, UnknownPhysicalSpecimenIdType {
@@ -197,56 +181,28 @@ public class DigitalObjectDirector {
     ds.withIdentifiers(assembleIdentifiers(data));
     ds.withCitations(assembleSpecimenCitations(data, dwc));
     ds.withEntityRelationships(assembleDigitalSpecimenEntityRelationships(ds));
-    setCalculatedFields(ds);
+    setCalculatedFields(ds, data);
     return ds;
   }
 
-  private void setCalculatedFields(eu.dissco.core.translator.schema.DigitalSpecimen ds) {
+  private void setCalculatedFields(DigitalSpecimen ds, JsonNode data) {
     ds.setOdsTopicDiscipline(new TopicDiscipline().calculate(ds));
     ds.setOdsTopicOrigin(new TopicOrigin().calculate(ds));
     ds.setOdsTopicDomain(new TopicDomain().calculate(ds));
     ds.setOdsSpecimenName(new SpecimenName().calculate(ds));
     ds.setOdsMarkedAsType(new MarkedAsType().calculate(ds));
+    addStandardSpecificLogic(ds, data);
   }
 
-  private List<Citations> assembleSpecimenCitations(JsonNode data, boolean dwc) {
-    List<Citations> citations;
-    if (dwc) {
-      citations = gatherDwcaCitations(data, dwc);
-    } else {
-      citations = gatherAbcdCitations(data, dwc, "abcd:unitReferences/unitReference/");
-    }
-    return citations;
-  }
+  protected abstract void addStandardSpecificLogic(DigitalSpecimen ds, JsonNode data);
 
-  private List<Citations> assembleIdentificationCitations(JsonNode data, boolean dwc) {
-    List<Citations> citations = List.of();
-    if (dwc) {
-      log.debug("Reference extension has been added to the occurrence");
-    } else {
-      citations = gatherAbcdCitations(data, dwc, "references/reference/");
-    }
-    return citations;
-  }
+  protected abstract List<Citations> assembleSpecimenCitations(JsonNode data, boolean dwc);
 
-  private List<Citations> gatherAbcdCitations(JsonNode data,
-      boolean dwc, String subpath) {
-    var citations = new ArrayList<Citations>();
-    var iterateOverElements = true;
-    var count = 0;
-    while (iterateOverElements) {
-      var citationNode = getSubJsonAbcd(data, count, subpath);
-      if (!citationNode.isEmpty()) {
-        citations.add(createCitation(citationNode, dwc));
-        count++;
-      } else {
-        iterateOverElements = false;
-      }
-    }
-    return citations;
-  }
+  protected abstract List<Citations> assembleIdentificationCitations(JsonNode data, boolean dwc);
 
-  private Citations createCitation(JsonNode data,
+  protected abstract List<Identifications> assembleIdentifications(JsonNode data, boolean dwc);
+
+  protected Citations createCitation(JsonNode data,
       boolean dwc) {
     return new eu.dissco.core.translator.schema.Citations()
         .withDctermsBibliographicCitation(
@@ -259,22 +215,6 @@ public class DigitalObjectDirector {
         .withDctermsType(termMapper.retrieveTerm(new Type(), data, dwc))
         .withDctermsDate(termMapper.retrieveTerm(new Date(), data, dwc))
         .withDctermsTitle(termMapper.retrieveTerm(new Title(), data, dwc));
-  }
-
-  private List<Citations> gatherDwcaCitations(JsonNode data,
-      boolean dwc) {
-    var citations = new ArrayList<Citations>();
-    if (data.get(EXTENSION) != null
-        && data.get(EXTENSION).get("gbif:Reference") != null) {
-      var references = data.get(EXTENSION).get("gbif:Reference");
-      for (int i = 0; i < references.size(); i++) {
-        var identification = references.get(i);
-        citations.add(createCitation(identification, dwc));
-      }
-    } else {
-      citations.add(createCitation(data, dwc));
-    }
-    return citations;
   }
 
   private DigitalSpecimen assembleDigitalSpecimenTerms(JsonNode data, boolean dwc)
@@ -341,7 +281,7 @@ public class DigitalObjectDirector {
 
   private List<Identifiers> assembleIdentifiers(JsonNode data) {
     var identifiers = new ArrayList<Identifiers>();
-    for (String identifierTerm : identifierTerms()) {
+    for (String identifierTerm : identifierTerms) {
       if (data.get(identifierTerm) != null) {
         var identifier = new Identifiers()
             .withIdentifierType(identifierTerm)
@@ -352,62 +292,7 @@ public class DigitalObjectDirector {
     return identifiers;
   }
 
-  private List<Identifications> assembleIdentifications(JsonNode data, boolean dwc) {
-    List<Identifications> identifications = null;
-    if (dwc) {
-      identifications = gatherDwcaIdentifications(data, dwc);
-    } else {
-      identifications = gatherAbcdIdentifications(data, dwc);
-    }
-    return identifications;
-  }
-
-  private List<Identifications> gatherAbcdIdentifications(
-      JsonNode data, boolean dwc) {
-    var identifications = new ArrayList<Identifications>();
-    var iterateOverElements = true;
-    var count = 0;
-    while (iterateOverElements) {
-      var identificationNode = getSubJsonAbcd(data, count, "abcd:identifications/identification/");
-      if (!identificationNode.isEmpty()) {
-        identifications.add(createIdentification(identificationNode, dwc));
-        count++;
-      } else {
-        iterateOverElements = false;
-      }
-    }
-    return identifications;
-  }
-
-  private JsonNode getSubJsonAbcd(JsonNode data, int count, String path) {
-    var identificationNode = mapper.createObjectNode();
-    data.fields().forEachRemaining(field -> {
-      if (field.getKey().startsWith(path + count)) {
-        identificationNode.set(
-            field.getKey().replace(path + count + "/", ""),
-            field.getValue());
-      }
-    });
-    return identificationNode;
-  }
-
-  private List<Identifications> gatherDwcaIdentifications(
-      JsonNode data, boolean dwc) {
-    var mappedIdentifications = new ArrayList<Identifications>();
-    if (data.get(EXTENSION) != null
-        && data.get(EXTENSION).get("dwc:Identification") != null) {
-      var identifications = data.get(EXTENSION).get("dwc:Identification");
-      for (int i = 0; i < identifications.size(); i++) {
-        var identification = identifications.get(i);
-        mappedIdentifications.add(createIdentification(identification, dwc));
-      }
-    } else {
-      mappedIdentifications.add(createIdentification(data, dwc));
-    }
-    return mappedIdentifications;
-  }
-
-  private Identifications createIdentification(JsonNode data, boolean dwc) {
+  protected Identifications createIdentification(JsonNode data, boolean dwc) {
     var mappedTaxonIdentification = new TaxonIdentification()
         .withDwcTaxonID(termMapper.retrieveTerm(new TaxonId(), data, dwc))
         .withDwcKingdom(termMapper.retrieveTerm(new Kingdom(), data, dwc))
@@ -551,13 +436,12 @@ public class DigitalObjectDirector {
         .withDwcSampleSizeValue(termMapper.retrieveTerm(new SampleSizeValue(), data, dwc))
         .withLocation(location)
         .withAssertions(assertions);
-
     return List.of(occurrence);
   }
 
   private <T extends Enum<T>> T retrieveEnum(Term term, JsonNode data, boolean dwc,
       java.lang.Class<T> enumClass) {
-    var value = termMapper.retrieveTerm(new OccurrenceStatus(), data, dwc);
+    var value = termMapper.retrieveTerm(term, data, dwc);
     try {
       if (value != null) {
         return Enum.valueOf(enumClass, value.toUpperCase());
@@ -624,11 +508,9 @@ public class DigitalObjectDirector {
         .withXmpRightsWebStatement(termMapper.retrieveTerm(new WebStatement(), mediaRecord, dwc))
         .withDctermsRights(termMapper.retrieveTerm(new Rights(), mediaRecord, dwc))
         .withDctermsAccessRights(
-            termMapper.retrieveTerm(new eu.dissco.core.translator.terms.media.AccessRights(),
-                mediaRecord, dwc))
+            termMapper.retrieveTerm(new AccessRights(), mediaRecord, dwc))
         .withDctermsRightsHolder(
-            termMapper.retrieveTerm(new eu.dissco.core.translator.terms.media.RightsHolder(),
-                mediaRecord, dwc))
+            termMapper.retrieveTerm(new RightsHolder(), mediaRecord, dwc))
         .withDctermsSource(termMapper.retrieveTerm(new Source(), mediaRecord, dwc))
         .withDctermsCreator(termMapper.retrieveTerm(new Creator(), mediaRecord, dwc))
         .withDctermsCreated(termMapper.retrieveTerm(new Created(), mediaRecord, dwc))

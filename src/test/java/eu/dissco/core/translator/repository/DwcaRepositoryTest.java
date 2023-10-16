@@ -9,6 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
@@ -40,6 +41,23 @@ class DwcaRepositoryTest extends BaseRepositoryIT {
     // Then
     assertThat(results).isEqualTo(
         records.stream().collect(Collectors.toMap(Pair::getLeft, Pair::getRight)));
+  }
+
+  @Test
+  void getCorruptCoreRecords() {
+    // Given
+    var tableName = "XXX-XXX-XXX_Core";
+    var records = List.of(Pair.of(UUID.randomUUID().toString(), givenRecord("\u0000 someCorruptedInformation")));
+    repository.createTable(tableName);
+    repository.postRecords(tableName, records);
+
+    // When
+    var results = repository.getCoreRecords(records.stream().map(Pair::getLeft).toList(),
+        tableName);
+    repository.deleteTable(tableName);
+
+    // Then
+    assertThat(results).isEqualTo(Map.of(records.get(0).getLeft(), givenRecord(" someCorruptedInformation")));
   }
 
   @Test
@@ -84,6 +102,13 @@ class DwcaRepositoryTest extends BaseRepositoryIT {
       records.add(pair);
     }
     return records;
+  }
+
+  private static JsonNode givenRecord(String corruptedValue) {
+    var objectNode = MAPPER.createObjectNode();
+    objectNode.put("someRandomInformation", "someRandomInformation");
+    objectNode.put("someCorruptedInformation", corruptedValue);
+    return objectNode;
   }
 
 }

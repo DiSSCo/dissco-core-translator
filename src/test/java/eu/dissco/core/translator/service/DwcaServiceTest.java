@@ -19,7 +19,7 @@ import eu.dissco.core.translator.properties.FdoProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.DwcaRepository;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
-import eu.dissco.core.translator.terms.DigitalObjectDirector;
+import eu.dissco.core.translator.terms.BaseDigitalObjectDirector;
 import eu.dissco.core.translator.terms.TermMapper;
 import java.io.File;
 import java.io.IOException;
@@ -70,7 +70,7 @@ class DwcaServiceTest {
   @Mock
   private DwcaRepository dwcaRepository;
   @Mock
-  private DigitalObjectDirector digitalSpecimenDirector;
+  private BaseDigitalObjectDirector digitalSpecimenDirector;
   @Mock
   private FdoProperties fdoProperties;
 

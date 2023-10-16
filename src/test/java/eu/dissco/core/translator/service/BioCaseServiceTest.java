@@ -16,7 +16,7 @@ import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.FdoProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
-import eu.dissco.core.translator.terms.DigitalObjectDirector;
+import eu.dissco.core.translator.terms.BaseDigitalObjectDirector;
 import eu.dissco.core.translator.terms.TermMapper;
 import freemarker.cache.FileTemplateLoader;
 import freemarker.template.Configuration;
@@ -58,7 +58,7 @@ class BioCaseServiceTest {
   @Mock
   private EnrichmentProperties enrichmentProperties;
   @Mock
-  private DigitalObjectDirector digitalSpecimenDirector;
+  private BaseDigitalObjectDirector digitalSpecimenDirector;
   @Mock
   private FdoProperties fdoProperties;
   private BioCaseService service;

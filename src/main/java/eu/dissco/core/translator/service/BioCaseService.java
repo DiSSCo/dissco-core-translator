@@ -25,7 +25,7 @@ import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.FdoProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
-import eu.dissco.core.translator.terms.DigitalObjectDirector;
+import eu.dissco.core.translator.terms.BaseDigitalObjectDirector;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 import jakarta.xml.bind.JAXBContext;
@@ -79,7 +79,7 @@ public class BioCaseService implements WebClientService {
   private final XMLInputFactory xmlFactory;
   private final KafkaService kafkaService;
   private final EnrichmentProperties enrichmentProperties;
-  private final DigitalObjectDirector digitalSpecimenDirector;
+  private final BaseDigitalObjectDirector digitalSpecimenDirector;
   private final FdoProperties fdoProperties;
 
   private boolean isAcceptedBasisOfRecord(Unit unit) {
@@ -197,7 +197,8 @@ public class BioCaseService implements WebClientService {
         log.error("Encountered data issue with record: {}", unitAttributes, e);
       }
     } else {
-      log.info("Record with record basis: {} is ignored ", unit.getRecordBasis());
+      log.info("Record with record basis: {} and id: {} is ignored ", unit.getRecordBasis(),
+          unit.getUnitGUID());
     }
   }
 

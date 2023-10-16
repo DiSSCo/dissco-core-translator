@@ -9,9 +9,9 @@ import lombok.extern.slf4j.Slf4j;
 public class MediaType extends Term {
 
   public static final String TERM = "dcterms:type";
-  private static final String STILL_IMAGE = "StillImage";
+  private static final String STILL_IMAGE = "Still_Image";
   private static final String SOUND = "Sound";
-  private static final String MOVING_IMAGE = "MovingImage";
+  private static final String MOVING_IMAGE = "Moving_Image";
   private final List<String> dwcaTerms = List.of(TERM, "dc:type");
   private final List<String> imageFormats = List.of("IMAGE/JPG", "JPG", "IMAGE/JPEG",
       "JPEG", "IMAGE/PNG", "PNG", "IMAGE/TIF", "TIF");
@@ -29,13 +29,13 @@ public class MediaType extends Term {
 
   private String parseToOdsType(String recoveredType) {
     switch (recoveredType) {
-      case STILL_IMAGE, "Image" -> {
+      case "StillImage", "Image" -> {
         return STILL_IMAGE;
       }
       case SOUND -> {
         return SOUND;
       }
-      case MOVING_IMAGE -> {
+      case "MovingImage" -> {
         return MOVING_IMAGE;
       }
       default -> {

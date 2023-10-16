@@ -8,7 +8,7 @@ public class PhysicalSpecimenId extends Term {
 
   public static final String TERM = ODS_PREFIX + "physicalSpecimenId";
 
-  private final List<String> dwcaTerms = List.of("dwc:catalogNumber", "dwc:occurrenceID");
+  private final List<String> dwcaTerms = List.of("dwc:occurrenceID", "dwc:catalogNumber");
   private final List<String> abcdTerms = List.of("abcd:unitGUID", "abcd:unitID");
 
   @Override
