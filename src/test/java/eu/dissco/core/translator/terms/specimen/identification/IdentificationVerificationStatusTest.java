@@ -43,6 +43,20 @@ class IdentificationVerificationStatusTest {
   }
 
   @Test
+  void testRetrieveFromDWCANull() {
+    // Given
+    var unit = MAPPER.createObjectNode();
+    unit.putNull("dwc:identificationVerificationStatus");
+
+    // When
+    var result = identificationVerificationStatus.retrieveFromDWCA(unit);
+
+    // Then
+    assertThat(result).isNull();
+  }
+
+
+  @Test
   void testRetrieveFromABCD() {
     // Given
     var identificationVerificationStatusString = "true";

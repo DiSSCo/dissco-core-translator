@@ -316,8 +316,7 @@ public abstract class BaseDigitalObjectDirector {
         .withDwcVernacularName(termMapper.retrieveTerm(new VernacularName(), data, dwc));
     return new Identifications()
         .withDwcIdentificationID(termMapper.retrieveTerm(new IdentificationId(), data, dwc))
-        .withDwcIdentificationVerificationStatus(Boolean.valueOf(
-            termMapper.retrieveTerm(new IdentificationVerificationStatus(), data, dwc)))
+        .withDwcIdentificationVerificationStatus(parseToBoolean(new IdentificationVerificationStatus(), data, dwc))
         .withDwcTypeStatus(termMapper.retrieveTerm(new TypeStatus(), data, dwc))
         .withDwcDateIdentified(termMapper.retrieveTerm(new DateIdentified(), data, dwc))
         .withDwcIdentifiedBy(termMapper.retrieveTerm(new IdentifiedBy(), data, dwc))

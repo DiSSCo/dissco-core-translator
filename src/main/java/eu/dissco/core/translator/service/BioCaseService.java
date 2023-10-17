@@ -177,6 +177,11 @@ public class BioCaseService implements WebClientService {
     if (isAcceptedBasisOfRecord(unit)) {
       try {
         var attributes = digitalSpecimenDirector.assembleDigitalSpecimenTerm(unitAttributes, false);
+        if (attributes.getOdsNormalisedPhysicalSpecimenId() == null
+            || attributes.getDwcInstitutionId() == null) {
+          throw new DiSSCoDataException(
+              "Record does not comply to MIDS level 0 (id and organisation), ignoring record");
+        }
         var digitalSpecimen = new DigitalSpecimenWrapper(
             attributes.getOdsNormalisedPhysicalSpecimenId(),
             fdoProperties.getDigitalSpecimenType(),

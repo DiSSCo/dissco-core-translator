@@ -11,7 +11,6 @@ import static org.mockito.BDDMockito.given;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.component.RorComponent;
-import eu.dissco.core.translator.exception.OrganisationNotRorId;
 import eu.dissco.core.translator.exception.UnknownPhysicalSpecimenIdType;
 import eu.dissco.core.translator.properties.FdoProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
@@ -43,7 +42,8 @@ class BiocaseDigitalObjectDirectorTest {
 
   @BeforeEach
   void setup() {
-    director = new BiocaseDigitalObjectDirector(MAPPER, termMapper, rorComponent, webClientProperties,
+    director = new BiocaseDigitalObjectDirector(MAPPER, termMapper, rorComponent,
+        webClientProperties,
         fdoProperties);
   }
 
