@@ -212,7 +212,8 @@ public class DwcaService implements WebClientService {
       JsonNode fullRecord) throws DiSSCoDataException {
     var ds = digitalSpecimenDirector.assembleDigitalSpecimenTerm(fullRecord, true);
     if (ds.getOdsNormalisedPhysicalSpecimenId() == null || ds.getDwcInstitutionId() == null) {
-      throw new DiSSCoDataException("Cannot find a physical specimen id for specimen record");
+      throw new DiSSCoDataException(
+          "Record does not comply to MIDS level 0 (id and organisation), ignoring record");
     }
     return Pair.of(new DigitalSpecimenWrapper(
             ds.getOdsNormalisedPhysicalSpecimenId(),
