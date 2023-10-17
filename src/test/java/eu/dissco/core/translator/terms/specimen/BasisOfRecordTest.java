@@ -3,14 +3,27 @@ package eu.dissco.core.translator.terms.specimen;
 import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class BasisOfRecordTest {
 
   private final BasisOfRecord basisOfRecord = new BasisOfRecord();
+
+  public static Stream<Arguments> prepareABCDRecordBasis() {
+    return Stream.of(
+        Arguments.of("PreservedSpecimen", "PreservedSpecimen"),
+        Arguments.of("RockSpecimen", "RockSpecimen"),
+        Arguments.of("HerbariumSheet", "Preserved specimen"),
+        Arguments.of(null, null)
+    );
+  }
 
   @Test
   void testRetrieveFromDWCA() {
@@ -25,44 +38,20 @@ class BasisOfRecordTest {
     assertThat(result).isEqualTo("LivingSpecimen");
   }
 
-  @Test
-  void testRetrieveFromDWCANotLiving() {
+  @ParameterizedTest
+  @MethodSource("prepareABCDRecordBasis")
+  void testRetrieveFromABCD(String recordBasis, String expected) {
     // Given
     var unit = MAPPER.createObjectNode();
-    unit.put("dwc:basisOfRecord", "PreservedSpecimen");
-
-    // When
-    var result = basisOfRecord.retrieveFromDWCA(unit);
-
-    // Then
-    assertThat(result).isEqualTo("PreservedSpecimen");
-  }
-
-  @Test
-  void testRetrieveFromABCD() {
-    // Given
-    var unit = MAPPER.createObjectNode();
-    unit.put("abcd:recordBasis", "RockSpecimen");
+    unit.put("abcd:recordBasis", recordBasis);
 
     // When
     var result = basisOfRecord.retrieveFromABCD(unit);
 
     // Then
-    assertThat(result).isEqualTo("RockSpecimen");
+    assertThat(result).isEqualTo(expected);
   }
 
-  @Test
-  void testRetrieveFromABCDNotFromControlledVocab() {
-    // Given
-    var unit = MAPPER.createObjectNode();
-    unit.put("abcd:recordBasis", "Herbarium Sheet");
-
-    // When
-    var result = basisOfRecord.retrieveFromABCD(unit);
-
-    // Then
-    assertThat(result).isEqualTo("Preserved specimen");
-  }
 
   @Test
   void testGetTerm() {
