@@ -10,6 +10,7 @@ public class BasisOfRecord extends Term {
 
   private final List<String> dwcaTerms = List.of(TERM);
   private final List<String> abcdTerms = List.of("abcd:recordBasis");
+  private static final List<String> PRESERVED_SPECIMEN_ALTERNATIVES = List.of("HERBARIUM SHEET", "HERBARIUMSHEET");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
@@ -18,7 +19,11 @@ public class BasisOfRecord extends Term {
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    return super.searchJsonForTerm(unit, abcdTerms);
+    var result = super.searchJsonForTerm(unit, abcdTerms);
+    if (result != null && PRESERVED_SPECIMEN_ALTERNATIVES.contains(result.toUpperCase())) {
+      return "Preserved specimen";
+    }
+    return result;
   }
 
   @Override

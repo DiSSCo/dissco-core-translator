@@ -11,7 +11,9 @@ public class ScientificName extends AbstractTaxonomy {
   private final List<String> dwcaTerms = List.of("dwc:scientificName");
   private final List<String> abcdTerms = List.of(
       "result/taxonIdentified/scientificName/fullScientificNameString",
-      "result/mineralRockIdentified/classifiedName/fullScientificNameString");
+      "result/mineralRockIdentified/classifiedName/fullScientificNameString",
+      "result/taxonIdentified/informalNameString/value",
+      "result/taxonIdentified/scientificName/nameAtomised/zoological/namedIndividual");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {

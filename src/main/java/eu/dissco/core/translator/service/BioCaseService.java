@@ -69,7 +69,7 @@ public class BioCaseService implements WebClientService {
   private static final List<String> allowedBasisOfRecord = List.of("PRESERVEDSPECIMEN", "FOSSIL",
       "OTHER", "ROCK", "MINERAL", "METEORITE", "FOSSILSPECIMEN", "LIVINGSPECIMEN", "MATERIALSAMPLE",
       "FOSSIL SPECIMEN", "ROCKSPECIMEN", "ROCK SPECIMEN", "MINERALSPECIMEN", "MINERAL SPECIMEN",
-      "METEORITESPECIMEN", "METEORITE SPECIMEN");
+      "METEORITESPECIMEN", "METEORITE SPECIMEN", "HERBARIUM SHEET", "HERBARIUMSHEET");
 
   private final ObjectMapper mapper;
   private final WebClientProperties webClientProperties;
@@ -203,7 +203,7 @@ public class BioCaseService implements WebClientService {
       }
     } else {
       log.info("Record with record basis: {} and id: {} is ignored ", unit.getRecordBasis(),
-          unit.getUnitGUID());
+          unit.getUnitID());
     }
   }
 

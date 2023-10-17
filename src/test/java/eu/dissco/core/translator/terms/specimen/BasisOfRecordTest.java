@@ -52,6 +52,19 @@ class BasisOfRecordTest {
   }
 
   @Test
+  void testRetrieveFromABCDNotFromControlledVocab() {
+    // Given
+    var unit = MAPPER.createObjectNode();
+    unit.put("abcd:recordBasis", "Herbarium Sheet");
+
+    // When
+    var result = basisOfRecord.retrieveFromABCD(unit);
+
+    // Then
+    assertThat(result).isEqualTo("Preserved specimen");
+  }
+
+  @Test
   void testGetTerm() {
     // When
     var result = basisOfRecord.getTerm();

@@ -54,6 +54,21 @@ class GenusTest {
   }
 
   @Test
+  void testRetrieveFromABCDZoology() {
+    // Given
+    var unit = MAPPER.createObjectNode();
+    unit.put(
+        "result/taxonIdentified/scientificName/nameAtomised/zoological/genusOrMonomial",
+        "Alchemilla");
+
+    // When
+    var result = genus.retrieveFromABCD(unit);
+
+    // Then
+    assertThat(result).isEqualTo("Alchemilla");
+  }
+
+  @Test
   void testGetTerm() {
     // When
     var result = genus.getTerm();

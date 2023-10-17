@@ -34,6 +34,9 @@ public class BiocaseDigitalObjectDirector extends BaseDigitalObjectDirector {
     list.add("abcd:unitIDNumeric");
     list.add("abcd:unitGUID");
     list.add("abcd:recordURI");
+    // For now just look at the two first accession numbers as a shortcut
+    list.add("abcd:specimenUnit/accessions/accessionDateAndAccessionCatalogueAndAccessionNumber/0/value");
+    list.add("abcd:specimenUnit/accessions/accessionDateAndAccessionCatalogueAndAccessionNumber/1/value");
     return list;
   }
 
