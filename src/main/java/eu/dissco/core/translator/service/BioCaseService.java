@@ -177,6 +177,10 @@ public class BioCaseService implements WebClientService {
     if (isAcceptedBasisOfRecord(unit)) {
       try {
         var attributes = digitalSpecimenDirector.assembleDigitalSpecimenTerm(unitAttributes, false);
+        if (attributes.getOdsNormalisedPhysicalSpecimenId() == null
+            || attributes.getDwcInstitutionId() == null) {
+          throw new DiSSCoDataException("Cannot find a physical specimen id for specimen record");
+        }
         var digitalSpecimen = new DigitalSpecimenWrapper(
             attributes.getOdsNormalisedPhysicalSpecimenId(),
             fdoProperties.getDigitalSpecimenType(),

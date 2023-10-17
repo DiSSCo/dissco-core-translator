@@ -20,6 +20,13 @@ class DwcaRepositoryTest extends BaseRepositoryIT {
 
   private DwcaRepository repository;
 
+  private static JsonNode givenRecord(String corruptedValue) {
+    var objectNode = MAPPER.createObjectNode();
+    objectNode.put("someRandomInformation", "someRandomInformation");
+    objectNode.put("someCorruptedInformation", corruptedValue);
+    return objectNode;
+  }
+
   @BeforeEach
   void setup() {
     repository = new DwcaRepository(MAPPER, context);
@@ -47,7 +54,8 @@ class DwcaRepositoryTest extends BaseRepositoryIT {
   void getCorruptCoreRecords() {
     // Given
     var tableName = "XXX-XXX-XXX_Core";
-    var records = List.of(Pair.of(UUID.randomUUID().toString(), givenRecord("\u0000 someCorruptedInformation")));
+    var records = List.of(
+        Pair.of(UUID.randomUUID().toString(), givenRecord("\u0000 someCorruptedInformation")));
     repository.createTable(tableName);
     repository.postRecords(tableName, records);
 
@@ -57,7 +65,8 @@ class DwcaRepositoryTest extends BaseRepositoryIT {
     repository.deleteTable(tableName);
 
     // Then
-    assertThat(results).isEqualTo(Map.of(records.get(0).getLeft(), givenRecord(" someCorruptedInformation")));
+    assertThat(results).isEqualTo(
+        Map.of(records.get(0).getLeft(), givenRecord(" someCorruptedInformation")));
   }
 
   @Test
@@ -102,13 +111,6 @@ class DwcaRepositoryTest extends BaseRepositoryIT {
       records.add(pair);
     }
     return records;
-  }
-
-  private static JsonNode givenRecord(String corruptedValue) {
-    var objectNode = MAPPER.createObjectNode();
-    objectNode.put("someRandomInformation", "someRandomInformation");
-    objectNode.put("someCorruptedInformation", corruptedValue);
-    return objectNode;
   }
 
 }

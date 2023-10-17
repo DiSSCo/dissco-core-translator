@@ -1,5 +1,6 @@
 package eu.dissco.core.translator.service;
 
+import static eu.dissco.core.translator.TestUtils.givenDigitalSpecimen;
 import static eu.dissco.core.translator.TestUtils.loadResourceFile;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -11,13 +12,12 @@ import static org.mockito.Mockito.times;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.dissco.core.translator.TestUtils;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.FdoProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
+import eu.dissco.core.translator.schema.DigitalSpecimen;
 import eu.dissco.core.translator.terms.BaseDigitalObjectDirector;
-import eu.dissco.core.translator.terms.TermMapper;
 import freemarker.cache.FileTemplateLoader;
 import freemarker.template.Configuration;
 import java.io.IOException;
@@ -25,6 +25,8 @@ import javax.xml.stream.XMLInputFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.ClassPathResource;
@@ -52,8 +54,6 @@ class BioCaseServiceTest {
   @Mock
   private ResponseSpec responseSpec;
   @Mock
-  private TermMapper termMapper;
-  @Mock
   private KafkaService kafkaService;
   @Mock
   private EnrichmentProperties enrichmentProperties;
@@ -73,7 +73,6 @@ class BioCaseServiceTest {
 
     // Given
     givenJsonWebclient();
-    given(fdoProperties.getDigitalSpecimenType()).willReturn("Doi of the digital specimen");
   }
 
   @Test
@@ -85,8 +84,9 @@ class BioCaseServiceTest {
             Mono.just(loadResourceFile("biocase/geocase-record-dropped.xml")))
         .willReturn(Mono.just(loadResourceFile("biocase/biocase-206-response.xml")));
     given(properties.getItemsPerRequest()).willReturn(100);
+    given(fdoProperties.getDigitalSpecimenType()).willReturn("Doi of the digital specimen");
     given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
-        .willReturn(TestUtils.givenDigitalSpecimen());
+        .willReturn(givenDigitalSpecimen());
 
     // When
     service.retrieveData();
@@ -105,7 +105,8 @@ class BioCaseServiceTest {
         Mono.just(loadResourceFile("biocase/biocase-206-with-media.xml")));
     given(properties.getItemsPerRequest()).willReturn(101);
     given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
-        .willReturn(TestUtils.givenDigitalSpecimen());
+        .willReturn(givenDigitalSpecimen());
+    given(fdoProperties.getDigitalSpecimenType()).willReturn("Doi of the digital specimen");
     given(fdoProperties.getDigitalMediaObjectType()).willReturn("Doi of the digital media object");
 
     // When
@@ -114,6 +115,26 @@ class BioCaseServiceTest {
     // Then
     then(webClient).should(times(1)).get();
     then(kafkaService).should(times(100)).sendMessage(eq("digital-specimen"), anyString());
+  }
+
+  @ParameterizedTest
+  @MethodSource("eu.dissco.core.translator.TestUtils#provideInvalidDigitalSpecimen")
+  void testRetrieveDataInvalidSpecimen(DigitalSpecimen digitalSpecimen) throws Exception {
+    // Given
+    given(properties.getSourceSystemId()).willReturn("ABC-DDD-ASD");
+    given(repository.getEndpoint(anyString())).willReturn("https://endpoint.com");
+    given(responseSpec.bodyToMono(any(Class.class))).willReturn(
+        Mono.just(loadResourceFile("biocase/biocase-206-with-media.xml")));
+    given(properties.getItemsPerRequest()).willReturn(101);
+    given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
+        .willReturn(digitalSpecimen);
+
+    // When
+    service.retrieveData();
+
+    // Then
+    then(webClient).should(times(1)).get();
+    then(kafkaService).shouldHaveNoInteractions();
   }
 
   private void givenJsonWebclient() {

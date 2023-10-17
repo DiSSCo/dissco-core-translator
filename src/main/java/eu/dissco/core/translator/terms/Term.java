@@ -1,6 +1,7 @@
 package eu.dissco.core.translator.terms;
 
 
+import eu.dissco.core.translator.schema.Identifications;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
@@ -113,9 +114,12 @@ public abstract class Term {
     return null;
   }
 
-  protected eu.dissco.core.translator.schema.Identifications retrieveAcceptedIdentification(
+  protected Identifications retrieveAcceptedIdentification(
       eu.dissco.core.translator.schema.DigitalSpecimen ds) {
     if (ds.getDwcIdentification() != null && !ds.getDwcIdentification().isEmpty()) {
+      if (ds.getDwcIdentification().size() == 1) {
+        return ds.getDwcIdentification().get(0);
+      }
       for (var identification : ds.getDwcIdentification()) {
         if (Boolean.TRUE.equals(identification.getDwcIdentificationVerificationStatus())) {
           return identification;

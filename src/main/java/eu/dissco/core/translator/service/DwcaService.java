@@ -136,18 +136,15 @@ public class DwcaService implements WebClientService {
       throws JsonProcessingException {
     for (var fullRecord : fullRecords) {
       if (fullRecord != null) {
-        var recordId = fullRecord.get(DwcaTerm.ID.prefixedName()).asText();
-        if (!recordNeedsToBeIgnored(fullRecord, recordId)) {
-          try {
-            var digitalObjects = createDigitalObjects(fullRecord);
-            log.debug("Digital Specimen: {}", digitalObjects);
-            var translatorEvent = new DigitalSpecimenEvent(enrichmentServices(false),
-                digitalObjects.getLeft(), digitalObjects.getRight());
-            kafkaService.sendMessage("digital-specimen",
-                mapper.writeValueAsString(translatorEvent));
-          } catch (DiSSCoDataException e) {
-            log.error("Encountered data issue with record: {}", fullRecord, e);
-          }
+        try {
+          var digitalObjects = createDigitalObjects(fullRecord);
+          log.debug("Digital Specimen: {}", digitalObjects);
+          var translatorEvent = new DigitalSpecimenEvent(enrichmentServices(false),
+              digitalObjects.getLeft(), digitalObjects.getRight());
+          kafkaService.sendMessage("digital-specimen",
+              mapper.writeValueAsString(translatorEvent));
+        } catch (DiSSCoDataException e) {
+          log.error("Encountered data issue with record: {}", fullRecord, e);
         }
       }
     }
@@ -214,6 +211,9 @@ public class DwcaService implements WebClientService {
   private Pair<DigitalSpecimenWrapper, List<DigitalMediaObjectEvent>> createDigitalObjects(
       JsonNode fullRecord) throws DiSSCoDataException {
     var ds = digitalSpecimenDirector.assembleDigitalSpecimenTerm(fullRecord, true);
+    if (ds.getOdsNormalisedPhysicalSpecimenId() == null || ds.getDwcInstitutionId() == null) {
+      throw new DiSSCoDataException("Cannot find a physical specimen id for specimen record");
+    }
     return Pair.of(new DigitalSpecimenWrapper(
             ds.getOdsNormalisedPhysicalSpecimenId(),
             fdoProperties.getDigitalSpecimenType(),
@@ -233,29 +233,6 @@ public class DwcaService implements WebClientService {
     return originalData;
   }
 
-  private boolean recordNeedsToBeIgnored(JsonNode fullRecord, String recordId) {
-    var basisOfRecord = fullRecord.get(DwcTerm.basisOfRecord.prefixedName());
-    if (basisOfRecord == null) {
-      log.warn("Record with id: {} is missing the basis of Record, Record will be ignored",
-          recordId);
-      return true;
-    } else {
-      if (!basisOfRecord.isTextual()) {
-        log.warn("Record with id: {} has basis of Record which is not a text field: {}",
-            recordId, basisOfRecord);
-        return true;
-      }
-      var value = basisOfRecord.asText().toUpperCase();
-      if (allowedBasisOfRecord.contains(value)) {
-        return false;
-      } else {
-        log.warn("Record with id: {} has basisOfRecord: {} which is not a physical specimen",
-            recordId, basisOfRecord);
-        return true;
-      }
-    }
-  }
-
   private Collection<List<String>> prepareChunks(List<String> inputList, int chunkSize) {
     AtomicInteger counter = new AtomicInteger();
     return inputList.stream()
@@ -268,7 +245,7 @@ public class DwcaService implements WebClientService {
     createTempTables(tableNames);
     log.info("Created tables: {}", tableNames);
     var idList = postCore(archive.getCore());
-    postExtensions(archive.getExtensions());
+    postExtensions(archive.getExtensions(), idList);
     return idList;
 
   }
@@ -305,16 +282,24 @@ public class DwcaService implements WebClientService {
     var dbRecords = new ArrayList<Pair<String, JsonNode>>();
     var idList = new ArrayList<String>();
     for (var rec : core) {
-      idList.add(rec.id());
-      var json = convertToJson(core, rec);
-      json.set(EXTENSIONS, mapper.createObjectNode());
-      dbRecords.add(Pair.of(rec.id(), json));
-      if (dbRecords.size() % 10000 == 0) {
-        postToDatabase(core, dbRecords);
+      var basisOfRecord = rec.value(DwcTerm.basisOfRecord);
+      if (basisOfRecord != null && allowedBasisOfRecord.contains(basisOfRecord.toUpperCase())) {
+        idList.add(rec.id());
+        var json = convertToJson(core, rec);
+        json.set(EXTENSIONS, mapper.createObjectNode());
+        dbRecords.add(Pair.of(rec.id(), json));
+        if (dbRecords.size() % 10000 == 0) {
+          postToDatabase(core, dbRecords);
+        }
+      } else {
+        log.debug("Record with id: {} has basisOfRecord: {} which is not an accepted basisOfRecord",
+            rec.id(), basisOfRecord);
       }
     }
-    postToDatabase(core, dbRecords);
-    log.info("Finished posting core archive to database");
+    if (!dbRecords.isEmpty()) {
+      postToDatabase(core, dbRecords);
+    }
+    log.info("Finished posting core archive to database, total records: {}", idList.size());
     return idList;
   }
 
@@ -326,16 +311,21 @@ public class DwcaService implements WebClientService {
   }
 
 
-  private void postExtensions(Set<ArchiveFile> extensions) {
+  private void postExtensions(Set<ArchiveFile> extensions, List<String> idsList) {
     var dbRecords = new ArrayList<Pair<String, JsonNode>>();
     for (var extension : extensions) {
+      log.info("Processing records of extension: {}", extension.getRowType().toString());
       for (var rec : extension) {
-        dbRecords.add(Pair.of(rec.id(), convertToJson(extension, rec)));
-        if (dbRecords.size() % 10000 == 0) {
-          postToDatabase(extension, dbRecords);
+        if (idsList.contains(rec.id())) {
+          dbRecords.add(Pair.of(rec.id(), convertToJson(extension, rec)));
+          if (dbRecords.size() % 10000 == 0) {
+            postToDatabase(extension, dbRecords);
+          }
         }
       }
-      postToDatabase(extension, dbRecords);
+      if (!dbRecords.isEmpty()) {
+        postToDatabase(extension, dbRecords);
+      }
     }
     log.info("Finished posting extensions archive to database");
   }
