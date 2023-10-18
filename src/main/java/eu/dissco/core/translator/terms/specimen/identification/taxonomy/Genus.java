@@ -9,7 +9,8 @@ public class Genus extends AbstractTaxonomy {
 
   private final List<String> dwcaTerms = List.of(TERM);
   private final List<String> abcdTerms = List.of(
-      "result/taxonIdentified/scientificName/nameAtomised/botanical/genusOrMonomial");
+      "result/taxonIdentified/scientificName/nameAtomised/botanical/genusOrMonomial",
+      "result/taxonIdentified/scientificName/nameAtomised/zoological/genusOrMonomial");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {

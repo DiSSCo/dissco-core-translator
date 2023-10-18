@@ -553,7 +553,7 @@ public abstract class BaseDigitalObjectDirector {
         || physicalSpecimenIdType.equals(OdsPhysicalSpecimenIdType.RESOLVABLE)) {
       return physicalSpecimenId;
     } else {
-      var minifiedSourceSystemId = sourceSystemId.substring(sourceSystemId.indexOf('/') + 1);
+      var minifiedSourceSystemId = sourceSystemId.substring(sourceSystemId.lastIndexOf('/') + 1);
       return physicalSpecimenId + ":" + minifiedSourceSystemId;
     }
   }

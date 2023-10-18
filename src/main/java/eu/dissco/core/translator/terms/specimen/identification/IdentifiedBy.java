@@ -8,7 +8,7 @@ public class IdentifiedBy extends Term {
 
   public static final String TERM = DWC_PREFIX + "identifiedBy";
 
-  private final List<String> dwcaTerms = List.of(TERM);
+  private final List<String> dwcaTerms = List.of(TERM, "dwc:identifiedByID");
 
   private final List<String> abcdTerms = List.of("identifiers/identifier/0/personName/fullName");
 
