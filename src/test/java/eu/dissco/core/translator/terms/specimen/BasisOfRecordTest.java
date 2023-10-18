@@ -21,6 +21,7 @@ class BasisOfRecordTest {
         Arguments.of("PreservedSpecimen", "PreservedSpecimen"),
         Arguments.of("RockSpecimen", "RockSpecimen"),
         Arguments.of("HerbariumSheet", "Preserved specimen"),
+        Arguments.of("Dried", "Preserved specimen"),
         Arguments.of(null, null)
     );
   }

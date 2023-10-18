@@ -7,10 +7,10 @@ import java.util.List;
 public class BasisOfRecord extends Term {
 
   public static final String TERM = DWC_PREFIX + "basisOfRecord";
-
+  private static final List<String> PRESERVED_SPECIMEN_ALTERNATIVES = List.of("HERBARIUM SHEET",
+      "HERBARIUMSHEET", "DRIED");
   private final List<String> dwcaTerms = List.of(TERM);
   private final List<String> abcdTerms = List.of("abcd:recordBasis");
-  private static final List<String> PRESERVED_SPECIMEN_ALTERNATIVES = List.of("HERBARIUM SHEET", "HERBARIUMSHEET");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {

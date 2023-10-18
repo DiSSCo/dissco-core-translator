@@ -69,7 +69,7 @@ public class BioCaseService implements WebClientService {
   private static final List<String> allowedBasisOfRecord = List.of("PRESERVEDSPECIMEN", "FOSSIL",
       "OTHER", "ROCK", "MINERAL", "METEORITE", "FOSSILSPECIMEN", "LIVINGSPECIMEN", "MATERIALSAMPLE",
       "FOSSIL SPECIMEN", "ROCKSPECIMEN", "ROCK SPECIMEN", "MINERALSPECIMEN", "MINERAL SPECIMEN",
-      "METEORITESPECIMEN", "METEORITE SPECIMEN", "HERBARIUM SHEET", "HERBARIUMSHEET");
+      "METEORITESPECIMEN", "METEORITE SPECIMEN", "HERBARIUM SHEET", "HERBARIUMSHEET", "DRIED");
 
   private final ObjectMapper mapper;
   private final WebClientProperties webClientProperties;
