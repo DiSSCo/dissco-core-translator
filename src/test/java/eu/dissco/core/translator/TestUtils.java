@@ -1,6 +1,7 @@
 package eu.dissco.core.translator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.dissco.core.translator.schema.DigitalEntity;
 import eu.dissco.core.translator.schema.DigitalSpecimen;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -68,6 +69,10 @@ public class TestUtils {
     return new DigitalSpecimen()
         .withOdsNormalisedPhysicalSpecimenId(NORMALISED_PHYSICAL_SPECIMEN_ID)
         .withDwcInstitutionId(INSTITUTION_ID);
+  }
+
+  public static DigitalEntity givenDigitalMediaObjects() {
+    return new DigitalEntity().withAcAccessUri("https://accessuri.eu/image_1");
   }
 
   public static Stream<Arguments> provideInvalidDigitalSpecimen() {

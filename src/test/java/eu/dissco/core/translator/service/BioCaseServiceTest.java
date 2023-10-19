@@ -1,7 +1,9 @@
 package eu.dissco.core.translator.service;
 
+import static eu.dissco.core.translator.TestUtils.givenDigitalMediaObjects;
 import static eu.dissco.core.translator.TestUtils.givenDigitalSpecimen;
 import static eu.dissco.core.translator.TestUtils.loadResourceFile;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -12,10 +14,12 @@ import static org.mockito.Mockito.times;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.FdoProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
+import eu.dissco.core.translator.schema.DigitalEntity;
 import eu.dissco.core.translator.schema.DigitalSpecimen;
 import eu.dissco.core.translator.terms.BaseDigitalObjectDirector;
 import freemarker.cache.FileTemplateLoader;
@@ -27,6 +31,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.ClassPathResource;
@@ -93,7 +98,8 @@ class BioCaseServiceTest {
 
     // Then
     then(webClient).should(times(2)).get();
-    then(kafkaService).should(times(99)).sendMessage(eq("digital-specimen"), anyString());
+    then(kafkaService).should(times(99)).sendMessage(eq("digital-specimen"), any(
+        DigitalSpecimenEvent.class));
   }
 
   @Test
@@ -108,13 +114,41 @@ class BioCaseServiceTest {
         .willReturn(givenDigitalSpecimen());
     given(fdoProperties.getDigitalSpecimenType()).willReturn("Doi of the digital specimen");
     given(fdoProperties.getDigitalMediaObjectType()).willReturn("Doi of the digital media object");
+    given(digitalSpecimenDirector.assembleDigitalMediaObjects(anyBoolean(), any(JsonNode.class),
+        anyString()))
+        .willReturn(givenDigitalMediaObjects());
 
     // When
     service.retrieveData();
 
     // Then
     then(webClient).should(times(1)).get();
-    then(kafkaService).should(times(100)).sendMessage(eq("digital-specimen"), anyString());
+    then(kafkaService).should(times(100)).sendMessage(eq("digital-specimen"), any(
+        DigitalSpecimenEvent.class));
+  }
+
+  @Test
+  void testRetrieveDataInvalidMedia() throws Exception {
+    // Given
+    given(properties.getSourceSystemId()).willReturn("ABC-DDD-ASD");
+    given(repository.getEndpoint(anyString())).willReturn("https://endpoint.com");
+    given(responseSpec.bodyToMono(any(Class.class))).willReturn(
+        Mono.just(loadResourceFile("biocase/biocase-206-with-invalid-media.xml")));
+    given(properties.getItemsPerRequest()).willReturn(101);
+    given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
+        .willReturn(givenDigitalSpecimen());
+    given(fdoProperties.getDigitalSpecimenType()).willReturn("Doi of the digital specimen");
+    given(digitalSpecimenDirector.assembleDigitalMediaObjects(anyBoolean(), any(JsonNode.class),
+        anyString())).willReturn(new DigitalEntity());
+
+    // When
+    service.retrieveData();
+
+    // Then
+    var captor = ArgumentCaptor.forClass(DigitalSpecimenEvent.class);
+    then(webClient).should(times(1)).get();
+    then(kafkaService).should(times(1)).sendMessage(eq("digital-specimen"), captor.capture());
+    assertThat(captor.getValue().digitalMediaObjectEvents()).isEmpty();
   }
 
   @ParameterizedTest
