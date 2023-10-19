@@ -1,12 +1,11 @@
-package eu.dissco.core.translator.terms.specimen.occurence;
+package eu.dissco.core.translator.terms.specimen.identification.taxonomy;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
-public class DataGeneralizations extends Term {
-
-  public static final String TERM = DWC_PREFIX + "dataGeneralizations";
+public class AcceptedNameUsageId extends Term {
+  public static final String TERM = DWC_PREFIX + "acceptedNameUsageId";
 
   private final List<String> dwcaTerms = List.of(TERM);
 
@@ -19,4 +18,6 @@ public class DataGeneralizations extends Term {
   public String getTerm() {
     return TERM;
   }
+
+
 }

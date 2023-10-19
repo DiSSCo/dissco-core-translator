@@ -1,16 +1,17 @@
-package eu.dissco.core.translator.terms.specimen.identification.taxonomy;
+package eu.dissco.core.translator.terms.specimen.identification;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
-public class Subgenus extends AbstractTaxonomy {
+public class IdentificationQualifier extends Term {
 
-  public static final String TERM = DWC_PREFIX + "subgenus";
+  public static final String TERM = DWC_PREFIX + "identificationQualifier";
 
   private final List<String> dwcaTerms = List.of(TERM);
+
   private final List<String> abcdTerms = List.of(
-      "result/taxonIdentified/scientificName/nameAtomised/zoological/subgenus",
-      "result/taxonIdentified/scientificName/nameAtomised/bacterial/subgenus");
+      "result/taxonIdentified/scientificName/identificationQualifier/nameAddendum");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
@@ -19,7 +20,7 @@ public class Subgenus extends AbstractTaxonomy {
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    return searchJsonForTerm(unit, abcdTerms);
+    return super.searchJsonForTerm(unit, abcdTerms);
   }
 
   @Override

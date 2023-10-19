@@ -8,32 +8,32 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class InformationWithheldTest {
+class CasteTest {
 
-  private static final String INFORMATION_WITHHELD_STRING = "Yes";
+  private static final String CASTE_STRING = "queen";
 
-  private final InformationWithheld informationWithheld = new InformationWithheld();
+  private final Caste caste = new Caste();
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
     var unit = MAPPER.createObjectNode();
-    unit.put("dwc:informationWithheld", INFORMATION_WITHHELD_STRING);
+    unit.put("dwc:caste", CASTE_STRING);
 
     // When
-    var result = informationWithheld.retrieveFromDWCA(unit);
+    var result = caste.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(INFORMATION_WITHHELD_STRING);
+    assertThat(result).isEqualTo(CASTE_STRING);
   }
 
   @Test
   void testGetTerm() {
     // When
-    var result = informationWithheld.getTerm();
+    var result = caste.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(InformationWithheld.TERM);
+    assertThat(result).isEqualTo(Caste.TERM);
   }
 
 }

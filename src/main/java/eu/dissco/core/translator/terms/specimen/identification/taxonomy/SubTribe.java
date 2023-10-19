@@ -3,14 +3,12 @@ package eu.dissco.core.translator.terms.specimen.identification.taxonomy;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
 
-public class Subgenus extends AbstractTaxonomy {
+public class SubTribe extends AbstractTaxonomy {
 
-  public static final String TERM = DWC_PREFIX + "subgenus";
+  public static final String TERM = DWC_PREFIX + "subtribe";
 
   private final List<String> dwcaTerms = List.of(TERM);
-  private final List<String> abcdTerms = List.of(
-      "result/taxonIdentified/scientificName/nameAtomised/zoological/subgenus",
-      "result/taxonIdentified/scientificName/nameAtomised/bacterial/subgenus");
+  private final List<String> abcdSplitTerms = List.of("subtribus", "subtribe");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
@@ -19,9 +17,8 @@ public class Subgenus extends AbstractTaxonomy {
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    return searchJsonForTerm(unit, abcdTerms);
+    return super.searchABCDSplitTerms(unit, abcdSplitTerms);
   }
-
   @Override
   public String getTerm() {
     return TERM;
