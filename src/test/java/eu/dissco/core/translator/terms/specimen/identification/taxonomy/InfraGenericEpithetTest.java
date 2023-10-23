@@ -32,7 +32,7 @@ class InfraGenericEpithetTest {
     // Given
     var unit = MAPPER.createObjectNode();
     unit.put(
-        "result/taxonIdentified/scientificName/nameAtomised/zoological/subspeciesEpithet",
+        "result/taxonIdentified/scientificName/nameAtomised/zoological/subgenus",
         infraGenericEpithetString);
 
     // When
