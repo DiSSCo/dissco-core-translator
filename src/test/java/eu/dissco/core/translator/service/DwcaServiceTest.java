@@ -1,7 +1,9 @@
 package eu.dissco.core.translator.service;
 
 import static eu.dissco.core.translator.TestUtils.MAPPER;
+import static eu.dissco.core.translator.TestUtils.givenDigitalMediaObjects;
 import static eu.dissco.core.translator.TestUtils.givenDigitalSpecimen;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -14,12 +16,14 @@ import static org.mockito.Mockito.times;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import eu.dissco.core.translator.TestUtils;
+import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
 import eu.dissco.core.translator.properties.DwcaProperties;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.FdoProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.DwcaRepository;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
+import eu.dissco.core.translator.schema.DigitalEntity;
 import eu.dissco.core.translator.schema.DigitalSpecimen;
 import eu.dissco.core.translator.terms.BaseDigitalObjectDirector;
 import java.io.File;
@@ -35,6 +39,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.ClassPathResource;
@@ -108,7 +113,8 @@ class DwcaServiceTest {
     // Then
     then(dwcaRepository).should(times(2)).createTable(anyString());
     then(dwcaRepository).should(times(2)).postRecords(anyString(), anyList());
-    then(kafkaService).should(times(9)).sendMessage(eq("digital-specimen"), anyString());
+    then(kafkaService).should(times(9)).sendMessage(eq("digital-specimen"), any(
+        DigitalSpecimenEvent.class));
     cleanup("src/test/resources/dwca/test/dwca-rbins.zip");
   }
 
@@ -155,6 +161,8 @@ class DwcaServiceTest {
         givenImageMap(19));
     given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
         .willReturn(givenDigitalSpecimen());
+    given(digitalSpecimenDirector.assembleDigitalMediaObjects(anyBoolean(), any(JsonNode.class),
+        anyString())).willReturn(givenDigitalMediaObjects());
     given(fdoProperties.getDigitalMediaObjectType()).willReturn("Doi of the digital media object");
     given(fdoProperties.getDigitalSpecimenType()).willReturn("Doi of the digital specimen");
 
@@ -164,7 +172,8 @@ class DwcaServiceTest {
     // Then
     then(dwcaRepository).should(times(3)).createTable(anyString());
     then(dwcaRepository).should(times(2)).postRecords(anyString(), anyList());
-    then(kafkaService).should(times(19)).sendMessage(eq("digital-specimen"), anyString());
+    then(kafkaService).should(times(19)).sendMessage(eq("digital-specimen"), any(
+        DigitalSpecimenEvent.class));
     cleanup("src/test/resources/dwca/test/dwca-kew-gbif-media.zip");
   }
 
@@ -188,6 +197,8 @@ class DwcaServiceTest {
         eq("ABC-DDD-ASD_http://rs.tdwg.org/ac/terms/Multimedia"))).willReturn(givenImageMap(14));
     given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
         .willReturn(givenDigitalSpecimen());
+    given(digitalSpecimenDirector.assembleDigitalMediaObjects(anyBoolean(), any(JsonNode.class),
+        anyString())).willReturn(givenDigitalMediaObjects());
     given(fdoProperties.getDigitalMediaObjectType()).willReturn("Doi of the digital media object");
     given(fdoProperties.getDigitalSpecimenType()).willReturn("Doi of the digital specimen");
 
@@ -197,8 +208,34 @@ class DwcaServiceTest {
     // Then
     then(dwcaRepository).should(times(2)).createTable(anyString());
     then(dwcaRepository).should(times(2)).postRecords(anyString(), anyList());
-    then(kafkaService).should(times(14)).sendMessage(eq("digital-specimen"), anyString());
+    then(kafkaService).should(times(14)).sendMessage(eq("digital-specimen"), any(
+        DigitalSpecimenEvent.class));
     cleanup("src/test/resources/dwca/test/dwca-naturalis-ac-media.zip");
+  }
+
+  @Test
+  void testRetrieveDataWithInvalidAcMedia() throws Exception {
+    // Given
+    givenDWCA("/dwca-invalid-ac-media.zip");
+    given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(1));
+    given(dwcaRepository.getRecords(anyList(),
+        eq("ABC-DDD-ASD_http://rs.tdwg.org/ac/terms/Multimedia"))).willReturn(givenImageMap(1));
+    given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
+        .willReturn(givenDigitalSpecimen());
+    given(digitalSpecimenDirector.assembleDigitalMediaObjects(anyBoolean(), any(JsonNode.class),
+        anyString())).willReturn(new DigitalEntity());
+    given(fdoProperties.getDigitalSpecimenType()).willReturn("Doi of the digital specimen");
+
+    // When
+    service.retrieveData();
+
+    // Then
+    var captor = ArgumentCaptor.forClass(DigitalSpecimenEvent.class);
+    then(dwcaRepository).should(times(2)).createTable(anyString());
+    then(dwcaRepository).should(times(2)).postRecords(anyString(), anyList());
+    then(kafkaService).should(times(1)).sendMessage(eq("digital-specimen"), captor.capture());
+    assertThat(captor.getValue().digitalMediaObjectEvents()).isEmpty();
+    cleanup("src/test/resources/dwca/test/dwca-invalid-ac-media.zip");
   }
 
   @Test
@@ -224,6 +261,8 @@ class DwcaServiceTest {
         givenSpecimenMapWithMedia(20));
     given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
         .willReturn(TestUtils.givenDigitalSpecimen());
+    given(digitalSpecimenDirector.assembleDigitalMediaObjects(anyBoolean(), any(JsonNode.class),
+        anyString())).willReturn(givenDigitalMediaObjects());
     given(fdoProperties.getDigitalMediaObjectType()).willReturn("Doi of the digital media object");
     given(fdoProperties.getDigitalSpecimenType()).willReturn("Doi of the digital specimen");
 
@@ -233,7 +272,8 @@ class DwcaServiceTest {
     // Then
     then(dwcaRepository).should(times(1)).createTable(anyString());
     then(dwcaRepository).should(times(1)).postRecords(anyString(), anyList());
-    then(kafkaService).should(times(20)).sendMessage(eq("digital-specimen"), anyString());
+    then(kafkaService).should(times(20)).sendMessage(eq("digital-specimen"), any(
+        DigitalSpecimenEvent.class));
     cleanup("src/test/resources/dwca/test/dwca-lux-associated-media.zip");
   }
 
