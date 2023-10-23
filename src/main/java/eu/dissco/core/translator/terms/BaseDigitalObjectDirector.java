@@ -62,24 +62,35 @@ import eu.dissco.core.translator.terms.specimen.identification.IdentificationVer
 import eu.dissco.core.translator.terms.specimen.identification.IdentifiedBy;
 import eu.dissco.core.translator.terms.specimen.identification.TypeStatus;
 import eu.dissco.core.translator.terms.specimen.identification.VerbatimIdentification;
+import eu.dissco.core.translator.terms.specimen.identification.taxonomy.AcceptedNameUsage;
+import eu.dissco.core.translator.terms.specimen.identification.taxonomy.AcceptedNameUsageId;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Class;
+import eu.dissco.core.translator.terms.specimen.identification.taxonomy.CultivarEpithet;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Family;
+import eu.dissco.core.translator.terms.specimen.identification.taxonomy.GenericName;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Genus;
+import eu.dissco.core.translator.terms.specimen.identification.taxonomy.InfraGenericEpithet;
+import eu.dissco.core.translator.terms.specimen.identification.taxonomy.InfraspecificEpithet;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Kingdom;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.NameAccordingTo;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.NamePublishedInYear;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.NomenclaturalCode;
+import eu.dissco.core.translator.terms.specimen.identification.taxonomy.NomenclaturalStatus;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Order;
+import eu.dissco.core.translator.terms.specimen.identification.taxonomy.OriginalNameUsage;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Phylum;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.ScientificName;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.ScientificNameAuthorship;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.SpecificEpithet;
+import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Subtribe;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Subfamily;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Subgenus;
+import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Superfamily;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.TaxonId;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.TaxonRank;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.TaxonRemarks;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.TaxonomicStatus;
+import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Tribe;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.VernacularName;
 import eu.dissco.core.translator.terms.specimen.location.Continent;
 import eu.dissco.core.translator.terms.specimen.location.Country;
@@ -116,7 +127,8 @@ import eu.dissco.core.translator.terms.specimen.location.georeference.Georeferen
 import eu.dissco.core.translator.terms.specimen.location.georeference.GeoreferencedDate;
 import eu.dissco.core.translator.terms.specimen.location.georeference.PointRadiusSpatialFit;
 import eu.dissco.core.translator.terms.specimen.occurence.Behavior;
-import eu.dissco.core.translator.terms.specimen.occurence.DataGeneralizations;
+import eu.dissco.core.translator.terms.specimen.occurence.Caste;
+import eu.dissco.core.translator.terms.specimen.DataGeneralizations;
 import eu.dissco.core.translator.terms.specimen.occurence.DegreeOfEstablishment;
 import eu.dissco.core.translator.terms.specimen.occurence.EstablishmentMeans;
 import eu.dissco.core.translator.terms.specimen.occurence.EventDate;
@@ -125,7 +137,7 @@ import eu.dissco.core.translator.terms.specimen.occurence.FieldNotes;
 import eu.dissco.core.translator.terms.specimen.occurence.FieldNumber;
 import eu.dissco.core.translator.terms.specimen.occurence.GeoreferenceVerificationStatus;
 import eu.dissco.core.translator.terms.specimen.occurence.Habitat;
-import eu.dissco.core.translator.terms.specimen.occurence.InformationWithheld;
+import eu.dissco.core.translator.terms.specimen.InformationWithheld;
 import eu.dissco.core.translator.terms.specimen.occurence.LifeStage;
 import eu.dissco.core.translator.terms.specimen.occurence.OccurrenceAssertions;
 import eu.dissco.core.translator.terms.specimen.occurence.OccurrenceRemarks;
@@ -138,6 +150,7 @@ import eu.dissco.core.translator.terms.specimen.occurence.SampleSizeUnit;
 import eu.dissco.core.translator.terms.specimen.occurence.SampleSizeValue;
 import eu.dissco.core.translator.terms.specimen.occurence.SamplingProtocol;
 import eu.dissco.core.translator.terms.specimen.occurence.Sex;
+import eu.dissco.core.translator.terms.specimen.occurence.Vitality;
 import eu.dissco.core.translator.terms.specimen.stratigraphy.biostratigraphic.HighestBiostratigraphicZone;
 import eu.dissco.core.translator.terms.specimen.stratigraphy.biostratigraphic.LowestBiostratigraphicZone;
 import eu.dissco.core.translator.terms.specimen.stratigraphy.chronostratigraphic.EarliestAgeOrLowestStage;
@@ -247,7 +260,9 @@ public abstract class BaseDigitalObjectDirector {
         .withDctermsAccessRights(termMapper.retrieveTerm(new AccessRights(), data, dwc))
         .withDctermsRightsHolder(termMapper.retrieveTerm(new RightsHolder(), data, dwc))
         .withDwcDatasetName(termMapper.retrieveTerm(new DatasetName(), data, dwc))
-        .withDwcDisposition(termMapper.retrieveTerm(new Disposition(), data, dwc));
+        .withDwcDisposition(termMapper.retrieveTerm(new Disposition(), data, dwc))
+        .withDwcInformationWithheld(termMapper.retrieveTerm(new InformationWithheld(), data, dwc))
+        .withDwcDataGeneralizations(termMapper.retrieveTerm(new DataGeneralizations(), data, dwc));
   }
 
   private List<EntityRelationships> assembleDigitalSpecimenEntityRelationships(
@@ -313,7 +328,18 @@ public abstract class BaseDigitalObjectDirector {
         .withDwcTaxonomicStatus(termMapper.retrieveTerm(new TaxonomicStatus(), data, dwc))
         .withDwcNomenclaturalCode(termMapper.retrieveTerm(new NomenclaturalCode(), data, dwc))
         .withDwcTaxonRemarks(termMapper.retrieveTerm(new TaxonRemarks(), data, dwc))
-        .withDwcVernacularName(termMapper.retrieveTerm(new VernacularName(), data, dwc));
+        .withDwcVernacularName(termMapper.retrieveTerm(new VernacularName(), data, dwc))
+        .withDwcAcceptedNameUsage(termMapper.retrieveTerm(new AcceptedNameUsage(), data, dwc))
+        .withDwcAcceptedNameUsageID(termMapper.retrieveTerm(new AcceptedNameUsageId(), data, dwc))
+        .withDwcCultivarEpithet(termMapper.retrieveTerm(new CultivarEpithet(), data, dwc))
+        .withDwcGenericName(termMapper.retrieveTerm(new GenericName(), data, dwc))
+        .withDwcInfragenericEpithet(termMapper.retrieveTerm(new InfraGenericEpithet(), data, dwc))
+        .withDwcInfraspecificEpithet(termMapper.retrieveTerm(new InfraspecificEpithet(), data, dwc))
+        .withDwcNomenclaturalStatus(termMapper.retrieveTerm(new NomenclaturalStatus(), data, dwc))
+        .withDwcOriginalNameUsage(termMapper.retrieveTerm(new OriginalNameUsage(), data, dwc))
+        .withDwcSubtribe(termMapper.retrieveTerm(new Subtribe(), data, dwc))
+        .withDwcSuperfamily(termMapper.retrieveTerm(new Superfamily(), data, dwc))
+        .withDwcTribe(termMapper.retrieveTerm(new Tribe(), data, dwc));
     return new Identifications()
         .withDwcIdentificationID(termMapper.retrieveTerm(new IdentificationId(), data, dwc))
         .withDwcIdentificationVerificationStatus(parseToBoolean(new IdentificationVerificationStatus(), data, dwc))
@@ -429,10 +455,10 @@ public abstract class BaseDigitalObjectDirector {
         .withDwcOccurrenceStatus(
             retrieveEnum(new OccurrenceStatus(), data, dwc, DwcOccurrenceStatus.class))
         .withDwcOccurrenceRemarks(termMapper.retrieveTerm(new OccurrenceRemarks(), data, dwc))
-        .withDwcInformationWithheld(termMapper.retrieveTerm(new InformationWithheld(), data, dwc))
-        .withDwcDataGeneralizations(termMapper.retrieveTerm(new DataGeneralizations(), data, dwc))
         .withDwcSampleSizeUnit(termMapper.retrieveTerm(new SampleSizeUnit(), data, dwc))
         .withDwcSampleSizeValue(termMapper.retrieveTerm(new SampleSizeValue(), data, dwc))
+        .withDwcCaste(termMapper.retrieveTerm(new Caste(), data, dwc))
+        .withDwcVitality(termMapper.retrieveTerm(new Vitality(), data, dwc))
         .withLocation(location)
         .withAssertions(assertions);
     return List.of(occurrence);
