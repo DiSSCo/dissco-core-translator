@@ -20,7 +20,6 @@ import eu.dissco.core.translator.domain.DigitalSpecimenWrapper;
 import eu.dissco.core.translator.domain.Enrichment;
 import eu.dissco.core.translator.exception.DiSSCoDataException;
 import eu.dissco.core.translator.exception.DisscoEfgParsingException;
-import eu.dissco.core.translator.exception.OrganisationNotRorId;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.FdoProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
@@ -193,11 +192,10 @@ public class BioCaseService implements WebClientService {
             attributes.getDwcInstitutionId());
         log.debug("Result digital Specimen: {}", digitalSpecimen);
         kafkaService.sendMessage("digital-specimen",
-            mapper.writeValueAsString(
-                new DigitalSpecimenEvent(
-                    enrichmentServices(false),
-                    digitalSpecimen,
-                    digitalMediaObjects)));
+            new DigitalSpecimenEvent(
+                enrichmentServices(false),
+                digitalSpecimen,
+                digitalMediaObjects));
       } catch (DiSSCoDataException e) {
         log.error("Encountered data issue with record: {}", unitAttributes, e);
       }
@@ -334,26 +332,37 @@ public class BioCaseService implements WebClientService {
   }
 
   private List<DigitalMediaObjectEvent> processDigitalMediaObjects(String physicalSpecimenId,
-      Unit unit, String organisationId) throws OrganisationNotRorId {
+      Unit unit, String organisationId) {
     var digitalMediaObjectEvents = new ArrayList<DigitalMediaObjectEvent>();
     if (unit.getMultiMediaObjects() != null && !unit.getMultiMediaObjects().getMultiMediaObject()
         .isEmpty()) {
       for (MultiMediaObject media : unit.getMultiMediaObjects().getMultiMediaObject()) {
-        digitalMediaObjectEvents.add(
-            processDigitalMediaObject(physicalSpecimenId, media, organisationId));
+        try {
+          digitalMediaObjectEvents.add(
+              processDigitalMediaObject(physicalSpecimenId, media, organisationId));
+        } catch (DiSSCoDataException e) {
+          log.error("Failed to process digital media object for digital specimen: {}",
+              physicalSpecimenId, e);
+        }
       }
     }
     return digitalMediaObjectEvents;
   }
 
   private DigitalMediaObjectEvent processDigitalMediaObject(String physicalSpecimenId,
-      MultiMediaObject media, String organisationId) throws OrganisationNotRorId {
+      MultiMediaObject media, String organisationId) throws DiSSCoDataException {
     var attributes = getData(mapper.valueToTree(media));
+    var digitalEntity = digitalSpecimenDirector.assembleDigitalMediaObjects(false, attributes,
+        organisationId);
+    if (digitalEntity.getAcAccessUri() == null) {
+      throw new DiSSCoDataException(
+          "Digital media object for specimen does not have an access uri, ignoring record");
+    }
     var digitalMediaObjectEvent = new DigitalMediaObjectEvent(enrichmentServices(true),
         new DigitalMediaObject(
             fdoProperties.getDigitalMediaObjectType(),
             physicalSpecimenId,
-            digitalSpecimenDirector.assembleDigitalMediaObjects(false, attributes, organisationId),
+            digitalEntity,
             attributes
         ));
     log.debug("Result digital media object: {}", digitalMediaObjectEvent);

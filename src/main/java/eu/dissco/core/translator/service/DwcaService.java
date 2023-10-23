@@ -141,8 +141,7 @@ public class DwcaService implements WebClientService {
           log.debug("Digital Specimen: {}", digitalObjects);
           var translatorEvent = new DigitalSpecimenEvent(enrichmentServices(false),
               digitalObjects.getLeft(), digitalObjects.getRight());
-          kafkaService.sendMessage("digital-specimen",
-              mapper.writeValueAsString(translatorEvent));
+          kafkaService.sendMessage("digital-specimen", translatorEvent);
         } catch (DiSSCoDataException e) {
           log.error("Encountered data issue with record: {}", fullRecord, e);
         }
@@ -173,16 +172,27 @@ public class DwcaService implements WebClientService {
   }
 
   private List<DigitalMediaObjectEvent> extractMultiMedia(String recordId, JsonNode imageArray,
-      String organisationId) throws OrganisationNotRorId {
+      String organisationId) {
     var digitalMediaObjectEvents = new ArrayList<DigitalMediaObjectEvent>();
     for (var image : imageArray) {
-      var digitalMediaObject = new DigitalMediaObjectEvent(enrichmentServices(true),
-          new DigitalMediaObject(
-              fdoProperties.getDigitalMediaObjectType(),
-              recordId,
-              digitalSpecimenDirector.assembleDigitalMediaObjects(true, image, organisationId),
-              image));
-      digitalMediaObjectEvents.add(digitalMediaObject);
+      try {
+        var digitalEntity = digitalSpecimenDirector.assembleDigitalMediaObjects(true, image,
+            organisationId);
+        if (digitalEntity.getAcAccessUri() == null) {
+          throw new DiSSCoDataException(
+              "Digital media object for specimen does not have an access uri, ignoring record");
+        }
+        var digitalMediaObject = new DigitalMediaObjectEvent(enrichmentServices(true),
+            new DigitalMediaObject(
+                fdoProperties.getDigitalMediaObjectType(),
+                recordId,
+                digitalEntity,
+                image));
+        digitalMediaObjectEvents.add(digitalMediaObject);
+      } catch (DiSSCoDataException e) {
+        log.error("Failed to process digital media object for digital specimen: {}",
+            recordId, e);
+      }
     }
     return digitalMediaObjectEvents;
   }
@@ -200,7 +210,7 @@ public class DwcaService implements WebClientService {
               fdoProperties.getDigitalMediaObjectType(),
               recordId,
               digitalSpecimenDirector.assembleDigitalMediaObjects(true,
-                  mapper.valueToTree(mediaUrl),
+                  mapper.createObjectNode().put("ac:accessUri", mediaUrl),
                   organisationId),
               null));
       digitalMediaObjects.add(digitalMediaObject);
