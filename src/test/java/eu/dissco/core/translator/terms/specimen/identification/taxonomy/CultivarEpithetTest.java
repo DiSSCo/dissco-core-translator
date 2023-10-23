@@ -12,19 +12,19 @@ class CultivarEpithetTest {
 
   private final CultivarEpithet cultivarEpithet = new CultivarEpithet();
 
-  private final String cultivaEpithetString = "King Edward";
+  private final String cultivarEpithetString = "King Edward";
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
     var unit = MAPPER.createObjectNode();
-    unit.put("dwc:cultivarEpithet", cultivaEpithetString);
+    unit.put("dwc:cultivarEpithet", cultivarEpithetString);
 
     // When
     var result = cultivarEpithet.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(cultivaEpithetString);
+    assertThat(result).isEqualTo(cultivarEpithetString);
   }
 
   @Test
@@ -33,13 +33,13 @@ class CultivarEpithetTest {
     var unit = MAPPER.createObjectNode();
     unit.put(
         "result/taxonIdentified/scientificName/nameAtomised/botanical/cultivarName",
-        cultivaEpithetString);
+        cultivarEpithetString);
 
     // When
     var result = cultivarEpithet.retrieveFromABCD(unit);
 
     // Then
-    assertThat(result).isEqualTo(cultivaEpithetString);
+    assertThat(result).isEqualTo(cultivarEpithetString);
   }
 
   @Test

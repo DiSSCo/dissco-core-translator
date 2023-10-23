@@ -82,7 +82,7 @@ import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Phylum;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.ScientificName;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.ScientificNameAuthorship;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.SpecificEpithet;
-import eu.dissco.core.translator.terms.specimen.identification.taxonomy.SubTribe;
+import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Subtribe;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Subfamily;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Subgenus;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Superfamily;
@@ -337,7 +337,7 @@ public abstract class BaseDigitalObjectDirector {
         .withDwcInfraspecificEpithet(termMapper.retrieveTerm(new InfraspecificEpithet(), data, dwc))
         .withDwcNomenclaturalStatus(termMapper.retrieveTerm(new NomenclaturalStatus(), data, dwc))
         .withDwcOriginalNameUsage(termMapper.retrieveTerm(new OriginalNameUsage(), data, dwc))
-        .withDwcSubtribe(termMapper.retrieveTerm(new SubTribe(), data, dwc))
+        .withDwcSubtribe(termMapper.retrieveTerm(new Subtribe(), data, dwc))
         .withDwcSuperfamily(termMapper.retrieveTerm(new Superfamily(), data, dwc))
         .withDwcTribe(termMapper.retrieveTerm(new Tribe(), data, dwc));
     return new Identifications()

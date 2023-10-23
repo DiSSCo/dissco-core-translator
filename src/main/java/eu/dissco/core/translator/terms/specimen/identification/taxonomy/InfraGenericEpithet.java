@@ -11,7 +11,7 @@ public class InfraGenericEpithet extends Term {
   private final List<String> dwcaTerms = List.of(TERM);
   private final List<String> abcdTerms = List.of(
       "result/taxonIdentified/scientificName/nameAtomised/botanical/firstEpithet",
-      "result/taxonIdentified/scientificName/nameAtomised/zoological/subspeciesEpithet",
+      "result/taxonIdentified/scientificName/nameAtomised/zoological/subgenus",
       "result/taxonIdentified/scientificName/nameAtomised/bacterial/subgenus");
 
   @Override

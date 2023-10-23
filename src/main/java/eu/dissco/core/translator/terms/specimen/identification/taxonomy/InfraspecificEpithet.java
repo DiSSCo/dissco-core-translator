@@ -10,6 +10,7 @@ public class InfraspecificEpithet extends AbstractTaxonomy {
   private final List<String> dwcaTerms = List.of(TERM);
   private final List<String> abcdTerms = List.of(
       "result/taxonIdentified/scientificName/nameAtomised/botanical/infraspecificEpithet",
+      "result/taxonIdentified/scientificName/nameAtomised/botanical/secondEpithet",
       "result/taxonIdentified/scientificName/nameAtomised/zoological/subspeciesEpithet",
       "result/taxonIdentified/scientificName/nameAtomised/bacterial/subspeciesEpithet");
 

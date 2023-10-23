@@ -3,7 +3,7 @@ package eu.dissco.core.translator.terms.specimen.identification.taxonomy;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
 
-public class SubTribe extends AbstractTaxonomy {
+public class Subtribe extends AbstractTaxonomy {
 
   public static final String TERM = DWC_PREFIX + "subtribe";
 

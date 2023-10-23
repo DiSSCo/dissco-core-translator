@@ -8,22 +8,22 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class SubTribeTest {
+class SubtribeTest {
 
-  private final SubTribe subTribe = new SubTribe();
-  private final String subTribeString = "Plotinini";
+  private final Subtribe subtribe = new Subtribe();
+  private final String subtribeString = "Plotinini";
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
     var unit = MAPPER.createObjectNode();
-    unit.put("dwc:subtribe", subTribeString);
+    unit.put("dwc:subtribe", subtribeString);
 
     // When
-    var result = subTribe.retrieveFromDWCA(unit);
+    var result = subtribe.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(subTribeString);
+    assertThat(result).isEqualTo(subtribeString);
   }
 
   @Test
@@ -35,21 +35,21 @@ class SubTribeTest {
         "subtribus");
     unit.put(
         "result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonName",
-        subTribeString);
+        subtribeString);
 
     // When
-    var result = subTribe.retrieveFromABCD(unit);
+    var result = subtribe.retrieveFromABCD(unit);
 
     // Then
-    assertThat(result).isEqualTo(subTribeString);
+    assertThat(result).isEqualTo(subtribeString);
   }
 
   @Test
   void testGetTerm() {
     // When
-    var result = subTribe.getTerm();
+    var result = subtribe.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(SubTribe.TERM);
+    assertThat(result).isEqualTo(Subtribe.TERM);
   }
 }
