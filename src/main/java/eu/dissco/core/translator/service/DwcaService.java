@@ -216,11 +216,10 @@ public class DwcaService extends WebClientService {
           log.debug("Found the license url in eml: {}", url);
           return url;
         }
-        if (isStartElement(element, "citetitle")) {
-          var title = xmlEventReader.nextEvent().asCharacters().getData();
-          log.debug("Found license title in eml: {}", title);
-          return title;
-        }
+      } else if (isStartElement(element, "citetitle")) {
+        var title = xmlEventReader.nextEvent().asCharacters().getData();
+        log.debug("Found license title in eml: {}", title);
+        return title;
       } else if (isStartElement(element, "pubDate")) {
         return "";
       }
