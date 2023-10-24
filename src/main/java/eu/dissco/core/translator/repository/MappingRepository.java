@@ -32,8 +32,7 @@ public class MappingRepository {
           .where(SOURCE_SYSTEM.ID.eq(sourceSystemId))
           .orderBy(MAPPING.ID, MAPPING.VERSION.desc())
           .fetchOne(this::mapToJson);
-    } catch (
-        DataAccessException ex) {
+    } catch (DataAccessException ex) {
       throw new DisscoRepositoryException("Failed to get mapping from repository", ex);
     }
   }

@@ -58,7 +58,7 @@ import reactor.core.scheduler.Schedulers;
 @Service
 @Profile(Profiles.BIOCASE)
 @RequiredArgsConstructor
-public class BioCaseService implements WebClientService {
+public class BioCaseService extends WebClientService {
 
   private static final String START_AT = "startAt";
   private static final String LIMIT = "limit";
@@ -154,8 +154,7 @@ public class BioCaseService implements WebClientService {
     }
   }
 
-  private void mapABCD206(XMLEventReader xmlEventReader)
-      throws JAXBException {
+  private void mapABCD206(XMLEventReader xmlEventReader) throws JAXBException {
     var context = JAXBContext.newInstance(DataSets.class);
     var datasetsMarshaller = context.createUnmarshaller().unmarshal(xmlEventReader, DataSets.class);
     var datasets = datasetsMarshaller.getValue().getDataSet().get(0);
@@ -321,7 +320,6 @@ public class BioCaseService implements WebClientService {
   private JsonNode cleanupRedundantFields(JsonNode unitData) {
     var multiMediaFields = new ArrayList<String>();
     var data = (ObjectNode) unitData.deepCopy();
-    data.remove("ods:taxonIdentificationIndex");
     data.fields().forEachRemaining(field -> {
       if (field.getKey().startsWith("abcd:multiMediaObjects")) {
         multiMediaFields.add(field.getKey());
@@ -399,15 +397,6 @@ public class BioCaseService implements WebClientService {
   private void updateStartAtParameter(Map<String, Object> templateProperties) {
     templateProperties.put(START_AT,
         ((int) templateProperties.get(START_AT) + (int) templateProperties.get(LIMIT)));
-  }
-
-  private boolean isStartElement(XMLEvent element, String field) {
-    if (element != null) {
-      return element.isStartElement() && element.asStartElement().getName().getLocalPart()
-          .equals(field);
-    } else {
-      return false;
-    }
   }
 
   private ObjectNode getData(JsonNode node) {

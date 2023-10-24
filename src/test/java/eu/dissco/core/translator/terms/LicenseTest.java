@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -14,11 +16,12 @@ class LicenseTest {
 
   private final License license = new License();
 
-  @Test
-  void testRetrieveFromDWCA() {
+  @ParameterizedTest
+  @ValueSource(strings = {"dcterms:license", "eml:license"})
+  void testRetrieveFromDWCA(String term) {
     // Given
     var unit = MAPPER.createObjectNode();
-    unit.put("dcterms:license", LICENSE_STRING);
+    unit.put(term, LICENSE_STRING);
 
     // When
     var result = license.retrieveFromDWCA(unit);
