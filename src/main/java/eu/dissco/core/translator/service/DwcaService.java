@@ -32,6 +32,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -110,14 +111,14 @@ public class DwcaService extends WebClientService {
 
   public void getSpecimenData(List<String> ids, Archive archive) throws JsonProcessingException {
     var batches = prepareChunks(ids, 10000);
-    var emlData = addDatasetMeta(archive.getMetadataLocationFile());
+    var optionalEmlData = addDatasetMeta(archive.getMetadataLocationFile());
     for (var batch : batches) {
       log.info("Starting to get records for: core");
       var specimenData = dwcaRepository.getCoreRecords(batch, getTableName(archive.getCore()));
       log.info("Got specimen batch: {}", batch.size());
       addExtensionsToSpecimen(archive, batch, specimenData);
       log.info("Start translation and publishing of batch: {}", specimenData.values().size());
-      processDigitalSpecimen(specimenData.values(), emlData);
+      processDigitalSpecimen(specimenData.values(), optionalEmlData);
     }
     log.info("Finished processing {} specimens", ids.size());
   }
@@ -143,12 +144,12 @@ public class DwcaService extends WebClientService {
   }
 
   private void processDigitalSpecimen(Collection<ObjectNode> fullRecords,
-      Map<String, String> emlData)
+      Optional<Map<String, String>> optionalEmlData)
       throws JsonProcessingException {
     for (var fullRecord : fullRecords) {
       if (fullRecord != null) {
         try {
-          addEmlDataToRecord(fullRecord, emlData);
+          optionalEmlData.ifPresent(emlData -> addEmlDataToRecord(fullRecord, emlData));
           var digitalObjects = createDigitalObjects(fullRecord);
           log.debug("Digital Specimen: {}", digitalObjects);
           var translatorEvent = new DigitalSpecimenEvent(enrichmentServices(false),
@@ -176,21 +177,19 @@ public class DwcaService extends WebClientService {
     }
   }
 
-  private Map<String, String> addDatasetMeta(File mf) {
+  private Optional<Map<String, String>> addDatasetMeta(File mf) {
     var emlData = new HashMap<String, String>();
-    if (mf.exists()) {
-      try {
-        var xmlEventReader = xmlFactory.createXMLEventReader(new FileInputStream(mf));
-        while (xmlEventReader.hasNext()) {
-          retrieveEmlData(xmlEventReader, emlData);
-        }
-      } catch (FileNotFoundException e) {
-        log.error("Unable to find EML file for dataset at location: {}", mf.getAbsolutePath());
-      } catch (XMLStreamException e) {
-        log.error("Unable to process EML", e);
+    try {
+      var xmlEventReader = xmlFactory.createXMLEventReader(new FileInputStream(mf));
+      while (xmlEventReader.hasNext()) {
+        retrieveEmlData(xmlEventReader, emlData);
       }
+    } catch (FileNotFoundException e) {
+      log.error("Unable to find EML file for dataset at location: {}", mf.getAbsolutePath());
+    } catch (XMLStreamException e) {
+      log.error("Unable to process EML", e);
     }
-    return emlData;
+    return emlData.isEmpty() ? Optional.empty() : Optional.of(emlData);
   }
 
   private void retrieveEmlData(XMLEventReader xmlEventReader, HashMap<String, String> emlData)

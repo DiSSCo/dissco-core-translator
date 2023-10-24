@@ -125,6 +125,29 @@ class DwcaServiceTest {
     cleanup("src/test/resources/dwca/test/dwca-rbins.zip");
   }
 
+  @Test
+  void testRetrieveDataEmlException() throws Exception {
+    // Given
+    var captor = ArgumentCaptor.forClass(JsonNode.class);
+    givenDWCA("/dwca-rbins-invalid-eml.zip");
+    given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(9));
+    given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(captor.capture(), anyBoolean()))
+        .willReturn(givenDigitalSpecimen());
+    given(fdoProperties.getDigitalSpecimenType()).willReturn("Doi of the digital specimen");
+
+    // When
+    service.retrieveData();
+
+    // Then
+    then(dwcaRepository).should(times(2)).createTable(anyString());
+    then(dwcaRepository).should(times(2)).postRecords(anyString(), anyList());
+    then(kafkaService).should(times(9)).sendMessage(eq("digital-specimen"), any(
+        DigitalSpecimenEvent.class));
+    assertThat(captor.getValue().get("eml:license")).isNull();
+    assertThat(captor.getValue().get("eml:title")).isNull();
+    cleanup("src/test/resources/dwca/test/dwca-rbins-invalid-eml.zip");
+  }
+
   @ParameterizedTest
   @MethodSource("eu.dissco.core.translator.TestUtils#provideInvalidDigitalSpecimen")
   void testRetrieveDataInvalidSpecimen(DigitalSpecimen digitalSpecimen) throws Exception {
