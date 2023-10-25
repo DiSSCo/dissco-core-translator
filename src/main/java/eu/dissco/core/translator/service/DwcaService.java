@@ -19,6 +19,9 @@ import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.DwcaRepository;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
 import eu.dissco.core.translator.terms.BaseDigitalObjectDirector;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
@@ -26,12 +29,18 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
@@ -51,7 +60,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Slf4j
 @Profile(Profiles.DWCA)
 @RequiredArgsConstructor
-public class DwcaService implements WebClientService {
+public class DwcaService extends WebClientService {
 
   private static final String DWC_ASSOCIATED_MEDIA = "dwc:associatedMedia";
   private static final String GBIF_MULTIMEDIA = "gbif:Multimedia";
@@ -68,6 +77,7 @@ public class DwcaService implements WebClientService {
   private final DwcaRepository dwcaRepository;
   private final BaseDigitalObjectDirector digitalSpecimenDirector;
   private final FdoProperties fdoProperties;
+  private final XMLInputFactory xmlFactory;
   private final List<String> allowedBasisOfRecord = List.of("PRESERVEDSPECIMEN", "FOSSIL", "OTHER",
       "ROCK", "MINERAL", "METEORITE", "FOSSILSPECIMEN", "LIVINGSPECIMEN", "MATERIALSAMPLE");
 
@@ -101,15 +111,16 @@ public class DwcaService implements WebClientService {
 
   public void getSpecimenData(List<String> ids, Archive archive) throws JsonProcessingException {
     var batches = prepareChunks(ids, 10000);
+    var optionalEmlData = addDatasetMeta(archive.getMetadataLocationFile());
     for (var batch : batches) {
       log.info("Starting to get records for: core");
       var specimenData = dwcaRepository.getCoreRecords(batch, getTableName(archive.getCore()));
       log.info("Got specimen batch: {}", batch.size());
       addExtensionsToSpecimen(archive, batch, specimenData);
       log.info("Start translation and publishing of batch: {}", specimenData.values().size());
-      processDigitalSpecimen(specimenData.values());
+      processDigitalSpecimen(specimenData.values(), optionalEmlData);
     }
-    log.info("Finished processing");
+    log.info("Finished processing {} specimens", ids.size());
   }
 
   private void addExtensionsToSpecimen(Archive archive, List<String> batch,
@@ -132,11 +143,13 @@ public class DwcaService implements WebClientService {
     }
   }
 
-  private void processDigitalSpecimen(Collection<ObjectNode> fullRecords)
+  private void processDigitalSpecimen(Collection<ObjectNode> fullRecords,
+      Optional<Map<String, String>> optionalEmlData)
       throws JsonProcessingException {
     for (var fullRecord : fullRecords) {
       if (fullRecord != null) {
         try {
+          optionalEmlData.ifPresent(emlData -> addEmlDataToRecord(fullRecord, emlData));
           var digitalObjects = createDigitalObjects(fullRecord);
           log.debug("Digital Specimen: {}", digitalObjects);
           var translatorEvent = new DigitalSpecimenEvent(enrichmentServices(false),
@@ -147,6 +160,71 @@ public class DwcaService implements WebClientService {
         }
       }
     }
+  }
+
+  private void retrieveTitle(XMLEventReader xmlEventReader, HashMap<String, String> emlData)
+      throws XMLStreamException {
+    var title = xmlEventReader.nextEvent().asCharacters().getData();
+    if (title != null) {
+      log.debug("Found the dataset title in eml: {}", title);
+      emlData.put("eml:title", title);
+    }
+  }
+
+  private void addEmlDataToRecord(ObjectNode fullRecord, Map<String, String> emlData) {
+    for (var entry : emlData.entrySet()) {
+      fullRecord.put(entry.getKey(), entry.getValue());
+    }
+  }
+
+  private Optional<Map<String, String>> addDatasetMeta(File mf) {
+    var emlData = new HashMap<String, String>();
+    try {
+      var xmlEventReader = xmlFactory.createXMLEventReader(new FileInputStream(mf));
+      while (xmlEventReader.hasNext()) {
+        retrieveEmlData(xmlEventReader, emlData);
+      }
+    } catch (FileNotFoundException e) {
+      log.error("Unable to find EML file for dataset at location: {}", mf.getAbsolutePath());
+    } catch (XMLStreamException e) {
+      log.error("Unable to process EML", e);
+    }
+    return emlData.isEmpty() ? Optional.empty() : Optional.of(emlData);
+  }
+
+  private void retrieveEmlData(XMLEventReader xmlEventReader, HashMap<String, String> emlData)
+      throws XMLStreamException {
+    var element = xmlEventReader.nextEvent();
+    if (isStartElement(element, "title")) {
+      retrieveTitle(xmlEventReader, emlData);
+    }
+    if (isStartElement(element, "intellectualRights")) {
+      var license = retrieveLicense(xmlEventReader);
+      if (license != null) {
+        emlData.put("eml:license", license);
+      }
+    }
+  }
+
+  private String retrieveLicense(XMLEventReader xmlEventReader) throws XMLStreamException {
+    while (xmlEventReader.hasNext()) {
+      var element = xmlEventReader.nextEvent();
+      if (isStartElement(element, "ulink")) {
+        var attribute = element.asStartElement().getAttributeByName(QName.valueOf("url"));
+        if (attribute != null) {
+          var url = attribute.getValue();
+          log.debug("Found the license url in eml: {}", url);
+          return url;
+        }
+      } else if (isStartElement(element, "citetitle")) {
+        var title = xmlEventReader.nextEvent().asCharacters().getData();
+        log.debug("Found license title in eml: {}", title);
+        return title;
+      } else if (isStartElement(element, "pubDate")) {
+        return "";
+      }
+    }
+    return "";
   }
 
   private List<DigitalMediaObjectEvent> processMedia(String recordId, JsonNode fullDigitalSpecimen,

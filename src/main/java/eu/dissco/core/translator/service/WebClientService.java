@@ -1,6 +1,17 @@
 package eu.dissco.core.translator.service;
 
-public interface WebClientService {
+import javax.xml.stream.events.XMLEvent;
 
-  void retrieveData();
+public abstract class WebClientService {
+
+  public abstract void retrieveData();
+
+  protected boolean isStartElement(XMLEvent element, String field) {
+    if (element != null) {
+      return element.isStartElement() && element.asStartElement().getName().getLocalPart()
+          .equals(field);
+    } else {
+      return false;
+    }
+  }
 }

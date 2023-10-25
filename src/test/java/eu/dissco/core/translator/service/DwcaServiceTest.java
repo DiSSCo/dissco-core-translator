@@ -34,6 +34,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.xml.stream.XMLInputFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,6 +56,7 @@ import org.springframework.web.reactive.function.client.WebClient.ResponseSpec;
 @ExtendWith(MockitoExtension.class)
 class DwcaServiceTest {
 
+  private final XMLInputFactory factory = XMLInputFactory.newFactory();
   @Mock
   private WebClientProperties webClientProperties;
   @Mock
@@ -92,7 +94,7 @@ class DwcaServiceTest {
   void setup() {
     this.service = new DwcaService(MAPPER, webClientProperties, webClient, dwcaProperties,
         kafkaService, enrichmentProperties, repository, dwcaRepository,
-        digitalSpecimenDirector, fdoProperties);
+        digitalSpecimenDirector, fdoProperties, factory);
 
     // Given
     givenEndpoint();
@@ -101,9 +103,10 @@ class DwcaServiceTest {
   @Test
   void testRetrieveData() throws Exception {
     // Given
+    var captor = ArgumentCaptor.forClass(JsonNode.class);
     givenDWCA("/dwca-rbins.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(9));
-    given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
+    given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(captor.capture(), anyBoolean()))
         .willReturn(givenDigitalSpecimen());
     given(fdoProperties.getDigitalSpecimenType()).willReturn("Doi of the digital specimen");
 
@@ -115,7 +118,34 @@ class DwcaServiceTest {
     then(dwcaRepository).should(times(2)).postRecords(anyString(), anyList());
     then(kafkaService).should(times(9)).sendMessage(eq("digital-specimen"), any(
         DigitalSpecimenEvent.class));
+    assertThat(captor.getValue().get("eml:license").asText()).isEqualTo(
+        "http://creativecommons.org/licenses/by-nc/4.0/legalcode");
+    assertThat(captor.getValue().get("eml:title").asText()).isEqualTo(
+        "Royal Belgian Institute of Natural Sciences Crustacea collection");
     cleanup("src/test/resources/dwca/test/dwca-rbins.zip");
+  }
+
+  @Test
+  void testRetrieveDataEmlException() throws Exception {
+    // Given
+    var captor = ArgumentCaptor.forClass(JsonNode.class);
+    givenDWCA("/dwca-rbins-invalid-eml.zip");
+    given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(9));
+    given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(captor.capture(), anyBoolean()))
+        .willReturn(givenDigitalSpecimen());
+    given(fdoProperties.getDigitalSpecimenType()).willReturn("Doi of the digital specimen");
+
+    // When
+    service.retrieveData();
+
+    // Then
+    then(dwcaRepository).should(times(2)).createTable(anyString());
+    then(dwcaRepository).should(times(2)).postRecords(anyString(), anyList());
+    then(kafkaService).should(times(9)).sendMessage(eq("digital-specimen"), any(
+        DigitalSpecimenEvent.class));
+    assertThat(captor.getValue().get("eml:license")).isNull();
+    assertThat(captor.getValue().get("eml:title")).isNull();
+    cleanup("src/test/resources/dwca/test/dwca-rbins-invalid-eml.zip");
   }
 
   @ParameterizedTest
