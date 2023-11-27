@@ -32,7 +32,7 @@ class BiocaseDigitalObjectDirectorTest {
   @Mock
   private TermMapper termMapper;
   @Mock
-  private InstitutionNameComponent rorComponent;
+  private InstitutionNameComponent institutionNameComponent;
   @Mock
   private WebClientProperties webClientProperties;
   @Mock
@@ -42,7 +42,7 @@ class BiocaseDigitalObjectDirectorTest {
 
   @BeforeEach
   void setup() {
-    director = new BiocaseDigitalObjectDirector(MAPPER, termMapper, rorComponent,
+    director = new BiocaseDigitalObjectDirector(MAPPER, termMapper, institutionNameComponent,
         webClientProperties,
         fdoProperties);
   }
@@ -51,11 +51,11 @@ class BiocaseDigitalObjectDirectorTest {
   void testConstructAbcdDigitalSpecimen() throws Exception {
     // Given
     var specimenJson = givenAbcdSpecimenJson();
-    given(rorComponent.getRorName(anyString())).willReturn("Tallinn University of Technology");
+    given(institutionNameComponent.getWikiDataName(anyString())).willReturn("Tallinn University of Technology");
     given(termMapper.retrieveTerm(any(Term.class), eq(specimenJson), eq(false))).willReturn(
         "a mapped term");
     given(termMapper.retrieveTerm(any(OrganisationId.class), eq(specimenJson), eq(false)))
-        .willReturn("https://ror.org/0443cwa12");
+        .willReturn("https://www.wikidata.org/wiki/Q604487");
     given(termMapper.retrieveTerm(any(PhysicalSpecimenIdType.class), eq(specimenJson), eq(false)))
         .willReturn(OdsPhysicalSpecimenIdType.RESOLVABLE.value());
 

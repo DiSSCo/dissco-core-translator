@@ -28,7 +28,7 @@ class DwcaDigitalObjectDirectorTest {
   @Mock
   private TermMapper termMapper;
   @Mock
-  private InstitutionNameComponent rorComponent;
+  private InstitutionNameComponent institutionNameComponent;
   @Mock
   private WebClientProperties webClientProperties;
   @Mock
@@ -38,7 +38,7 @@ class DwcaDigitalObjectDirectorTest {
 
   @BeforeEach
   void setup() {
-    director = new DwcaDigitalObjectDirector(MAPPER, termMapper, rorComponent, webClientProperties,
+    director = new DwcaDigitalObjectDirector(MAPPER, termMapper, institutionNameComponent, webClientProperties,
         fdoProperties);
   }
 
@@ -46,7 +46,7 @@ class DwcaDigitalObjectDirectorTest {
   void testConstructDwcaDigitalSpecimen() throws Exception {
     // Given
     var specimenJson = givenDwcaSpecimenJson();
-    given(rorComponent.getRorName(anyString())).willReturn("National Museum of Natural History");
+    given(institutionNameComponent.getRorName(anyString())).willReturn("National Museum of Natural History");
     given(termMapper.retrieveTerm(any(Term.class), eq(specimenJson), eq(true))).willReturn(
         "a mapped term");
     given(termMapper.retrieveTerm(any(OrganisationId.class), eq(specimenJson), eq(true)))
@@ -69,7 +69,7 @@ class DwcaDigitalObjectDirectorTest {
   void testConstructDwcaDigitalMediaObject() throws JsonProcessingException, OrganisationException {
     // Given
     var specimenJson = givenDwcaMediaObject();
-    given(rorComponent.getRorName(anyString())).willReturn("National Museum of Natural History");
+    given(institutionNameComponent.getRorName(anyString())).willReturn("National Museum of Natural History");
     given(termMapper.retrieveTerm(any(Term.class), eq(specimenJson), eq(true))).willReturn(
         "a mapped term");
 
