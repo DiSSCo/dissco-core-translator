@@ -2,8 +2,8 @@ package eu.dissco.core.translator.terms;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.dissco.core.translator.component.RorComponent;
-import eu.dissco.core.translator.exception.OrganisationNotRorId;
+import eu.dissco.core.translator.component.InstitutionNameComponent;
+import eu.dissco.core.translator.exception.OrganisationException;
 import eu.dissco.core.translator.exception.UnknownPhysicalSpecimenIdType;
 import eu.dissco.core.translator.properties.FdoProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
@@ -33,9 +33,11 @@ import eu.dissco.core.translator.terms.media.WebStatement;
 import eu.dissco.core.translator.terms.specimen.AccessRights;
 import eu.dissco.core.translator.terms.specimen.BasisOfRecord;
 import eu.dissco.core.translator.terms.specimen.CollectionId;
+import eu.dissco.core.translator.terms.specimen.DataGeneralizations;
 import eu.dissco.core.translator.terms.specimen.DatasetName;
 import eu.dissco.core.translator.terms.specimen.Disposition;
 import eu.dissco.core.translator.terms.specimen.HasMedia;
+import eu.dissco.core.translator.terms.specimen.InformationWithheld;
 import eu.dissco.core.translator.terms.specimen.LivingOrPreserved;
 import eu.dissco.core.translator.terms.specimen.MarkedAsType;
 import eu.dissco.core.translator.terms.specimen.Modified;
@@ -82,9 +84,9 @@ import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Phylum;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.ScientificName;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.ScientificNameAuthorship;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.SpecificEpithet;
-import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Subtribe;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Subfamily;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Subgenus;
+import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Subtribe;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Superfamily;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.TaxonId;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.TaxonRank;
@@ -128,7 +130,6 @@ import eu.dissco.core.translator.terms.specimen.location.georeference.Georeferen
 import eu.dissco.core.translator.terms.specimen.location.georeference.PointRadiusSpatialFit;
 import eu.dissco.core.translator.terms.specimen.occurence.Behavior;
 import eu.dissco.core.translator.terms.specimen.occurence.Caste;
-import eu.dissco.core.translator.terms.specimen.DataGeneralizations;
 import eu.dissco.core.translator.terms.specimen.occurence.DegreeOfEstablishment;
 import eu.dissco.core.translator.terms.specimen.occurence.EstablishmentMeans;
 import eu.dissco.core.translator.terms.specimen.occurence.EventDate;
@@ -137,7 +138,6 @@ import eu.dissco.core.translator.terms.specimen.occurence.FieldNotes;
 import eu.dissco.core.translator.terms.specimen.occurence.FieldNumber;
 import eu.dissco.core.translator.terms.specimen.occurence.GeoreferenceVerificationStatus;
 import eu.dissco.core.translator.terms.specimen.occurence.Habitat;
-import eu.dissco.core.translator.terms.specimen.InformationWithheld;
 import eu.dissco.core.translator.terms.specimen.occurence.LifeStage;
 import eu.dissco.core.translator.terms.specimen.occurence.OccurrenceAssertions;
 import eu.dissco.core.translator.terms.specimen.occurence.OccurrenceRemarks;
@@ -181,13 +181,13 @@ public abstract class BaseDigitalObjectDirector {
 
   protected final ObjectMapper mapper;
   protected final TermMapper termMapper;
-  private final RorComponent rorComponent;
+  private final InstitutionNameComponent institutionNameComponent;
   private final WebClientProperties webClientProperties;
   private final FdoProperties fdoProperties;
   private final List<String> identifierTerms;
 
   public DigitalSpecimen assembleDigitalSpecimenTerm(JsonNode data, boolean dwc)
-      throws OrganisationNotRorId, UnknownPhysicalSpecimenIdType {
+      throws OrganisationException, UnknownPhysicalSpecimenIdType {
     var ds = assembleDigitalSpecimenTerms(data, dwc);
     ds.withOccurrences(assembleOccurrenceTerms(data, dwc));
     ds.withDwcIdentification(assembleIdentifications(data, dwc));
@@ -231,7 +231,7 @@ public abstract class BaseDigitalObjectDirector {
   }
 
   private DigitalSpecimen assembleDigitalSpecimenTerms(JsonNode data, boolean dwc)
-      throws OrganisationNotRorId, UnknownPhysicalSpecimenIdType {
+      throws OrganisationException, UnknownPhysicalSpecimenIdType {
     var physicalSpecimenIdTypeHarmonised = convertToPhysicalSpecimenIdTypeEnum(
         termMapper.retrieveTerm(new PhysicalSpecimenIdType(), data, dwc));
     var organisationId = termMapper.retrieveTerm(new OrganisationId(), data, dwc);
@@ -254,7 +254,7 @@ public abstract class BaseDigitalObjectDirector {
         .withDwcCollectionId(termMapper.retrieveTerm(new CollectionId(), data, dwc))
         .withDctermsModified(termMapper.retrieveTerm(new Modified(), data, dwc))
         .withDwcInstitutionName(
-            rorComponent.getRorName(minifyOrganisationId(organisationId)))
+            getInstitutionName(organisationId))
         .withDwcRecordedBy(termMapper.retrieveTerm(new RecordedBy(), data, dwc))
         .withDwcBasisOfRecord(termMapper.retrieveTerm(new BasisOfRecord(), data, dwc))
         .withDctermsAccessRights(termMapper.retrieveTerm(new AccessRights(), data, dwc))
@@ -263,6 +263,18 @@ public abstract class BaseDigitalObjectDirector {
         .withDwcDisposition(termMapper.retrieveTerm(new Disposition(), data, dwc))
         .withDwcInformationWithheld(termMapper.retrieveTerm(new InformationWithheld(), data, dwc))
         .withDwcDataGeneralizations(termMapper.retrieveTerm(new DataGeneralizations(), data, dwc));
+  }
+
+  private String getInstitutionName(String organisationId) throws OrganisationException {
+    if (organisationId.startsWith("https://ror.org/")) {
+      var rorId = organisationId.replace("https://ror.org/", "");
+      return institutionNameComponent.getRorName(rorId);
+    } else if (organisationId.startsWith("https://www.wikidata.org/")) {
+      var wikidataId = organisationId.replace("https://www.wikidata.org/wiki/", "");
+      return institutionNameComponent.getWikiDataName(wikidataId);
+    } else {
+      throw new OrganisationException(organisationId + " is not a valid ror or wikidata identifier");
+    }
   }
 
   private List<EntityRelationships> assembleDigitalSpecimenEntityRelationships(
@@ -342,7 +354,8 @@ public abstract class BaseDigitalObjectDirector {
         .withDwcTribe(termMapper.retrieveTerm(new Tribe(), data, dwc));
     return new Identifications()
         .withDwcIdentificationID(termMapper.retrieveTerm(new IdentificationId(), data, dwc))
-        .withDwcIdentificationVerificationStatus(parseToBoolean(new IdentificationVerificationStatus(), data, dwc))
+        .withDwcIdentificationVerificationStatus(
+            parseToBoolean(new IdentificationVerificationStatus(), data, dwc))
         .withDwcTypeStatus(termMapper.retrieveTerm(new TypeStatus(), data, dwc))
         .withDwcDateIdentified(termMapper.retrieveTerm(new DateIdentified(), data, dwc))
         .withDwcIdentifiedBy(termMapper.retrieveTerm(new IdentifiedBy(), data, dwc))
@@ -513,19 +526,11 @@ public abstract class BaseDigitalObjectDirector {
     return null;
   }
 
-  private String minifyOrganisationId(String organisationId) throws OrganisationNotRorId {
-    if (organisationId.startsWith("https://ror.org")) {
-      return organisationId.replace("https://ror.org/", "");
-    } else {
-      throw new OrganisationNotRorId(organisationId + " is not a valid ror");
-    }
-  }
-
   public DigitalEntity assembleDigitalMediaObjects(boolean dwc,
-      JsonNode mediaRecord, String organisationId) throws OrganisationNotRorId {
+      JsonNode mediaRecord, String organisationId) throws OrganisationException {
     var digitalMedioObject = new DigitalEntity()
         .withDwcInstitutionId(organisationId)
-        .withDwcInstitutionName(rorComponent.getRorName(minifyOrganisationId(organisationId)))
+        .withDwcInstitutionName(getInstitutionName(organisationId))
         .withAcAccessUri(termMapper.retrieveTerm(new AccessUri(), mediaRecord, dwc))
         .withDctermsLicense(termMapper.retrieveTerm(new License(), mediaRecord, dwc))
         .withDctermsFormat(termMapper.retrieveTerm(new Format(), mediaRecord, dwc))

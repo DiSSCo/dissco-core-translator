@@ -10,7 +10,7 @@ import static org.mockito.BDDMockito.given;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import eu.dissco.core.translator.component.RorComponent;
+import eu.dissco.core.translator.component.InstitutionNameComponent;
 import eu.dissco.core.translator.exception.UnknownPhysicalSpecimenIdType;
 import eu.dissco.core.translator.properties.FdoProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
@@ -32,7 +32,7 @@ class BiocaseDigitalObjectDirectorTest {
   @Mock
   private TermMapper termMapper;
   @Mock
-  private RorComponent rorComponent;
+  private InstitutionNameComponent rorComponent;
   @Mock
   private WebClientProperties webClientProperties;
   @Mock

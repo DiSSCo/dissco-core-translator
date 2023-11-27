@@ -3,7 +3,7 @@ package eu.dissco.core.translator.terms;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.dissco.core.translator.Profiles;
-import eu.dissco.core.translator.component.RorComponent;
+import eu.dissco.core.translator.component.InstitutionNameComponent;
 import eu.dissco.core.translator.properties.FdoProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.schema.Citations;
@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 public class BiocaseDigitalObjectDirector extends BaseDigitalObjectDirector {
 
   public BiocaseDigitalObjectDirector(ObjectMapper mapper, TermMapper termMapper,
-      RorComponent rorComponent, WebClientProperties webClientProperties,
+      InstitutionNameComponent rorComponent, WebClientProperties webClientProperties,
       FdoProperties fdoProperties) {
     super(mapper, termMapper, rorComponent, webClientProperties, fdoProperties, identifierTerms());
   }
@@ -35,8 +35,10 @@ public class BiocaseDigitalObjectDirector extends BaseDigitalObjectDirector {
     list.add("abcd:unitGUID");
     list.add("abcd:recordURI");
     // For now just look at the two first accession numbers as a shortcut
-    list.add("abcd:specimenUnit/accessions/accessionDateAndAccessionCatalogueAndAccessionNumber/0/value");
-    list.add("abcd:specimenUnit/accessions/accessionDateAndAccessionCatalogueAndAccessionNumber/1/value");
+    list.add(
+        "abcd:specimenUnit/accessions/accessionDateAndAccessionCatalogueAndAccessionNumber/0/value");
+    list.add(
+        "abcd:specimenUnit/accessions/accessionDateAndAccessionCatalogueAndAccessionNumber/1/value");
     return list;
   }
 
@@ -61,7 +63,9 @@ public class BiocaseDigitalObjectDirector extends BaseDigitalObjectDirector {
     var iterateOverElements = true;
     var count = 0;
     while (iterateOverElements) {
-      var identificationNode = getSubJsonAbcd(data, count, "abcd:identifications/identification/");
+      var identificationNode = getSubJsonAbcd(data, count,
+          List.of("abcd:identifications/identification/",
+              "abcd-efg:identifications/identification/"));
       if (!identificationNode.isEmpty()) {
         identifications.add(createIdentification(identificationNode, dwc));
         count++;
@@ -77,7 +81,7 @@ public class BiocaseDigitalObjectDirector extends BaseDigitalObjectDirector {
     var iterateOverElements = true;
     var count = 0;
     while (iterateOverElements) {
-      var citationNode = getSubJsonAbcd(data, count, subPath);
+      var citationNode = getSubJsonAbcd(data, count, List.of(subPath));
       if (!citationNode.isEmpty()) {
         citations.add(super.createCitation(citationNode, dwc));
         count++;
@@ -88,15 +92,15 @@ public class BiocaseDigitalObjectDirector extends BaseDigitalObjectDirector {
     return citations;
   }
 
-  private JsonNode getSubJsonAbcd(JsonNode data, int count, String path) {
+  private JsonNode getSubJsonAbcd(JsonNode data, int count, List<String> paths) {
     var subNode = mapper.createObjectNode();
-    data.fields().forEachRemaining(field -> {
+    paths.forEach(path -> data.fields().forEachRemaining(field -> {
       if (field.getKey().startsWith(path + count)) {
         subNode.set(
             field.getKey().replace(path + count + "/", ""),
             field.getValue());
       }
-    });
+    }));
     return subNode;
   }
 }

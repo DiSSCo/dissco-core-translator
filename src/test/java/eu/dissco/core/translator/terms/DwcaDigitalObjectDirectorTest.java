@@ -9,8 +9,8 @@ import static org.mockito.BDDMockito.given;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import eu.dissco.core.translator.component.RorComponent;
-import eu.dissco.core.translator.exception.OrganisationNotRorId;
+import eu.dissco.core.translator.component.InstitutionNameComponent;
+import eu.dissco.core.translator.exception.OrganisationException;
 import eu.dissco.core.translator.properties.FdoProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.schema.DigitalSpecimen.OdsPhysicalSpecimenIdType;
@@ -28,7 +28,7 @@ class DwcaDigitalObjectDirectorTest {
   @Mock
   private TermMapper termMapper;
   @Mock
-  private RorComponent rorComponent;
+  private InstitutionNameComponent rorComponent;
   @Mock
   private WebClientProperties webClientProperties;
   @Mock
@@ -66,7 +66,7 @@ class DwcaDigitalObjectDirectorTest {
   }
 
   @Test
-  void testConstructDwcaDigitalMediaObject() throws JsonProcessingException, OrganisationNotRorId {
+  void testConstructDwcaDigitalMediaObject() throws JsonProcessingException, OrganisationException {
     // Given
     var specimenJson = givenDwcaMediaObject();
     given(rorComponent.getRorName(anyString())).willReturn("National Museum of Natural History");

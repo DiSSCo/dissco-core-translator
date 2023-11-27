@@ -11,7 +11,7 @@ import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
 import eu.dissco.core.translator.domain.DigitalSpecimenWrapper;
 import eu.dissco.core.translator.domain.Enrichment;
 import eu.dissco.core.translator.exception.DiSSCoDataException;
-import eu.dissco.core.translator.exception.OrganisationNotRorId;
+import eu.dissco.core.translator.exception.OrganisationException;
 import eu.dissco.core.translator.properties.DwcaProperties;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.FdoProperties;
@@ -228,7 +228,7 @@ public class DwcaService extends WebClientService {
   }
 
   private List<DigitalMediaObjectEvent> processMedia(String recordId, JsonNode fullDigitalSpecimen,
-      String organisationId) throws OrganisationNotRorId {
+      String organisationId) throws OrganisationException {
     var extensions = fullDigitalSpecimen.get(EXTENSIONS);
     if (extensions != null) {
       if (extensions.get(AC_MULTIMEDIA) != null) {
@@ -277,7 +277,7 @@ public class DwcaService extends WebClientService {
 
   private List<DigitalMediaObjectEvent> publishAssociatedMedia(String recordId,
       String associatedMedia,
-      String organisationId) throws OrganisationNotRorId {
+      String organisationId) throws OrganisationException {
     log.debug("Digital Specimen: {}, has associatedMedia {}", recordId,
         associatedMedia);
     String[] mediaUrls = associatedMedia.split("\\|");
