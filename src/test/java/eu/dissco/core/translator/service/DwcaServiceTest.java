@@ -148,6 +148,31 @@ class DwcaServiceTest {
     cleanup("src/test/resources/dwca/test/dwca-rbins-invalid-eml.zip");
   }
 
+  @Test
+  void testRetrieveDataWithLicenseText() throws Exception {
+    // Given
+    var captor = ArgumentCaptor.forClass(JsonNode.class);
+    givenDWCA("/dwca-rbins-license-text.zip");
+    given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(9));
+    given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(captor.capture(), anyBoolean()))
+        .willReturn(givenDigitalSpecimen());
+    given(fdoProperties.getDigitalSpecimenType()).willReturn("Doi of the digital specimen");
+
+    // When
+    service.retrieveData();
+
+    // Then
+    then(dwcaRepository).should(times(2)).createTable(anyString());
+    then(dwcaRepository).should(times(2)).postRecords(anyString(), anyList());
+    then(kafkaService).should(times(9)).sendMessage(eq("digital-specimen"), any(
+        DigitalSpecimenEvent.class));
+    assertThat(captor.getValue().get("eml:license").asText()).isEqualTo(
+        "Creative Commons Attribution Non Commercial (CC-BY-NC) 4.0 License");
+    assertThat(captor.getValue().get("eml:title").asText()).isEqualTo(
+        "Royal Belgian Institute of Natural Sciences Crustacea collection");
+    cleanup("src/test/resources/dwca/test/dwca-rbins-license-text.zip");
+  }
+
   @ParameterizedTest
   @MethodSource("eu.dissco.core.translator.TestUtils#provideInvalidDigitalSpecimen")
   void testRetrieveDataInvalidSpecimen(DigitalSpecimen digitalSpecimen) throws Exception {
