@@ -11,12 +11,14 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import eu.dissco.core.translator.TestUtils;
 import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
+import eu.dissco.core.translator.exception.DisscoRepositoryException;
 import eu.dissco.core.translator.properties.DwcaProperties;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.FdoProperties;
@@ -123,6 +125,23 @@ class DwcaServiceTest {
     assertThat(captor.getValue().get("eml:title").asText()).isEqualTo(
         "Royal Belgian Institute of Natural Sciences Crustacea collection");
     cleanup("src/test/resources/dwca/test/dwca-rbins.zip");
+  }
+
+  @Test
+  void testCopyTableFails() throws Exception {
+    // Given
+    givenDWCA("/dwca-rbins.zip");
+    doThrow(new DisscoRepositoryException("", new Exception())).when(dwcaRepository)
+        .postRecords(eq("ABC-DDD-ASD_dwc:Occurrence"), anyList());
+
+    // When
+    service.retrieveData();
+
+    // Then
+    then(dwcaRepository).should(times(2)).deleteTable(any());
+    then(dwcaRepository).should(times(2)).createTable(any());
+    then(dwcaRepository).shouldHaveNoMoreInteractions();
+    then(kafkaService).shouldHaveNoInteractions();
   }
 
   @Test
@@ -364,7 +383,7 @@ class DwcaServiceTest {
   }
 
   @Test
-  void testRetrieveDataNull() throws IOException {
+  void testRetrieveDataNull() throws Exception {
     // Given
     givenDWCA("/dwca-lux-associated-media.zip");
     var nullMap = new HashMap<String, ObjectNode>();

@@ -11,6 +11,7 @@ import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
 import eu.dissco.core.translator.domain.DigitalSpecimenWrapper;
 import eu.dissco.core.translator.domain.Enrichment;
 import eu.dissco.core.translator.exception.DiSSCoDataException;
+import eu.dissco.core.translator.exception.DisscoRepositoryException;
 import eu.dissco.core.translator.exception.OrganisationException;
 import eu.dissco.core.translator.properties.DwcaProperties;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
@@ -101,6 +102,8 @@ public class DwcaService extends WebClientService {
     } catch (InterruptedException e) {
       log.error("Failed during downloading file due to interruption", e);
       Thread.currentThread().interrupt();
+    } catch (DisscoRepositoryException e) {
+      log.error("Failed during batch copy into temp tables with exception", e);
     } finally {
       if (archive != null) {
         log.info("Cleaning up database tables");
@@ -329,14 +332,13 @@ public class DwcaService extends WebClientService {
   }
 
 
-  private List<String> postArchiveToDatabase(Archive archive) {
+  private List<String> postArchiveToDatabase(Archive archive) throws DisscoRepositoryException {
     var tableNames = generateTableNames(archive);
     createTempTables(tableNames);
     log.info("Created tables: {}", tableNames);
     var idList = postCore(archive.getCore());
     postExtensions(archive.getExtensions(), idList);
     return idList;
-
   }
 
   private void removeTempTables(Archive archive) {
@@ -358,7 +360,8 @@ public class DwcaService extends WebClientService {
   private String getTableName(ArchiveFile archiveFile) {
     var fullSourceSystemId = webClientProperties.getSourceSystemId();
     var minifiedSourceSystemId = fullSourceSystemId.substring(fullSourceSystemId.indexOf('/') + 1);
-    return minifiedSourceSystemId + "_" + archiveFile.getRowType().prefixedName();
+    minifiedSourceSystemId = minifiedSourceSystemId.replace("-", "_");
+    return (minifiedSourceSystemId + "_" + archiveFile.getRowType().prefixedName()).toLowerCase().replace(":","_");
   }
 
   private void createTempTables(List<String> tableNames) {
@@ -367,7 +370,7 @@ public class DwcaService extends WebClientService {
     }
   }
 
-  private ArrayList<String> postCore(ArchiveFile core) {
+  private ArrayList<String> postCore(ArchiveFile core) throws DisscoRepositoryException {
     var dbRecords = new ArrayList<Pair<String, JsonNode>>();
     var idList = new ArrayList<String>();
     for (var rec : core) {
@@ -393,14 +396,14 @@ public class DwcaService extends WebClientService {
   }
 
   private void postToDatabase(ArchiveFile archiveFile,
-      ArrayList<Pair<String, JsonNode>> dbRecords) {
+      ArrayList<Pair<String, JsonNode>> dbRecords) throws DisscoRepositoryException {
     log.info("Persisting {} records to database", dbRecords.size());
     dwcaRepository.postRecords(getTableName(archiveFile), dbRecords);
     dbRecords.clear();
   }
 
-
-  private void postExtensions(Set<ArchiveFile> extensions, List<String> idsList) {
+  private void postExtensions(Set<ArchiveFile> extensions, List<String> idsList)
+      throws DisscoRepositoryException {
     var dbRecords = new ArrayList<Pair<String, JsonNode>>();
     for (var extension : extensions) {
       log.info("Processing records of extension: {}", extension.getRowType().toString());
