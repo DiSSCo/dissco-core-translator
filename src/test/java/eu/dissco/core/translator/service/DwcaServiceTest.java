@@ -132,7 +132,7 @@ class DwcaServiceTest {
     // Given
     givenDWCA("/dwca-rbins.zip");
     doThrow(new DisscoRepositoryException("", new Exception())).when(dwcaRepository)
-        .postRecords(eq("ABC-DDD-ASD_dwc:Occurrence"), anyList());
+        .postRecords(eq("abc_ddd_asd_dwc_occurrence"), anyList());
 
     // When
     service.retrieveData();
@@ -229,9 +229,9 @@ class DwcaServiceTest {
     // Given
     givenDWCA("/dwca-kew-gbif-media.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(19));
-    given(dwcaRepository.getRecords(anyList(), eq("ABC-DDD-ASD_dwc:Identification"))).willReturn(
+    given(dwcaRepository.getRecords(anyList(), eq("abc_ddd_asd_dwc_identification"))).willReturn(
         Map.of());
-    given(dwcaRepository.getRecords(anyList(), eq("ABC-DDD-ASD_gbif:Multimedia"))).willReturn(
+    given(dwcaRepository.getRecords(anyList(), eq("abc_ddd_asd_gbif_multimedia"))).willReturn(
         givenImageMap(19));
     given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
         .willReturn(givenDigitalSpecimen());
@@ -267,8 +267,7 @@ class DwcaServiceTest {
     // Given
     givenDWCA("/dwca-naturalis-ac-media.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(14));
-    given(dwcaRepository.getRecords(anyList(),
-        eq("ABC-DDD-ASD_http://rs.tdwg.org/ac/terms/Multimedia"))).willReturn(givenImageMap(14));
+    given(dwcaRepository.getRecords(anyList(), eq("abc_ddd_asd_http___rs_tdwg_org_ac_terms_multimedia"))).willReturn(givenImageMap(14));
     given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
         .willReturn(givenDigitalSpecimen());
     given(digitalSpecimenDirector.assembleDigitalMediaObjects(anyBoolean(), any(JsonNode.class),
@@ -293,7 +292,7 @@ class DwcaServiceTest {
     givenDWCA("/dwca-invalid-ac-media.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(1));
     given(dwcaRepository.getRecords(anyList(),
-        eq("ABC-DDD-ASD_http://rs.tdwg.org/ac/terms/Multimedia"))).willReturn(givenImageMap(1));
+        eq("abc_ddd_asd_http___rs_tdwg_org_ac_terms_multimedia"))).willReturn(givenImageMap(1));
     given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
         .willReturn(givenDigitalSpecimen());
     given(digitalSpecimenDirector.assembleDigitalMediaObjects(anyBoolean(), any(JsonNode.class),

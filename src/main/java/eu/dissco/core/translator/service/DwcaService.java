@@ -359,9 +359,13 @@ public class DwcaService extends WebClientService {
 
   private String getTableName(ArchiveFile archiveFile) {
     var fullSourceSystemId = webClientProperties.getSourceSystemId();
-    var minifiedSourceSystemId = fullSourceSystemId.substring(fullSourceSystemId.indexOf('/') + 1);
-    minifiedSourceSystemId = minifiedSourceSystemId.replace("-", "_");
-    return (minifiedSourceSystemId + "_" + archiveFile.getRowType().prefixedName()).toLowerCase().replace(":","_");
+    var minifiedSourceSystemId = fullSourceSystemId.substring(fullSourceSystemId.indexOf('/') + 1)
+        .replace("-", "_");
+    var tableName = (minifiedSourceSystemId + "_" + archiveFile.getRowType()
+        .prefixedName()).toLowerCase()
+        .replace(":", "_");
+    tableName = tableName.replace("/", "_");
+    return tableName.replace(".", "_");
   }
 
   private void createTempTables(List<String> tableNames) {
