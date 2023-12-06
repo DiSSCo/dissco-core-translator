@@ -11,12 +11,14 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import eu.dissco.core.translator.TestUtils;
 import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
+import eu.dissco.core.translator.exception.DisscoRepositoryException;
 import eu.dissco.core.translator.properties.DwcaProperties;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.FdoProperties;
@@ -126,6 +128,23 @@ class DwcaServiceTest {
   }
 
   @Test
+  void testCopyTableFails() throws Exception {
+    // Given
+    givenDWCA("/dwca-rbins.zip");
+    doThrow(new DisscoRepositoryException("", new Exception())).when(dwcaRepository)
+        .postRecords(eq("abc_ddd_asd_dwc_occurrence"), anyList());
+
+    // When
+    service.retrieveData();
+
+    // Then
+    then(dwcaRepository).should(times(2)).deleteTable(any());
+    then(dwcaRepository).should(times(2)).createTable(any());
+    then(dwcaRepository).shouldHaveNoMoreInteractions();
+    then(kafkaService).shouldHaveNoInteractions();
+  }
+
+  @Test
   void testRetrieveDataEmlException() throws Exception {
     // Given
     var captor = ArgumentCaptor.forClass(JsonNode.class);
@@ -210,9 +229,9 @@ class DwcaServiceTest {
     // Given
     givenDWCA("/dwca-kew-gbif-media.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(19));
-    given(dwcaRepository.getRecords(anyList(), eq("ABC-DDD-ASD_dwc:Identification"))).willReturn(
+    given(dwcaRepository.getRecords(anyList(), eq("abc_ddd_asd_dwc_identification"))).willReturn(
         Map.of());
-    given(dwcaRepository.getRecords(anyList(), eq("ABC-DDD-ASD_gbif:Multimedia"))).willReturn(
+    given(dwcaRepository.getRecords(anyList(), eq("abc_ddd_asd_gbif_multimedia"))).willReturn(
         givenImageMap(19));
     given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
         .willReturn(givenDigitalSpecimen());
@@ -248,8 +267,7 @@ class DwcaServiceTest {
     // Given
     givenDWCA("/dwca-naturalis-ac-media.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(14));
-    given(dwcaRepository.getRecords(anyList(),
-        eq("ABC-DDD-ASD_http://rs.tdwg.org/ac/terms/Multimedia"))).willReturn(givenImageMap(14));
+    given(dwcaRepository.getRecords(anyList(), eq("abc_ddd_asd_http___rs_tdwg_org_ac_terms_multimedia"))).willReturn(givenImageMap(14));
     given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
         .willReturn(givenDigitalSpecimen());
     given(digitalSpecimenDirector.assembleDigitalMediaObjects(anyBoolean(), any(JsonNode.class),
@@ -274,7 +292,7 @@ class DwcaServiceTest {
     givenDWCA("/dwca-invalid-ac-media.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(1));
     given(dwcaRepository.getRecords(anyList(),
-        eq("ABC-DDD-ASD_http://rs.tdwg.org/ac/terms/Multimedia"))).willReturn(givenImageMap(1));
+        eq("abc_ddd_asd_http___rs_tdwg_org_ac_terms_multimedia"))).willReturn(givenImageMap(1));
     given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
         .willReturn(givenDigitalSpecimen());
     given(digitalSpecimenDirector.assembleDigitalMediaObjects(anyBoolean(), any(JsonNode.class),
@@ -364,7 +382,7 @@ class DwcaServiceTest {
   }
 
   @Test
-  void testRetrieveDataNull() throws IOException {
+  void testRetrieveDataNull() throws Exception {
     // Given
     givenDWCA("/dwca-lux-associated-media.zip");
     var nullMap = new HashMap<String, ObjectNode>();

@@ -8,16 +8,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import eu.dissco.core.translator.exception.DisscoRepositoryException;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.JSONB;
-import org.jooq.Query;
 import org.jooq.Record;
 import org.jooq.Table;
 import org.jooq.impl.DSL;
@@ -34,6 +33,7 @@ public class DwcaRepository {
 
   private final ObjectMapper mapper;
   private final DSLContext context;
+  private final BatchInserter batchInserter;
 
   public void createTable(String tableName) {
     context.createTable(tableName)
@@ -43,26 +43,13 @@ public class DwcaRepository {
     context.createIndex().on(tableName, idField.getName()).execute();
   }
 
-
   private Table<Record> getTable(String tableName) {
     return DSL.table("\"" + tableName + "\"");
   }
 
-  public void postRecords(String tableName, List<Pair<String, JsonNode>> dbRecords) {
-    var queries = dbRecords.stream().map(dbRecord -> recordToQuery(tableName, dbRecord)).filter(
-        Objects::nonNull).toList();
-    context.batch(queries).execute();
-  }
-
-  private Query recordToQuery(String tableName, Pair<String, JsonNode> dbRecord) {
-    try {
-      return context.insertInto(getTable(tableName)).set(idField, dbRecord.getLeft())
-          .set(dataField,
-              JSONB.jsonb(mapper.writeValueAsString(dbRecord.getRight()).replace("\\u0000", "")));
-    } catch (JsonProcessingException e) {
-      log.error("Unable to map JSON to JSONB, ignoring record: {}", dbRecord.getLeft(), e);
-      return null;
-    }
+  public void postRecords(String tableName, List<Pair<String, JsonNode>> dbRecords)
+      throws DisscoRepositoryException {
+    batchInserter.batchCopy(tableName, dbRecords);
   }
 
   public Map<String, ObjectNode> getCoreRecords(List<String> batch, String tableName) {
@@ -88,7 +75,6 @@ public class DwcaRepository {
   public void deleteTable(String tableName) {
     context.dropTableIfExists(tableName).execute();
   }
-
 
 }
 

@@ -23,7 +23,7 @@ public class BaseRepositoryIT {
   @Container
   private static final PostgreSQLContainer<?> CONTAINER = new PostgreSQLContainer<>(POSTGIS);
   protected DSLContext context;
-  private HikariDataSource dataSource;
+  protected HikariDataSource dataSource;
 
   @BeforeEach
   void prepareDatabase() {
