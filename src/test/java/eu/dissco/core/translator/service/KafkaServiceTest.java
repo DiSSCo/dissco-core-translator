@@ -48,7 +48,8 @@ class KafkaServiceTest {
     service.sendMessage("test-topic", digitalSpecimenEvent);
 
     // Then
-    then(kafkaTemplate).should().send("test-topic", MAPPER.writeValueAsString(digitalSpecimenEvent));
+    then(kafkaTemplate).should()
+        .send("test-topic", MAPPER.writeValueAsString(digitalSpecimenEvent));
   }
 
   private DigitalSpecimenEvent givenDigitalSpecimenEvent() {

@@ -30,12 +30,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class DwcaRepositoryTest extends BaseRepositoryIT {
 
-  private DwcaRepository repository;
-  @Mock
-  BatchInserter batchInserter;
-
   private final Field<String> idField = DSL.field("dwcaid", String.class);
   private final Field<JSONB> dataField = DSL.field("data", JSONB.class);
+  @Mock
+  BatchInserter batchInserter;
+  private DwcaRepository repository;
 
   private static JsonNode givenRecord(String corruptedValue) {
     var objectNode = MAPPER.createObjectNode();
@@ -52,7 +51,7 @@ class DwcaRepositoryTest extends BaseRepositoryIT {
   @Test
   void getCoreRecords() {
     // Given
-    var tableName = "XXX-XXX-XXX_Core";
+    var tableName = "temp_XXX-XXX-XXX_Core";
     var records = givenCoreRecords();
     repository.createTable(tableName);
     postRecords(tableName, records);
@@ -70,7 +69,7 @@ class DwcaRepositoryTest extends BaseRepositoryIT {
   @Test
   void getCorruptCoreRecords() {
     // Given
-    var tableName = "XXX-XXX-XXX_Core";
+    var tableName = "temp_XXX-XXX-XXX_Core";
     var records = List.of(
         Pair.of(UUID.randomUUID().toString(), givenRecord("\u0000 someCorruptedInformation")));
     repository.createTable(tableName);
@@ -89,7 +88,7 @@ class DwcaRepositoryTest extends BaseRepositoryIT {
   @Test
   void getCoreExtensionRecords() {
     // Given
-    var tableName = "XXX-XXX-XXX_Extension";
+    var tableName = "temp_XXX-XXX-XXX_Extension";
     var records = givenExtensionRecord();
     repository.createTable(tableName);
     postRecords(tableName, records);
@@ -106,7 +105,7 @@ class DwcaRepositoryTest extends BaseRepositoryIT {
   @Test
   void testPostRecords() throws Exception {
     // Given
-    var tableName = "XXX-XXX-XXX_Extension";
+    var tableName = "temp_XXX-XXX-XXX_Extension";
     var records = givenExtensionRecord();
 
     // When
