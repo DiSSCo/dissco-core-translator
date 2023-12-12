@@ -24,16 +24,28 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.postgresql.copy.CopyManager;
 import org.postgresql.core.BaseConnection;
-import org.testcontainers.shaded.org.yaml.snakeyaml.events.Event.ID;
 
 class BatchInserterTest extends BaseRepositoryIT {
 
-  private BatchInserter batchInserter;
-  private static final String TABLE_NAME = "xxx_xxx_xxx_core";
-  private final Field<String> ID_FIELD = DSL.field("dwcaid", String.class);
+  private static final String TABLE_NAME = "temp_xxx_xxx_xxx_core";
   private static final Field<JSONB> DATA_FIELD = DSL.field("data", JSONB.class);
   private static final String RECORD_ID = "11a8a4c6-3188-4305-9688-d68942f4038e";
   private static final String RECORD_ID_ALT = "32546f7b-f62a-4368-8c60-922f1cba4ab8";
+  private final Field<String> ID_FIELD = DSL.field("dwcaid", String.class);
+  private BatchInserter batchInserter;
+
+  private static Stream<Arguments> badStrings() {
+    return Stream.of(
+        Arguments.of("bad \b string"),
+        Arguments.of("bad \f string"),
+        Arguments.of("bad \n string"),
+        Arguments.of("bad \r string"),
+        Arguments.of("bad \t string"),
+        Arguments.of("bad, string"),
+        Arguments.of("bad \\N string")
+    );
+  }
+
   @BeforeEach
   void setup() throws SQLException {
     var connection = DriverManager.getConnection(dataSource.getJdbcUrl(), dataSource.getUsername(),
@@ -48,7 +60,7 @@ class BatchInserterTest extends BaseRepositoryIT {
   }
 
   @AfterEach
-  void destroy(){
+  void destroy() {
     context.dropTableIfExists(getTable(TABLE_NAME)).execute();
   }
 
@@ -113,18 +125,6 @@ class BatchInserterTest extends BaseRepositoryIT {
     assertThat(MAPPER.readTree(result.get(DATA_FIELD).data())).isEqualTo(expected);
   }
 
-  private static Stream<Arguments> badStrings(){
-    return Stream.of(
-        Arguments.of("bad \b string"),
-        Arguments.of("bad \f string"),
-        Arguments.of("bad \n string"),
-        Arguments.of("bad \r string"),
-        Arguments.of("bad \t string"),
-        Arguments.of("bad, string"),
-        Arguments.of("bad \\N string")
-    );
-  }
-
   private List<Pair<String, JsonNode>> givenCoreRecords() {
     var records = new ArrayList<Pair<String, JsonNode>>();
     records.add(Pair.of(RECORD_ID, givenJsonNode()));
@@ -132,7 +132,7 @@ class BatchInserterTest extends BaseRepositoryIT {
     return records;
   }
 
-  private JsonNode givenJsonNode(){
+  private JsonNode givenJsonNode() {
     var node = MAPPER.createObjectNode();
     node.put("test", "test");
     node.put("data", "value");

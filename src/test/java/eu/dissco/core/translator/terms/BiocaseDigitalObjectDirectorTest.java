@@ -51,7 +51,8 @@ class BiocaseDigitalObjectDirectorTest {
   void testConstructAbcdDigitalSpecimen() throws Exception {
     // Given
     var specimenJson = givenAbcdSpecimenJson();
-    given(institutionNameComponent.getWikiDataName(anyString())).willReturn("Tallinn University of Technology");
+    given(institutionNameComponent.getWikiDataName(anyString())).willReturn(
+        "Tallinn University of Technology");
     given(termMapper.retrieveTerm(any(Term.class), eq(specimenJson), eq(false))).willReturn(
         "a mapped term");
     given(termMapper.retrieveTerm(any(OrganisationId.class), eq(specimenJson), eq(false)))

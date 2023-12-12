@@ -361,8 +361,8 @@ public class DwcaService extends WebClientService {
     var fullSourceSystemId = webClientProperties.getSourceSystemId();
     var minifiedSourceSystemId = fullSourceSystemId.substring(fullSourceSystemId.indexOf('/') + 1)
         .replace("-", "_");
-    var tableName = (minifiedSourceSystemId + "_" + archiveFile.getRowType()
-        .prefixedName()).toLowerCase()
+    var tableName = "temp_" + (minifiedSourceSystemId + "_" + archiveFile.getRowType()
+        .simpleName()).toLowerCase()
         .replace(":", "_");
     tableName = tableName.replace("/", "_");
     return tableName.replace(".", "_");
