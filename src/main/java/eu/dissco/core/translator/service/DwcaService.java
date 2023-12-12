@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -112,7 +113,7 @@ public class DwcaService extends WebClientService {
     }
   }
 
-  public void getSpecimenData(List<String> ids, Archive archive) throws JsonProcessingException {
+  public void getSpecimenData(Set<String> ids, Archive archive) throws JsonProcessingException {
     var batches = prepareChunks(ids, 10000);
     var optionalEmlData = addDatasetMeta(archive.getMetadataLocationFile());
     for (var batch : batches) {
@@ -325,14 +326,14 @@ public class DwcaService extends WebClientService {
     return originalData;
   }
 
-  private Collection<List<String>> prepareChunks(List<String> inputList, int chunkSize) {
+  private Collection<List<String>> prepareChunks(Set<String> inputList, int chunkSize) {
     AtomicInteger counter = new AtomicInteger();
     return inputList.stream()
         .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / chunkSize)).values();
   }
 
 
-  private List<String> postArchiveToDatabase(Archive archive) throws DisscoRepositoryException {
+  private Set<String> postArchiveToDatabase(Archive archive) throws DisscoRepositoryException {
     var tableNames = generateTableNames(archive);
     createTempTables(tableNames);
     log.info("Created tables: {}", tableNames);
@@ -374,9 +375,9 @@ public class DwcaService extends WebClientService {
     }
   }
 
-  private ArrayList<String> postCore(ArchiveFile core) throws DisscoRepositoryException {
+  private Set<String> postCore(ArchiveFile core) throws DisscoRepositoryException {
     var dbRecords = new ArrayList<Pair<String, JsonNode>>();
-    var idList = new ArrayList<String>();
+    var idList = new HashSet<String>();
     for (var rec : core) {
       var basisOfRecord = rec.value(DwcTerm.basisOfRecord);
       if (basisOfRecord != null && allowedBasisOfRecord.contains(basisOfRecord.toUpperCase())) {
@@ -406,7 +407,7 @@ public class DwcaService extends WebClientService {
     dbRecords.clear();
   }
 
-  private void postExtensions(Set<ArchiveFile> extensions, List<String> idsList)
+  private void postExtensions(Set<ArchiveFile> extensions, Set<String> idsList)
       throws DisscoRepositoryException {
     var dbRecords = new ArrayList<Pair<String, JsonNode>>();
     for (var extension : extensions) {
