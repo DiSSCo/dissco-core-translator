@@ -237,20 +237,31 @@ public class DwcaService extends WebClientService {
     if (extensions != null) {
       if (extensions.get(AC_MULTIMEDIA) != null) {
         var imageArray = extensions.get(AC_MULTIMEDIA);
+        addDatasetMetadata(imageArray, fullDigitalSpecimen);
         if (imageArray.isArray() && !imageArray.isEmpty()) {
           return extractMultiMedia(recordId, imageArray, organisationId);
         }
       } else if (extensions.get(GBIF_MULTIMEDIA) != null) {
         var imageArray = extensions.get(GBIF_MULTIMEDIA);
+        addDatasetMetadata(imageArray, fullDigitalSpecimen);
         if (imageArray.isArray() && !imageArray.isEmpty()) {
           return extractMultiMedia(recordId, imageArray, organisationId);
         }
       }
     } else if (fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA) != null) {
       return publishAssociatedMedia(recordId,
-          fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA).asText(), organisationId);
+          fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA).asText(), organisationId,
+          fullDigitalSpecimen.get("eml:license"));
     }
     return List.of();
+  }
+
+  private void addDatasetMetadata(JsonNode imageArray, JsonNode fullDigitalSpecimen) {
+    for (JsonNode jsonNode : imageArray) {
+      var imageNode = (ObjectNode) jsonNode;
+      imageNode.set("eml:license", fullDigitalSpecimen.get("eml:license"));
+    }
+
   }
 
   private List<DigitalMediaObjectEvent> extractMultiMedia(String recordId, JsonNode imageArray,
@@ -280,8 +291,8 @@ public class DwcaService extends WebClientService {
   }
 
   private List<DigitalMediaObjectEvent> publishAssociatedMedia(String recordId,
-      String associatedMedia,
-      String organisationId) throws OrganisationException {
+      String associatedMedia, String organisationId, JsonNode licenseNode)
+      throws OrganisationException {
     log.debug("Digital Specimen: {}, has associatedMedia {}", recordId,
         associatedMedia);
     String[] mediaUrls = associatedMedia.split("\\|");
@@ -292,7 +303,8 @@ public class DwcaService extends WebClientService {
               fdoProperties.getDigitalMediaObjectType(),
               recordId,
               digitalSpecimenDirector.assembleDigitalMediaObjects(true,
-                  mapper.createObjectNode().put("ac:accessUri", mediaUrl),
+                  mapper.createObjectNode().put("ac:accessUri", mediaUrl)
+                      .set("eml:license", licenseNode),
                   organisationId),
               null));
       digitalMediaObjects.add(digitalMediaObject);
