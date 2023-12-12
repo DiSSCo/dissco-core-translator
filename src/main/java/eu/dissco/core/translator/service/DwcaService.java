@@ -66,6 +66,7 @@ public class DwcaService extends WebClientService {
 
   private static final String DWC_ASSOCIATED_MEDIA = "dwc:associatedMedia";
   private static final String GBIF_MULTIMEDIA = "gbif:Multimedia";
+  private static final String EML_LICENSE = "eml:license";
   private static final String AC_MULTIMEDIA = "http://rs.tdwg.org/ac/terms/Multimedia";
   private static final String EXTENSIONS = "extensions";
 
@@ -205,7 +206,7 @@ public class DwcaService extends WebClientService {
     if (isStartElement(element, "intellectualRights")) {
       var license = retrieveLicense(xmlEventReader);
       if (license != null) {
-        emlData.put("eml:license", license);
+        emlData.put(EML_LICENSE, license);
       }
     }
   }
@@ -251,7 +252,7 @@ public class DwcaService extends WebClientService {
     } else if (fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA) != null) {
       return publishAssociatedMedia(recordId,
           fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA).asText(), organisationId,
-          fullDigitalSpecimen.get("eml:license"));
+          fullDigitalSpecimen.get(EML_LICENSE));
     }
     return List.of();
   }
@@ -259,7 +260,7 @@ public class DwcaService extends WebClientService {
   private void addDatasetMetadata(JsonNode imageArray, JsonNode fullDigitalSpecimen) {
     for (JsonNode jsonNode : imageArray) {
       var imageNode = (ObjectNode) jsonNode;
-      imageNode.set("eml:license", fullDigitalSpecimen.get("eml:license"));
+      imageNode.set(EML_LICENSE, fullDigitalSpecimen.get(EML_LICENSE));
     }
 
   }
@@ -304,7 +305,7 @@ public class DwcaService extends WebClientService {
               recordId,
               digitalSpecimenDirector.assembleDigitalMediaObjects(true,
                   mapper.createObjectNode().put("ac:accessUri", mediaUrl)
-                      .set("eml:license", licenseNode),
+                      .set(EML_LICENSE, licenseNode),
                   organisationId),
               null));
       digitalMediaObjects.add(digitalMediaObject);
