@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -65,6 +66,7 @@ public class DwcaService extends WebClientService {
 
   private static final String DWC_ASSOCIATED_MEDIA = "dwc:associatedMedia";
   private static final String GBIF_MULTIMEDIA = "gbif:Multimedia";
+  private static final String EML_LICENSE = "eml:license";
   private static final String AC_MULTIMEDIA = "http://rs.tdwg.org/ac/terms/Multimedia";
   private static final String EXTENSIONS = "extensions";
 
@@ -112,7 +114,7 @@ public class DwcaService extends WebClientService {
     }
   }
 
-  public void getSpecimenData(List<String> ids, Archive archive) throws JsonProcessingException {
+  public void getSpecimenData(Set<String> ids, Archive archive) throws JsonProcessingException {
     var batches = prepareChunks(ids, 10000);
     var optionalEmlData = addDatasetMeta(archive.getMetadataLocationFile());
     for (var batch : batches) {
@@ -204,7 +206,7 @@ public class DwcaService extends WebClientService {
     if (isStartElement(element, "intellectualRights")) {
       var license = retrieveLicense(xmlEventReader);
       if (license != null) {
-        emlData.put("eml:license", license);
+        emlData.put(EML_LICENSE, license);
       }
     }
   }
@@ -236,20 +238,31 @@ public class DwcaService extends WebClientService {
     if (extensions != null) {
       if (extensions.get(AC_MULTIMEDIA) != null) {
         var imageArray = extensions.get(AC_MULTIMEDIA);
+        addDatasetMetadata(imageArray, fullDigitalSpecimen);
         if (imageArray.isArray() && !imageArray.isEmpty()) {
           return extractMultiMedia(recordId, imageArray, organisationId);
         }
       } else if (extensions.get(GBIF_MULTIMEDIA) != null) {
         var imageArray = extensions.get(GBIF_MULTIMEDIA);
+        addDatasetMetadata(imageArray, fullDigitalSpecimen);
         if (imageArray.isArray() && !imageArray.isEmpty()) {
           return extractMultiMedia(recordId, imageArray, organisationId);
         }
       }
     } else if (fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA) != null) {
       return publishAssociatedMedia(recordId,
-          fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA).asText(), organisationId);
+          fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA).asText(), organisationId,
+          fullDigitalSpecimen.get(EML_LICENSE));
     }
     return List.of();
+  }
+
+  private void addDatasetMetadata(JsonNode imageArray, JsonNode fullDigitalSpecimen) {
+    for (JsonNode jsonNode : imageArray) {
+      var imageNode = (ObjectNode) jsonNode;
+      imageNode.set(EML_LICENSE, fullDigitalSpecimen.get(EML_LICENSE));
+    }
+
   }
 
   private List<DigitalMediaObjectEvent> extractMultiMedia(String recordId, JsonNode imageArray,
@@ -279,8 +292,8 @@ public class DwcaService extends WebClientService {
   }
 
   private List<DigitalMediaObjectEvent> publishAssociatedMedia(String recordId,
-      String associatedMedia,
-      String organisationId) throws OrganisationException {
+      String associatedMedia, String organisationId, JsonNode licenseNode)
+      throws OrganisationException {
     log.debug("Digital Specimen: {}, has associatedMedia {}", recordId,
         associatedMedia);
     String[] mediaUrls = associatedMedia.split("\\|");
@@ -291,7 +304,8 @@ public class DwcaService extends WebClientService {
               fdoProperties.getDigitalMediaObjectType(),
               recordId,
               digitalSpecimenDirector.assembleDigitalMediaObjects(true,
-                  mapper.createObjectNode().put("ac:accessUri", mediaUrl),
+                  mapper.createObjectNode().put("ac:accessUri", mediaUrl)
+                      .set(EML_LICENSE, licenseNode),
                   organisationId),
               null));
       digitalMediaObjects.add(digitalMediaObject);
@@ -325,14 +339,14 @@ public class DwcaService extends WebClientService {
     return originalData;
   }
 
-  private Collection<List<String>> prepareChunks(List<String> inputList, int chunkSize) {
+  private Collection<List<String>> prepareChunks(Set<String> inputList, int chunkSize) {
     AtomicInteger counter = new AtomicInteger();
     return inputList.stream()
         .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / chunkSize)).values();
   }
 
 
-  private List<String> postArchiveToDatabase(Archive archive) throws DisscoRepositoryException {
+  private Set<String> postArchiveToDatabase(Archive archive) throws DisscoRepositoryException {
     var tableNames = generateTableNames(archive);
     createTempTables(tableNames);
     log.info("Created tables: {}", tableNames);
@@ -374,9 +388,9 @@ public class DwcaService extends WebClientService {
     }
   }
 
-  private ArrayList<String> postCore(ArchiveFile core) throws DisscoRepositoryException {
+  private Set<String> postCore(ArchiveFile core) throws DisscoRepositoryException {
     var dbRecords = new ArrayList<Pair<String, JsonNode>>();
-    var idList = new ArrayList<String>();
+    var idList = new HashSet<String>();
     for (var rec : core) {
       var basisOfRecord = rec.value(DwcTerm.basisOfRecord);
       if (basisOfRecord != null && allowedBasisOfRecord.contains(basisOfRecord.toUpperCase())) {
@@ -406,7 +420,7 @@ public class DwcaService extends WebClientService {
     dbRecords.clear();
   }
 
-  private void postExtensions(Set<ArchiveFile> extensions, List<String> idsList)
+  private void postExtensions(Set<ArchiveFile> extensions, Set<String> idsList)
       throws DisscoRepositoryException {
     var dbRecords = new ArrayList<Pair<String, JsonNode>>();
     for (var extension : extensions) {
