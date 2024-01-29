@@ -2,10 +2,10 @@ package eu.dissco.core.translator.repository;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.exception.DisscoRepositoryException;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.List;
@@ -41,23 +41,16 @@ public class BatchInserter {
 
   public void batchCopy(String tableName, List<Pair<String, JsonNode>> dbRecords)
       throws DisscoRepositoryException {
-    try (var outputStream = new ByteArrayOutputStream();
-        var in = new PipedInputStream();
-        var out = new PipedOutputStream(in)) {
+    byte[] buffer = new byte[2048];
+    try (var baos = new ByteArrayOutputStream();
+        var bos = new BufferedOutputStream(baos, buffer.length)) {
       for (var dbRecord : dbRecords) {
-        outputStream.write(getCsvRow(dbRecord));
+        bos.write(getCsvRow(dbRecord));
       }
-      try (in) {
-        new Thread(() -> {
-          try (out) {
-            outputStream.writeTo(out);
-          } catch (IOException e) {
-            log.error("Error writing to pipe", e);
-          }
-        }).start();
-
+      try (ByteArrayInputStream bais =
+          new ByteArrayInputStream(baos.toByteArray())) {
         copyManager.copyIn("COPY " + tableName
-            + " FROM stdin DELIMITER ','", in);
+            + " FROM stdin DELIMITER ','", bais);
       }
     } catch (IOException | SQLException e) {
       throw new DisscoRepositoryException(
@@ -65,5 +58,6 @@ public class BatchInserter {
               dbRecords.size(), tableName), e);
     }
   }
+
 
 }
