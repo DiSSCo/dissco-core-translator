@@ -47,8 +47,8 @@ public class BatchInserter {
       for (var dbRecord : dbRecords) {
         bos.write(getCsvRow(dbRecord));
       }
-      try (ByteArrayInputStream bais =
-          new ByteArrayInputStream(baos.toByteArray())) {
+      bos.flush();
+      try (var bais = new ByteArrayInputStream(baos.toByteArray())) {
         copyManager.copyIn("COPY " + tableName
             + " FROM stdin DELIMITER ','", bais);
       }
@@ -58,6 +58,5 @@ public class BatchInserter {
               dbRecords.size(), tableName), e);
     }
   }
-
 
 }
