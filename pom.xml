@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.2.0</version>
+    <version>3.2.2</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
   <groupId>eu.dissco.core</groupId>
@@ -21,9 +21,8 @@
     <jaxb2-maven-plugin.version>3.1.0</jaxb2-maven-plugin.version>
     <jakarta.activation-api.version>2.1.2</jakarta.activation-api.version>
     <jakarta.xml.bind-api.version>4.0.1</jakarta.xml.bind-api.version>
-    <logback.version>1.4.12</logback.version>
     <mockito-inline.version>5.2.0</mockito-inline.version>
-    <testcontainers.version>1.19.0</testcontainers.version>
+    <testcontainers.version>1.19.5</testcontainers.version>
     <sonar.organization>dissco</sonar.organization>
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     <sonar.coverage.jacoco.xmlReportPaths>../app-it/target/site/jacoco-aggregate/jacoco.xml
@@ -88,7 +87,7 @@
       <artifactId>dwca-io</artifactId>
       <version>${dwca-io.version}</version>
     </dependency>
-<!--    Needed to overwrite gbif dep with security issue in this lib -->
+    <!--    Needed to overwrite gbif dep with security issue in this lib -->
     <dependency>
       <groupId>commons-beanutils</groupId>
       <artifactId>commons-beanutils</artifactId>
