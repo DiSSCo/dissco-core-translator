@@ -190,7 +190,7 @@ public class BioCaseService extends WebClientService {
             attributes.getOdsNormalisedPhysicalSpecimenId(), unit,
             attributes.getDwcInstitutionId());
         log.debug("Result digital Specimen: {}", digitalSpecimen);
-        kafkaService.sendMessage("digital-specimen",
+        kafkaService.sendMessage(
             new DigitalSpecimenEvent(
                 enrichmentServices(false),
                 digitalSpecimen,

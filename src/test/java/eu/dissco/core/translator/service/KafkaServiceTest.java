@@ -13,6 +13,7 @@ import eu.dissco.core.translator.domain.DigitalMediaObject;
 import eu.dissco.core.translator.domain.DigitalMediaObjectEvent;
 import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
 import eu.dissco.core.translator.domain.DigitalSpecimenWrapper;
+import eu.dissco.core.translator.properties.KafkaProperties;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,11 +31,13 @@ class KafkaServiceTest {
   private KafkaTemplate<String, String> kafkaTemplate;
   @Mock
   private SendResult<String, String> sendResult;
+  @Mock
+  private KafkaProperties properties;
   private KafkaService service;
 
   @BeforeEach
   void setup() {
-    this.service = new KafkaService(kafkaTemplate, MAPPER);
+    this.service = new KafkaService(kafkaTemplate, properties, MAPPER);
   }
 
   @Test
@@ -42,10 +45,11 @@ class KafkaServiceTest {
     // Given
     var x = CompletableFuture.completedFuture(sendResult);
     given(kafkaTemplate.send(anyString(), anyString())).willReturn(x);
+    given(properties.getTopic()).willReturn("test-topic");
     var digitalSpecimenEvent = givenDigitalSpecimenEvent();
 
     // When
-    service.sendMessage("test-topic", digitalSpecimenEvent);
+    service.sendMessage(digitalSpecimenEvent);
 
     // Then
     then(kafkaTemplate).should()

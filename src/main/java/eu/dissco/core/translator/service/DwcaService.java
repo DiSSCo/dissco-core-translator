@@ -159,7 +159,7 @@ public class DwcaService extends WebClientService {
           log.debug("Digital Specimen: {}", digitalObjects);
           var translatorEvent = new DigitalSpecimenEvent(enrichmentServices(false),
               digitalObjects.getLeft(), digitalObjects.getRight());
-          kafkaService.sendMessage("digital-specimen", translatorEvent);
+          kafkaService.sendMessage(translatorEvent);
         } catch (DiSSCoDataException e) {
           log.error("Encountered data issue with record: {}", fullRecord, e);
         }

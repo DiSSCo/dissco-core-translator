@@ -98,7 +98,7 @@ class BioCaseServiceTest {
 
     // Then
     then(webClient).should(times(2)).get();
-    then(kafkaService).should(times(99)).sendMessage(eq("digital-specimen"), any(
+    then(kafkaService).should(times(99)).sendMessage(any(
         DigitalSpecimenEvent.class));
   }
 
@@ -123,7 +123,7 @@ class BioCaseServiceTest {
 
     // Then
     then(webClient).should(times(1)).get();
-    then(kafkaService).should(times(100)).sendMessage(eq("digital-specimen"), any(
+    then(kafkaService).should(times(100)).sendMessage( any(
         DigitalSpecimenEvent.class));
   }
 
@@ -147,7 +147,7 @@ class BioCaseServiceTest {
     // Then
     var captor = ArgumentCaptor.forClass(DigitalSpecimenEvent.class);
     then(webClient).should(times(1)).get();
-    then(kafkaService).should(times(1)).sendMessage(eq("digital-specimen"), captor.capture());
+    then(kafkaService).should(times(1)).sendMessage(captor.capture());
     assertThat(captor.getValue().digitalMediaObjectEvents()).isEmpty();
   }
 
