@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.2.2</version>
+    <version>3.2.3</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
   <groupId>eu.dissco.core</groupId>
@@ -19,6 +19,7 @@
     <dwca-io.version>2.16</dwca-io.version>
     <commons-beanutils.version>1.9.4</commons-beanutils.version>
     <jaxb2-maven-plugin.version>3.1.0</jaxb2-maven-plugin.version>
+    <commons-compress.version>1.26.0</commons-compress.version>
     <jakarta.activation-api.version>2.1.2</jakarta.activation-api.version>
     <jakarta.xml.bind-api.version>4.0.1</jakarta.xml.bind-api.version>
     <mockito-inline.version>5.2.0</mockito-inline.version>
@@ -92,6 +93,12 @@
       <groupId>commons-beanutils</groupId>
       <artifactId>commons-beanutils</artifactId>
       <version>${commons-beanutils.version}</version>
+    </dependency>
+    <!-- Mitigating CVE-2024-25710 and CVE-2024-26308 from the gbif-commons -->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-compress</artifactId>
+      <version>${commons-compress.version}</version>
     </dependency>
     <dependency>
       <groupId>org.codehaus.mojo</groupId>
