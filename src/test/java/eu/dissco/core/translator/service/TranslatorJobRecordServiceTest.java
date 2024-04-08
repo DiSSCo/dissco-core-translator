@@ -18,7 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class TranslatorJobRecordServiceTest {
+class TranslatorJobRecordServiceTest {
 
   @Mock
   private TranslatorJobRecordRepository repository;

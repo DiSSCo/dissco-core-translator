@@ -10,6 +10,7 @@ import static org.mockito.BDDMockito.given;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import eu.dissco.core.translator.component.InstitutionNameComponent;
 import eu.dissco.core.translator.exception.UnknownPhysicalSpecimenIdType;
 import eu.dissco.core.translator.properties.FdoProperties;
@@ -18,7 +19,6 @@ import eu.dissco.core.translator.schema.DigitalSpecimen.OdsPhysicalSpecimenIdTyp
 import eu.dissco.core.translator.terms.specimen.OrganisationId;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenIdType;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
@@ -47,10 +47,11 @@ class BiocaseDigitalObjectDirectorTest {
         fdoProperties);
   }
 
-  @Test
-  void testConstructAbcdDigitalSpecimen() throws Exception {
+  @ParameterizedTest
+  @ValueSource(booleans = {true, false})
+  void testConstructAbcdDigitalSpecimen(boolean verificationStatusPresent) throws Exception {
     // Given
-    var specimenJson = givenAbcdSpecimenJson();
+    var specimenJson = givenAbcdSpecimenJson(verificationStatusPresent);
     given(institutionNameComponent.getWikiDataName(anyString())).willReturn(
         "Tallinn University of Technology");
     given(termMapper.retrieveTerm(any(Term.class), eq(specimenJson), eq(false))).willReturn(
@@ -69,6 +70,8 @@ class BiocaseDigitalObjectDirectorTest {
     assertThat(result.getIdentifiers()).asList().hasSize(4);
     assertThat(result.getCitations()).asList().hasSize(1);
     assertThat(result.getDwcIdentification()).asList().hasSize(1);
+    assertThat(((eu.dissco.core.translator.schema.Identifications) result.getDwcIdentification()
+        .get(0)).getDwcIdentificationVerificationStatus()).isEqualTo(true);
   }
 
   @ParameterizedTest
@@ -76,7 +79,7 @@ class BiocaseDigitalObjectDirectorTest {
   @NullSource
   void testConstructAbcdDigitalSpecimenUnknownIdType(String value) throws Exception {
     // Given
-    var specimenJson = givenAbcdSpecimenJson();
+    var specimenJson = givenAbcdSpecimenJson(true);
     given(termMapper.retrieveTerm(any(PhysicalSpecimenIdType.class), eq(specimenJson), eq(false)))
         .willReturn(value);
 
@@ -85,8 +88,9 @@ class BiocaseDigitalObjectDirectorTest {
         () -> director.assembleDigitalSpecimenTerm(specimenJson, false));
   }
 
-  private JsonNode givenAbcdSpecimenJson() throws JsonProcessingException {
-    return MAPPER.readTree(
+  private JsonNode givenAbcdSpecimenJson(boolean verificationStatusPresent)
+      throws JsonProcessingException {
+    var node = (ObjectNode) MAPPER.readTree(
         """
             {
                   "abcd:unitGUID": "https://geocollections.info/specimen/287",
@@ -102,7 +106,6 @@ class BiocaseDigitalObjectDirectorTest {
                   "abcd:identifications/identification/0/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonRank": "Phylum",
                   "abcd:identifications/identification/0/result/taxonIdentified/scientificName/fullScientificNameString": "Hemiphragma rotundatum",
                   "abcd:identifications/identification/0/result/taxonIdentified/scientificName/nameAtomised/zoological/speciesEpithet": "rotundatum",
-                  "abcd:identifications/identification/0/preferredFlag": true,
                   "abcd:identifications/identification/0/identifiers/identifier/0/personName/fullName": "Ernst",
                   "abcd:identifications/identification/0/identifiers/identifier/0/personName/atomisedName/inheritedName": "Ernst",
                   "abcd:identifications/identification/0/identifiers/identifier/0/personName/atomisedName/givenNames": "Andrej",
@@ -162,8 +165,11 @@ class BiocaseDigitalObjectDirectorTest {
                   "abcd:iprstatements/citations/citation/text": "National geological collection of Estonia; Department of Geology, TalTech",
                   "abcd:iprstatements/citations/citation/language": "en"
                 }
-            """
-    );
+            """);
+    if (verificationStatusPresent) {
+      node.put("abcd:identifications/identification/0/preferredFlag", true);
+    }
+    return node;
   }
 
 }

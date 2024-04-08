@@ -5,7 +5,6 @@ import static eu.dissco.core.translator.database.jooq.Tables.TRANSLATOR_JOB_RECO
 import eu.dissco.core.translator.database.jooq.enums.ErrorCode;
 import eu.dissco.core.translator.database.jooq.enums.JobState;
 import eu.dissco.core.translator.domain.TranslatorJobResult;
-import eu.dissco.core.translator.properties.WebClientProperties;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
