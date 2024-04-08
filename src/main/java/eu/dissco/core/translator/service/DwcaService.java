@@ -5,11 +5,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import eu.dissco.core.translator.Profiles;
+import eu.dissco.core.translator.database.jooq.enums.JobState;
 import eu.dissco.core.translator.domain.DigitalMediaObject;
 import eu.dissco.core.translator.domain.DigitalMediaObjectEvent;
 import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
 import eu.dissco.core.translator.domain.DigitalSpecimenWrapper;
 import eu.dissco.core.translator.domain.Enrichment;
+import eu.dissco.core.translator.domain.TranslatorJobResult;
 import eu.dissco.core.translator.exception.DiSSCoDataException;
 import eu.dissco.core.translator.exception.DisscoRepositoryException;
 import eu.dissco.core.translator.exception.OrganisationException;
@@ -85,9 +87,10 @@ public class DwcaService extends WebClientService {
       "ROCK", "MINERAL", "METEORITE", "FOSSILSPECIMEN", "LIVINGSPECIMEN", "MATERIALSAMPLE");
 
   @Override
-  public void retrieveData() {
+  public TranslatorJobResult retrieveData() {
     var endpoint = repository.getEndpoint(webClientProperties.getSourceSystemId());
     Archive archive = null;
+    var processedRecords = new AtomicInteger(0);
     try {
       var file = Path.of(dwcaProperties.getDownloadFile());
       var buffer = webClient.get().uri(URI.create(endpoint)).retrieve()
@@ -96,25 +99,35 @@ public class DwcaService extends WebClientService {
           .then().toFuture().get();
       archive = DwcFiles.fromCompressed(file, Path.of(dwcaProperties.getTempFolder()));
       var ids = postArchiveToDatabase(archive);
-      getSpecimenData(ids, archive);
+      getSpecimenData(ids, archive, processedRecords);
     } catch (IOException e) {
       log.error("Failed to open output stream for download file", e);
+      return new TranslatorJobResult(JobState.FAILED, processedRecords.get());
     } catch (ExecutionException e) {
       log.error("Failed during downloading file with exception", e.getCause());
+      return new TranslatorJobResult(JobState.FAILED, processedRecords.get());
     } catch (InterruptedException e) {
       log.error("Failed during downloading file due to interruption", e);
       Thread.currentThread().interrupt();
+      return new TranslatorJobResult(JobState.FAILED, processedRecords.get());
     } catch (DisscoRepositoryException e) {
       log.error("Failed during batch copy into temp tables with exception", e);
+      return new TranslatorJobResult(JobState.FAILED, processedRecords.get());
     } finally {
       if (archive != null) {
         log.info("Cleaning up database tables");
         removeTempTables(archive);
       }
     }
+    if (processedRecords.get() == 0) {
+      log.info("No records were successfully processed");
+      return new TranslatorJobResult(JobState.FAILED, processedRecords.get());
+    }
+    return new TranslatorJobResult(JobState.COMPLETED, processedRecords.get());
   }
 
-  public void getSpecimenData(Set<String> ids, Archive archive) throws JsonProcessingException {
+  public void getSpecimenData(Set<String> ids, Archive archive, AtomicInteger processedRecords)
+      throws JsonProcessingException {
     var batches = prepareChunks(ids, 10000);
     var optionalEmlData = addDatasetMeta(archive.getMetadataLocationFile());
     for (var batch : batches) {
@@ -123,7 +136,7 @@ public class DwcaService extends WebClientService {
       log.info("Got specimen batch: {}", batch.size());
       addExtensionsToSpecimen(archive, batch, specimenData);
       log.info("Start translation and publishing of batch: {}", specimenData.values().size());
-      processDigitalSpecimen(specimenData.values(), optionalEmlData);
+      processDigitalSpecimen(specimenData.values(), optionalEmlData, processedRecords);
     }
     log.info("Finished processing {} specimens", ids.size());
   }
@@ -149,7 +162,7 @@ public class DwcaService extends WebClientService {
   }
 
   private void processDigitalSpecimen(Collection<ObjectNode> fullRecords,
-      Optional<Map<String, String>> optionalEmlData)
+      Optional<Map<String, String>> optionalEmlData, AtomicInteger processedRecords)
       throws JsonProcessingException {
     for (var fullRecord : fullRecords) {
       if (fullRecord != null) {
@@ -160,6 +173,7 @@ public class DwcaService extends WebClientService {
           var translatorEvent = new DigitalSpecimenEvent(enrichmentServices(false),
               digitalObjects.getLeft(), digitalObjects.getRight());
           kafkaService.sendMessage(translatorEvent);
+          processedRecords.incrementAndGet();
         } catch (DiSSCoDataException e) {
           log.error("Encountered data issue with record: {}", fullRecord, e);
         }

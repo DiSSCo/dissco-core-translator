@@ -14,7 +14,9 @@ import static org.mockito.Mockito.times;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.dissco.core.translator.database.jooq.enums.JobState;
 import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
+import eu.dissco.core.translator.domain.TranslatorJobResult;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.FdoProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
@@ -83,6 +85,7 @@ class BioCaseServiceTest {
   @Test
   void testRetrieveData206() throws Exception {
     // Given
+    var expectedResult = new TranslatorJobResult(JobState.COMPLETED, 99);
     given(properties.getSourceSystemId()).willReturn("ABC-DDD-ASD");
     given(repository.getEndpoint(anyString())).willReturn("https://endpoint.com");
     given(responseSpec.bodyToMono(any(Class.class))).willReturn(
@@ -94,9 +97,10 @@ class BioCaseServiceTest {
         .willReturn(givenDigitalSpecimen());
 
     // When
-    service.retrieveData();
+    var result = service.retrieveData();
 
     // Then
+    assertThat(result).isEqualTo(expectedResult);
     then(webClient).should(times(2)).get();
     then(kafkaService).should(times(99)).sendMessage(any(
         DigitalSpecimenEvent.class));
@@ -105,6 +109,7 @@ class BioCaseServiceTest {
   @Test
   void testRetrieveDataWithMedia206() throws Exception {
     // Given
+    var expectedResult = new TranslatorJobResult(JobState.COMPLETED, 100);
     given(properties.getSourceSystemId()).willReturn("ABC-DDD-ASD");
     given(repository.getEndpoint(anyString())).willReturn("https://endpoint.com");
     given(responseSpec.bodyToMono(any(Class.class))).willReturn(
@@ -119,9 +124,10 @@ class BioCaseServiceTest {
         .willReturn(givenDigitalMediaObjects());
 
     // When
-    service.retrieveData();
+    var result = service.retrieveData();
 
     // Then
+    assertThat(result).isEqualTo(expectedResult);
     then(webClient).should(times(1)).get();
     then(kafkaService).should(times(100)).sendMessage( any(
         DigitalSpecimenEvent.class));
@@ -130,6 +136,7 @@ class BioCaseServiceTest {
   @Test
   void testRetrieveDataInvalidMedia() throws Exception {
     // Given
+    var expectedResult = new TranslatorJobResult(JobState.COMPLETED, 1);
     given(properties.getSourceSystemId()).willReturn("ABC-DDD-ASD");
     given(repository.getEndpoint(anyString())).willReturn("https://endpoint.com");
     given(responseSpec.bodyToMono(any(Class.class))).willReturn(
@@ -142,9 +149,10 @@ class BioCaseServiceTest {
         anyString())).willReturn(new DigitalEntity());
 
     // When
-    service.retrieveData();
+    var result = service.retrieveData();
 
     // Then
+    assertThat(result).isEqualTo(expectedResult);
     var captor = ArgumentCaptor.forClass(DigitalSpecimenEvent.class);
     then(webClient).should(times(1)).get();
     then(kafkaService).should(times(1)).sendMessage(captor.capture());
@@ -155,6 +163,7 @@ class BioCaseServiceTest {
   @MethodSource("eu.dissco.core.translator.TestUtils#provideInvalidDigitalSpecimen")
   void testRetrieveDataInvalidSpecimen(DigitalSpecimen digitalSpecimen) throws Exception {
     // Given
+    var expectedResult = new TranslatorJobResult(JobState.FAILED, 0);
     given(properties.getSourceSystemId()).willReturn("ABC-DDD-ASD");
     given(repository.getEndpoint(anyString())).willReturn("https://endpoint.com");
     given(responseSpec.bodyToMono(any(Class.class))).willReturn(
@@ -164,9 +173,10 @@ class BioCaseServiceTest {
         .willReturn(digitalSpecimen);
 
     // When
-    service.retrieveData();
+    var result = service.retrieveData();
 
     // Then
+    assertThat(result).isEqualTo(expectedResult);
     then(webClient).should(times(1)).get();
     then(kafkaService).shouldHaveNoInteractions();
   }
