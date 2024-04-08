@@ -71,7 +71,7 @@ class BiocaseDigitalObjectDirectorTest {
     assertThat(result.getCitations()).asList().hasSize(1);
     assertThat(result.getDwcIdentification()).asList().hasSize(1);
     assertThat(((eu.dissco.core.translator.schema.Identifications) result.getDwcIdentification()
-        .get(0)).getDwcIdentificationVerificationStatus()).isEqualTo(true);
+        .get(0)).getDwcIdentificationVerificationStatus()).isTrue();
   }
 
   @ParameterizedTest
