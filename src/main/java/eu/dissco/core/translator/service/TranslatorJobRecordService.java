@@ -31,7 +31,7 @@ public class TranslatorJobRecordService {
       log.info("Job with id {} finished successfully. Processed {} records", jobId,
           processingResult.processedRecords());
       repository.updateJobState(jobId, processingResult, null);
-    } else if (jobState == JobState.FAILED) {
+    } else {
       log.info("Job with id {} failed. Processed {} records", jobId,
           processingResult.processedRecords());
       repository.updateJobState(jobId, processingResult, ErrorCode.DISSCO_EXCEPTION);
