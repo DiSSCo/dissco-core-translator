@@ -78,6 +78,11 @@ public class DwcaDigitalObjectDirector extends BaseDigitalObjectDirector {
     } else {
       mappedIdentifications.add(createIdentification(data, dwc));
     }
+    if (mappedIdentifications.size() == 1
+        && mappedIdentifications.get(0).getDwcIdentificationVerificationStatus() == null) {
+      //If there is only one identification, and it doesn't have a verification status, set it to true
+      mappedIdentifications.get(0).setDwcIdentificationVerificationStatus(Boolean.TRUE);
+    }
     return mappedIdentifications;
   }
 }

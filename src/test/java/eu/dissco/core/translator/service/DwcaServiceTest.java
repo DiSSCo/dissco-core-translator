@@ -17,7 +17,9 @@ import static org.mockito.Mockito.times;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import eu.dissco.core.translator.TestUtils;
+import eu.dissco.core.translator.database.jooq.enums.JobState;
 import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
+import eu.dissco.core.translator.domain.TranslatorJobResult;
 import eu.dissco.core.translator.exception.DisscoRepositoryException;
 import eu.dissco.core.translator.properties.DwcaProperties;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
@@ -105,6 +107,7 @@ class DwcaServiceTest {
   @Test
   void testRetrieveData() throws Exception {
     // Given
+    var expected = new TranslatorJobResult(JobState.COMPLETED, 9);
     var captor = ArgumentCaptor.forClass(JsonNode.class);
     givenDWCA("/dwca-rbins.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(9));
@@ -113,9 +116,10 @@ class DwcaServiceTest {
     given(fdoProperties.getDigitalSpecimenType()).willReturn("Doi of the digital specimen");
 
     // When
-    service.retrieveData();
+    var result = service.retrieveData();
 
     // Then
+    assertThat(result).isEqualTo(expected);
     then(dwcaRepository).should(times(2)).createTable(anyString());
     then(dwcaRepository).should(times(2)).postRecords(anyString(), anyList());
     then(kafkaService).should(times(9)).sendMessage(any(
@@ -130,14 +134,16 @@ class DwcaServiceTest {
   @Test
   void testCopyTableFails() throws Exception {
     // Given
+    var expected = new TranslatorJobResult(JobState.FAILED, 0);
     givenDWCA("/dwca-rbins.zip");
     doThrow(new DisscoRepositoryException("", new Exception())).when(dwcaRepository)
         .postRecords(eq("temp_abc_ddd_asd_occurrence"), anyList());
 
     // When
-    service.retrieveData();
+    var result = service.retrieveData();
 
     // Then
+    assertThat(result).isEqualTo(expected);
     then(dwcaRepository).should(times(2)).deleteTable(any());
     then(dwcaRepository).should(times(2)).createTable(any());
     then(dwcaRepository).shouldHaveNoMoreInteractions();
@@ -147,6 +153,7 @@ class DwcaServiceTest {
   @Test
   void testRetrieveDataEmlException() throws Exception {
     // Given
+    var expected = new TranslatorJobResult(JobState.COMPLETED, 9);
     var captor = ArgumentCaptor.forClass(JsonNode.class);
     givenDWCA("/dwca-rbins-invalid-eml.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(9));
@@ -155,9 +162,10 @@ class DwcaServiceTest {
     given(fdoProperties.getDigitalSpecimenType()).willReturn("Doi of the digital specimen");
 
     // When
-    service.retrieveData();
+    var result = service.retrieveData();
 
     // Then
+    assertThat(result).isEqualTo(expected);
     then(dwcaRepository).should(times(2)).createTable(anyString());
     then(dwcaRepository).should(times(2)).postRecords(anyString(), anyList());
     then(kafkaService).should(times(9)).sendMessage( any(
@@ -170,6 +178,7 @@ class DwcaServiceTest {
   @Test
   void testRetrieveDataWithLicenseText() throws Exception {
     // Given
+    var expected = new TranslatorJobResult(JobState.COMPLETED, 9);
     var captor = ArgumentCaptor.forClass(JsonNode.class);
     givenDWCA("/dwca-rbins-license-text.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(9));
@@ -178,9 +187,10 @@ class DwcaServiceTest {
     given(fdoProperties.getDigitalSpecimenType()).willReturn("Doi of the digital specimen");
 
     // When
-    service.retrieveData();
+    var result = service.retrieveData();
 
     // Then
+    assertThat(result).isEqualTo(expected);
     then(dwcaRepository).should(times(2)).createTable(anyString());
     then(dwcaRepository).should(times(2)).postRecords(anyString(), anyList());
     then(kafkaService).should(times(9)).sendMessage(any(
@@ -196,15 +206,17 @@ class DwcaServiceTest {
   @MethodSource("eu.dissco.core.translator.TestUtils#provideInvalidDigitalSpecimen")
   void testRetrieveDataInvalidSpecimen(DigitalSpecimen digitalSpecimen) throws Exception {
     // Given
+    var expected = new TranslatorJobResult(JobState.FAILED, 0);
     givenDWCA("/dwca-rbins.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(9));
     given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
         .willReturn(digitalSpecimen);
 
     // When
-    service.retrieveData();
+    var result = service.retrieveData();
 
     // Then
+    assertThat(result).isEqualTo(expected);
     then(dwcaRepository).should(times(2)).createTable(anyString());
     then(dwcaRepository).should(times(2)).postRecords(anyString(), anyList());
     then(kafkaService).shouldHaveNoInteractions();
@@ -227,6 +239,7 @@ class DwcaServiceTest {
   @Test
   void testRetrieveDataWithGbifMedia() throws Exception {
     // Given
+    var expected = new TranslatorJobResult(JobState.COMPLETED, 19);
     givenDWCA("/dwca-kew-gbif-media.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(19));
     given(dwcaRepository.getRecords(anyList(), eq("temp_abc_ddd_asd_identification"))).willReturn(
@@ -241,9 +254,10 @@ class DwcaServiceTest {
     given(fdoProperties.getDigitalSpecimenType()).willReturn("Doi of the digital specimen");
 
     // When
-    service.retrieveData();
+    var result = service.retrieveData();
 
     // Then
+    assertThat(result).isEqualTo(expected);
     then(dwcaRepository).should(times(3)).createTable(anyString());
     then(dwcaRepository).should(times(2)).postRecords(anyString(), anyList());
     then(kafkaService).should(times(19)).sendMessage(any(
@@ -265,6 +279,7 @@ class DwcaServiceTest {
   @Test
   void testRetrieveDataWithAcMedia() throws Exception {
     // Given
+    var expected = new TranslatorJobResult(JobState.COMPLETED, 14);
     givenDWCA("/dwca-naturalis-ac-media.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(14));
     given(dwcaRepository.getRecords(anyList(),
@@ -277,9 +292,10 @@ class DwcaServiceTest {
     given(fdoProperties.getDigitalSpecimenType()).willReturn("Doi of the digital specimen");
 
     // When
-    service.retrieveData();
+    var result = service.retrieveData();
 
     // Then
+    assertThat(result).isEqualTo(expected);
     then(dwcaRepository).should(times(2)).createTable(anyString());
     then(dwcaRepository).should(times(2)).postRecords(anyString(), anyList());
     then(kafkaService).should(times(14)).sendMessage(any(
@@ -290,6 +306,7 @@ class DwcaServiceTest {
   @Test
   void testRetrieveDataWithInvalidAcMedia() throws Exception {
     // Given
+    var expected = new TranslatorJobResult(JobState.COMPLETED, 1);
     givenDWCA("/dwca-invalid-ac-media.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(1));
     given(dwcaRepository.getRecords(anyList(),
@@ -301,9 +318,10 @@ class DwcaServiceTest {
     given(fdoProperties.getDigitalSpecimenType()).willReturn("Doi of the digital specimen");
 
     // When
-    service.retrieveData();
+    var result = service.retrieveData();
 
     // Then
+    assertThat(result).isEqualTo(expected);
     var captor = ArgumentCaptor.forClass(DigitalSpecimenEvent.class);
     then(dwcaRepository).should(times(2)).createTable(anyString());
     then(dwcaRepository).should(times(2)).postRecords(anyString(), anyList());
@@ -315,12 +333,14 @@ class DwcaServiceTest {
   @Test
   void testRetrieveOnlyOccurrence() throws Exception {
     // Given
+    var expected = new TranslatorJobResult(JobState.FAILED, 0);
     givenDWCA("/dwca-only-occurrences.zip");
 
     // When
-    service.retrieveData();
+    var result = service.retrieveData();
 
     // Then
+    assertThat(result).isEqualTo(expected);
     then(dwcaRepository).should(times(2)).createTable(anyString());
     then(dwcaRepository).should(times(0)).postRecords(anyString(), anyList());
     then(kafkaService).shouldHaveNoInteractions();
@@ -330,6 +350,7 @@ class DwcaServiceTest {
   @Test
   void testRetrieveDataWithAssociatedMedia() throws Exception {
     // Given
+    var expected = new TranslatorJobResult(JobState.COMPLETED, 20);
     givenDWCA("/dwca-lux-associated-media.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(
         givenSpecimenMapWithMedia(20));
@@ -341,9 +362,10 @@ class DwcaServiceTest {
     given(fdoProperties.getDigitalSpecimenType()).willReturn("Doi of the digital specimen");
 
     // When
-    service.retrieveData();
+    var result = service.retrieveData();
 
     // Then
+    assertThat(result).isEqualTo(expected);
     then(dwcaRepository).should(times(1)).createTable(anyString());
     then(dwcaRepository).should(times(1)).postRecords(anyString(), anyList());
     then(kafkaService).should(times(20)).sendMessage(any(
@@ -385,15 +407,17 @@ class DwcaServiceTest {
   @Test
   void testRetrieveDataNull() throws Exception {
     // Given
+    var expected = new TranslatorJobResult(JobState.FAILED, 0);
     givenDWCA("/dwca-lux-associated-media.zip");
     var nullMap = new HashMap<String, ObjectNode>();
     nullMap.put("id", null);
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(nullMap);
 
     // When
-    service.retrieveData();
+    var result = service.retrieveData();
 
     // Then
+    assertThat(result).isEqualTo(expected);
     then(dwcaRepository).should(times(1)).createTable(anyString());
     then(dwcaRepository).should(times(1)).postRecords(anyString(), anyList());
     then(kafkaService).shouldHaveNoInteractions();

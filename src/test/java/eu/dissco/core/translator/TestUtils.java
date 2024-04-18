@@ -6,6 +6,7 @@ import eu.dissco.core.translator.schema.DigitalSpecimen;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Stream;
 import org.junit.jupiter.params.provider.Arguments;
 import org.springframework.core.io.ClassPathResource;
@@ -18,6 +19,8 @@ public class TestUtils {
 
   public static String INSTITUTION_ID = "https://ror.org/02y22ws83";
   public static String NORMALISED_PHYSICAL_SPECIMEN_ID = "http://coldb.mnhn.fr/catalognumber/mnhn/ec/ec10867";
+
+  public static UUID JOB_ID = UUID.fromString("4a9be957-b8f6-4467-a98e-d19cbd2fa6ec");
 
   public static String MOCK_DATE = "29-09-2023";
   public static Map<String, String> DEFAULT_MAPPING = Map.of(

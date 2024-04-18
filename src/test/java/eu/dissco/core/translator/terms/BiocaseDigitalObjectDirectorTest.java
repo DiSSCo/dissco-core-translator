@@ -10,6 +10,7 @@ import static org.mockito.BDDMockito.given;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import eu.dissco.core.translator.component.InstitutionNameComponent;
 import eu.dissco.core.translator.exception.UnknownPhysicalSpecimenIdType;
 import eu.dissco.core.translator.properties.FdoProperties;
@@ -17,10 +18,12 @@ import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.schema.DigitalSpecimen.OdsPhysicalSpecimenIdType;
 import eu.dissco.core.translator.terms.specimen.OrganisationId;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenIdType;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
@@ -40,6 +43,52 @@ class BiocaseDigitalObjectDirectorTest {
 
   private BiocaseDigitalObjectDirector director;
 
+  private static Stream<Arguments> givenIdentifications() throws JsonProcessingException {
+    return Stream.of(
+        Arguments.of(addSecondIdentification(identifications(true)), 2),
+        Arguments.of(identifications(true), 1),
+        Arguments.of(identifications(false), 1),
+        Arguments.of(MAPPER.createObjectNode(), 0)
+    );
+  }
+
+  private static ObjectNode identifications(boolean verified) throws JsonProcessingException {
+    var node = (ObjectNode) MAPPER.readTree(
+        """
+                {
+                "abcd:identifications/identification/0/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonName": "Bryozoa",
+                "abcd:identifications/identification/0/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonRank": "Phylum",
+                "abcd:identifications/identification/0/result/taxonIdentified/scientificName/fullScientificNameString": "Hemiphragma rotundatum",
+                "abcd:identifications/identification/0/result/taxonIdentified/scientificName/nameAtomised/zoological/speciesEpithet": "rotundatum",
+                "abcd:identifications/identification/0/identifiers/identifier/0/personName/fullName": "Ernst",
+                "abcd:identifications/identification/0/identifiers/identifier/0/personName/atomisedName/inheritedName": "Ernst",
+                "abcd:identifications/identification/0/identifiers/identifier/0/personName/atomisedName/givenNames": "Andrej"
+                }
+            """);
+    if (verified) {
+      node.put("abcd:identifications/identification/0/preferredFlag", true);
+    }
+    return node;
+  }
+
+  private static ObjectNode addSecondIdentification(ObjectNode identifications)
+      throws JsonProcessingException {
+    var node = (ObjectNode) MAPPER.readTree(
+        """
+                {
+                "abcd:identifications/identification/1/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonName": "Bryozoa",
+                "abcd:identifications/identification/1/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonRank": "Phylum",
+                "abcd:identifications/identification/1/result/taxonIdentified/scientificName/fullScientificNameString": "Hemiphragma rotundatum",
+                "abcd:identifications/identification/1/result/taxonIdentified/scientificName/nameAtomised/zoological/speciesEpithet": "rotundatum",
+                "abcd:identifications/identification/1/identifiers/identifier/0/personName/fullName": "Ernst",
+                "abcd:identifications/identification/1/identifiers/identifier/0/personName/atomisedName/inheritedName": "Ernst",
+                "abcd:identifications/identification/1/identifiers/identifier/0/personName/atomisedName/givenNames": "Andrej"
+                }
+            """);
+    identifications.setAll(node);
+    return identifications;
+  }
+
   @BeforeEach
   void setup() {
     director = new BiocaseDigitalObjectDirector(MAPPER, termMapper, institutionNameComponent,
@@ -47,10 +96,12 @@ class BiocaseDigitalObjectDirectorTest {
         fdoProperties);
   }
 
-  @Test
-  void testConstructAbcdDigitalSpecimen() throws Exception {
+  @ParameterizedTest
+  @MethodSource("givenIdentifications")
+  void testConstructAbcdDigitalSpecimen(ObjectNode identifications, int totalIdentifications)
+      throws Exception {
     // Given
-    var specimenJson = givenAbcdSpecimenJson();
+    var specimenJson = givenAbcdSpecimenJson(identifications);
     given(institutionNameComponent.getWikiDataName(anyString())).willReturn(
         "Tallinn University of Technology");
     given(termMapper.retrieveTerm(any(Term.class), eq(specimenJson), eq(false))).willReturn(
@@ -68,7 +119,7 @@ class BiocaseDigitalObjectDirectorTest {
     assertThat(result.getEntityRelationships()).asList().hasSize(4);
     assertThat(result.getIdentifiers()).asList().hasSize(4);
     assertThat(result.getCitations()).asList().hasSize(1);
-    assertThat(result.getDwcIdentification()).asList().hasSize(1);
+    assertThat(result.getDwcIdentification()).asList().hasSize(totalIdentifications);
   }
 
   @ParameterizedTest
@@ -76,7 +127,7 @@ class BiocaseDigitalObjectDirectorTest {
   @NullSource
   void testConstructAbcdDigitalSpecimenUnknownIdType(String value) throws Exception {
     // Given
-    var specimenJson = givenAbcdSpecimenJson();
+    var specimenJson = givenAbcdSpecimenJson(identifications(true));
     given(termMapper.retrieveTerm(any(PhysicalSpecimenIdType.class), eq(specimenJson), eq(false)))
         .willReturn(value);
 
@@ -85,8 +136,9 @@ class BiocaseDigitalObjectDirectorTest {
         () -> director.assembleDigitalSpecimenTerm(specimenJson, false));
   }
 
-  private JsonNode givenAbcdSpecimenJson() throws JsonProcessingException {
-    return MAPPER.readTree(
+  private JsonNode givenAbcdSpecimenJson(ObjectNode identifications)
+      throws JsonProcessingException {
+    var node = (ObjectNode) MAPPER.readTree(
         """
             {
                   "abcd:unitGUID": "https://geocollections.info/specimen/287",
@@ -98,14 +150,6 @@ class BiocaseDigitalObjectDirectorTest {
                   "abcd:unitReferences/unitReference/0/titleCitation": "Ernst, 2022",
                   "abcd:unitReferences/unitReference/0/citationDetail": "Bryozoan fauna from the Kunda Stage (Darriwilian, Middle Ordovician) of Estonia and NW Russia",
                   "abcd:unitReferences/unitReference/0/uri": "10.3140/bull.geosci.1843",
-                  "abcd:identifications/identification/0/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonName": "Bryozoa",
-                  "abcd:identifications/identification/0/result/taxonIdentified/higherTaxa/higherTaxon/0/higherTaxonRank": "Phylum",
-                  "abcd:identifications/identification/0/result/taxonIdentified/scientificName/fullScientificNameString": "Hemiphragma rotundatum",
-                  "abcd:identifications/identification/0/result/taxonIdentified/scientificName/nameAtomised/zoological/speciesEpithet": "rotundatum",
-                  "abcd:identifications/identification/0/preferredFlag": true,
-                  "abcd:identifications/identification/0/identifiers/identifier/0/personName/fullName": "Ernst",
-                  "abcd:identifications/identification/0/identifiers/identifier/0/personName/atomisedName/inheritedName": "Ernst",
-                  "abcd:identifications/identification/0/identifiers/identifier/0/personName/atomisedName/givenNames": "Andrej",
                   "abcd:recordBasis": "FossilSpecimen",
                   "abcd:kindOfUnit/0/value": "specimen in parts",
                   "abcd:kindOfUnit/0/language": "en",
@@ -162,8 +206,9 @@ class BiocaseDigitalObjectDirectorTest {
                   "abcd:iprstatements/citations/citation/text": "National geological collection of Estonia; Department of Geology, TalTech",
                   "abcd:iprstatements/citations/citation/language": "en"
                 }
-            """
-    );
+            """);
+    node.setAll(identifications);
+    return node;
   }
 
 }

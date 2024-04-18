@@ -13,7 +13,7 @@
     <database>
       <name>org.jooq.meta.postgres.PostgresDatabase</name>
       <inputSchema>public</inputSchema>
-      <includes> source_system | mapping</includes>
+      <includes> source_system | mapping | job_state | translator_job_record | error_code </includes>
       <forcedTypes>
         <forcedType>
           <name>INSTANT</name>

@@ -1,4 +1,3 @@
-# Date: Feb 12, 2024
-# Notes: Issue with libexpat, parsing large tokens can trigger a denial of service
-# Needs to be fixed in Docker Image.
-CVE-2023-52425
+# April 18 2024
+# Spring boot needs to update its version of spring
+CVE-2024-22262

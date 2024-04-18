@@ -27,7 +27,7 @@ class MappingRepositoryIT extends BaseRepositoryIT {
 
   @AfterEach
   void cleanup() {
-    context.truncate(SOURCE_SYSTEM).execute();
+    context.truncate(SOURCE_SYSTEM).cascade().execute();
     context.truncate(MAPPING).execute();
   }
 
