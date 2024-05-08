@@ -8,9 +8,10 @@ public class MaximumElevationInMeters extends Term {
 
   public static final String TERM = DWC_PREFIX + "maximumElevationInMeters";
 
-  private final List<String> dwcaTerms = List.of(TERM);
+  private final List<String> dwcaTerms = List.of(TERM, VerbatimElevation.TERM);
   private final List<String> abcdTerms = List.of(
-      "abcd:gathering/altitude/measurementOrFactAtomised/upperValue/value", "abcd:gathering/altitude/measurementOrFactText/value");
+      "abcd:gathering/altitude/measurementOrFactAtomised/upperValue/value",
+      "abcd:gathering/altitude/measurementOrFactText/value");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {

@@ -1,13 +1,13 @@
 package eu.dissco.core.translator.terms.specimen.identification.taxonomy;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
-public class TaxonRank extends AbstractTaxonomy {
+public class ScientificNameId extends Term {
 
-  public static final String TERM = DWC_PREFIX + "taxonRank";
-
-  private final List<String> dwcaTerms = List.of(TERM, VerbatimTaxonRank.TERM);
+  public static final String TERM = DWC_PREFIX + "scientificNameID";
+  private final List<String> dwcaTerms = List.of(TERM);
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {

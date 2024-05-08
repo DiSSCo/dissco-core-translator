@@ -142,11 +142,25 @@
         "RV Sol 87-03-08"
       ]
     },
+    "dwc:recordNumber": {
+      "type": "string",
+      "description": "https://rs.tdwg.org/dwc/terms/recordNumber",
+      "examples": [
+        "OPP 7101"
+      ]
+    },
     "dwc:eventDate": {
       "type": "string",
       "description": "https://rs.tdwg.org/dwc/terms/eventDate",
       "examples": [
         "1963-03-08T14:07-0600"
+      ]
+    },
+    "dwc:verbatimEventDate": {
+      "type": "string",
+      "description": "https://rs.tdwg.org/dwc/terms/verbatimEventDate",
+      "examples": [
+        "Marzo 2002"
       ]
     },
     "dwc:year": {

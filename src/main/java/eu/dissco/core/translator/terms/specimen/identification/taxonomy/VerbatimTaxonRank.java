@@ -2,18 +2,14 @@ package eu.dissco.core.translator.terms.specimen.identification.taxonomy;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
-public class ScientificName extends AbstractTaxonomy {
+public class VerbatimTaxonRank extends AbstractTaxonomy {
 
-  public static final String TERM = DWC_PREFIX + "scientificName";
+  public static final String TERM = DWC_PREFIX + "verbatimTaxonRank";
+
   private final List<String> dwcaTerms = List.of(TERM);
   private final List<String> abcdTerms = List.of(
-      "result/taxonIdentified/scientificName/fullScientificNameString",
-      "result/mineralRockIdentified/classifiedName/fullScientificNameString",
-      "result/taxonIdentified/informalNameString/value",
-      "result/taxonIdentified/scientificName/nameAtomised/zoological/namedIndividual");
+      "result/taxonIdentified/scientificName/nameAtomised/botanical/rank");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {

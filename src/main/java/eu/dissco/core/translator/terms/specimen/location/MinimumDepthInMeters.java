@@ -8,9 +8,10 @@ public class MinimumDepthInMeters extends Term {
 
   public static final String TERM = DWC_PREFIX + "minimumDepthInMeters";
 
-  private final List<String> dwcaTerms = List.of(TERM);
+  private final List<String> dwcaTerms = List.of(TERM, VerbatimDepth.TERM);
   private final List<String> abcdTerms = List.of(
-      "abcd:gathering/depth/measurementOrFactAtomised/lowerValue/value");
+      "abcd:gathering/depth/measurementOrFactAtomised/lowerValue/value",
+      "abcd:gathering/depth/measurementOrFactText/value");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {

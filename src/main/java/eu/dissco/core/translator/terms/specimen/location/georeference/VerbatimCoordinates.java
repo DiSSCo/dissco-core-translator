@@ -1,17 +1,14 @@
-package eu.dissco.core.translator.terms.specimen.location;
+package eu.dissco.core.translator.terms.specimen.location.georeference;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
-public class MinimumElevationInMeters extends Term {
-
-  public static final String TERM = DWC_PREFIX + "minimumElevationInMeters";
-
-  private final List<String> dwcaTerms = List.of(TERM, VerbatimElevation.TERM);
+public class VerbatimCoordinates extends Term {
+  public static final String TERM = DWC_PREFIX + "verbatimCoordinates";
+  private final List<String> dwcaTerms = List.of(TERM);
   private final List<String> abcdTerms = List.of(
-      "abcd:gathering/altitude/measurementOrFactAtomised/lowerValue/value",
-      "abcd:gathering/altitude/measurementOrFactText/value");
+      "abcd:gathering/siteCoordinateSets/siteCoordinates/0/coordinatesUTM/uTMText");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {

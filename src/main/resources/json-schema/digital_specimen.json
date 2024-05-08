@@ -264,6 +264,13 @@
         "Museu de História Natural e da Ciência da Universidade do Porto"
       ]
     },
+    "dwc:verbatimLabel": {
+      "type": "string",
+      "description": "https://rs.tdwg.org/dwc/terms/verbatimLabel",
+      "examples": [
+        "ILL: Union Co. Wolf Lake by Powder Plant Bridge. 1 March 1975 Coll. S. Ketzler, S. Herbert\n\nMonotoma longicollis 4 ♂ Det TC McElrath 2018\n\nINHS Insect Collection 456782"
+      ]
+    },
     "materialEntity": {
       "type": "array",
       "items": {

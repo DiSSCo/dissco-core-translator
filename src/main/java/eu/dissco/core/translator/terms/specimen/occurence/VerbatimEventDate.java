@@ -1,15 +1,15 @@
-package eu.dissco.core.translator.terms.specimen.location.georeference;
+package eu.dissco.core.translator.terms.specimen.occurence;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
-public class DecimalLatitude extends Term {
+public class VerbatimEventDate extends Term {
 
-  public static final String TERM = DWC_PREFIX + "decimalLatitude";
-  private final List<String> dwcaTerms = List.of(TERM, VerbatimLatitude.TERM);
-  private final List<String> abcdTerms = List.of(
-      "abcd:gathering/siteCoordinateSets/siteCoordinates/0/coordinatesLatLong/latitudeDecimal");
+  public static final String TERM = DWC_PREFIX + "verbatimEventDate";
+
+  private final List<String> dwcaTerms = List.of(TERM);
+  private final List<String> abcdTerms = List.of("abcd:gathering/dateTime/dateText");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {

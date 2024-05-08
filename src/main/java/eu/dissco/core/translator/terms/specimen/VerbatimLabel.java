@@ -4,12 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
-public class PhysicalSpecimenId extends Term {
+public class VerbatimLabel extends Term {
 
-  public static final String TERM = ODS_PREFIX + "physicalSpecimenId";
-
-  private final List<String> dwcaTerms = List.of("dwc:occurrenceID", "dwc:catalogNumber", "dwc:materialSampleID", "dwc:materialEntityID");
-  private final List<String> abcdTerms = List.of("abcd:unitGUID", "abcd:unitID");
+  public static final String TERM = DWC_PREFIX + "verbatimLabel";
+  private final List<String> dwcaTerms = List.of(TERM);
+  private final List<String> abcdUnitTerms = List.of("abcd:specimenUnit/marks/mark/0/markText/value");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
@@ -18,7 +17,7 @@ public class PhysicalSpecimenId extends Term {
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    return super.searchJsonForTerm(unit, abcdTerms);
+    return searchJsonForTerm(unit, abcdUnitTerms);
   }
 
   @Override

@@ -8,7 +8,7 @@ public class EventDate extends Term {
 
   public static final String TERM = DWC_PREFIX + "eventDate";
 
-  private final List<String> dwcaTerms = List.of(TERM);
+  private final List<String> dwcaTerms = List.of(TERM, VerbatimEventDate.TERM);
   private final List<String> abcdTerms = List.of("abcd:gathering/dateTime/isodateTimeBegin",
       "abcd:gathering/dateTime/isodateTimeEnd", "abcd:gathering/dateTime/dateText");
 
