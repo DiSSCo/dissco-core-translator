@@ -5,6 +5,7 @@ import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
 public class VerbatimDepth extends Term {
+
   public static final String TERM = DWC_PREFIX + "verbatimDepth";
 
   private final List<String> dwcaTerms = List.of(TERM);

@@ -12,7 +12,7 @@ public class SpecimenName extends Term {
     if (acceptedIdentification != null && acceptedIdentification.getTaxonIdentifications() != null
         && !acceptedIdentification.getTaxonIdentifications().isEmpty()) {
       if (acceptedIdentification.getTaxonIdentifications().get(0)
-          .getDwcScientificName() != null){
+          .getDwcScientificName() != null) {
         return acceptedIdentification.getTaxonIdentifications().get(0)
             .getDwcScientificName();
       }

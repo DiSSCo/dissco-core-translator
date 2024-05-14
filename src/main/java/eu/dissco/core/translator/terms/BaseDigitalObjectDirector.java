@@ -293,7 +293,8 @@ public abstract class BaseDigitalObjectDirector {
       var wikidataId = organisationId.replace("https://www.wikidata.org/wiki/", "");
       return institutionNameComponent.getWikiDataName(wikidataId);
     } else {
-      throw new OrganisationException(organisationId + " is not a valid ror or wikidata identifier");
+      throw new OrganisationException(
+          organisationId + " is not a valid ror or wikidata identifier");
     }
   }
 
@@ -400,7 +401,8 @@ public abstract class BaseDigitalObjectDirector {
         .withDwcVerbatimLongitude(termMapper.retrieveTerm(new VerbatimLongitude(), data, dwc))
         .withDwcGeodeticDatum(termMapper.retrieveTerm(new GeodeticDatum(), data, dwc))
         .withDwcVerbatimCoordinates(termMapper.retrieveTerm(new VerbatimCoordinates(), data, dwc))
-        .withDwcVerbatimCoordinateSystem(termMapper.retrieveTerm(new VerbatimCoordinateSystem(), data, dwc))
+        .withDwcVerbatimCoordinateSystem(
+            termMapper.retrieveTerm(new VerbatimCoordinateSystem(), data, dwc))
         .withDwcVerbatimSRS(termMapper.retrieveTerm(new VerbatimSRS(), data, dwc))
         .withDwcGeoreferenceProtocol(termMapper.retrieveTerm(new GeoreferenceProtocol(), data, dwc))
         .withDwcCoordinatePrecision(parseToDouble(new CoordinatePrecision(), data, dwc))

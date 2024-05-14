@@ -15,7 +15,7 @@ public class TaxonRank extends AbstractTaxonomy {
   public String retrieveFromDWCA(JsonNode unit) {
     return super.searchJsonForTerm(unit, dwcaTerms);
   }
-  
+
   @Override
   public String retrieveFromABCD(JsonNode unit) {
     return searchJsonForTerm(unit, abcdTerms);

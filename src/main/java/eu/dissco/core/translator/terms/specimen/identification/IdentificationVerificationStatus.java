@@ -15,7 +15,7 @@ public class IdentificationVerificationStatus extends Term {
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
     var result = super.searchJsonForTerm(unit, dwcaTerms);
-    if (result != null){
+    if (result != null) {
       if (result.equals("1")) {
         return Boolean.TRUE.toString();
       } else {

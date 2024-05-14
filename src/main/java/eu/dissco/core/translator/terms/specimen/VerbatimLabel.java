@@ -8,7 +8,8 @@ public class VerbatimLabel extends Term {
 
   public static final String TERM = DWC_PREFIX + "verbatimLabel";
   private final List<String> dwcaTerms = List.of(TERM);
-  private final List<String> abcdUnitTerms = List.of("abcd:specimenUnit/marks/mark/0/markText/value");
+  private final List<String> abcdUnitTerms = List.of(
+      "abcd:specimenUnit/marks/mark/0/markText/value");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {

@@ -12,7 +12,7 @@
       ],
       "$comments": "Should become new term in DWC or borrow from somewhere else?"
     },
-    "???:identifierValue":{
+    "???:identifierValue": {
       "type": "string",
       "description": "The value for the identifier",
       "examples": [

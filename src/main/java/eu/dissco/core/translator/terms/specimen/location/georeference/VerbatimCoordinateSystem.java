@@ -5,6 +5,7 @@ import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
 public class VerbatimCoordinateSystem extends Term {
+
   public static final String TERM = DWC_PREFIX + "verbatimCoordinateSystem";
   private final List<String> dwcaTerms = List.of(TERM);
   private final List<String> abcdTerms = List.of(

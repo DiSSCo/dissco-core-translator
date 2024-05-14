@@ -19,6 +19,7 @@ public class Superfamily extends AbstractTaxonomy {
   public String retrieveFromABCD(JsonNode unit) {
     return super.searchABCDSplitTerms(unit, abcdSplitTerms);
   }
+
   @Override
   public String getTerm() {
     return TERM;

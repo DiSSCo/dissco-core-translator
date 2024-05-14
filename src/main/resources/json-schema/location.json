@@ -74,16 +74,16 @@
       ]
     },
     "dwc:locality": {
-    "type": "string",
-    "description": "https://rs.tdwg.org/dwc/terms/locality",
-    "examples": [
-      "Zeeuws-Vlaanderen, Hulst, Braakman"
-    ]
-  },
-  "dwc:verbatimLocality": {
-    "type": "string",
-    "description": "https://rs.tdwg.org/dwc/terms/verbatimLocality",
-    "examples": [
+      "type": "string",
+      "description": "https://rs.tdwg.org/dwc/terms/locality",
+      "examples": [
+        "Zeeuws-Vlaanderen, Hulst, Braakman"
+      ]
+    },
+    "dwc:verbatimLocality": {
+      "type": "string",
+      "description": "https://rs.tdwg.org/dwc/terms/verbatimLocality",
+      "examples": [
         "25 km NNE Bariloche por R. Nac. 237"
       ]
     },
