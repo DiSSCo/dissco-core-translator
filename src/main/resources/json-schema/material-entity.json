@@ -1,6 +1,7 @@
 {
-  "$id": "materialEntity",
+  "$id": "https://schemas.dissco.tech/schemas/digitalobjects/0.2.0/digital-specimens/material-entity.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment":"DigitalObject Version 0.2.0",
   "type": "object",
   "$comment": "Only if the part did not get a separate catalogue number, otherwise it will be a separate digital specimen itself",
   "properties": {
@@ -80,40 +81,53 @@
         "https://orcid.org/0000-0002-1825-0097"
       ]
     },
+    "dwc:verbatimLabel": {
+      "type": "string",
+      "description": "https://rs.tdwg.org/dwc/terms/verbatimLabel",
+      "examples": [
+        "ILL: Union Co. Wolf Lake by Powder Plant Bridge. 1 March 1975 Coll. S. Ketzler, S. Herbert\n\nMonotoma longicollis 4 ♂ Det TC McElrath 2018\n\nINHS Insect Collection 456782"
+      ]
+    },
     "identifications": {
       "type": "array",
       "items": {
-        "$ref": "identifications.json"
+        "$ref": "./identifications.json"
       }
     },
     "assertions": {
       "type": "array",
       "items": {
-        "$ref": "assertions.json"
+        "$ref": "./assertions.json"
       }
     },
     "entityRelationships": {
       "type": "array",
       "items": {
-        "$ref": "entity_relationships.json"
+        "$ref": "./entity-relationships.json"
       }
     },
     "citations": {
       "type": "array",
       "items": {
-        "$ref": "citations.json"
+        "$ref": "./citations.json"
       }
     },
     "identifiers": {
       "type": "array",
       "items": {
-        "$ref": "identifications.json"
+        "$ref": "./identifiers.json"
       }
     },
     "events": {
       "type": "array",
       "items": {
-        "$ref": "events.json"
+        "$ref": "./events.json"
+      }
+    },
+    "agents": {
+      "type": "array",
+      "items": {
+        "$ref": "./agent.json"
       }
     }
   }

@@ -7,7 +7,7 @@
       "type": "string",
       "description": "https://rs.tdwg.org/dwc/terms/locationID",
       "examples": [
-        "\thttps://opencontext.org/subjects/768A875F-E205-4D0B-DE55-BAB7598D0FD1"
+        "https://opencontext.org/subjects/768A875F-E205-4D0B-DE55-BAB7598D0FD1"
       ]
     },
     "dwc:continent": {

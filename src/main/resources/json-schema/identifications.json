@@ -1,11 +1,15 @@
 {
-  "$id": "identifications",
+  "$id": "https://schemas.dissco.tech/schemas/digitalobjects/0.2.0/digital-specimens/identifications.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "DigitalObject Version 0.2.0",
   "type": "object",
   "properties": {
     "dwc:identificationID": {
       "type": "string",
-      "description": "Check DWC terms"
+      "description": "https://rs.tdwg.org/dwc/terms/identificationID",
+      "examples": [
+        "9992"
+      ]
     },
     "???:identificationType": {
       "type": "string",
@@ -79,7 +83,7 @@
       "type": "string",
       "description": "https://rs.tdwg.org/dwc/terms/identificationQualifier",
       "examples": [
-        "cf. var. oxyadenia "
+        "cf. var. oxyadenia"
       ]
     },
     "???:typeDesignationType": {
@@ -95,7 +99,13 @@
     "citations": {
       "type": "array",
       "items": {
-        "$ref": "citations.json"
+        "$ref": "./citations.json"
+      }
+    },
+    "agents": {
+      "type": "array",
+      "items": {
+        "$ref": "./agent.json"
       }
     },
     "taxonIdentifications": {

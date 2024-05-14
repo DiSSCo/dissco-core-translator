@@ -1,5 +1,5 @@
 {
-  "$id": "identifiers",
+  "$id": "https://schemas.dissco.tech/schemas/digitalobjects/0.1.0/shared-models/identifiers.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
   "properties": {
@@ -12,7 +12,7 @@
       ],
       "$comments": "Should become new term in DWC or borrow from somewhere else?"
     },
-    "???:identifierValue": {
+    "???:identifierValue":{
       "type": "string",
       "description": "The value for the identifier",
       "examples": [
