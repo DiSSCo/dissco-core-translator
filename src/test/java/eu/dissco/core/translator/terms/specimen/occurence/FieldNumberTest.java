@@ -18,7 +18,7 @@ class FieldNumberTest {
   void testRetrieveFromDWCA() {
     // Given
     var unit = MAPPER.createObjectNode();
-    unit.put("dwc:recordNumber", NUMBER);
+    unit.put("dwc:fieldNumber", NUMBER);
 
     // When
     var result = fieldNumber.retrieveFromDWCA(unit);
@@ -31,7 +31,7 @@ class FieldNumberTest {
   void testRetrieveFromABCD() {
     // Given
     var unit = MAPPER.createObjectNode();
-    unit.put("abcd:collectorsFieldNumber", NUMBER);
+    unit.put("abcd:gathering/code", NUMBER);
 
     // When
     var result = fieldNumber.retrieveFromABCD(unit);

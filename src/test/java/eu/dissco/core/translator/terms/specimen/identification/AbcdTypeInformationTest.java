@@ -1,6 +1,7 @@
 package eu.dissco.core.translator.terms.specimen.identification;
 
 import static eu.dissco.core.translator.TestUtils.MAPPER;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.schema.DigitalSpecimen;
