@@ -107,6 +107,7 @@ import eu.dissco.core.translator.terms.specimen.location.Island;
 import eu.dissco.core.translator.terms.specimen.location.IslandGroup;
 import eu.dissco.core.translator.terms.specimen.location.Locality;
 import eu.dissco.core.translator.terms.specimen.location.LocationAccordingTo;
+import eu.dissco.core.translator.terms.specimen.location.LocationId;
 import eu.dissco.core.translator.terms.specimen.location.LocationRemarks;
 import eu.dissco.core.translator.terms.specimen.location.MaximumDepthInMeters;
 import eu.dissco.core.translator.terms.specimen.location.MaximumDistanceAboveSurfaceInMeters;
@@ -445,6 +446,7 @@ public abstract class BaseDigitalObjectDirector {
         .withDwcGroup(termMapper.retrieveTerm(new Group(), data, dwc))
         .withDwcMember(termMapper.retrieveTerm(new Member(), data, dwc));
     var location = new eu.dissco.core.translator.schema.Location()
+        .withDwcLocationID(termMapper.retrieveTerm(new LocationId(), data, dwc))
         .withDwcContinent(termMapper.retrieveTerm(new Continent(), data, dwc))
         .withDwcCountry(termMapper.retrieveTerm(new Country(), data, dwc))
         .withDwcCountryCode(termMapper.retrieveTerm(new CountryCode(), data, dwc))
