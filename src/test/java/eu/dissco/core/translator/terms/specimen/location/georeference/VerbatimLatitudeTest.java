@@ -8,7 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class VerbatimLatitudeTest {
+class VerbatimLatitudeTest {
 
   private static final String VERBATIM_LATITUDE = "41 05 54.03S";
 

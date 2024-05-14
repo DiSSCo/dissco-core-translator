@@ -8,7 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class VerbatimLongitudeTest {
+class VerbatimLongitudeTest {
 
   private static final String VERBATIM_LONGITUDE = "121d 10' 34\" W";
 

@@ -8,7 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class VerbatimCoordinatesTest {
+class VerbatimCoordinatesTest {
 
   private static final String VERBATIM_COORDINATES = "41 05 54S 121 05 34W";
 

@@ -36,6 +36,38 @@ class SpecimenNameTest {
     assertThat(result).isEqualTo(SPECIMEN_NAME);
   }
 
+
+  @Test
+  void testRetrieveVernacular() {
+    // Given
+    var ds = new eu.dissco.core.translator.schema.DigitalSpecimen()
+        .withDwcIdentification(List.of(
+            new eu.dissco.core.translator.schema.Identifications()
+                .withDwcIdentificationVerificationStatus(Boolean.TRUE)
+                .withTaxonIdentifications(
+                    List.of(new TaxonIdentification().withDwcVernacularName(SPECIMEN_NAME)))
+        ));
+
+    // When
+    var result = specimenName.calculate(ds);
+
+    // Then
+    assertThat(result).isEqualTo(SPECIMEN_NAME);
+  }
+
+  @Test
+  void testRetrieveNoName() {
+    // Given
+    var ds = new eu.dissco.core.translator.schema.DigitalSpecimen()
+        .withDwcIdentification(List.of());
+
+    // When
+    var result = specimenName.calculate(ds);
+
+    // Then
+    assertThat(result).isNull();
+  }
+
   @Test
   void testGetTerm() {
     // When
