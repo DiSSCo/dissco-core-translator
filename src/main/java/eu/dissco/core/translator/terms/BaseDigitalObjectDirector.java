@@ -14,7 +14,7 @@ import eu.dissco.core.translator.schema.DigitalSpecimen;
 import eu.dissco.core.translator.schema.DigitalSpecimen.OdsLivingOrPreserved;
 import eu.dissco.core.translator.schema.DigitalSpecimen.OdsPhysicalSpecimenIdType;
 import eu.dissco.core.translator.schema.EntityRelationships;
-import eu.dissco.core.translator.schema.Georeference;
+import eu.dissco.core.translator.schema.GeoReference;
 import eu.dissco.core.translator.schema.Identifications;
 import eu.dissco.core.translator.schema.Identifiers;
 import eu.dissco.core.translator.schema.Occurrences;
@@ -207,11 +207,11 @@ public abstract class BaseDigitalObjectDirector {
   public DigitalSpecimen assembleDigitalSpecimenTerm(JsonNode data, boolean dwc)
       throws OrganisationException, UnknownPhysicalSpecimenIdType {
     var ds = assembleDigitalSpecimenTerms(data, dwc);
-    ds.withOccurrences(assembleOccurrenceTerms(data, dwc));
+    ds.withDwcOccurrence(assembleOccurrenceTerms(data, dwc));
     ds.withDwcIdentification(assembleIdentifications(data, dwc));
-    ds.withIdentifiers(assembleIdentifiers(data));
-    ds.withCitations(assembleSpecimenCitations(data, dwc));
-    ds.withEntityRelationships(assembleDigitalSpecimenEntityRelationships(ds));
+    ds.withIdentifier(assembleIdentifiers(data));
+    ds.withCitation(assembleSpecimenCitations(data, dwc));
+    ds.withEntityRelationship(assembleDigitalSpecimenEntityRelationships(ds));
     setCalculatedFields(ds, data);
     return ds;
   }
@@ -316,8 +316,8 @@ public abstract class BaseDigitalObjectDirector {
       relationships.add(new EntityRelationships().withEntityRelationshipType("hasLicense")
           .withObjectEntityIri(ds.getDctermsLicense()));
     }
-    if (ds.getCitations() != null) {
-      for (Citations citation : ds.getCitations()) {
+    if (ds.getCitation() != null) {
+      for (Citations citation : ds.getCitation()) {
         if (citation.getReferenceIri() != null) {
           relationships.add(new EntityRelationships().withEntityRelationshipType("hasReference")
               .withObjectEntityIri(citation.getReferenceIri()));
@@ -387,13 +387,13 @@ public abstract class BaseDigitalObjectDirector {
         .withDwcVerbatimIdentification(
             termMapper.retrieveTerm(new VerbatimIdentification(), data, dwc))
         .withTaxonIdentifications(List.of(mappedTaxonIdentification))
-        .withCitations(assembleIdentificationCitations(data, dwc));
+        .withCitation(assembleIdentificationCitations(data, dwc));
   }
 
 
   private List<Occurrences> assembleOccurrenceTerms(JsonNode data,
       boolean dwc) {
-    var georeference = new Georeference()
+    var georeference = new GeoReference()
         .withDwcDecimalLatitude(
             parseToDouble(new DecimalLatitude(), data, dwc))
         .withDwcVerbatimLatitude(termMapper.retrieveTerm(new VerbatimLatitude(), data, dwc))
@@ -416,7 +416,7 @@ public abstract class BaseDigitalObjectDirector {
         .withDwcGeoreferenceRemarks(termMapper.retrieveTerm(new GeoreferenceRemarks(), data, dwc))
         .withDwcGeoreferenceSources(termMapper.retrieveTerm(new GeoreferenceSources(), data, dwc))
         .withDwcPointRadiusSpatialFit(parseToDouble(new PointRadiusSpatialFit(), data, dwc));
-    var geologicalContext = new eu.dissco.core.translator.schema.GeologicalContext()
+    var geologicalContext = new eu.dissco.core.translator.schema.DwcGeologicalContext()
         .withDwcLowestBiostratigraphicZone(
             termMapper.retrieveTerm(new LowestBiostratigraphicZone(), data, dwc))
         .withDwcHighestBiostratigraphicZone(
@@ -474,8 +474,8 @@ public abstract class BaseDigitalObjectDirector {
         .withDwcVerticalDatum(termMapper.retrieveTerm(new VerticalDatum(), data, dwc))
         .withDwcLocationAccordingTo(termMapper.retrieveTerm(new LocationAccordingTo(), data, dwc))
         .withDwcLocationRemarks(termMapper.retrieveTerm(new LocationRemarks(), data, dwc))
-        .withGeoreference(georeference)
-        .withGeologicalContext(geologicalContext);
+        .withGeoReference(georeference)
+        .withDwcGeologicalContext(geologicalContext);
     var assertions = new OccurrenceAssertions().gatherOccurrenceAssertions(mapper, data, dwc);
     var occurrence = new eu.dissco.core.translator.schema.Occurrences()
         .withDwcFieldNumber(termMapper.retrieveTerm(new FieldNumber(), data, dwc))
@@ -510,8 +510,8 @@ public abstract class BaseDigitalObjectDirector {
         .withDwcSampleSizeValue(termMapper.retrieveTerm(new SampleSizeValue(), data, dwc))
         .withDwcCaste(termMapper.retrieveTerm(new Caste(), data, dwc))
         .withDwcVitality(termMapper.retrieveTerm(new Vitality(), data, dwc))
-        .withLocation(location)
-        .withAssertions(assertions);
+        .withDctermsLocation(location)
+        .withAssertion(assertions);
     return List.of(occurrence);
   }
 
