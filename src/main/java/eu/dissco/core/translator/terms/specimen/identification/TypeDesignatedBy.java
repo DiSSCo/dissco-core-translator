@@ -5,6 +5,7 @@ import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
 public class TypeDesignatedBy extends Term {
+
   public static final String TERM = "typeDesignatedBy";
 
   private final List<String> abcdTerms = List.of("verifier/fullName/value");

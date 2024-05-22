@@ -5,6 +5,7 @@ import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
 public class AcceptedNameUsageId extends Term {
+
   public static final String TERM = DWC_PREFIX + "acceptedNameUsageId";
 
   private final List<String> dwcaTerms = List.of(TERM);

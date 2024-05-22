@@ -7,7 +7,7 @@ import java.util.List;
 public class DecimalLatitude extends Term {
 
   public static final String TERM = DWC_PREFIX + "decimalLatitude";
-  private final List<String> dwcaTerms = List.of(TERM);
+  private final List<String> dwcaTerms = List.of(TERM, VerbatimLatitude.TERM);
   private final List<String> abcdTerms = List.of(
       "abcd:gathering/siteCoordinateSets/siteCoordinates/0/coordinatesLatLong/latitudeDecimal");
 

@@ -14,7 +14,7 @@ import eu.dissco.core.translator.schema.DigitalSpecimen;
 import eu.dissco.core.translator.schema.DigitalSpecimen.OdsLivingOrPreserved;
 import eu.dissco.core.translator.schema.DigitalSpecimen.OdsPhysicalSpecimenIdType;
 import eu.dissco.core.translator.schema.EntityRelationships;
-import eu.dissco.core.translator.schema.Georeference;
+import eu.dissco.core.translator.schema.GeoReference;
 import eu.dissco.core.translator.schema.Identifications;
 import eu.dissco.core.translator.schema.Identifiers;
 import eu.dissco.core.translator.schema.Occurrences;
@@ -46,11 +46,13 @@ import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenId;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenIdType;
 import eu.dissco.core.translator.terms.specimen.Preparations;
 import eu.dissco.core.translator.terms.specimen.RecordedBy;
+import eu.dissco.core.translator.terms.specimen.RecordedById;
 import eu.dissco.core.translator.terms.specimen.RightsHolder;
 import eu.dissco.core.translator.terms.specimen.SpecimenName;
 import eu.dissco.core.translator.terms.specimen.TopicDiscipline;
 import eu.dissco.core.translator.terms.specimen.TopicDomain;
 import eu.dissco.core.translator.terms.specimen.TopicOrigin;
+import eu.dissco.core.translator.terms.specimen.VerbatimLabel;
 import eu.dissco.core.translator.terms.specimen.citation.BibliographicCitation;
 import eu.dissco.core.translator.terms.specimen.citation.CitationRemarks;
 import eu.dissco.core.translator.terms.specimen.citation.Date;
@@ -83,6 +85,7 @@ import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Original
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Phylum;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.ScientificName;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.ScientificNameAuthorship;
+import eu.dissco.core.translator.terms.specimen.identification.taxonomy.ScientificNameId;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.SpecificEpithet;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Subfamily;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Subgenus;
@@ -93,6 +96,7 @@ import eu.dissco.core.translator.terms.specimen.identification.taxonomy.TaxonRan
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.TaxonRemarks;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.TaxonomicStatus;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Tribe;
+import eu.dissco.core.translator.terms.specimen.identification.taxonomy.VerbatimTaxonRank;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.VernacularName;
 import eu.dissco.core.translator.terms.specimen.location.Continent;
 import eu.dissco.core.translator.terms.specimen.location.Country;
@@ -103,6 +107,7 @@ import eu.dissco.core.translator.terms.specimen.location.Island;
 import eu.dissco.core.translator.terms.specimen.location.IslandGroup;
 import eu.dissco.core.translator.terms.specimen.location.Locality;
 import eu.dissco.core.translator.terms.specimen.location.LocationAccordingTo;
+import eu.dissco.core.translator.terms.specimen.location.LocationId;
 import eu.dissco.core.translator.terms.specimen.location.LocationRemarks;
 import eu.dissco.core.translator.terms.specimen.location.MaximumDepthInMeters;
 import eu.dissco.core.translator.terms.specimen.location.MaximumDistanceAboveSurfaceInMeters;
@@ -112,6 +117,9 @@ import eu.dissco.core.translator.terms.specimen.location.MinimumDistanceAboveSur
 import eu.dissco.core.translator.terms.specimen.location.MinimumElevationInMeters;
 import eu.dissco.core.translator.terms.specimen.location.Municipality;
 import eu.dissco.core.translator.terms.specimen.location.StateProvince;
+import eu.dissco.core.translator.terms.specimen.location.VerbatimDepth;
+import eu.dissco.core.translator.terms.specimen.location.VerbatimElevation;
+import eu.dissco.core.translator.terms.specimen.location.VerbatimLocality;
 import eu.dissco.core.translator.terms.specimen.location.VerticalDatum;
 import eu.dissco.core.translator.terms.specimen.location.WaterBody;
 import eu.dissco.core.translator.terms.specimen.location.georeference.CoordinatePrecision;
@@ -128,8 +136,14 @@ import eu.dissco.core.translator.terms.specimen.location.georeference.Georeferen
 import eu.dissco.core.translator.terms.specimen.location.georeference.GeoreferencedBy;
 import eu.dissco.core.translator.terms.specimen.location.georeference.GeoreferencedDate;
 import eu.dissco.core.translator.terms.specimen.location.georeference.PointRadiusSpatialFit;
+import eu.dissco.core.translator.terms.specimen.location.georeference.VerbatimCoordinateSystem;
+import eu.dissco.core.translator.terms.specimen.location.georeference.VerbatimCoordinates;
+import eu.dissco.core.translator.terms.specimen.location.georeference.VerbatimLatitude;
+import eu.dissco.core.translator.terms.specimen.location.georeference.VerbatimLongitude;
+import eu.dissco.core.translator.terms.specimen.location.georeference.VerbatimSRS;
 import eu.dissco.core.translator.terms.specimen.occurence.Behavior;
 import eu.dissco.core.translator.terms.specimen.occurence.Caste;
+import eu.dissco.core.translator.terms.specimen.occurence.Day;
 import eu.dissco.core.translator.terms.specimen.occurence.DegreeOfEstablishment;
 import eu.dissco.core.translator.terms.specimen.occurence.EstablishmentMeans;
 import eu.dissco.core.translator.terms.specimen.occurence.EventDate;
@@ -139,18 +153,22 @@ import eu.dissco.core.translator.terms.specimen.occurence.FieldNumber;
 import eu.dissco.core.translator.terms.specimen.occurence.GeoreferenceVerificationStatus;
 import eu.dissco.core.translator.terms.specimen.occurence.Habitat;
 import eu.dissco.core.translator.terms.specimen.occurence.LifeStage;
+import eu.dissco.core.translator.terms.specimen.occurence.Month;
 import eu.dissco.core.translator.terms.specimen.occurence.OccurrenceAssertions;
 import eu.dissco.core.translator.terms.specimen.occurence.OccurrenceRemarks;
 import eu.dissco.core.translator.terms.specimen.occurence.OccurrenceStatus;
 import eu.dissco.core.translator.terms.specimen.occurence.OrganismQuantity;
 import eu.dissco.core.translator.terms.specimen.occurence.OrganismQuantityType;
 import eu.dissco.core.translator.terms.specimen.occurence.Pathway;
+import eu.dissco.core.translator.terms.specimen.occurence.RecordNumber;
 import eu.dissco.core.translator.terms.specimen.occurence.ReproductiveCondition;
 import eu.dissco.core.translator.terms.specimen.occurence.SampleSizeUnit;
 import eu.dissco.core.translator.terms.specimen.occurence.SampleSizeValue;
 import eu.dissco.core.translator.terms.specimen.occurence.SamplingProtocol;
 import eu.dissco.core.translator.terms.specimen.occurence.Sex;
+import eu.dissco.core.translator.terms.specimen.occurence.VerbatimEventDate;
 import eu.dissco.core.translator.terms.specimen.occurence.Vitality;
+import eu.dissco.core.translator.terms.specimen.occurence.Year;
 import eu.dissco.core.translator.terms.specimen.stratigraphy.biostratigraphic.HighestBiostratigraphicZone;
 import eu.dissco.core.translator.terms.specimen.stratigraphy.biostratigraphic.LowestBiostratigraphicZone;
 import eu.dissco.core.translator.terms.specimen.stratigraphy.chronostratigraphic.EarliestAgeOrLowestStage;
@@ -189,11 +207,11 @@ public abstract class BaseDigitalObjectDirector {
   public DigitalSpecimen assembleDigitalSpecimenTerm(JsonNode data, boolean dwc)
       throws OrganisationException, UnknownPhysicalSpecimenIdType {
     var ds = assembleDigitalSpecimenTerms(data, dwc);
-    ds.withOccurrences(assembleOccurrenceTerms(data, dwc));
+    ds.withDwcOccurrence(assembleOccurrenceTerms(data, dwc));
     ds.withDwcIdentification(assembleIdentifications(data, dwc));
-    ds.withIdentifiers(assembleIdentifiers(data));
-    ds.withCitations(assembleSpecimenCitations(data, dwc));
-    ds.withEntityRelationships(assembleDigitalSpecimenEntityRelationships(ds));
+    ds.withIdentifier(assembleIdentifiers(data));
+    ds.withCitation(assembleSpecimenCitations(data, dwc));
+    ds.withEntityRelationship(assembleDigitalSpecimenEntityRelationships(ds));
     setCalculatedFields(ds, data);
     return ds;
   }
@@ -256,12 +274,14 @@ public abstract class BaseDigitalObjectDirector {
         .withDwcInstitutionName(
             getInstitutionName(organisationId))
         .withDwcRecordedBy(termMapper.retrieveTerm(new RecordedBy(), data, dwc))
+        .withDwcRecordedById(termMapper.retrieveTerm(new RecordedById(), data, dwc))
         .withDwcBasisOfRecord(termMapper.retrieveTerm(new BasisOfRecord(), data, dwc))
         .withDctermsAccessRights(termMapper.retrieveTerm(new AccessRights(), data, dwc))
         .withDctermsRightsHolder(termMapper.retrieveTerm(new RightsHolder(), data, dwc))
         .withDwcDatasetName(termMapper.retrieveTerm(new DatasetName(), data, dwc))
         .withDwcDisposition(termMapper.retrieveTerm(new Disposition(), data, dwc))
         .withDwcInformationWithheld(termMapper.retrieveTerm(new InformationWithheld(), data, dwc))
+        .withDwcVerbatimLabel(termMapper.retrieveTerm(new VerbatimLabel(), data, dwc))
         .withDwcDataGeneralizations(termMapper.retrieveTerm(new DataGeneralizations(), data, dwc));
   }
 
@@ -273,7 +293,8 @@ public abstract class BaseDigitalObjectDirector {
       var wikidataId = organisationId.replace("https://www.wikidata.org/wiki/", "");
       return institutionNameComponent.getWikiDataName(wikidataId);
     } else {
-      throw new OrganisationException(organisationId + " is not a valid ror or wikidata identifier");
+      throw new OrganisationException(
+          organisationId + " is not a valid ror or wikidata identifier");
     }
   }
 
@@ -295,8 +316,8 @@ public abstract class BaseDigitalObjectDirector {
       relationships.add(new EntityRelationships().withEntityRelationshipType("hasLicense")
           .withObjectEntityIri(ds.getDctermsLicense()));
     }
-    if (ds.getCitations() != null) {
-      for (Citations citation : ds.getCitations()) {
+    if (ds.getCitation() != null) {
+      for (Citations citation : ds.getCitation()) {
         if (citation.getReferenceIri() != null) {
           relationships.add(new EntityRelationships().withEntityRelationshipType("hasReference")
               .withObjectEntityIri(citation.getReferenceIri()));
@@ -324,12 +345,14 @@ public abstract class BaseDigitalObjectDirector {
         .withDwcTaxonID(termMapper.retrieveTerm(new TaxonId(), data, dwc))
         .withDwcKingdom(termMapper.retrieveTerm(new Kingdom(), data, dwc))
         .withDwcTaxonRank(termMapper.retrieveTerm(new TaxonRank(), data, dwc))
+        .withDwcVerbatimTaxonRank(termMapper.retrieveTerm(new VerbatimTaxonRank(), data, dwc))
         .withDwcGenus(termMapper.retrieveTerm(new Genus(), data, dwc))
         .withDwcSubgenus(termMapper.retrieveTerm(new Subgenus(), data, dwc))
         .withDwcOrder(termMapper.retrieveTerm(new Order(), data, dwc))
         .withDwcScientificName(termMapper.retrieveTerm(new ScientificName(), data, dwc))
         .withDwcScientificNameAuthorship(
             termMapper.retrieveTerm(new ScientificNameAuthorship(), data, dwc))
+        .withDwcScientificNameId(termMapper.retrieveTerm(new ScientificNameId(), data, dwc))
         .withDwcNamePublishedInYear(termMapper.retrieveTerm(new NamePublishedInYear(), data, dwc))
         .withDwcClass(termMapper.retrieveTerm(new Class(), data, dwc))
         .withDwcFamily(termMapper.retrieveTerm(new Family(), data, dwc))
@@ -364,17 +387,23 @@ public abstract class BaseDigitalObjectDirector {
         .withDwcVerbatimIdentification(
             termMapper.retrieveTerm(new VerbatimIdentification(), data, dwc))
         .withTaxonIdentifications(List.of(mappedTaxonIdentification))
-        .withCitations(assembleIdentificationCitations(data, dwc));
+        .withCitation(assembleIdentificationCitations(data, dwc));
   }
 
 
   private List<Occurrences> assembleOccurrenceTerms(JsonNode data,
       boolean dwc) {
-    var georeference = new Georeference()
+    var georeference = new GeoReference()
         .withDwcDecimalLatitude(
             parseToDouble(new DecimalLatitude(), data, dwc))
+        .withDwcVerbatimLatitude(termMapper.retrieveTerm(new VerbatimLatitude(), data, dwc))
         .withDwcDecimalLongitude(parseToDouble(new DecimalLongitude(), data, dwc))
+        .withDwcVerbatimLongitude(termMapper.retrieveTerm(new VerbatimLongitude(), data, dwc))
         .withDwcGeodeticDatum(termMapper.retrieveTerm(new GeodeticDatum(), data, dwc))
+        .withDwcVerbatimCoordinates(termMapper.retrieveTerm(new VerbatimCoordinates(), data, dwc))
+        .withDwcVerbatimCoordinateSystem(
+            termMapper.retrieveTerm(new VerbatimCoordinateSystem(), data, dwc))
+        .withDwcVerbatimSRS(termMapper.retrieveTerm(new VerbatimSRS(), data, dwc))
         .withDwcGeoreferenceProtocol(termMapper.retrieveTerm(new GeoreferenceProtocol(), data, dwc))
         .withDwcCoordinatePrecision(parseToDouble(new CoordinatePrecision(), data, dwc))
         .withDwcCoordinateUncertaintyInMeters(
@@ -387,7 +416,7 @@ public abstract class BaseDigitalObjectDirector {
         .withDwcGeoreferenceRemarks(termMapper.retrieveTerm(new GeoreferenceRemarks(), data, dwc))
         .withDwcGeoreferenceSources(termMapper.retrieveTerm(new GeoreferenceSources(), data, dwc))
         .withDwcPointRadiusSpatialFit(parseToDouble(new PointRadiusSpatialFit(), data, dwc));
-    var geologicalContext = new eu.dissco.core.translator.schema.GeologicalContext()
+    var geologicalContext = new eu.dissco.core.translator.schema.DwcGeologicalContext()
         .withDwcLowestBiostratigraphicZone(
             termMapper.retrieveTerm(new LowestBiostratigraphicZone(), data, dwc))
         .withDwcHighestBiostratigraphicZone(
@@ -419,6 +448,7 @@ public abstract class BaseDigitalObjectDirector {
         .withDwcGroup(termMapper.retrieveTerm(new Group(), data, dwc))
         .withDwcMember(termMapper.retrieveTerm(new Member(), data, dwc));
     var location = new eu.dissco.core.translator.schema.Location()
+        .withDwcLocationID(termMapper.retrieveTerm(new LocationId(), data, dwc))
         .withDwcContinent(termMapper.retrieveTerm(new Continent(), data, dwc))
         .withDwcCountry(termMapper.retrieveTerm(new Country(), data, dwc))
         .withDwcCountryCode(termMapper.retrieveTerm(new CountryCode(), data, dwc))
@@ -427,6 +457,7 @@ public abstract class BaseDigitalObjectDirector {
         .withDwcIslandGroup(termMapper.retrieveTerm(new IslandGroup(), data, dwc))
         .withDwcMunicipality(termMapper.retrieveTerm(new Municipality(), data, dwc))
         .withDwcLocality(termMapper.retrieveTerm(new Locality(), data, dwc))
+        .withDwcVerbatimLocality(termMapper.retrieveTerm(new VerbatimLocality(), data, dwc))
         .withDwcStateProvince(termMapper.retrieveTerm(new StateProvince(), data, dwc))
         .withDwcWaterBody(termMapper.retrieveTerm(new WaterBody(), data, dwc))
         .withDwcHigherGeography(termMapper.retrieveTerm(new HigherGeography(), data, dwc))
@@ -438,15 +469,21 @@ public abstract class BaseDigitalObjectDirector {
         .withDwcMinimumDistanceAboveSurfaceInMeters(
             parseToDouble(new MinimumDistanceAboveSurfaceInMeters(), data, dwc))
         .withDwcMinimumElevationInMeters(parseToDouble(new MinimumElevationInMeters(), data, dwc))
+        .withDwcVerbatimDepth(termMapper.retrieveTerm(new VerbatimDepth(), data, dwc))
+        .withDwcVerbatimElevation(termMapper.retrieveTerm(new VerbatimElevation(), data, dwc))
         .withDwcVerticalDatum(termMapper.retrieveTerm(new VerticalDatum(), data, dwc))
         .withDwcLocationAccordingTo(termMapper.retrieveTerm(new LocationAccordingTo(), data, dwc))
         .withDwcLocationRemarks(termMapper.retrieveTerm(new LocationRemarks(), data, dwc))
-        .withGeoreference(georeference)
-        .withGeologicalContext(geologicalContext);
+        .withGeoReference(georeference)
+        .withDwcGeologicalContext(geologicalContext);
     var assertions = new OccurrenceAssertions().gatherOccurrenceAssertions(mapper, data, dwc);
     var occurrence = new eu.dissco.core.translator.schema.Occurrences()
         .withDwcFieldNumber(termMapper.retrieveTerm(new FieldNumber(), data, dwc))
         .withDwcEventDate(termMapper.retrieveTerm(new EventDate(), data, dwc))
+        .withDwcVerbatimEventDate(termMapper.retrieveTerm(new VerbatimEventDate(), data, dwc))
+        .withDwcYear(parseToInteger(new Year(), data, dwc))
+        .withDwcMonth(parseToInteger(new Month(), data, dwc))
+        .withDwcDay(parseToInteger(new Day(), data, dwc))
         .withDwcSex(termMapper.retrieveTerm(new Sex(), data, dwc))
         .withDwcOrganismQuantity(termMapper.retrieveTerm(new OrganismQuantity(), data, dwc))
         .withDwcOrganismQuantityType(termMapper.retrieveTerm(new OrganismQuantityType(), data, dwc))
@@ -454,6 +491,7 @@ public abstract class BaseDigitalObjectDirector {
         .withDwcLifeStage(termMapper.retrieveTerm(new LifeStage(), data, dwc))
         .withDwcEventRemarks(termMapper.retrieveTerm(new EventRemark(), data, dwc))
         .withDwcFieldNumber(termMapper.retrieveTerm(new FieldNumber(), data, dwc))
+        .withDwcRecordNumber(termMapper.retrieveTerm(new RecordNumber(), data, dwc))
         .withDwcFieldNotes(termMapper.retrieveTerm(new FieldNotes(), data, dwc))
         .withDwcHabitat(termMapper.retrieveTerm(new Habitat(), data, dwc))
         .withDwcReproductiveCondition(
@@ -472,8 +510,8 @@ public abstract class BaseDigitalObjectDirector {
         .withDwcSampleSizeValue(termMapper.retrieveTerm(new SampleSizeValue(), data, dwc))
         .withDwcCaste(termMapper.retrieveTerm(new Caste(), data, dwc))
         .withDwcVitality(termMapper.retrieveTerm(new Vitality(), data, dwc))
-        .withLocation(location)
-        .withAssertions(assertions);
+        .withDctermsLocation(location)
+        .withAssertion(assertions);
     return List.of(occurrence);
   }
 

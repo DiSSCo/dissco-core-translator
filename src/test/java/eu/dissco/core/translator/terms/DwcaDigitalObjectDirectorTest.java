@@ -61,9 +61,9 @@ class DwcaDigitalObjectDirectorTest {
 
     // Then
     assertThat(result).isNotNull();
-    assertThat(result.getEntityRelationships()).asList().hasSize(3);
-    assertThat(result.getIdentifiers()).asList().hasSize(3);
-    assertThat(result.getCitations()).asList().hasSize(2);
+    assertThat(result.getEntityRelationship()).asList().hasSize(3);
+    assertThat(result.getIdentifier()).asList().hasSize(3);
+    assertThat(result.getCitation()).asList().hasSize(2);
     assertThat(result.getDwcIdentification()).asList().hasSize(2);
   }
 
@@ -85,9 +85,9 @@ class DwcaDigitalObjectDirectorTest {
 
     // Then
     assertThat(result).isNotNull();
-    assertThat(result.getEntityRelationships()).asList().hasSize(3);
-    assertThat(result.getIdentifiers()).asList().hasSize(3);
-    assertThat(result.getCitations()).asList().hasSize(1);
+    assertThat(result.getEntityRelationship()).asList().hasSize(3);
+    assertThat(result.getIdentifier()).asList().hasSize(3);
+    assertThat(result.getCitation()).asList().hasSize(1);
     assertThat(result.getDwcIdentification()).asList().hasSize(1);
     assertThat(((eu.dissco.core.translator.schema.Identifications) result.getDwcIdentification()
         .get(0)).getDwcIdentificationVerificationStatus()).isTrue();

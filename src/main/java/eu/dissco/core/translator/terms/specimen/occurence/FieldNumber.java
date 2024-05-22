@@ -8,9 +8,8 @@ public class FieldNumber extends Term {
 
   public static final String TERM = DWC_PREFIX + "fieldNumber";
 
-  private final List<String> dwcaTerms = List.of("dwc:recordNumber", "dwc:fieldNumber");
-  private final List<String> abcdTerms = List.of("abcd:collectorsFieldNumber",
-      "abcd:gathering/code");
+  private final List<String> dwcaTerms = List.of(TERM);
+  private final List<String> abcdTerms = List.of("abcd:gathering/code");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {

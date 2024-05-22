@@ -8,7 +8,7 @@ public class Locality extends Term {
 
   public static final String TERM = DWC_PREFIX + "locality";
 
-  private final List<String> dwcaTerms = List.of(TERM, "dwc:verbatimLocality");
+  private final List<String> dwcaTerms = List.of(TERM, VerbatimLocality.TERM);
   private final List<String> abcdTerms = List.of("abcd:gathering/localityText/value");
 
   @Override

@@ -11,7 +11,16 @@ public class SpecimenName extends Term {
     var acceptedIdentification = retrieveAcceptedIdentification(ds);
     if (acceptedIdentification != null && acceptedIdentification.getTaxonIdentifications() != null
         && !acceptedIdentification.getTaxonIdentifications().isEmpty()) {
-      return acceptedIdentification.getTaxonIdentifications().get(0).getDwcScientificName();
+      if (acceptedIdentification.getTaxonIdentifications().get(0)
+          .getDwcScientificName() != null) {
+        return acceptedIdentification.getTaxonIdentifications().get(0)
+            .getDwcScientificName();
+      }
+      if (acceptedIdentification.getTaxonIdentifications().get(0)
+          .getDwcVernacularName() != null) {
+        return acceptedIdentification.getTaxonIdentifications().get(0)
+            .getDwcVernacularName();
+      }
     }
     return null;
   }

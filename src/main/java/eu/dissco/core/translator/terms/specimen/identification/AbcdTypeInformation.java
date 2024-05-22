@@ -39,8 +39,10 @@ public class AbcdTypeInformation extends Term {
     }
   }
 
-  private void setAdditionalIdentificationInfo(Identifications identification, JsonNode typeDesignationNodes) {
-    identification.setTypeDesignatedBy(new TypeDesignatedBy().retrieveFromABCD(typeDesignationNodes));
+  private void setAdditionalIdentificationInfo(Identifications identification,
+      JsonNode typeDesignationNodes) {
+    identification.setTypeDesignatedBy(
+        new TypeDesignatedBy().retrieveFromABCD(typeDesignationNodes));
     identification.setDwcTypeStatus(new TypeStatus().retrieveFromABCD(typeDesignationNodes));
   }
 

@@ -73,7 +73,8 @@ public class BiocaseDigitalObjectDirector extends BaseDigitalObjectDirector {
         iterateOverElements = false;
       }
     }
-    if (identifications.size() == 1 && identifications.get(0).getDwcIdentificationVerificationStatus() == null){
+    if (identifications.size() == 1
+        && identifications.get(0).getDwcIdentificationVerificationStatus() == null) {
       //If there is only one identification, and it doesn't have a verification status, set it to true
       identifications.get(0).setDwcIdentificationVerificationStatus(Boolean.TRUE);
     }

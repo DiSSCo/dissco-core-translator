@@ -116,9 +116,9 @@ class BiocaseDigitalObjectDirectorTest {
 
     // Then
     assertThat(result).isNotNull();
-    assertThat(result.getEntityRelationships()).asList().hasSize(4);
-    assertThat(result.getIdentifiers()).asList().hasSize(4);
-    assertThat(result.getCitations()).asList().hasSize(1);
+    assertThat(result.getEntityRelationship()).asList().hasSize(4);
+    assertThat(result.getIdentifier()).asList().hasSize(4);
+    assertThat(result.getCitation()).asList().hasSize(1);
     assertThat(result.getDwcIdentification()).asList().hasSize(totalIdentifications);
   }
 

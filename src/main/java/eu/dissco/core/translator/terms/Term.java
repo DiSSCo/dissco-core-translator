@@ -1,9 +1,9 @@
 package eu.dissco.core.translator.terms;
 
 
-import eu.dissco.core.translator.schema.Identifications;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.dissco.core.translator.schema.Identifications;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
