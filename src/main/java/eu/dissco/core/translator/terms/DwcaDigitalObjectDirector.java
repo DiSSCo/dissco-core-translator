@@ -6,9 +6,9 @@ import eu.dissco.core.translator.Profiles;
 import eu.dissco.core.translator.component.InstitutionNameComponent;
 import eu.dissco.core.translator.properties.FdoProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
-import eu.dissco.core.translator.schema.Citations;
+import eu.dissco.core.translator.schema.Citation;
 import eu.dissco.core.translator.schema.DigitalSpecimen;
-import eu.dissco.core.translator.schema.Identifications;
+import eu.dissco.core.translator.schema.Identification;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +35,7 @@ public class DwcaDigitalObjectDirector extends BaseDigitalObjectDirector {
     list.add("dwc:catalogNumber");
     list.add("dwc:otherCatalogNumbers");
     list.add("dcterms:identifier");
+    list.add("dwc:materialEntityID");
     return list;
   }
 
@@ -44,8 +45,8 @@ public class DwcaDigitalObjectDirector extends BaseDigitalObjectDirector {
   }
 
   @Override
-  protected List<Citations> assembleSpecimenCitations(JsonNode data, boolean dwc) {
-    var citations = new ArrayList<Citations>();
+  protected List<Citation> assembleSpecimenCitations(JsonNode data, boolean dwc) {
+    var citations = new ArrayList<Citation>();
     if (data.get(EXTENSION) != null
         && data.get(EXTENSION).get("gbif:Reference") != null) {
       var references = data.get(EXTENSION).get("gbif:Reference");
@@ -60,14 +61,14 @@ public class DwcaDigitalObjectDirector extends BaseDigitalObjectDirector {
   }
 
   @Override
-  protected List<Citations> assembleIdentificationCitations(JsonNode data, boolean dwc) {
+  protected List<Citation> assembleIdentificationCitations(JsonNode data, boolean dwc) {
     log.debug("DWCA does not have identification citations");
     return List.of();
   }
 
   @Override
-  protected List<Identifications> assembleIdentifications(JsonNode data, boolean dwc) {
-    var mappedIdentifications = new ArrayList<Identifications>();
+  protected List<Identification> assembleIdentifications(JsonNode data, boolean dwc) {
+    var mappedIdentifications = new ArrayList<Identification>();
     if (data.get(EXTENSION) != null
         && data.get(EXTENSION).get("dwc:Identification") != null) {
       var identifications = data.get(EXTENSION).get("dwc:Identification");
@@ -79,9 +80,9 @@ public class DwcaDigitalObjectDirector extends BaseDigitalObjectDirector {
       mappedIdentifications.add(createIdentification(data, dwc));
     }
     if (mappedIdentifications.size() == 1
-        && mappedIdentifications.get(0).getDwcIdentificationVerificationStatus() == null) {
+        && mappedIdentifications.get(0).getOdsIsVerifiedIdentification() == null) {
       //If there is only one identification, and it doesn't have a verification status, set it to true
-      mappedIdentifications.get(0).setDwcIdentificationVerificationStatus(Boolean.TRUE);
+      mappedIdentifications.get(0).setOdsIsVerifiedIdentification(Boolean.TRUE);
     }
     return mappedIdentifications;
   }

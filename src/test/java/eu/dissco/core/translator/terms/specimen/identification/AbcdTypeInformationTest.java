@@ -5,8 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.schema.DigitalSpecimen;
-import eu.dissco.core.translator.schema.Identifications;
-import eu.dissco.core.translator.schema.TaxonIdentification;
+import eu.dissco.core.translator.schema.Identification;
+import eu.dissco.core.translator.schema.OdsHasTaxonIdentification;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,8 +34,8 @@ class AbcdTypeInformationTest {
     abcdTypeInformation.addTypeInformation(digitalSpecimen, json, MAPPER);
 
     // Then
-    assertThat(digitalSpecimen.getDwcIdentification().get(0))
-        .extracting(Identifications::getDwcTypeStatus)
+    assertThat(digitalSpecimen.getOdsHasIdentification().get(0))
+        .extracting(Identification::getDwcTypeStatus)
         .isEqualTo("isotype");
   }
 
@@ -51,11 +51,11 @@ class AbcdTypeInformationTest {
     abcdTypeInformation.addTypeInformation(digitalSpecimen, json, MAPPER);
 
     // Then
-    assertThat(digitalSpecimen.getDwcIdentification().get(0))
-        .extracting(Identifications::getDwcTypeStatus)
+    assertThat(digitalSpecimen.getOdsHasIdentification().get(0))
+        .extracting(Identification::getDwcTypeStatus)
         .isEqualTo("isotype");
-    assertThat(digitalSpecimen.getDwcIdentification().get(1))
-        .extracting(Identifications::getDwcTypeStatus)
+    assertThat(digitalSpecimen.getOdsHasIdentification().get(1))
+        .extracting(Identification::getDwcTypeStatus)
         .isNull();
   }
 
@@ -71,8 +71,8 @@ class AbcdTypeInformationTest {
     abcdTypeInformation.addTypeInformation(digitalSpecimen, json, MAPPER);
 
     // Then
-    assertThat(digitalSpecimen.getDwcIdentification().get(0))
-        .extracting(Identifications::getDwcTypeStatus)
+    assertThat(digitalSpecimen.getOdsHasIdentification().get(0))
+        .extracting(Identification::getDwcTypeStatus)
         .isNull();
   }
 
@@ -92,11 +92,11 @@ class AbcdTypeInformationTest {
 
   private DigitalSpecimen givenDigitalSpecimenWithIdentification(List<String> names) {
     var identifications = names.stream().map(
-            name -> new Identifications().withTaxonIdentifications(
-                List.of(new TaxonIdentification().withDwcScientificName(name))))
+            name -> new Identification().withOdsHasTaxonIdentification(
+                List.of(new OdsHasTaxonIdentification().withDwcScientificName(name))))
         .toList();
     return new DigitalSpecimen()
-        .withDwcIdentification(identifications);
+        .withOdsHasIdentification(identifications);
   }
 
 }

@@ -15,8 +15,8 @@ import efg.Unit;
 import eu.dissco.core.translator.Profiles;
 import eu.dissco.core.translator.database.jooq.enums.JobState;
 import eu.dissco.core.translator.domain.BioCasePartResult;
-import eu.dissco.core.translator.domain.DigitalMediaObject;
-import eu.dissco.core.translator.domain.DigitalMediaObjectEvent;
+import eu.dissco.core.translator.domain.DigitalMedia;
+import eu.dissco.core.translator.domain.DigitalMediaEvent;
 import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
 import eu.dissco.core.translator.domain.DigitalSpecimenWrapper;
 import eu.dissco.core.translator.domain.Enrichment;
@@ -187,29 +187,30 @@ public class BioCaseService extends WebClientService {
     var unitAttributes = parseToJson(unit);
     var datasetAttribute = getData(mapper.valueToTree(dataset.getMetadata()));
     unitAttributes.setAll(datasetAttribute);
+    unitAttributes.put("abcd:datasetGUID", dataset.getDatasetGUID());
     if (isAcceptedBasisOfRecord(unit)) {
       try {
         var attributes = digitalSpecimenDirector.assembleDigitalSpecimenTerm(unitAttributes, false);
-        if (attributes.getOdsNormalisedPhysicalSpecimenId() == null
-            || attributes.getDwcInstitutionId() == null) {
+        if (attributes.getOdsNormalisedPhysicalSpecimenID() == null
+            || attributes.getDwcInstitutionID() == null) {
           throw new DiSSCoDataException(
               "Record does not comply to MIDS level 0 (id and organisation), ignoring record");
         }
         var digitalSpecimen = new DigitalSpecimenWrapper(
-            attributes.getOdsNormalisedPhysicalSpecimenId(),
+            attributes.getOdsNormalisedPhysicalSpecimenID(),
             fdoProperties.getDigitalSpecimenType(),
             attributes,
             cleanupRedundantFields(unitAttributes)
         );
-        var digitalMediaObjects = processDigitalMediaObjects(
-            attributes.getOdsNormalisedPhysicalSpecimenId(), unit,
-            attributes.getDwcInstitutionId());
+        var digitalMedia = processDigitalMedia(
+            attributes.getOdsNormalisedPhysicalSpecimenID(), unit,
+            attributes.getDwcInstitutionID());
         log.debug("Result digital Specimen: {}", digitalSpecimen);
         kafkaService.sendMessage(
             new DigitalSpecimenEvent(
                 enrichmentServices(false),
                 digitalSpecimen,
-                digitalMediaObjects));
+                digitalMedia));
         processedRecords.incrementAndGet();
       } catch (DiSSCoDataException e) {
         log.error("Encountered data issue with record: {}", unitAttributes, e);
@@ -345,42 +346,42 @@ public class BioCaseService extends WebClientService {
     return data;
   }
 
-  private List<DigitalMediaObjectEvent> processDigitalMediaObjects(String physicalSpecimenId,
+  private List<DigitalMediaEvent> processDigitalMedia(String physicalSpecimenId,
       Unit unit, String organisationId) {
-    var digitalMediaObjectEvents = new ArrayList<DigitalMediaObjectEvent>();
+    var digitalMediaEvents = new ArrayList<DigitalMediaEvent>();
     if (unit.getMultiMediaObjects() != null && !unit.getMultiMediaObjects().getMultiMediaObject()
         .isEmpty()) {
       for (MultiMediaObject media : unit.getMultiMediaObjects().getMultiMediaObject()) {
         try {
-          digitalMediaObjectEvents.add(
-              processDigitalMediaObject(physicalSpecimenId, media, organisationId));
+          digitalMediaEvents.add(
+              processDigitalMedia(physicalSpecimenId, media, organisationId));
         } catch (DiSSCoDataException e) {
           log.error("Failed to process digital media object for digital specimen: {}",
               physicalSpecimenId, e);
         }
       }
     }
-    return digitalMediaObjectEvents;
+    return digitalMediaEvents;
   }
 
-  private DigitalMediaObjectEvent processDigitalMediaObject(String physicalSpecimenId,
+  private DigitalMediaEvent processDigitalMedia(String physicalSpecimenId,
       MultiMediaObject media, String organisationId) throws DiSSCoDataException {
     var attributes = getData(mapper.valueToTree(media));
-    var digitalEntity = digitalSpecimenDirector.assembleDigitalMediaObjects(false, attributes,
+    var digitalMedia = digitalSpecimenDirector.assembleDigitalMedia(false, attributes,
         organisationId);
-    if (digitalEntity.getAcAccessUri() == null) {
+    if (digitalMedia.getAcAccessURI() == null) {
       throw new DiSSCoDataException(
           "Digital media object for specimen does not have an access uri, ignoring record");
     }
-    var digitalMediaObjectEvent = new DigitalMediaObjectEvent(enrichmentServices(true),
-        new DigitalMediaObject(
-            fdoProperties.getDigitalMediaObjectType(),
+    var digitalMediaEvent = new DigitalMediaEvent(enrichmentServices(true),
+        new DigitalMedia(
+            fdoProperties.getDigitalMediaType(),
             physicalSpecimenId,
-            digitalEntity,
+            digitalMedia,
             attributes
         ));
-    log.debug("Result digital media object: {}", digitalMediaObjectEvent);
-    return digitalMediaObjectEvent;
+    log.debug("Result digital media object: {}", digitalMediaEvent);
+    return digitalMediaEvent;
   }
 
   private List<String> enrichmentServices(boolean multiMediaObject) {

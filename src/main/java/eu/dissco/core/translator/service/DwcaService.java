@@ -6,8 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import eu.dissco.core.translator.Profiles;
 import eu.dissco.core.translator.database.jooq.enums.JobState;
-import eu.dissco.core.translator.domain.DigitalMediaObject;
-import eu.dissco.core.translator.domain.DigitalMediaObjectEvent;
+import eu.dissco.core.translator.domain.DigitalMedia;
+import eu.dissco.core.translator.domain.DigitalMediaEvent;
 import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
 import eu.dissco.core.translator.domain.DigitalSpecimenWrapper;
 import eu.dissco.core.translator.domain.Enrichment;
@@ -246,7 +246,7 @@ public class DwcaService extends WebClientService {
     return "";
   }
 
-  private List<DigitalMediaObjectEvent> processMedia(String recordId, JsonNode fullDigitalSpecimen,
+  private List<DigitalMediaEvent> processMedia(String recordId, JsonNode fullDigitalSpecimen,
       String organisationId) throws OrganisationException {
     var extensions = fullDigitalSpecimen.get(EXTENSIONS);
     if (extensions != null) {
@@ -279,67 +279,67 @@ public class DwcaService extends WebClientService {
 
   }
 
-  private List<DigitalMediaObjectEvent> extractMultiMedia(String recordId, JsonNode imageArray,
+  private List<DigitalMediaEvent> extractMultiMedia(String recordId, JsonNode imageArray,
       String organisationId) {
-    var digitalMediaObjectEvents = new ArrayList<DigitalMediaObjectEvent>();
+    var digitalMediaEvents = new ArrayList<DigitalMediaEvent>();
     for (var image : imageArray) {
       try {
-        var digitalEntity = digitalSpecimenDirector.assembleDigitalMediaObjects(true, image,
+        var digitalMedia = digitalSpecimenDirector.assembleDigitalMedia(true, image,
             organisationId);
-        if (digitalEntity.getAcAccessUri() == null) {
+        if (digitalMedia.getAcAccessURI() == null) {
           throw new DiSSCoDataException(
               "Digital media object for specimen does not have an access uri, ignoring record");
         }
-        var digitalMediaObject = new DigitalMediaObjectEvent(enrichmentServices(true),
-            new DigitalMediaObject(
-                fdoProperties.getDigitalMediaObjectType(),
+        var digitalMediaEvent = new DigitalMediaEvent(enrichmentServices(true),
+            new DigitalMedia(
+                fdoProperties.getDigitalMediaType(),
                 recordId,
-                digitalEntity,
+                digitalMedia,
                 image));
-        digitalMediaObjectEvents.add(digitalMediaObject);
+        digitalMediaEvents.add(digitalMediaEvent);
       } catch (DiSSCoDataException e) {
         log.error("Failed to process digital media object for digital specimen: {}",
             recordId, e);
       }
     }
-    return digitalMediaObjectEvents;
+    return digitalMediaEvents;
   }
 
-  private List<DigitalMediaObjectEvent> publishAssociatedMedia(String recordId,
+  private List<DigitalMediaEvent> publishAssociatedMedia(String recordId,
       String associatedMedia, String organisationId, JsonNode licenseNode)
       throws OrganisationException {
     log.debug("Digital Specimen: {}, has associatedMedia {}", recordId,
         associatedMedia);
     String[] mediaUrls = associatedMedia.split("\\|");
-    var digitalMediaObjects = new ArrayList<DigitalMediaObjectEvent>();
+    var digitalMedia = new ArrayList<DigitalMediaEvent>();
     for (var mediaUrl : mediaUrls) {
-      var digitalMediaObject = new DigitalMediaObjectEvent(enrichmentServices(true),
-          new DigitalMediaObject(
-              fdoProperties.getDigitalMediaObjectType(),
+      var digitalMediaEvent = new DigitalMediaEvent(enrichmentServices(true),
+          new DigitalMedia(
+              fdoProperties.getDigitalMediaType(),
               recordId,
-              digitalSpecimenDirector.assembleDigitalMediaObjects(true,
+              digitalSpecimenDirector.assembleDigitalMedia(true,
                   mapper.createObjectNode().put("ac:accessUri", mediaUrl)
                       .set(EML_LICENSE, licenseNode),
                   organisationId),
               null));
-      digitalMediaObjects.add(digitalMediaObject);
+      digitalMedia.add(digitalMediaEvent);
     }
-    return digitalMediaObjects;
+    return digitalMedia;
   }
 
-  private Pair<DigitalSpecimenWrapper, List<DigitalMediaObjectEvent>> createDigitalObjects(
+  private Pair<DigitalSpecimenWrapper, List<DigitalMediaEvent>> createDigitalObjects(
       JsonNode fullRecord) throws DiSSCoDataException {
     var ds = digitalSpecimenDirector.assembleDigitalSpecimenTerm(fullRecord, true);
-    if (ds.getOdsNormalisedPhysicalSpecimenId() == null || ds.getDwcInstitutionId() == null) {
+    if (ds.getOdsNormalisedPhysicalSpecimenID() == null || ds.getDwcInstitutionID() == null) {
       throw new DiSSCoDataException(
           "Record does not comply to MIDS level 0 (id and organisation), ignoring record");
     }
     return Pair.of(new DigitalSpecimenWrapper(
-            ds.getOdsNormalisedPhysicalSpecimenId(),
+            ds.getOdsNormalisedPhysicalSpecimenID(),
             fdoProperties.getDigitalSpecimenType(),
             ds,
             cleanupRedundantFields(fullRecord)),
-        processMedia(ds.getOdsNormalisedPhysicalSpecimenId(), fullRecord, ds.getDwcInstitutionId())
+        processMedia(ds.getOdsNormalisedPhysicalSpecimenID(), fullRecord, ds.getDwcInstitutionID())
     );
   }
 

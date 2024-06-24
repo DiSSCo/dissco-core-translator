@@ -6,9 +6,9 @@ import eu.dissco.core.translator.Profiles;
 import eu.dissco.core.translator.component.InstitutionNameComponent;
 import eu.dissco.core.translator.properties.FdoProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
-import eu.dissco.core.translator.schema.Citations;
+import eu.dissco.core.translator.schema.Citation;
 import eu.dissco.core.translator.schema.DigitalSpecimen;
-import eu.dissco.core.translator.schema.Identifications;
+import eu.dissco.core.translator.schema.Identification;
 import eu.dissco.core.translator.terms.specimen.identification.AbcdTypeInformation;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,18 +48,18 @@ public class BiocaseDigitalObjectDirector extends BaseDigitalObjectDirector {
   }
 
   @Override
-  protected List<Citations> assembleSpecimenCitations(JsonNode data, boolean dwc) {
+  protected List<Citation> assembleSpecimenCitations(JsonNode data, boolean dwc) {
     return getCitations(data, dwc, "abcd:unitReferences/unitReference/");
   }
 
   @Override
-  protected List<Citations> assembleIdentificationCitations(JsonNode data, boolean dwc) {
+  protected List<Citation> assembleIdentificationCitations(JsonNode data, boolean dwc) {
     return getCitations(data, dwc, "references/reference/");
   }
 
   @Override
-  protected List<Identifications> assembleIdentifications(JsonNode data, boolean dwc) {
-    var identifications = new ArrayList<Identifications>();
+  protected List<Identification> assembleIdentifications(JsonNode data, boolean dwc) {
+    var identifications = new ArrayList<Identification>();
     var iterateOverElements = true;
     var count = 0;
     while (iterateOverElements) {
@@ -74,15 +74,15 @@ public class BiocaseDigitalObjectDirector extends BaseDigitalObjectDirector {
       }
     }
     if (identifications.size() == 1
-        && identifications.get(0).getDwcIdentificationVerificationStatus() == null) {
+        && identifications.get(0).getOdsIsVerifiedIdentification() == null) {
       //If there is only one identification, and it doesn't have a verification status, set it to true
-      identifications.get(0).setDwcIdentificationVerificationStatus(Boolean.TRUE);
+      identifications.get(0).setOdsIsVerifiedIdentification(Boolean.TRUE);
     }
     return identifications;
   }
 
-  private ArrayList<Citations> getCitations(JsonNode data, boolean dwc, String subPath) {
-    var citations = new ArrayList<Citations>();
+  private ArrayList<Citation> getCitations(JsonNode data, boolean dwc, String subPath) {
+    var citations = new ArrayList<Citation>();
     var iterateOverElements = true;
     var count = 0;
     while (iterateOverElements) {

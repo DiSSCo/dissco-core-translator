@@ -15,10 +15,11 @@ import eu.dissco.core.translator.component.InstitutionNameComponent;
 import eu.dissco.core.translator.exception.UnknownPhysicalSpecimenIdType;
 import eu.dissco.core.translator.properties.FdoProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
-import eu.dissco.core.translator.schema.DigitalSpecimen.OdsPhysicalSpecimenIdType;
-import eu.dissco.core.translator.terms.specimen.OrganisationId;
-import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenIdType;
+import eu.dissco.core.translator.schema.DigitalSpecimen.OdsPhysicalSpecimenIDType;
+import eu.dissco.core.translator.terms.specimen.OrganisationID;
+import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenIDType;
 import java.util.stream.Stream;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -106,20 +107,20 @@ class BiocaseDigitalObjectDirectorTest {
         "Tallinn University of Technology");
     given(termMapper.retrieveTerm(any(Term.class), eq(specimenJson), eq(false))).willReturn(
         "a mapped term");
-    given(termMapper.retrieveTerm(any(OrganisationId.class), eq(specimenJson), eq(false)))
+    given(termMapper.retrieveTerm(any(OrganisationID.class), eq(specimenJson), eq(false)))
         .willReturn("https://www.wikidata.org/wiki/Q604487");
-    given(termMapper.retrieveTerm(any(PhysicalSpecimenIdType.class), eq(specimenJson), eq(false)))
-        .willReturn(OdsPhysicalSpecimenIdType.RESOLVABLE.value());
+    given(termMapper.retrieveTerm(any(PhysicalSpecimenIDType.class), eq(specimenJson), eq(false)))
+        .willReturn(OdsPhysicalSpecimenIDType.RESOLVABLE.value());
 
     // When
     var result = director.assembleDigitalSpecimenTerm(specimenJson, false);
 
     // Then
     assertThat(result).isNotNull();
-    assertThat(result.getEntityRelationship()).asList().hasSize(4);
-    assertThat(result.getIdentifier()).asList().hasSize(4);
-    assertThat(result.getCitation()).asList().hasSize(1);
-    assertThat(result.getDwcIdentification()).asList().hasSize(totalIdentifications);
+    assertThat(result.getOdsHasEntityRelationship()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(4);
+    assertThat(result.getOdsHasIdentifier()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(4);
+    assertThat(result.getOdsHasCitation()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(1);
+    assertThat(result.getOdsHasIdentification()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(totalIdentifications);
   }
 
   @ParameterizedTest
@@ -128,7 +129,7 @@ class BiocaseDigitalObjectDirectorTest {
   void testConstructAbcdDigitalSpecimenUnknownIdType(String value) throws Exception {
     // Given
     var specimenJson = givenAbcdSpecimenJson(identifications(true));
-    given(termMapper.retrieveTerm(any(PhysicalSpecimenIdType.class), eq(specimenJson), eq(false)))
+    given(termMapper.retrieveTerm(any(PhysicalSpecimenIDType.class), eq(specimenJson), eq(false)))
         .willReturn(value);
 
     // When / Then

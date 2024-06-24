@@ -9,16 +9,16 @@ public class SpecimenName extends Term {
 
   public String calculate(DigitalSpecimen ds) {
     var acceptedIdentification = retrieveAcceptedIdentification(ds);
-    if (acceptedIdentification != null && acceptedIdentification.getTaxonIdentifications() != null
-        && !acceptedIdentification.getTaxonIdentifications().isEmpty()) {
-      if (acceptedIdentification.getTaxonIdentifications().get(0)
+    if (acceptedIdentification != null && acceptedIdentification.getOdsHasTaxonIdentification() != null
+        && !acceptedIdentification.getOdsHasTaxonIdentification().isEmpty()) {
+      if (acceptedIdentification.getOdsHasTaxonIdentification().get(0)
           .getDwcScientificName() != null) {
-        return acceptedIdentification.getTaxonIdentifications().get(0)
+        return acceptedIdentification.getOdsHasTaxonIdentification().get(0)
             .getDwcScientificName();
       }
-      if (acceptedIdentification.getTaxonIdentifications().get(0)
+      if (acceptedIdentification.getOdsHasTaxonIdentification().get(0)
           .getDwcVernacularName() != null) {
-        return acceptedIdentification.getTaxonIdentifications().get(0)
+        return acceptedIdentification.getOdsHasTaxonIdentification().get(0)
             .getDwcVernacularName();
       }
     }

@@ -2,7 +2,7 @@ package eu.dissco.core.translator.terms.specimen;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import eu.dissco.core.translator.schema.TaxonIdentification;
+import eu.dissco.core.translator.schema.OdsHasTaxonIdentification;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,15 +18,15 @@ class SpecimenNameTest {
   void testRetrieve() {
     // Given
     var ds = new eu.dissco.core.translator.schema.DigitalSpecimen()
-        .withDwcIdentification(List.of(
-            new eu.dissco.core.translator.schema.Identifications()
-                .withDwcIdentificationVerificationStatus(Boolean.FALSE)
-                .withTaxonIdentifications(List.of(
-                    new TaxonIdentification().withDwcScientificName("A very scientific name"))),
-            new eu.dissco.core.translator.schema.Identifications()
-                .withDwcIdentificationVerificationStatus(Boolean.TRUE)
-                .withTaxonIdentifications(
-                    List.of(new TaxonIdentification().withDwcScientificName(SPECIMEN_NAME)))
+        .withOdsHasIdentification(List.of(
+            new eu.dissco.core.translator.schema.Identification()
+                .withOdsIsVerifiedIdentification(Boolean.FALSE)
+                .withOdsHasTaxonIdentification(List.of(
+                    new OdsHasTaxonIdentification().withDwcScientificName("A very scientific name"))),
+            new eu.dissco.core.translator.schema.Identification()
+                .withOdsIsVerifiedIdentification(Boolean.TRUE)
+                .withOdsHasTaxonIdentification(
+                    List.of(new OdsHasTaxonIdentification().withDwcScientificName(SPECIMEN_NAME)))
         ));
 
     // When
@@ -41,11 +41,11 @@ class SpecimenNameTest {
   void testRetrieveVernacular() {
     // Given
     var ds = new eu.dissco.core.translator.schema.DigitalSpecimen()
-        .withDwcIdentification(List.of(
-            new eu.dissco.core.translator.schema.Identifications()
-                .withDwcIdentificationVerificationStatus(Boolean.TRUE)
-                .withTaxonIdentifications(
-                    List.of(new TaxonIdentification().withDwcVernacularName(SPECIMEN_NAME)))
+        .withOdsHasIdentification(List.of(
+            new eu.dissco.core.translator.schema.Identification()
+                .withOdsIsVerifiedIdentification(Boolean.TRUE)
+                .withOdsHasTaxonIdentification(
+                    List.of(new OdsHasTaxonIdentification().withDwcVernacularName(SPECIMEN_NAME)))
         ));
 
     // When
@@ -59,7 +59,7 @@ class SpecimenNameTest {
   void testRetrieveNoName() {
     // Given
     var ds = new eu.dissco.core.translator.schema.DigitalSpecimen()
-        .withDwcIdentification(List.of());
+        .withOdsHasIdentification(List.of());
 
     // When
     var result = specimenName.calculate(ds);

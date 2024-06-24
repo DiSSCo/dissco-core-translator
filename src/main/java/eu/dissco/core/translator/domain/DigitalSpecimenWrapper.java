@@ -6,7 +6,7 @@ import eu.dissco.core.translator.schema.DigitalSpecimen;
 
 
 public record DigitalSpecimenWrapper(
-    @JsonProperty("ods:normalisedPhysicalSpecimenId")
+    @JsonProperty("ods:normalisedPhysicalSpecimenID")
     String id,
     @JsonProperty("ods:type")
     String type,

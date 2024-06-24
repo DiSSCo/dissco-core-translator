@@ -13,9 +13,9 @@ import eu.dissco.core.translator.component.InstitutionNameComponent;
 import eu.dissco.core.translator.exception.OrganisationException;
 import eu.dissco.core.translator.properties.FdoProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
-import eu.dissco.core.translator.schema.DigitalSpecimen.OdsPhysicalSpecimenIdType;
-import eu.dissco.core.translator.terms.specimen.OrganisationId;
-import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenIdType;
+import eu.dissco.core.translator.schema.DigitalSpecimen.OdsPhysicalSpecimenIDType;
+import eu.dissco.core.translator.terms.specimen.OrganisationID;
+import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenIDType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,20 +51,20 @@ class DwcaDigitalObjectDirectorTest {
         "National Museum of Natural History");
     given(termMapper.retrieveTerm(any(Term.class), eq(specimenJson), eq(true))).willReturn(
         "a mapped term");
-    given(termMapper.retrieveTerm(any(OrganisationId.class), eq(specimenJson), eq(true)))
+    given(termMapper.retrieveTerm(any(OrganisationID.class), eq(specimenJson), eq(true)))
         .willReturn("https://ror.org/0443cwa12");
-    given(termMapper.retrieveTerm(any(PhysicalSpecimenIdType.class), eq(specimenJson), eq(true)))
-        .willReturn(OdsPhysicalSpecimenIdType.LOCAL.value());
+    given(termMapper.retrieveTerm(any(PhysicalSpecimenIDType.class), eq(specimenJson), eq(true)))
+        .willReturn(OdsPhysicalSpecimenIDType.LOCAL.value());
 
     // When
     var result = director.assembleDigitalSpecimenTerm(specimenJson, true);
 
     // Then
     assertThat(result).isNotNull();
-    assertThat(result.getEntityRelationship()).asList().hasSize(3);
-    assertThat(result.getIdentifier()).asList().hasSize(3);
-    assertThat(result.getCitation()).asList().hasSize(2);
-    assertThat(result.getDwcIdentification()).asList().hasSize(2);
+    assertThat(result.getOdsHasEntityRelationship()).asList().hasSize(3);
+    assertThat(result.getOdsHasIdentifier()).asList().hasSize(3);
+    assertThat(result.getOdsHasCitation()).asList().hasSize(2);
+    assertThat(result.getOdsHasIdentification()).asList().hasSize(2);
   }
 
   @Test
@@ -75,27 +75,27 @@ class DwcaDigitalObjectDirectorTest {
         "National Museum of Natural History");
     given(termMapper.retrieveTerm(any(Term.class), eq(specimenJson), eq(true))).willReturn(
         "a mapped term");
-    given(termMapper.retrieveTerm(any(OrganisationId.class), eq(specimenJson), eq(true)))
+    given(termMapper.retrieveTerm(any(OrganisationID.class), eq(specimenJson), eq(true)))
         .willReturn("https://ror.org/0443cwa12");
-    given(termMapper.retrieveTerm(any(PhysicalSpecimenIdType.class), eq(specimenJson), eq(true)))
-        .willReturn(OdsPhysicalSpecimenIdType.LOCAL.value());
+    given(termMapper.retrieveTerm(any(PhysicalSpecimenIDType.class), eq(specimenJson), eq(true)))
+        .willReturn(OdsPhysicalSpecimenIDType.LOCAL.value());
 
     // When
     var result = director.assembleDigitalSpecimenTerm(specimenJson, true);
 
     // Then
     assertThat(result).isNotNull();
-    assertThat(result.getEntityRelationship()).asList().hasSize(3);
-    assertThat(result.getIdentifier()).asList().hasSize(3);
-    assertThat(result.getCitation()).asList().hasSize(1);
-    assertThat(result.getDwcIdentification()).asList().hasSize(1);
-    assertThat(((eu.dissco.core.translator.schema.Identifications) result.getDwcIdentification()
-        .get(0)).getDwcIdentificationVerificationStatus()).isTrue();
+    assertThat(result.getOdsHasEntityRelationship()).asList().hasSize(3);
+    assertThat(result.getOdsHasIdentifier()).asList().hasSize(3);
+    assertThat(result.getOdsHasCitation()).asList().hasSize(1);
+    assertThat(result.getOdsHasIdentification()).asList().hasSize(1);
+    assertThat(((eu.dissco.core.translator.schema.Identification) result.getOdsHasIdentification()
+        .get(0)).getOdsIsVerifiedIdentification()).isTrue();
   }
 
 
   @Test
-  void testConstructDwcaDigitalMediaObject() throws JsonProcessingException, OrganisationException {
+  void testConstructDwcaDigitalMedia() throws JsonProcessingException, OrganisationException {
     // Given
     var specimenJson = givenDwcaMediaObject();
     given(institutionNameComponent.getRorName(anyString())).willReturn(
@@ -104,13 +104,13 @@ class DwcaDigitalObjectDirectorTest {
         "a mapped term");
 
     // When
-    var result = director.assembleDigitalMediaObjects(true, specimenJson,
+    var result = director.assembleDigitalMedia(true, specimenJson,
         "https://ror.org/0443cwa12");
 
     // Then
     assertThat(result).isNotNull();
-    assertThat(result.getEntityRelationships()).asList().hasSize(3);
-    assertThat(result.getIdentifiers()).asList().hasSize(2);
+    assertThat(result.getOdsHasEntityRelationship()).asList().hasSize(3);
+    assertThat(result.getOdsHasIdentifier()).asList().hasSize(2);
   }
 
   private JsonNode givenDwcaMediaObject() throws JsonProcessingException {

@@ -3,7 +3,7 @@ package eu.dissco.core.translator.terms.specimen.identification;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.dissco.core.translator.schema.DigitalSpecimen;
-import eu.dissco.core.translator.schema.Identifications;
+import eu.dissco.core.translator.schema.Identification;
 import eu.dissco.core.translator.terms.Term;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +19,7 @@ public class AbcdTypeInformation extends Term {
     if (typeDesignationNodes.isEmpty()) {
       return;
     }
-    var identifications = ds.getDwcIdentification();
+    var identifications = ds.getOdsHasIdentification();
     if (typeDesignationNodes.size() == 1 && identifications.size() == 1) {
       setAdditionalIdentificationInfo(identifications.get(0), typeDesignationNodes.get(0));
     } else {
@@ -29,20 +29,18 @@ public class AbcdTypeInformation extends Term {
     }
   }
 
-  private boolean isNameMatch(Identifications identification, JsonNode node) {
+  private boolean isNameMatch(Identification identification, JsonNode node) {
     if (node.get("typifiedName/fullScientificNameString") != null) {
       return node.get("typifiedName/fullScientificNameString").asText()
-          .equals(identification.getTaxonIdentifications().get(0).getDwcScientificName());
+          .equals(identification.getOdsHasTaxonIdentification().get(0).getDwcScientificName());
     } else {
       log.warn("No typifiedName found in typeDesignationNode: {}", node);
       return false;
     }
   }
 
-  private void setAdditionalIdentificationInfo(Identifications identification,
+  private void setAdditionalIdentificationInfo(Identification identification,
       JsonNode typeDesignationNodes) {
-    identification.setTypeDesignatedBy(
-        new TypeDesignatedBy().retrieveFromABCD(typeDesignationNodes));
     identification.setDwcTypeStatus(new TypeStatus().retrieveFromABCD(typeDesignationNodes));
   }
 

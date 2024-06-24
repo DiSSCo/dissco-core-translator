@@ -1,7 +1,7 @@
 package eu.dissco.core.translator.service;
 
 import static eu.dissco.core.translator.TestUtils.MAPPER;
-import static eu.dissco.core.translator.TestUtils.givenDigitalMediaObjects;
+import static eu.dissco.core.translator.TestUtils.givenDigitalMedia;
 import static eu.dissco.core.translator.TestUtils.givenDigitalSpecimen;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -27,7 +27,7 @@ import eu.dissco.core.translator.properties.FdoProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.DwcaRepository;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
-import eu.dissco.core.translator.schema.DigitalEntity;
+import eu.dissco.core.translator.schema.DigitalMedia;
 import eu.dissco.core.translator.schema.DigitalSpecimen;
 import eu.dissco.core.translator.terms.BaseDigitalObjectDirector;
 import java.io.File;
@@ -248,9 +248,9 @@ class DwcaServiceTest {
         givenImageMap(19));
     given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
         .willReturn(givenDigitalSpecimen());
-    given(digitalSpecimenDirector.assembleDigitalMediaObjects(anyBoolean(), any(JsonNode.class),
-        anyString())).willReturn(givenDigitalMediaObjects());
-    given(fdoProperties.getDigitalMediaObjectType()).willReturn("Doi of the digital media object");
+    given(digitalSpecimenDirector.assembleDigitalMedia(anyBoolean(), any(JsonNode.class),
+        anyString())).willReturn(givenDigitalMedia());
+    given(fdoProperties.getDigitalMediaType()).willReturn("Doi of the digital media object");
     given(fdoProperties.getDigitalSpecimenType()).willReturn("Doi of the digital specimen");
 
     // When
@@ -286,9 +286,9 @@ class DwcaServiceTest {
         eq("temp_abc_ddd_asd_multimedia"))).willReturn(givenImageMap(14));
     given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
         .willReturn(givenDigitalSpecimen());
-    given(digitalSpecimenDirector.assembleDigitalMediaObjects(anyBoolean(), any(JsonNode.class),
-        anyString())).willReturn(givenDigitalMediaObjects());
-    given(fdoProperties.getDigitalMediaObjectType()).willReturn("Doi of the digital media object");
+    given(digitalSpecimenDirector.assembleDigitalMedia(anyBoolean(), any(JsonNode.class),
+        anyString())).willReturn(givenDigitalMedia());
+    given(fdoProperties.getDigitalMediaType()).willReturn("Doi of the digital media object");
     given(fdoProperties.getDigitalSpecimenType()).willReturn("Doi of the digital specimen");
 
     // When
@@ -313,8 +313,8 @@ class DwcaServiceTest {
         eq("temp_abc_ddd_asd_multimedia"))).willReturn(givenImageMap(1));
     given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
         .willReturn(givenDigitalSpecimen());
-    given(digitalSpecimenDirector.assembleDigitalMediaObjects(anyBoolean(), any(JsonNode.class),
-        anyString())).willReturn(new DigitalEntity());
+    given(digitalSpecimenDirector.assembleDigitalMedia(anyBoolean(), any(JsonNode.class),
+        anyString())).willReturn(new DigitalMedia());
     given(fdoProperties.getDigitalSpecimenType()).willReturn("Doi of the digital specimen");
 
     // When
@@ -326,7 +326,7 @@ class DwcaServiceTest {
     then(dwcaRepository).should(times(2)).createTable(anyString());
     then(dwcaRepository).should(times(2)).postRecords(anyString(), anyList());
     then(kafkaService).should(times(1)).sendMessage(captor.capture());
-    assertThat(captor.getValue().digitalMediaObjectEvents()).isEmpty();
+    assertThat(captor.getValue().digitalMediaEvents()).isEmpty();
     cleanup("src/test/resources/dwca/test/dwca-invalid-ac-media.zip");
   }
 
@@ -356,9 +356,9 @@ class DwcaServiceTest {
         givenSpecimenMapWithMedia(20));
     given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
         .willReturn(TestUtils.givenDigitalSpecimen());
-    given(digitalSpecimenDirector.assembleDigitalMediaObjects(anyBoolean(), any(JsonNode.class),
-        anyString())).willReturn(givenDigitalMediaObjects());
-    given(fdoProperties.getDigitalMediaObjectType()).willReturn("Doi of the digital media object");
+    given(digitalSpecimenDirector.assembleDigitalMedia(anyBoolean(), any(JsonNode.class),
+        anyString())).willReturn(givenDigitalMedia());
+    given(fdoProperties.getDigitalMediaType()).willReturn("Doi of the digital media object");
     given(fdoProperties.getDigitalSpecimenType()).willReturn("Doi of the digital specimen");
 
     // When
