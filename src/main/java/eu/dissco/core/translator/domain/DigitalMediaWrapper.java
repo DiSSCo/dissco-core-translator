@@ -9,7 +9,7 @@ public record DigitalMediaWrapper(
     @JsonProperty("ods:type")
     String type,
     @JsonProperty(PhysicalSpecimenID.TERM)
-    String physicalSpecimenId,
+    String physicalSpecimenID,
     @JsonProperty("ods:attributes")
     DigitalMedia attributes,
     @JsonProperty("ods:originalAttributes")

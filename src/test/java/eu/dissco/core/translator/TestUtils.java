@@ -29,7 +29,7 @@ public class TestUtils {
       "ods:organisationId", INSTITUTION_ID
   );
   public static Map<String, String> TERM_MAPPING = Map.of(
-      "ods:physicalSpecimenId", "dwc:occurrenceID",
+      "ods:physicalSpecimenID", "dwc:occurrenceID",
       "ods:specimenName", "dwc:scientificName",
       "ods:physicalSpecimenCollection", "dwc:collectionID",
       "ods:datasetId", "dwc:datasetID"
@@ -38,7 +38,7 @@ public class TestUtils {
       {
         "mapping": [
           {
-            "ods:physicalSpecimenId": "dwc:occurrenceID"
+            "ods:physicalSpecimenID": "dwc:occurrenceID"
           },
           {
             "ods:specimenName": "dwc:scientificName"
