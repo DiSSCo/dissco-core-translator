@@ -11,6 +11,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 public class MavenRunner {
 
@@ -22,15 +23,10 @@ public class MavenRunner {
       LOGGER.info("Processing json schema: {}", schemaUrl);
       var fileName = schemaUrl.substring(schemaUrl.lastIndexOf('/') + 1);
       String outputFilePath = "src/main/resources/json-schema/" + fileName;
-
       try {
-        // Download the JSON schema
         String schema = downloadSchema(schemaUrl);
-
-        // Save the JSON schema to a file
         saveSchemaToFile(schema, outputFilePath);
-
-        LOGGER.info("JSON schema downloaded and saved to " + outputFilePath);
+        LOGGER.info("JSON schema downloaded and saved to: {} ", outputFilePath);
       } catch (IOException e) {
         LOGGER.error("Error downloading or saving the JSON schema", e);
       }
@@ -41,8 +37,7 @@ public class MavenRunner {
     StringBuilder result = new StringBuilder();
     URL url = new URL(schemaUrl);
     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-    conn.setRequestMethod("GET");
-
+    conn.setRequestMethod(RequestMethod.GET.name());
     try (BufferedReader reader = new BufferedReader(
         new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
       String line;

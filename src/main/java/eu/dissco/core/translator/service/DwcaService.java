@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import eu.dissco.core.translator.Profiles;
 import eu.dissco.core.translator.database.jooq.enums.JobState;
-import eu.dissco.core.translator.domain.DigitalMedia;
+import eu.dissco.core.translator.domain.DigitalMediaWrapper;
 import eu.dissco.core.translator.domain.DigitalMediaEvent;
 import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
 import eu.dissco.core.translator.domain.DigitalSpecimenWrapper;
@@ -291,7 +291,7 @@ public class DwcaService extends WebClientService {
               "Digital media object for specimen does not have an access uri, ignoring record");
         }
         var digitalMediaEvent = new DigitalMediaEvent(enrichmentServices(true),
-            new DigitalMedia(
+            new DigitalMediaWrapper(
                 fdoProperties.getDigitalMediaType(),
                 recordId,
                 digitalMedia,
@@ -314,7 +314,7 @@ public class DwcaService extends WebClientService {
     var digitalMedia = new ArrayList<DigitalMediaEvent>();
     for (var mediaUrl : mediaUrls) {
       var digitalMediaEvent = new DigitalMediaEvent(enrichmentServices(true),
-          new DigitalMedia(
+          new DigitalMediaWrapper(
               fdoProperties.getDigitalMediaType(),
               recordId,
               digitalSpecimenDirector.assembleDigitalMedia(true,
