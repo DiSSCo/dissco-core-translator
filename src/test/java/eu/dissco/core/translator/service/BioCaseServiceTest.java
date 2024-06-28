@@ -1,6 +1,6 @@
 package eu.dissco.core.translator.service;
 
-import static eu.dissco.core.translator.TestUtils.givenDigitalMediaObjects;
+import static eu.dissco.core.translator.TestUtils.givenDigitalMedia;
 import static eu.dissco.core.translator.TestUtils.givenDigitalSpecimen;
 import static eu.dissco.core.translator.TestUtils.loadResourceFile;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,7 +21,7 @@ import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.FdoProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
-import eu.dissco.core.translator.schema.DigitalEntity;
+import eu.dissco.core.translator.schema.DigitalMedia;
 import eu.dissco.core.translator.schema.DigitalSpecimen;
 import eu.dissco.core.translator.terms.BaseDigitalObjectDirector;
 import freemarker.cache.FileTemplateLoader;
@@ -118,10 +118,10 @@ class BioCaseServiceTest {
     given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
         .willReturn(givenDigitalSpecimen());
     given(fdoProperties.getDigitalSpecimenType()).willReturn("Doi of the digital specimen");
-    given(fdoProperties.getDigitalMediaObjectType()).willReturn("Doi of the digital media object");
-    given(digitalSpecimenDirector.assembleDigitalMediaObjects(anyBoolean(), any(JsonNode.class),
+    given(fdoProperties.getDigitalMediaType()).willReturn("Doi of the digital media");
+    given(digitalSpecimenDirector.assembleDigitalMedia(anyBoolean(), any(JsonNode.class),
         anyString()))
-        .willReturn(givenDigitalMediaObjects());
+        .willReturn(givenDigitalMedia());
 
     // When
     var result = service.retrieveData();
@@ -145,8 +145,8 @@ class BioCaseServiceTest {
     given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
         .willReturn(givenDigitalSpecimen());
     given(fdoProperties.getDigitalSpecimenType()).willReturn("Doi of the digital specimen");
-    given(digitalSpecimenDirector.assembleDigitalMediaObjects(anyBoolean(), any(JsonNode.class),
-        anyString())).willReturn(new DigitalEntity());
+    given(digitalSpecimenDirector.assembleDigitalMedia(anyBoolean(), any(JsonNode.class),
+        anyString())).willReturn(new DigitalMedia());
 
     // When
     var result = service.retrieveData();
@@ -156,7 +156,7 @@ class BioCaseServiceTest {
     var captor = ArgumentCaptor.forClass(DigitalSpecimenEvent.class);
     then(webClient).should(times(1)).get();
     then(kafkaService).should(times(1)).sendMessage(captor.capture());
-    assertThat(captor.getValue().digitalMediaObjectEvents()).isEmpty();
+    assertThat(captor.getValue().digitalMediaEvents()).isEmpty();
   }
 
   @ParameterizedTest

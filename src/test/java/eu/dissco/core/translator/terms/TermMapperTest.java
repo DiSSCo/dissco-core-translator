@@ -8,9 +8,9 @@ import static org.mockito.Mockito.mock;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.component.MappingComponent;
-import eu.dissco.core.translator.terms.specimen.CollectionId;
-import eu.dissco.core.translator.terms.specimen.OrganisationId;
-import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenId;
+import eu.dissco.core.translator.terms.specimen.CollectionID;
+import eu.dissco.core.translator.terms.specimen.OrganisationID;
+import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenID;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,10 +35,10 @@ class TermMapperTest {
   void testRetrieveFromDWCADefault() {
     // Given
     given(mappingComponent.getDefaults()).willReturn(
-        Map.of(OrganisationId.TERM, "https://ror.org/02y22ws83"));
+        Map.of(OrganisationID.TERM, "https://ror.org/02y22ws83"));
 
     // When
-    var result = termMapper.retrieveTerm(new OrganisationId(), mock(JsonNode.class), true);
+    var result = termMapper.retrieveTerm(new OrganisationID(), mock(JsonNode.class), true);
 
     // Then
     assertThat(result).isEqualTo("https://ror.org/02y22ws83");
@@ -47,10 +47,10 @@ class TermMapperTest {
   @Test
   void testRetrieveFromDWCAFieldMapping() {
     // Given
-    var physicalSpecimenCollection = new CollectionId();
+    var physicalSpecimenCollection = new CollectionID();
     var dwcaTerm = "dwc:collectionID";
     given(mappingComponent.getFieldMappings()).willReturn(
-        Map.of(CollectionId.TERM, dwcaTerm));
+        Map.of(CollectionID.TERM, dwcaTerm));
     var unit = MAPPER.createObjectNode();
     unit.put("dwc:collectionID", "TestCollection");
 
@@ -64,8 +64,8 @@ class TermMapperTest {
   @Test
   void testRetrieveFromDWCANoMapping() {
     // Given
-    var collectionId = mock(CollectionId.class);
-    given(collectionId.getTerm()).willReturn(CollectionId.TERM);
+    var collectionId = mock(CollectionID.class);
+    given(collectionId.getTerm()).willReturn(CollectionID.TERM);
     var attributes = mock(JsonNode.class);
 
     // When
@@ -78,9 +78,9 @@ class TermMapperTest {
   @Test
   void testRetrieveFromABCDDefault() {
     // Given
-    var organisationId = new OrganisationId();
+    var organisationId = new OrganisationID();
     given(mappingComponent.getDefaults()).willReturn(
-        Map.of(OrganisationId.TERM, "https://ror.org/02y22ws83"));
+        Map.of(OrganisationID.TERM, "https://ror.org/02y22ws83"));
 
     // When
     var result = termMapper.retrieveTerm(organisationId, mock(JsonNode.class), false);
@@ -96,10 +96,10 @@ class TermMapperTest {
     var attributes = MAPPER.createObjectNode();
     attributes.put(abcdTerm, "123456");
     given(mappingComponent.getFieldMappings()).willReturn(
-        Map.of(PhysicalSpecimenId.TERM, abcdTerm));
+        Map.of(PhysicalSpecimenID.TERM, abcdTerm));
 
     // When
-    var result = termMapper.retrieveTerm(new PhysicalSpecimenId(), attributes, false);
+    var result = termMapper.retrieveTerm(new PhysicalSpecimenID(), attributes, false);
 
     // Then
     assertThat(result).isEqualTo("123456");
@@ -108,8 +108,8 @@ class TermMapperTest {
   @Test
   void testRetrieveFromABCDNoMapping() {
     // Given
-    var physicalSpecimenCollection = mock(CollectionId.class);
-    given(physicalSpecimenCollection.getTerm()).willReturn(CollectionId.TERM);
+    var physicalSpecimenCollection = mock(CollectionID.class);
+    given(physicalSpecimenCollection.getTerm()).willReturn(CollectionID.TERM);
     var attributes = mock(JsonNode.class);
 
     // When

@@ -1,7 +1,7 @@
 package eu.dissco.core.translator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.dissco.core.translator.schema.DigitalEntity;
+import eu.dissco.core.translator.schema.DigitalMedia;
 import eu.dissco.core.translator.schema.DigitalSpecimen;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -29,7 +29,7 @@ public class TestUtils {
       "ods:organisationId", INSTITUTION_ID
   );
   public static Map<String, String> TERM_MAPPING = Map.of(
-      "ods:physicalSpecimenId", "dwc:occurrenceID",
+      "ods:physicalSpecimenID", "dwc:occurrenceID",
       "ods:specimenName", "dwc:scientificName",
       "ods:physicalSpecimenCollection", "dwc:collectionID",
       "ods:datasetId", "dwc:datasetID"
@@ -38,7 +38,7 @@ public class TestUtils {
       {
         "mapping": [
           {
-            "ods:physicalSpecimenId": "dwc:occurrenceID"
+            "ods:physicalSpecimenID": "dwc:occurrenceID"
           },
           {
             "ods:specimenName": "dwc:scientificName"
@@ -70,19 +70,19 @@ public class TestUtils {
 
   public static DigitalSpecimen givenDigitalSpecimen() {
     return new DigitalSpecimen()
-        .withOdsNormalisedPhysicalSpecimenId(NORMALISED_PHYSICAL_SPECIMEN_ID)
-        .withDwcInstitutionId(INSTITUTION_ID);
+        .withOdsNormalisedPhysicalSpecimenID(NORMALISED_PHYSICAL_SPECIMEN_ID)
+        .withDwcInstitutionID(INSTITUTION_ID);
   }
 
-  public static DigitalEntity givenDigitalMediaObjects() {
-    return new DigitalEntity().withAcAccessUri("https://accessuri.eu/image_1");
+  public static DigitalMedia givenDigitalMedia() {
+    return new DigitalMedia().withAcAccessURI("https://accessuri.eu/image_1");
   }
 
   public static Stream<Arguments> provideInvalidDigitalSpecimen() {
     return Stream.of(
-        Arguments.of(new DigitalSpecimen().withOdsNormalisedPhysicalSpecimenId(
+        Arguments.of(new DigitalSpecimen().withOdsNormalisedPhysicalSpecimenID(
             NORMALISED_PHYSICAL_SPECIMEN_ID)),
-        Arguments.of(new DigitalSpecimen().withDwcInstitutionId(INSTITUTION_ID))
+        Arguments.of(new DigitalSpecimen().withDwcInstitutionID(INSTITUTION_ID))
     );
   }
 }

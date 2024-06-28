@@ -3,10 +3,11 @@ package eu.dissco.core.translator.terms;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.dissco.core.translator.schema.Identifications;
+import eu.dissco.core.translator.schema.Identification;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
+import eu.dissco.core.translator.schema.DigitalSpecimen;
 
 @Slf4j
 public abstract class Term {
@@ -114,14 +115,13 @@ public abstract class Term {
     return null;
   }
 
-  protected Identifications retrieveAcceptedIdentification(
-      eu.dissco.core.translator.schema.DigitalSpecimen ds) {
-    if (ds.getDwcIdentification() != null && !ds.getDwcIdentification().isEmpty()) {
-      if (ds.getDwcIdentification().size() == 1) {
-        return ds.getDwcIdentification().get(0);
+  protected Identification retrieveAcceptedIdentification(DigitalSpecimen ds) {
+    if (ds.getOdsHasIdentification() != null && !ds.getOdsHasIdentification().isEmpty()) {
+      if (ds.getOdsHasIdentification().size() == 1) {
+        return ds.getOdsHasIdentification().get(0);
       }
-      for (var identification : ds.getDwcIdentification()) {
-        if (Boolean.TRUE.equals(identification.getDwcIdentificationVerificationStatus())) {
+      for (Identification identification : ds.getOdsHasIdentification()) {
+        if (Boolean.TRUE.equals(identification.getOdsIsVerifiedIdentification())) {
           return identification;
         }
       }

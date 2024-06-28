@@ -14,6 +14,12 @@ public class FdoProperties {
   private String digitalSpecimenType;
 
   @NotBlank
-  private String digitalMediaObjectType;
+  private String digitalMediaType;
+
+  @NotBlank
+  private String applicationName = "DiSSCo Translator Service";
+
+  @NotBlank
+  private String applicationPID = "https://hdl.handle.net/TEST/XXX-XXX-XXX";
 
 }

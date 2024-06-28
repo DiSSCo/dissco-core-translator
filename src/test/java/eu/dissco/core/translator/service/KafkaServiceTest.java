@@ -2,15 +2,15 @@ package eu.dissco.core.translator.service;
 
 import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static eu.dissco.core.translator.TestUtils.NORMALISED_PHYSICAL_SPECIMEN_ID;
-import static eu.dissco.core.translator.TestUtils.givenDigitalMediaObjects;
+import static eu.dissco.core.translator.TestUtils.givenDigitalMedia;
 import static eu.dissco.core.translator.TestUtils.givenDigitalSpecimen;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import eu.dissco.core.translator.domain.DigitalMediaObject;
-import eu.dissco.core.translator.domain.DigitalMediaObjectEvent;
+import eu.dissco.core.translator.domain.DigitalMediaWrapper;
+import eu.dissco.core.translator.domain.DigitalMediaEvent;
 import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
 import eu.dissco.core.translator.domain.DigitalSpecimenWrapper;
 import eu.dissco.core.translator.properties.KafkaProperties;
@@ -60,9 +60,9 @@ class KafkaServiceTest {
     return new DigitalSpecimenEvent(List.of("AAS"),
         new DigitalSpecimenWrapper(NORMALISED_PHYSICAL_SPECIMEN_ID,
             "https://doi.org/21.T11148/894b1e6cad57e921764e", givenDigitalSpecimen(), null),
-        List.of(new DigitalMediaObjectEvent(List.of(),
-            new DigitalMediaObject("https://doi.org/21.T11148/bbad8c4e101e8af01115",
-                NORMALISED_PHYSICAL_SPECIMEN_ID, givenDigitalMediaObjects(), null))));
+        List.of(new DigitalMediaEvent(List.of(),
+            new DigitalMediaWrapper("https://doi.org/21.T11148/bbad8c4e101e8af01115",
+                NORMALISED_PHYSICAL_SPECIMEN_ID, givenDigitalMedia(), null))));
   }
 
 }

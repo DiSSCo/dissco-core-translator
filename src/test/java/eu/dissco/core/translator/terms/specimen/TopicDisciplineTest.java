@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import eu.dissco.core.translator.schema.DigitalSpecimen;
 import eu.dissco.core.translator.schema.DigitalSpecimen.OdsTopicDiscipline;
-import eu.dissco.core.translator.schema.TaxonIdentification;
+import eu.dissco.core.translator.schema.OdsHasTaxonIdentification;
 import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
@@ -42,15 +42,15 @@ class TopicDisciplineTest {
   private static Object givenDigitalSpecimen(String basisOfRecord, String kingdom) {
     return new DigitalSpecimen()
         .withDwcBasisOfRecord(basisOfRecord)
-        .withDwcIdentification(List.of(
-                new eu.dissco.core.translator.schema.Identifications()
-                    .withDwcIdentificationVerificationStatus(false)
-                    .withTaxonIdentifications(
-                        List.of(new TaxonIdentification().withDwcKingdom("Unicorn Kingdom"))),
-                new eu.dissco.core.translator.schema.Identifications()
-                    .withDwcIdentificationVerificationStatus(true)
-                    .withTaxonIdentifications(
-                        List.of(new TaxonIdentification().withDwcKingdom(kingdom)))
+        .withOdsHasIdentification(List.of(
+                new eu.dissco.core.translator.schema.Identification()
+                    .withOdsIsVerifiedIdentification(false)
+                    .withOdsHasTaxonIdentification(
+                        List.of(new OdsHasTaxonIdentification().withDwcKingdom("Unicorn Kingdom"))),
+                new eu.dissco.core.translator.schema.Identification()
+                    .withOdsIsVerifiedIdentification(true)
+                    .withOdsHasTaxonIdentification(
+                        List.of(new OdsHasTaxonIdentification().withDwcKingdom(kingdom)))
             )
         );
   }
