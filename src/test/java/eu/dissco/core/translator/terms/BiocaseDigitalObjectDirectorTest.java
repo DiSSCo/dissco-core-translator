@@ -11,11 +11,12 @@ import static org.mockito.BDDMockito.given;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import eu.dissco.core.translator.component.InstitutionNameComponent;
+import eu.dissco.core.translator.component.OrganisationNameComponent;
 import eu.dissco.core.translator.exception.UnknownPhysicalSpecimenIdType;
 import eu.dissco.core.translator.properties.FdoProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.schema.DigitalSpecimen.OdsPhysicalSpecimenIDType;
+import eu.dissco.core.translator.schema.DigitalSpecimen.OdsStatus;
 import eu.dissco.core.translator.terms.specimen.OrganisationID;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenIDType;
 import java.util.stream.Stream;
@@ -36,7 +37,7 @@ class BiocaseDigitalObjectDirectorTest {
   @Mock
   private TermMapper termMapper;
   @Mock
-  private InstitutionNameComponent institutionNameComponent;
+  private OrganisationNameComponent institutionNameComponent;
   @Mock
   private WebClientProperties webClientProperties;
   @Mock
@@ -117,6 +118,7 @@ class BiocaseDigitalObjectDirectorTest {
 
     // Then
     assertThat(result).isNotNull();
+    assertThat(result.getOdsStatus()).isEqualTo(OdsStatus.ODS_ACTIVE);
     assertThat(result.getOdsHasEntityRelationship()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(4);
     assertThat(result.getOdsHasIdentifier()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(4);
     assertThat(result.getOdsHasCitation()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(1);

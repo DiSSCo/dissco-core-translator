@@ -13,7 +13,7 @@ import reactor.core.scheduler.Schedulers;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class InstitutionNameComponent {
+public class OrganisationNameComponent {
 
   private final WebClient webClient;
 

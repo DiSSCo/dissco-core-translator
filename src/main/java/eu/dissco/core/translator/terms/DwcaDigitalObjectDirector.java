@@ -3,7 +3,7 @@ package eu.dissco.core.translator.terms;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.dissco.core.translator.Profiles;
-import eu.dissco.core.translator.component.InstitutionNameComponent;
+import eu.dissco.core.translator.component.OrganisationNameComponent;
 import eu.dissco.core.translator.properties.FdoProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.schema.Citation;
@@ -23,7 +23,7 @@ public class DwcaDigitalObjectDirector extends BaseDigitalObjectDirector {
   private static final String EXTENSION = "extensions";
 
   public DwcaDigitalObjectDirector(ObjectMapper mapper, TermMapper termMapper,
-      InstitutionNameComponent rorComponent, WebClientProperties webClientProperties,
+      OrganisationNameComponent rorComponent, WebClientProperties webClientProperties,
       FdoProperties fdoProperties) {
     super(mapper, termMapper, rorComponent, webClientProperties, fdoProperties, identifierTerms());
   }

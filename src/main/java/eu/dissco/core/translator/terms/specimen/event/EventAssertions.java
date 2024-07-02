@@ -2,6 +2,8 @@ package eu.dissco.core.translator.terms.specimen.event;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.dissco.core.translator.schema.Agent;
+import eu.dissco.core.translator.schema.Agent.Type;
 import eu.dissco.core.translator.schema.Assertion;
 import eu.dissco.core.translator.terms.Term;
 import java.util.ArrayList;
@@ -42,8 +44,9 @@ public class EventAssertions extends Term {
       JsonNode assertionNode) {
     return new Assertion()
         .withType("ods:Assertion")
-        .withOdsAssertionByAgentName(
-            super.searchJsonForTerm(assertionNode, List.of("measurementOrFactAtomised/measuredBy")))
+        .withOdsAssertionByAgent(new Agent()
+            .withType(Type.SCHEMA_PERSON)
+            .withSchemaName(super.searchJsonForTerm(assertionNode, List.of("measurementOrFactAtomised/measuredBy"))))
         .withDwcMeasurementUnit(super.searchJsonForTerm(assertionNode,
             List.of("measurementOrFactAtomised/unitOfMeasurement")))
         .withDwcMeasurementType(

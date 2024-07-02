@@ -71,7 +71,7 @@ public class TestUtils {
   public static DigitalSpecimen givenDigitalSpecimen() {
     return new DigitalSpecimen()
         .withOdsNormalisedPhysicalSpecimenID(NORMALISED_PHYSICAL_SPECIMEN_ID)
-        .withDwcInstitutionID(INSTITUTION_ID);
+        .withOdsOrganisationID(INSTITUTION_ID);
   }
 
   public static DigitalMedia givenDigitalMedia() {
@@ -82,7 +82,7 @@ public class TestUtils {
     return Stream.of(
         Arguments.of(new DigitalSpecimen().withOdsNormalisedPhysicalSpecimenID(
             NORMALISED_PHYSICAL_SPECIMEN_ID)),
-        Arguments.of(new DigitalSpecimen().withDwcInstitutionID(INSTITUTION_ID))
+        Arguments.of(new DigitalSpecimen().withOdsOrganisationID(INSTITUTION_ID))
     );
   }
 }

@@ -192,7 +192,7 @@ public class BioCaseService extends WebClientService {
       try {
         var attributes = digitalSpecimenDirector.assembleDigitalSpecimenTerm(unitAttributes, false);
         if (attributes.getOdsNormalisedPhysicalSpecimenID() == null
-            || attributes.getDwcInstitutionID() == null) {
+            || attributes.getOdsOrganisationID() == null) {
           throw new DiSSCoDataException(
               "Record does not comply to MIDS level 0 (id and organisation), ignoring record");
         }
@@ -204,7 +204,7 @@ public class BioCaseService extends WebClientService {
         );
         var digitalMedia = processDigitalMedia(
             attributes.getOdsNormalisedPhysicalSpecimenID(), unit,
-            attributes.getDwcInstitutionID());
+            attributes.getOdsOrganisationID());
         log.debug("Result digital Specimen: {}", digitalSpecimen);
         kafkaService.sendMessage(
             new DigitalSpecimenEvent(

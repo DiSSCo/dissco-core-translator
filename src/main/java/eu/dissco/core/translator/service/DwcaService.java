@@ -330,7 +330,7 @@ public class DwcaService extends WebClientService {
   private Pair<DigitalSpecimenWrapper, List<DigitalMediaEvent>> createDigitalObjects(
       JsonNode fullRecord) throws DiSSCoDataException {
     var ds = digitalSpecimenDirector.assembleDigitalSpecimenTerm(fullRecord, true);
-    if (ds.getOdsNormalisedPhysicalSpecimenID() == null || ds.getDwcInstitutionID() == null) {
+    if (ds.getOdsNormalisedPhysicalSpecimenID() == null || ds.getOdsOrganisationID() == null) {
       throw new DiSSCoDataException(
           "Record does not comply to MIDS level 0 (id and organisation), ignoring record");
     }
@@ -339,7 +339,7 @@ public class DwcaService extends WebClientService {
             fdoProperties.getDigitalSpecimenType(),
             ds,
             cleanupRedundantFields(fullRecord)),
-        processMedia(ds.getOdsNormalisedPhysicalSpecimenID(), fullRecord, ds.getDwcInstitutionID())
+        processMedia(ds.getOdsNormalisedPhysicalSpecimenID(), fullRecord, ds.getOdsOrganisationID())
     );
   }
 
