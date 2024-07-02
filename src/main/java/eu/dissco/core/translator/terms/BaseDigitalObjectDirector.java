@@ -2,17 +2,19 @@ package eu.dissco.core.translator.terms;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.dissco.core.translator.component.InstitutionNameComponent;
+import eu.dissco.core.translator.component.OrganisationNameComponent;
 import eu.dissco.core.translator.exception.OrganisationException;
 import eu.dissco.core.translator.exception.UnknownPhysicalSpecimenIdType;
 import eu.dissco.core.translator.properties.FdoProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
+import eu.dissco.core.translator.schema.Agent;
 import eu.dissco.core.translator.schema.Citation;
 import eu.dissco.core.translator.schema.DigitalMedia;
 import eu.dissco.core.translator.schema.DigitalMedia.DctermsType;
 import eu.dissco.core.translator.schema.DigitalSpecimen;
 import eu.dissco.core.translator.schema.DigitalSpecimen.OdsLivingOrPreserved;
 import eu.dissco.core.translator.schema.DigitalSpecimen.OdsPhysicalSpecimenIDType;
+import eu.dissco.core.translator.schema.DigitalSpecimen.OdsStatus;
 import eu.dissco.core.translator.schema.EntityRelationship;
 import eu.dissco.core.translator.schema.Event;
 import eu.dissco.core.translator.schema.Event.DwcOccurrenceStatus;
@@ -162,8 +164,8 @@ import eu.dissco.core.translator.terms.specimen.location.georeference.Coordinate
 import eu.dissco.core.translator.terms.specimen.location.georeference.CoordinateUncertaintyInMeters;
 import eu.dissco.core.translator.terms.specimen.location.georeference.DecimalLatitude;
 import eu.dissco.core.translator.terms.specimen.location.georeference.DecimalLongitude;
-import eu.dissco.core.translator.terms.specimen.location.georeference.FootprintSpatialFit;
 import eu.dissco.core.translator.terms.specimen.location.georeference.FootprintSRS;
+import eu.dissco.core.translator.terms.specimen.location.georeference.FootprintSpatialFit;
 import eu.dissco.core.translator.terms.specimen.location.georeference.FootprintWkt;
 import eu.dissco.core.translator.terms.specimen.location.georeference.GeodeticDatum;
 import eu.dissco.core.translator.terms.specimen.location.georeference.GeoreferenceProtocol;
@@ -208,7 +210,7 @@ public abstract class BaseDigitalObjectDirector {
 
   protected final ObjectMapper mapper;
   protected final TermMapper termMapper;
-  private final InstitutionNameComponent institutionNameComponent;
+  private final OrganisationNameComponent organisationNameComponent;
   private final WebClientProperties webClientProperties;
   private final FdoProperties fdoProperties;
   private final List<String> identifierTerms;
@@ -250,9 +252,11 @@ public abstract class BaseDigitalObjectDirector {
             termMapper.retrieveTerm(new BibliographicCitation(), data, dwc))
         .withOdsCitationRemarks(termMapper.retrieveTerm(new CitationRemarks(), data, dwc))
         .withOdsReferenceIRI(termMapper.retrieveTerm(new ReferenceIRI(), data, dwc))
-        .withDctermsCreator(
-            termMapper.retrieveTerm(new eu.dissco.core.translator.terms.specimen.citation.Creator(),
-                data, dwc))
+        .withDctermsCreator(new Agent()
+            .withType(Agent.Type.SCHEMA_PERSON)
+            .withSchemaName(termMapper.retrieveTerm(
+                new eu.dissco.core.translator.terms.specimen.citation.Creator(),
+                data, dwc)))
         .withDctermsType(termMapper.retrieveTerm(new Type(), data, dwc))
         .withDctermsDate(termMapper.retrieveTerm(new Date(), data, dwc))
         .withDctermsTitle(termMapper.retrieveTerm(new Title(), data, dwc));
@@ -268,12 +272,13 @@ public abstract class BaseDigitalObjectDirector {
         physicalSpecimenIdTypeHarmonised, organisationId, physicalSpecimenId);
     return new DigitalSpecimen()
         .withType("ods:DigitalSpecimen")
+        .withOdsStatus(OdsStatus.ODS_ACTIVE)
         .withOdsType(fdoProperties.getDigitalSpecimenType())
         .withDctermsLicense(termMapper.retrieveTerm(new License(), data, dwc))
         .withOdsPhysicalSpecimenID(physicalSpecimenId)
         .withOdsNormalisedPhysicalSpecimenID(normalisedPhysicalSpecimenId)
         .withOdsPhysicalSpecimenIDType(physicalSpecimenIdTypeHarmonised)
-        .withDwcInstitutionID(organisationId)
+        .withOdsOrganisationID(organisationId)
         .withOdsPhysicalSpecimenID(physicalSpecimenId)
         .withOdsIsKnownToContainMedia(parseToBoolean(new HasMedia(), data, dwc))
         .withOdsSourceSystemID(
@@ -283,8 +288,8 @@ public abstract class BaseDigitalObjectDirector {
         .withDwcPreparations(termMapper.retrieveTerm(new Preparations(), data, dwc))
         .withDwcCollectionID(termMapper.retrieveTerm(new CollectionID(), data, dwc))
         .withDctermsModified(termMapper.retrieveTerm(new Modified(), data, dwc))
-        .withOdsInstitutionName(
-            getInstitutionName(organisationId))
+        .withOdsOrganisationName(
+            getOrganisationName(organisationId))
         .withDwcRecordedBy(termMapper.retrieveTerm(new RecordedBy(), data, dwc))
         .withDwcRecordedByID(termMapper.retrieveTerm(new RecordedByID(), data, dwc))
         .withDwcBasisOfRecord(termMapper.retrieveTerm(new BasisOfRecord(), data, dwc))
@@ -304,13 +309,13 @@ public abstract class BaseDigitalObjectDirector {
         .withDwcDataGeneralizations(termMapper.retrieveTerm(new DataGeneralizations(), data, dwc));
   }
 
-  private String getInstitutionName(String organisationId) throws OrganisationException {
+  private String getOrganisationName(String organisationId) throws OrganisationException {
     if (organisationId.startsWith("https://ror.org/")) {
       var rorId = organisationId.replace("https://ror.org/", "");
-      return institutionNameComponent.getRorName(rorId);
+      return organisationNameComponent.getRorName(rorId);
     } else if (organisationId.startsWith("https://www.wikidata.org/")) {
       var wikidataId = organisationId.replace("https://www.wikidata.org/wiki/", "");
-      return institutionNameComponent.getWikiDataName(wikidataId);
+      return organisationNameComponent.getWikiDataName(wikidataId);
     } else {
       throw new OrganisationException(
           organisationId + " is not a valid ror or wikidata identifier");
@@ -320,7 +325,7 @@ public abstract class BaseDigitalObjectDirector {
   private List<EntityRelationship> assembleDigitalSpecimenEntityRelationships(
       DigitalSpecimen ds) {
     var relationships = new ArrayList<EntityRelationship>();
-    relationships.add(getEntityRelationship("hasInstitutionID", ds.getDwcInstitutionID()));
+    relationships.add(getEntityRelationship("hasOrganisationID", ds.getOdsOrganisationID()));
     relationships.add(getEntityRelationship("hasSourceSystemID", ds.getOdsSourceSystemID()));
     relationships.add(getEntityRelationship("hasFdoType", fdoProperties.getDigitalSpecimenType()));
     if (ds.getOdsPhysicalSpecimenIDType().equals(OdsPhysicalSpecimenIDType.RESOLVABLE)) {
@@ -347,7 +352,10 @@ public abstract class BaseDigitalObjectDirector {
         .withDwcRelationshipOfResource(relationOfResource)
         .withDwcRelatedResourceID(relatedResource)
         .withDwcRelationshipAccordingTo(fdoProperties.getApplicationName())
-        .withOdsRelationshipAccordingToID(fdoProperties.getApplicationPID())
+        .withOdsRelationshipAccordingToAgent(new Agent()
+            .withType(Agent.Type.AS_APPLICATION)
+            .withId(fdoProperties.getApplicationPID())
+            .withSchemaName(fdoProperties.getApplicationName()))
         .withDwcRelationshipEstablishedDate(java.util.Date.from(Instant.now()));
   }
 
@@ -604,9 +612,10 @@ public abstract class BaseDigitalObjectDirector {
       String organisationId) throws OrganisationException {
     DigitalMedia digitalMedia = new DigitalMedia()
         .withType("ods:DigitalMedia")
+        .withOdsStatus(DigitalMedia.OdsStatus.ODS_ACTIVE)
         .withOdsType(fdoProperties.getDigitalMediaType())
-        .withDwcInstitutionID(organisationId)
-        .withOdsInstitutionName(getInstitutionName(organisationId))
+        .withOdsOrganisationID(organisationId)
+        .withOdsOrganisationName(getOrganisationName(organisationId))
         .withAcAccessURI(termMapper.retrieveTerm(new AccessURI(), mediaRecord, dwc))
         .withDctermsLicense(termMapper.retrieveTerm(new License(), mediaRecord, dwc))
         .withDctermsFormat(termMapper.retrieveTerm(new Format(), mediaRecord, dwc))
@@ -635,7 +644,7 @@ public abstract class BaseDigitalObjectDirector {
     var relationships = new ArrayList<EntityRelationship>();
     relationships.add(getEntityRelationship("hasUrl", digitalMedia.getAcAccessURI()));
     relationships.add(
-        getEntityRelationship("hasInstitutionID", digitalMedia.getDwcInstitutionID()));
+        getEntityRelationship("hasOrganisationID", digitalMedia.getOdsOrganisationID()));
     relationships.add(
         getEntityRelationship("hasFdoType", fdoProperties.getDigitalMediaType()));
     if (digitalMedia.getDctermsLicense() != null && digitalMedia.getDctermsLicense()

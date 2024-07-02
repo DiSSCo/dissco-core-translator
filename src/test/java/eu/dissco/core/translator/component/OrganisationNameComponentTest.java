@@ -25,7 +25,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 
 @ExtendWith(MockitoExtension.class)
-class InstitutionNameComponentTest {
+class OrganisationNameComponentTest {
 
   private static final String ROR = "03srysw20";
   private static final String WIKIDATA_ID = "Q2203052";
@@ -42,11 +42,11 @@ class InstitutionNameComponentTest {
   private Mono<JsonNode> jsonNodeMono;
   @Mock
   private CompletableFuture<JsonNode> jsonFuture;
-  private InstitutionNameComponent rorComponent;
+  private OrganisationNameComponent rorComponent;
 
   @BeforeEach
   void setup() {
-    this.rorComponent = new InstitutionNameComponent(client);
+    this.rorComponent = new OrganisationNameComponent(client);
   }
 
 
@@ -55,7 +55,7 @@ class InstitutionNameComponentTest {
     // Given
     givenWebclient();
     given(jsonFuture.get()).willReturn(
-        mapper.readTree(loadResourceFile("institution-name/example-ror.json")));
+        mapper.readTree(loadResourceFile("organisation-name/example-ror.json")));
 
     // When
     var result = rorComponent.getRorName(ROR);
@@ -69,7 +69,7 @@ class InstitutionNameComponentTest {
     // Given
     givenWebclient();
     given(jsonFuture.get()).willReturn(
-        mapper.readTree(loadResourceFile("institution-name/example-wikidata.json")));
+        mapper.readTree(loadResourceFile("organisation-name/example-wikidata.json")));
 
     // When
     var result = rorComponent.getWikiDataName(WIKIDATA_ID);
@@ -83,7 +83,7 @@ class InstitutionNameComponentTest {
     // Given
     givenWebclient();
     given(jsonFuture.get()).willReturn(
-        mapper.readTree(loadResourceFile("institution-name/invalid-wikidata.json")));
+        mapper.readTree(loadResourceFile("organisation-name/invalid-wikidata.json")));
 
     // When / Then
     assertThrows(OrganisationException.class, () -> rorComponent.getWikiDataName(ROR));
@@ -95,7 +95,7 @@ class InstitutionNameComponentTest {
     // Given
     givenWebclient();
     given(jsonFuture.get()).willReturn(
-        mapper.readTree(loadResourceFile("institution-name/response-invalid.json")));
+        mapper.readTree(loadResourceFile("organisation-name/response-invalid.json")));
 
     // When / Then
     assertThrows(OrganisationException.class, () -> rorComponent.getRorName(ROR));
