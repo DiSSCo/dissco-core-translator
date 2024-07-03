@@ -614,6 +614,7 @@ public abstract class BaseDigitalObjectDirector {
         .withType("ods:DigitalMedia")
         .withOdsStatus(DigitalMedia.OdsStatus.ODS_ACTIVE)
         .withOdsType(fdoProperties.getDigitalMediaType())
+        .withOdsSourceSystemID(webClientProperties.getSourceSystemId())
         .withOdsOrganisationID(organisationId)
         .withOdsOrganisationName(getOrganisationName(organisationId))
         .withAcAccessURI(termMapper.retrieveTerm(new AccessURI(), mediaRecord, dwc))
