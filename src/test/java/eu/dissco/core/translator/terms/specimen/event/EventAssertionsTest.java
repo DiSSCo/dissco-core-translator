@@ -4,6 +4,7 @@ import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static eu.dissco.core.translator.TestUtils.MOCK_DATE;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import eu.dissco.core.translator.schema.Agent.Type;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -71,7 +72,10 @@ class EventAssertionsTest {
         .withDwcMeasurementUnit(UNIT)
         .withDwcMeasurementType(TYPE)
         .withDwcMeasurementValue(VALUE)
-        .withOdsAssertionByAgentName(MEASURED_BY)
+        .withOdsAssertionByAgent(
+            new eu.dissco.core.translator.schema.Agent()
+                .withType(Type.SCHEMA_PERSON)
+                .withSchemaName(MEASURED_BY))
         .withDwcMeasurementDeterminedDate(MOCK_DATE)
         .withOdsAssertionRemarks(REMARK);
     // When
