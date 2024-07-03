@@ -13,28 +13,28 @@ import org.springframework.core.io.ClassPathResource;
 
 public class TestUtils {
 
-  public static ObjectMapper MAPPER = new ObjectMapper().findAndRegisterModules();
-  public static String SOURCE_SYSTEM_ID = "20.5000.1025/GW0-TYL-YRU";
-  public static String ENDPOINT = "https://data.rbge.org.uk/service/dwca/data/darwin_core_living.zip";
+  public static final ObjectMapper MAPPER = new ObjectMapper().findAndRegisterModules();
+  public static final String SOURCE_SYSTEM_ID = "20.5000.1025/GW0-TYL-YRU";
+  public static final String ENDPOINT = "https://data.rbge.org.uk/service/dwca/data/darwin_core_living.zip";
 
-  public static String ORGANISATION_ID = "https://ror.org/02y22ws83";
-  public static String NORMALISED_PHYSICAL_SPECIMEN_ID = "http://coldb.mnhn.fr/catalognumber/mnhn/ec/ec10867";
+  public static final String ORGANISATION_ID = "https://ror.org/02y22ws83";
+  public static final String NORMALISED_PHYSICAL_SPECIMEN_ID = "http://coldb.mnhn.fr/catalognumber/mnhn/ec/ec10867";
 
-  public static UUID JOB_ID = UUID.fromString("4a9be957-b8f6-4467-a98e-d19cbd2fa6ec");
+  public static final UUID JOB_ID = UUID.fromString("4a9be957-b8f6-4467-a98e-d19cbd2fa6ec");
 
-  public static String MOCK_DATE = "29-09-2023";
-  public static Map<String, String> DEFAULT_MAPPING = Map.of(
+  public static final String MOCK_DATE = "29-09-2023";
+  public static final Map<String, String> DEFAULT_MAPPING = Map.of(
       "ods:physicalSpecimenIdType", "cetaf",
       "ods:type", "ZoologyVertebrateSpecimen",
       "ods:organisationId", ORGANISATION_ID
   );
-  public static Map<String, String> TERM_MAPPING = Map.of(
+  public static final Map<String, String> TERM_MAPPING = Map.of(
       "ods:physicalSpecimenID", "dwc:occurrenceID",
       "ods:specimenName", "dwc:scientificName",
       "ods:physicalSpecimenCollection", "dwc:collectionID",
       "ods:datasetId", "dwc:datasetID"
   );
-  public static String MAPPING_JSON = """
+  public static final String MAPPING_JSON = """
       {
         "mapping": [
           {
