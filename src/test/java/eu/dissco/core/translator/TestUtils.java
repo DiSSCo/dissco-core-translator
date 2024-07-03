@@ -17,7 +17,7 @@ public class TestUtils {
   public static String SOURCE_SYSTEM_ID = "20.5000.1025/GW0-TYL-YRU";
   public static String ENDPOINT = "https://data.rbge.org.uk/service/dwca/data/darwin_core_living.zip";
 
-  public static String INSTITUTION_ID = "https://ror.org/02y22ws83";
+  public static String ORGANISATION_ID = "https://ror.org/02y22ws83";
   public static String NORMALISED_PHYSICAL_SPECIMEN_ID = "http://coldb.mnhn.fr/catalognumber/mnhn/ec/ec10867";
 
   public static UUID JOB_ID = UUID.fromString("4a9be957-b8f6-4467-a98e-d19cbd2fa6ec");
@@ -26,7 +26,7 @@ public class TestUtils {
   public static Map<String, String> DEFAULT_MAPPING = Map.of(
       "ods:physicalSpecimenIdType", "cetaf",
       "ods:type", "ZoologyVertebrateSpecimen",
-      "ods:organisationId", INSTITUTION_ID
+      "ods:organisationId", ORGANISATION_ID
   );
   public static Map<String, String> TERM_MAPPING = Map.of(
       "ods:physicalSpecimenID", "dwc:occurrenceID",
@@ -71,7 +71,7 @@ public class TestUtils {
   public static DigitalSpecimen givenDigitalSpecimen() {
     return new DigitalSpecimen()
         .withOdsNormalisedPhysicalSpecimenID(NORMALISED_PHYSICAL_SPECIMEN_ID)
-        .withOdsOrganisationID(INSTITUTION_ID);
+        .withOdsOrganisationID(ORGANISATION_ID);
   }
 
   public static DigitalMedia givenDigitalMedia() {
@@ -82,7 +82,7 @@ public class TestUtils {
     return Stream.of(
         Arguments.of(new DigitalSpecimen().withOdsNormalisedPhysicalSpecimenID(
             NORMALISED_PHYSICAL_SPECIMEN_ID)),
-        Arguments.of(new DigitalSpecimen().withOdsOrganisationID(INSTITUTION_ID))
+        Arguments.of(new DigitalSpecimen().withOdsOrganisationID(ORGANISATION_ID))
     );
   }
 }
