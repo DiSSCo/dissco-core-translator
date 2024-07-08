@@ -51,8 +51,12 @@ public class DwcaDigitalObjectDirector extends BaseDigitalObjectDirector {
         && data.get(EXTENSION).get("gbif:Reference") != null) {
       var references = data.get(EXTENSION).get("gbif:Reference");
       for (int i = 0; i < references.size(); i++) {
-        var identification = references.get(i);
-        citations.add(createCitation(identification, dwc));
+        var citationJson = references.get(i);
+        if (citationJson.properties().size() <= 1){
+          log.debug("Skipping citation with only one property: {}", citationJson);
+        } else {
+          citations.add(createCitation(citationJson, dwc));
+        }
       }
     } else {
       citations.add(createCitation(data, dwc));
