@@ -28,6 +28,19 @@ class ModifiedTest {
   }
 
   @Test
+  void testRetrieveFromDWCAEmpty() {
+    // Given
+    var unit = MAPPER.createObjectNode();
+    unit.put("dcterms:modified", "    ");
+
+    // When
+    var result = modified.retrieveFromDWCA(unit);
+
+    // Then
+    assertThat(result).isNotBlank();
+  }
+
+  @Test
   void testRetrieveFromABCD() {
     // Given
     String modifiedString = "1674553668909";
@@ -77,7 +90,7 @@ class ModifiedTest {
     var result = modified.retrieveFromABCD(unit);
 
     // Then
-    assertThat(result).isNull();
+    assertThat(result).isNotBlank();
   }
 
   @Test

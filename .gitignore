@@ -4,3 +4,7 @@ target/
 ### IntelliJ IDEA ###
 .idea
 *.iml
+
+### test files
+/src/main/resources/darwin.zip
+/src/main/resources/darwin/*

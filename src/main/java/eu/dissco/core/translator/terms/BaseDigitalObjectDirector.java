@@ -25,7 +25,6 @@ import eu.dissco.core.translator.schema.OdsGeoReference;
 import eu.dissco.core.translator.schema.OdsGeologicalContext;
 import eu.dissco.core.translator.schema.OdsHasTaxonIdentification;
 import eu.dissco.core.translator.terms.media.AccessURI;
-import eu.dissco.core.translator.terms.media.Created;
 import eu.dissco.core.translator.terms.media.Creator;
 import eu.dissco.core.translator.terms.media.Description;
 import eu.dissco.core.translator.terms.media.Format;
@@ -244,8 +243,7 @@ public abstract class BaseDigitalObjectDirector {
 
   protected abstract List<Identification> assembleIdentifications(JsonNode data, boolean dwc);
 
-  protected Citation createCitation(JsonNode data,
-      boolean dwc) {
+  protected Citation createCitation(JsonNode data, boolean dwc) {
     return new Citation()
         .withType("ods:Citation")
         .withDctermsBibliographicCitation(
@@ -614,6 +612,8 @@ public abstract class BaseDigitalObjectDirector {
         .withType("ods:DigitalMedia")
         .withOdsStatus(DigitalMedia.OdsStatus.ODS_ACTIVE)
         .withOdsType(fdoProperties.getDigitalMediaType())
+        .withOdsSourceSystemID(
+            "https://hdl.handle.net/" + webClientProperties.getSourceSystemId())
         .withOdsOrganisationID(organisationId)
         .withOdsOrganisationName(getOrganisationName(organisationId))
         .withAcAccessURI(termMapper.retrieveTerm(new AccessURI(), mediaRecord, dwc))
@@ -627,7 +627,6 @@ public abstract class BaseDigitalObjectDirector {
             termMapper.retrieveTerm(new RightsHolder(), mediaRecord, dwc))
         .withDctermsSource(termMapper.retrieveTerm(new Source(), mediaRecord, dwc))
         .withDctermsCreator(termMapper.retrieveTerm(new Creator(), mediaRecord, dwc))
-        .withDctermsCreated(termMapper.retrieveTerm(new Created(), mediaRecord, dwc))
         .withDctermsModified(
             termMapper.retrieveTerm(new eu.dissco.core.translator.terms.media.Modified(),
                 mediaRecord, dwc))
