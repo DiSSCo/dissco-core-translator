@@ -1,5 +1,7 @@
 package eu.dissco.core.translator.terms.specimen;
 
+import static eu.dissco.core.translator.configuration.ApplicationConfiguration.DATE_STRING;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.terms.Term;
 import java.time.Instant;
@@ -10,8 +12,7 @@ import java.util.List;
 public class Modified extends Term {
 
   public static final String TERM = "dcterms:modified";
-  private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(
-      "yyyy-MM-dd'T'HH:mm:ss.SSSXXX").withZone(
+  private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_STRING).withZone(
       ZoneOffset.UTC);
   private final List<String> dwcaTerms = List.of(TERM);
   private final List<String> abcdUnitTerms = List.of("abcd:hasDateModified", "abcd:dateLastEdited",
