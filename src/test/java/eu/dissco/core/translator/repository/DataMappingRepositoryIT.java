@@ -4,31 +4,32 @@ import static eu.dissco.core.translator.TestUtils.ENDPOINT;
 import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static eu.dissco.core.translator.TestUtils.MAPPING_JSON;
 import static eu.dissco.core.translator.TestUtils.SOURCE_SYSTEM_ID;
-import static eu.dissco.core.translator.database.jooq.Tables.MAPPING;
+import static eu.dissco.core.translator.database.jooq.Tables.DATA_MAPPING;
 import static eu.dissco.core.translator.database.jooq.Tables.SOURCE_SYSTEM;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import eu.dissco.core.translator.database.jooq.enums.TranslatorType;
 import java.time.Instant;
 import org.jooq.JSONB;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class MappingRepositoryIT extends BaseRepositoryIT {
+class DataMappingRepositoryIT extends BaseRepositoryIT {
 
-  private MappingRepository repository;
+  private DataMappingRepository repository;
 
   @BeforeEach
   void setup() {
-    repository = new MappingRepository(MAPPER, context);
+    repository = new DataMappingRepository(MAPPER, context);
   }
 
   @AfterEach
   void cleanup() {
     context.truncate(SOURCE_SYSTEM).cascade().execute();
-    context.truncate(MAPPING).execute();
+    context.truncate(DATA_MAPPING).execute();
   }
 
   @Test
@@ -49,24 +50,27 @@ class MappingRepositoryIT extends BaseRepositoryIT {
   }
 
   private void givenInsertRecords(String mapping) {
-    context.insertInto(MAPPING)
-        .set(MAPPING.ID, "20.5000.1025/GW0-POP-XAS")
-        .set(MAPPING.VERSION, 1)
-        .set(MAPPING.NAME, "Royal Botanic Garden Edinburgh Living Plant Collections Mapping")
-        .set(MAPPING.DESCRIPTION, "Mapping create based on the Living Plant Collections dwca")
-        .set(MAPPING.MAPPING_, JSONB.valueOf(mapping))
-        .set(MAPPING.CREATED, Instant.parse("2022-09-16T08:25:01.00Z"))
-        .set(MAPPING.CREATOR, "e2befba6-9324-4bb4-9f41-d7dfae4a44b0")
+    context.insertInto(DATA_MAPPING)
+        .set(DATA_MAPPING.ID, "20.5000.1025/GW0-POP-XAS")
+        .set(DATA_MAPPING.VERSION, 1)
+        .set(DATA_MAPPING.NAME, "Royal Botanic Garden Edinburgh Living Plant Collections Mapping")
+        .set(DATA_MAPPING.CREATOR, "e2befba6-9324-4bb4-9f41-d7dfae4a44b0")
+        .set(DATA_MAPPING.DATE_CREATED,Instant.parse("2022-09-16T08:25:01.00Z"))
+        .set(DATA_MAPPING.DATE_MODIFIED, Instant.parse("2022-09-16T08:25:01.00Z"))
+        .set(DATA_MAPPING.MAPPING_DATA_STANDARD, "dwc")
+        .set(DATA_MAPPING.DATA, JSONB.valueOf(mapping))
         .execute();
 
     context.insertInto(SOURCE_SYSTEM)
         .set(SOURCE_SYSTEM.ID, SOURCE_SYSTEM_ID)
         .set(SOURCE_SYSTEM.NAME, "Royal Botanic Garden Edinburgh Living Plant Collections")
         .set(SOURCE_SYSTEM.ENDPOINT, ENDPOINT)
-        .set(SOURCE_SYSTEM.DESCRIPTION,
-            "Source system for the DWCA of the Living Plant Collections")
-        .set(SOURCE_SYSTEM.CREATED, Instant.parse("2022-09-16T08:25:01.00Z"))
+        .set(SOURCE_SYSTEM.CREATOR, "e2befba6-9324-4bb4-9f41-d7dfae4a44b0")
+        .set(SOURCE_SYSTEM.DATE_CREATED, Instant.parse("2022-09-16T08:25:01.00Z"))
+        .set(SOURCE_SYSTEM.DATE_MODIFIED, Instant.parse("2022-09-16T08:25:01.00Z"))
+        .set(SOURCE_SYSTEM.TRANSLATOR_TYPE, TranslatorType.dwca)
         .set(SOURCE_SYSTEM.MAPPING_ID, "20.5000.1025/GW0-POP-XAS")
+        .set(SOURCE_SYSTEM.DATA, JSONB.valueOf("{}"))
         .execute();
   }
 

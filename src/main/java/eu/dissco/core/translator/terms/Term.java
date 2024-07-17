@@ -3,11 +3,11 @@ package eu.dissco.core.translator.terms;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.dissco.core.translator.schema.DigitalSpecimen;
 import eu.dissco.core.translator.schema.Identification;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
-import eu.dissco.core.translator.schema.DigitalSpecimen;
 
 @Slf4j
 public abstract class Term {

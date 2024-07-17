@@ -24,19 +24,34 @@ public class TestUtils {
 
   public static final String MOCK_DATE = "29-09-2023";
   public static final Map<String, String> DEFAULT_MAPPING = Map.of(
-      "ods:physicalSpecimenIdType", "cetaf",
+      "ods:physicalSpecimenIDType", "cetaf",
       "ods:type", "ZoologyVertebrateSpecimen",
-      "ods:organisationId", ORGANISATION_ID
+      "ods:organisationID", ORGANISATION_ID
   );
   public static final Map<String, String> TERM_MAPPING = Map.of(
       "ods:physicalSpecimenID", "dwc:occurrenceID",
       "ods:specimenName", "dwc:scientificName",
       "ods:physicalSpecimenCollection", "dwc:collectionID",
-      "ods:datasetId", "dwc:datasetID"
+      "ods:datasetID", "dwc:datasetID"
   );
   public static final String MAPPING_JSON = """
       {
-        "mapping": [
+         "@id": "https://hdl.handle.net/TEST/PH1-C7E-Q4J",
+         "@type": "ods:DataMapping",
+         "ods:ID": "https://hdl.handle.net/TEST/PH1-C7E-Q4J",
+         "ods:type": "https://hdl.handle.net/21.T11148/ce794a6f4df42eb7e77e",
+         "ods:status": "ods:Active",
+         "schema:version": 2,
+         "schema:name": "RBINS default mapping",
+         "schema:description": "The default mapping for RBINS datasets",
+         "schema:dateCreated": "2024-07-17T09:06:47.707Z",
+         "schema:dateModified": "2024-07-17T09:30:28.513Z",
+         "schema:creator": {
+             "@id": "adf294ba-bb03-4962-8042-a37f1648458e",
+             "@type": "schema:Person",
+             "ods:hasIdentifier": []
+         },
+        "ods:FieldMapping": [
           {
             "ods:physicalSpecimenID": "dwc:occurrenceID"
           },
@@ -47,20 +62,21 @@ public class TestUtils {
             "ods:physicalSpecimenCollection": "dwc:collectionID"
           },
           {
-            "ods:datasetId": "dwc:datasetID"
+            "ods:datasetID": "dwc:datasetID"
           }
         ],
-        "defaults": [
+        "ods:DefaultMapping": [
           {
-            "ods:physicalSpecimenIdType": "cetaf"
+            "ods:physicalSpecimenIDType": "cetaf"
           },
           {
             "ods:type": "ZoologyVertebrateSpecimen"
           },
           {
-            "ods:organisationId": "https://ror.org/02y22ws83"
+            "ods:organisationID": "https://ror.org/02y22ws83"
           }
-        ]
+        ],
+        "ods:mappingDataStandard": "dwc"
       }""";
 
   public static String loadResourceFile(String fileName) throws IOException {

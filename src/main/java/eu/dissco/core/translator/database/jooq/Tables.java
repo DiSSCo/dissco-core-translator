@@ -4,7 +4,7 @@
 package eu.dissco.core.translator.database.jooq;
 
 
-import eu.dissco.core.translator.database.jooq.tables.Mapping;
+import eu.dissco.core.translator.database.jooq.tables.DataMapping;
 import eu.dissco.core.translator.database.jooq.tables.SourceSystem;
 import eu.dissco.core.translator.database.jooq.tables.TranslatorJobRecord;
 
@@ -16,9 +16,9 @@ import eu.dissco.core.translator.database.jooq.tables.TranslatorJobRecord;
 public class Tables {
 
     /**
-     * The table <code>public.mapping</code>.
+     * The table <code>public.data_mapping</code>.
      */
-    public static final Mapping MAPPING = Mapping.MAPPING;
+    public static final DataMapping DATA_MAPPING = DataMapping.DATA_MAPPING;
 
     /**
      * The table <code>public.source_system</code>.
