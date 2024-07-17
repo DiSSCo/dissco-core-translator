@@ -4,14 +4,13 @@
 package eu.dissco.core.translator.database.jooq;
 
 
-import eu.dissco.core.translator.database.jooq.tables.Mapping;
+import eu.dissco.core.translator.database.jooq.tables.DataMapping;
 import eu.dissco.core.translator.database.jooq.tables.SourceSystem;
 import eu.dissco.core.translator.database.jooq.tables.TranslatorJobRecord;
-import eu.dissco.core.translator.database.jooq.tables.records.MappingRecord;
+import eu.dissco.core.translator.database.jooq.tables.records.DataMappingRecord;
 import eu.dissco.core.translator.database.jooq.tables.records.SourceSystemRecord;
 import eu.dissco.core.translator.database.jooq.tables.records.TranslatorJobRecordRecord;
 
-import org.jooq.ForeignKey;
 import org.jooq.TableField;
 import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
@@ -29,13 +28,7 @@ public class Keys {
     // UNIQUE and PRIMARY KEY definitions
     // -------------------------------------------------------------------------
 
-    public static final UniqueKey<MappingRecord> NEW_MAPPING_PK = Internal.createUniqueKey(Mapping.MAPPING, DSL.name("new_mapping_pk"), new TableField[] { Mapping.MAPPING.ID, Mapping.MAPPING.VERSION }, true);
-    public static final UniqueKey<SourceSystemRecord> NEW_SOURCE_SYSTEM_PKEY = Internal.createUniqueKey(SourceSystem.SOURCE_SYSTEM, DSL.name("new_source_system_pkey"), new TableField[] { SourceSystem.SOURCE_SYSTEM.ID }, true);
+    public static final UniqueKey<DataMappingRecord> DATA_MAPPING_PK = Internal.createUniqueKey(DataMapping.DATA_MAPPING, DSL.name("data_mapping_pk"), new TableField[] { DataMapping.DATA_MAPPING.ID, DataMapping.DATA_MAPPING.VERSION }, true);
+    public static final UniqueKey<SourceSystemRecord> SOURCE_SYSTEM_PKEY = Internal.createUniqueKey(SourceSystem.SOURCE_SYSTEM, DSL.name("source_system_pkey"), new TableField[] { SourceSystem.SOURCE_SYSTEM.ID }, true);
     public static final UniqueKey<TranslatorJobRecordRecord> TRANSLATOR_JOB_RECORD_PKEY = Internal.createUniqueKey(TranslatorJobRecord.TRANSLATOR_JOB_RECORD, DSL.name("translator_job_record_pkey"), new TableField[] { TranslatorJobRecord.TRANSLATOR_JOB_RECORD.JOB_ID, TranslatorJobRecord.TRANSLATOR_JOB_RECORD.SOURCE_SYSTEM_ID }, true);
-
-    // -------------------------------------------------------------------------
-    // FOREIGN KEY definitions
-    // -------------------------------------------------------------------------
-
-    public static final ForeignKey<TranslatorJobRecordRecord, SourceSystemRecord> TRANSLATOR_JOB_RECORD__TRANSLATOR_JOB_RECORD_SOURCE_SYSTEM_ID_FKEY = Internal.createForeignKey(TranslatorJobRecord.TRANSLATOR_JOB_RECORD, DSL.name("translator_job_record_source_system_id_fkey"), new TableField[] { TranslatorJobRecord.TRANSLATOR_JOB_RECORD.SOURCE_SYSTEM_ID }, Keys.NEW_SOURCE_SYSTEM_PKEY, new TableField[] { SourceSystem.SOURCE_SYSTEM.ID }, true);
 }

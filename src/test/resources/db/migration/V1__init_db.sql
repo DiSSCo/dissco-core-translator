@@ -1,27 +1,35 @@
-CREATE TABLE public.mapping
+create type translator_type as enum ('biocase', 'dwca');
+
+create table source_system
 (
-    id          text        NOT NULL,
-    "version"   int4        NOT NULL,
-    "name"      text        NOT NULL,
-    description text        NULL,
-    "mapping"   jsonb       NOT NULL,
-    created     timestamptz NOT NULL,
-    creator     text        NOT NULL,
-    deleted     timestamptz NULL,
-    CONSTRAINT new_mapping_pk PRIMARY KEY (id, version)
+    id text not null
+        constraint newnew_source_system_pkey
+            primary key,
+    name text not null,
+    endpoint text not null,
+    date_created timestamp with time zone not null,
+    date_modified timestamp with time zone not null,
+    date_tombstoned timestamp with time zone,
+    mapping_id text not null,
+    version integer default 1 not null,
+    creator text not null,
+    translator_type translator_type,
+    data jsonb not null
 );
 
-CREATE TABLE public.source_system
+create table data_mapping
 (
-    id          text        NOT NULL,
-    "name"      text        NOT NULL,
-    endpoint    text        NOT NULL,
-    description text        NULL,
-    created     timestamptz NOT NULL,
-    deleted     timestamptz NULL,
-    mapping_id  text        NOT NULL,
-    CONSTRAINT new_source_system_endpoint_key UNIQUE (endpoint),
-    CONSTRAINT new_source_system_pkey PRIMARY KEY (id)
+    id                   text                     not null,
+    version              integer                  not null,
+    name                 text                     not null,
+    date_created         timestamp with time zone not null,
+    date_modified        timestamp with time zone not null,
+    date_tombstoned      timestamp with time zone,
+    creator              text                     not null,
+    mapping_data_standard varchar                  not null,
+    data                 jsonb                    not null,
+    constraint data_mapping_pk
+        primary key (id, version)
 );
 
 create type error_code as enum ('TIMEOUT', 'DISSCO_EXCEPTION');

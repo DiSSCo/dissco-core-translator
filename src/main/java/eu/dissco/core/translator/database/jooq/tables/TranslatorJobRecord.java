@@ -11,20 +11,18 @@ import eu.dissco.core.translator.database.jooq.enums.JobState;
 import eu.dissco.core.translator.database.jooq.tables.records.TranslatorJobRecordRecord;
 
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.List;
+import java.util.Collection;
 import java.util.UUID;
-import java.util.function.Function;
 
+import org.jooq.Condition;
 import org.jooq.Field;
-import org.jooq.ForeignKey;
-import org.jooq.Function7;
 import org.jooq.Name;
-import org.jooq.Record;
-import org.jooq.Records;
-import org.jooq.Row7;
+import org.jooq.PlainSQL;
+import org.jooq.QueryPart;
+import org.jooq.SQL;
 import org.jooq.Schema;
-import org.jooq.SelectField;
+import org.jooq.Select;
+import org.jooq.Stringly;
 import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.TableOptions;
@@ -63,7 +61,7 @@ public class TranslatorJobRecord extends TableImpl<TranslatorJobRecordRecord> {
     /**
      * The column <code>public.translator_job_record.job_state</code>.
      */
-    public final TableField<TranslatorJobRecordRecord, JobState> JOB_STATE = createField(DSL.name("job_state"), SQLDataType.VARCHAR.nullable(false).asEnumDataType(eu.dissco.core.translator.database.jooq.enums.JobState.class), this, "");
+    public final TableField<TranslatorJobRecordRecord, JobState> JOB_STATE = createField(DSL.name("job_state"), SQLDataType.VARCHAR.nullable(false).asEnumDataType(JobState.class), this, "");
 
     /**
      * The column <code>public.translator_job_record.source_system_id</code>.
@@ -88,14 +86,14 @@ public class TranslatorJobRecord extends TableImpl<TranslatorJobRecordRecord> {
     /**
      * The column <code>public.translator_job_record.error</code>.
      */
-    public final TableField<TranslatorJobRecordRecord, ErrorCode> ERROR = createField(DSL.name("error"), SQLDataType.VARCHAR.asEnumDataType(eu.dissco.core.translator.database.jooq.enums.ErrorCode.class), this, "");
+    public final TableField<TranslatorJobRecordRecord, ErrorCode> ERROR = createField(DSL.name("error"), SQLDataType.VARCHAR.asEnumDataType(ErrorCode.class), this, "");
 
     private TranslatorJobRecord(Name alias, Table<TranslatorJobRecordRecord> aliased) {
-        this(alias, aliased, null);
+        this(alias, aliased, (Field<?>[]) null, null);
     }
 
-    private TranslatorJobRecord(Name alias, Table<TranslatorJobRecordRecord> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table());
+    private TranslatorJobRecord(Name alias, Table<TranslatorJobRecordRecord> aliased, Field<?>[] parameters, Condition where) {
+        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table(), where);
     }
 
     /**
@@ -121,10 +119,6 @@ public class TranslatorJobRecord extends TableImpl<TranslatorJobRecordRecord> {
         this(DSL.name("translator_job_record"), null);
     }
 
-    public <O extends Record> TranslatorJobRecord(Table<O> child, ForeignKey<O, TranslatorJobRecordRecord> key) {
-        super(child, key, TRANSLATOR_JOB_RECORD);
-    }
-
     @Override
     public Schema getSchema() {
         return aliased() ? null : Public.PUBLIC;
@@ -133,24 +127,6 @@ public class TranslatorJobRecord extends TableImpl<TranslatorJobRecordRecord> {
     @Override
     public UniqueKey<TranslatorJobRecordRecord> getPrimaryKey() {
         return Keys.TRANSLATOR_JOB_RECORD_PKEY;
-    }
-
-    @Override
-    public List<ForeignKey<TranslatorJobRecordRecord, ?>> getReferences() {
-        return Arrays.asList(Keys.TRANSLATOR_JOB_RECORD__TRANSLATOR_JOB_RECORD_SOURCE_SYSTEM_ID_FKEY);
-    }
-
-    private transient SourceSystem _sourceSystem;
-
-    /**
-     * Get the implicit join path to the <code>public.source_system</code>
-     * table.
-     */
-    public SourceSystem sourceSystem() {
-        if (_sourceSystem == null)
-            _sourceSystem = new SourceSystem(this, Keys.TRANSLATOR_JOB_RECORD__TRANSLATOR_JOB_RECORD_SOURCE_SYSTEM_ID_FKEY);
-
-        return _sourceSystem;
     }
 
     @Override
@@ -192,27 +168,87 @@ public class TranslatorJobRecord extends TableImpl<TranslatorJobRecordRecord> {
         return new TranslatorJobRecord(name.getQualifiedName(), null);
     }
 
-    // -------------------------------------------------------------------------
-    // Row7 type methods
-    // -------------------------------------------------------------------------
-
+    /**
+     * Create an inline derived table from this table
+     */
     @Override
-    public Row7<UUID, JobState, String, Instant, Instant, Integer, ErrorCode> fieldsRow() {
-        return (Row7) super.fieldsRow();
+    public TranslatorJobRecord where(Condition condition) {
+        return new TranslatorJobRecord(getQualifiedName(), aliased() ? this : null, null, condition);
     }
 
     /**
-     * Convenience mapping calling {@link SelectField#convertFrom(Function)}.
+     * Create an inline derived table from this table
      */
-    public <U> SelectField<U> mapping(Function7<? super UUID, ? super JobState, ? super String, ? super Instant, ? super Instant, ? super Integer, ? super ErrorCode, ? extends U> from) {
-        return convertFrom(Records.mapping(from));
+    @Override
+    public TranslatorJobRecord where(Collection<? extends Condition> conditions) {
+        return where(DSL.and(conditions));
     }
 
     /**
-     * Convenience mapping calling {@link SelectField#convertFrom(Class,
-     * Function)}.
+     * Create an inline derived table from this table
      */
-    public <U> SelectField<U> mapping(Class<U> toType, Function7<? super UUID, ? super JobState, ? super String, ? super Instant, ? super Instant, ? super Integer, ? super ErrorCode, ? extends U> from) {
-        return convertFrom(toType, Records.mapping(from));
+    @Override
+    public TranslatorJobRecord where(Condition... conditions) {
+        return where(DSL.and(conditions));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public TranslatorJobRecord where(Field<Boolean> condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public TranslatorJobRecord where(SQL condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public TranslatorJobRecord where(@Stringly.SQL String condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public TranslatorJobRecord where(@Stringly.SQL String condition, Object... binds) {
+        return where(DSL.condition(condition, binds));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public TranslatorJobRecord where(@Stringly.SQL String condition, QueryPart... parts) {
+        return where(DSL.condition(condition, parts));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public TranslatorJobRecord whereExists(Select<?> select) {
+        return where(DSL.exists(select));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public TranslatorJobRecord whereNotExists(Select<?> select) {
+        return where(DSL.notExists(select));
     }
 }

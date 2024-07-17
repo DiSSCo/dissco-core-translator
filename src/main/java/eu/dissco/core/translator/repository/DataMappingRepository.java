@@ -1,6 +1,6 @@
 package eu.dissco.core.translator.repository;
 
-import static eu.dissco.core.translator.database.jooq.Tables.MAPPING;
+import static eu.dissco.core.translator.database.jooq.Tables.DATA_MAPPING;
 import static eu.dissco.core.translator.database.jooq.Tables.SOURCE_SYSTEM;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -17,20 +17,20 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
-public class MappingRepository {
+public class DataMappingRepository {
 
   private final ObjectMapper mapper;
   private final DSLContext context;
 
   public JsonNode retrieveMapping(String sourceSystemId) throws DisscoRepositoryException {
     try {
-      return context.select(MAPPING.MAPPING_)
-          .distinctOn(MAPPING.ID)
-          .from(MAPPING)
+      return context.select(DATA_MAPPING.DATA)
+          .distinctOn(DATA_MAPPING.ID)
+          .from(DATA_MAPPING)
           .join(SOURCE_SYSTEM)
-          .on(SOURCE_SYSTEM.MAPPING_ID.eq(MAPPING.ID))
+          .on(SOURCE_SYSTEM.MAPPING_ID.eq(DATA_MAPPING.ID))
           .where(SOURCE_SYSTEM.ID.eq(sourceSystemId))
-          .orderBy(MAPPING.ID, MAPPING.VERSION.desc())
+          .orderBy(DATA_MAPPING.ID, DATA_MAPPING.VERSION.desc())
           .fetchOne(this::mapToJson);
     } catch (DataAccessException ex) {
       throw new DisscoRepositoryException("Failed to get mapping from repository", ex);

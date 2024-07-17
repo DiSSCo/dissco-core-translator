@@ -7,7 +7,7 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import eu.dissco.core.translator.component.MappingComponent;
+import eu.dissco.core.translator.component.DataMappingComponent;
 import eu.dissco.core.translator.terms.specimen.CollectionID;
 import eu.dissco.core.translator.terms.specimen.OrganisationID;
 import eu.dissco.core.translator.terms.specimen.PhysicalSpecimenID;
@@ -22,19 +22,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class TermMapperTest {
 
   @Mock
-  private MappingComponent mappingComponent;
+  private DataMappingComponent dataMappingComponent;
 
   private TermMapper termMapper;
 
   @BeforeEach
   void setup() {
-    termMapper = new TermMapper(mappingComponent);
+    termMapper = new TermMapper(dataMappingComponent);
   }
 
   @Test
   void testRetrieveFromDWCADefault() {
     // Given
-    given(mappingComponent.getDefaults()).willReturn(
+    given(dataMappingComponent.getDefaults()).willReturn(
         Map.of(OrganisationID.TERM, "https://ror.org/02y22ws83"));
 
     // When
@@ -49,7 +49,7 @@ class TermMapperTest {
     // Given
     var physicalSpecimenCollection = new CollectionID();
     var dwcaTerm = "dwc:collectionID";
-    given(mappingComponent.getFieldMappings()).willReturn(
+    given(dataMappingComponent.getFieldMappings()).willReturn(
         Map.of(CollectionID.TERM, dwcaTerm));
     var unit = MAPPER.createObjectNode();
     unit.put("dwc:collectionID", "TestCollection");
@@ -79,7 +79,7 @@ class TermMapperTest {
   void testRetrieveFromABCDDefault() {
     // Given
     var organisationId = new OrganisationID();
-    given(mappingComponent.getDefaults()).willReturn(
+    given(dataMappingComponent.getDefaults()).willReturn(
         Map.of(OrganisationID.TERM, "https://ror.org/02y22ws83"));
 
     // When
@@ -95,7 +95,7 @@ class TermMapperTest {
     var abcdTerm = "abcd:unitID";
     var attributes = MAPPER.createObjectNode();
     attributes.put(abcdTerm, "123456");
-    given(mappingComponent.getFieldMappings()).willReturn(
+    given(dataMappingComponent.getFieldMappings()).willReturn(
         Map.of(PhysicalSpecimenID.TERM, abcdTerm));
 
     // When

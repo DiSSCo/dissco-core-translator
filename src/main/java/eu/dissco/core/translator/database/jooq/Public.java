@@ -4,7 +4,7 @@
 package eu.dissco.core.translator.database.jooq;
 
 
-import eu.dissco.core.translator.database.jooq.tables.Mapping;
+import eu.dissco.core.translator.database.jooq.tables.DataMapping;
 import eu.dissco.core.translator.database.jooq.tables.SourceSystem;
 import eu.dissco.core.translator.database.jooq.tables.TranslatorJobRecord;
 
@@ -30,9 +30,9 @@ public class Public extends SchemaImpl {
     public static final Public PUBLIC = new Public();
 
     /**
-     * The table <code>public.mapping</code>.
+     * The table <code>public.data_mapping</code>.
      */
-    public final Mapping MAPPING = Mapping.MAPPING;
+    public final DataMapping DATA_MAPPING = DataMapping.DATA_MAPPING;
 
     /**
      * The table <code>public.source_system</code>.
@@ -60,7 +60,7 @@ public class Public extends SchemaImpl {
     @Override
     public final List<Table<?>> getTables() {
         return Arrays.asList(
-            Mapping.MAPPING,
+            DataMapping.DATA_MAPPING,
             SourceSystem.SOURCE_SYSTEM,
             TranslatorJobRecord.TRANSLATOR_JOB_RECORD
         );

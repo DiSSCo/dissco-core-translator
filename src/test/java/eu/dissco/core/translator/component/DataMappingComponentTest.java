@@ -9,7 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
 import eu.dissco.core.translator.properties.WebClientProperties;
-import eu.dissco.core.translator.repository.MappingRepository;
+import eu.dissco.core.translator.repository.DataMappingRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,18 +17,18 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class MappingComponentTest {
+class DataMappingComponentTest {
 
   @Mock
   private WebClientProperties properties;
   @Mock
-  private MappingRepository repository;
+  private DataMappingRepository repository;
 
-  private MappingComponent mappingComponent;
+  private DataMappingComponent dataMappingComponent;
 
   @BeforeEach
   void setup() {
-    mappingComponent = new MappingComponent(properties, repository);
+    dataMappingComponent = new DataMappingComponent(properties, repository);
   }
 
   @Test
@@ -38,11 +38,11 @@ class MappingComponentTest {
     given(repository.retrieveMapping(SOURCE_SYSTEM_ID)).willReturn(MAPPER.readTree(MAPPING_JSON));
 
     // When
-    mappingComponent.setup();
+    dataMappingComponent.setup();
 
     // Then
-    assertThat(mappingComponent.getFieldMappings()).isEqualTo(TERM_MAPPING);
-    assertThat(mappingComponent.getDefaults()).isEqualTo(DEFAULT_MAPPING);
+    assertThat(dataMappingComponent.getFieldMappings()).isEqualTo(TERM_MAPPING);
+    assertThat(dataMappingComponent.getDefaults()).isEqualTo(DEFAULT_MAPPING);
   }
 
 }

@@ -9,8 +9,8 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import eu.dissco.core.translator.domain.DigitalMediaWrapper;
 import eu.dissco.core.translator.domain.DigitalMediaEvent;
+import eu.dissco.core.translator.domain.DigitalMediaWrapper;
 import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
 import eu.dissco.core.translator.domain.DigitalSpecimenWrapper;
 import eu.dissco.core.translator.properties.KafkaProperties;

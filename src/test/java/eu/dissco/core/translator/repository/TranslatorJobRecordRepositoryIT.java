@@ -8,9 +8,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import eu.dissco.core.translator.database.jooq.enums.ErrorCode;
 import eu.dissco.core.translator.database.jooq.enums.JobState;
+import eu.dissco.core.translator.database.jooq.enums.TranslatorType;
 import eu.dissco.core.translator.domain.TranslatorJobResult;
 import java.time.Instant;
 import java.util.UUID;
+import org.jooq.JSONB;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -98,10 +100,12 @@ class TranslatorJobRecordRepositoryIT extends BaseRepositoryIT {
         .set(SOURCE_SYSTEM.ID, SOURCE_SYSTEM_ID)
         .set(SOURCE_SYSTEM.NAME, "Royal Botanic Garden Edinburgh Living Plant Collections")
         .set(SOURCE_SYSTEM.ENDPOINT, ENDPOINT)
-        .set(SOURCE_SYSTEM.DESCRIPTION,
-            "Source system for the DWCA of the Living Plant Collections")
-        .set(SOURCE_SYSTEM.CREATED, Instant.parse("2022-09-16T08:25:01.00Z"))
+        .set(SOURCE_SYSTEM.CREATOR, "e2befba6-9324-4bb4-9f41-d7dfae4a44b0")
+        .set(SOURCE_SYSTEM.DATE_CREATED, Instant.parse("2022-09-16T08:25:01.00Z"))
+        .set(SOURCE_SYSTEM.DATE_MODIFIED, Instant.parse("2022-09-16T08:25:01.00Z"))
+        .set(SOURCE_SYSTEM.TRANSLATOR_TYPE, TranslatorType.dwca)
         .set(SOURCE_SYSTEM.MAPPING_ID, "20.5000.1025/GW0-POP-XAS")
+        .set(SOURCE_SYSTEM.DATA, JSONB.valueOf("{}"))
         .execute();
   }
 
