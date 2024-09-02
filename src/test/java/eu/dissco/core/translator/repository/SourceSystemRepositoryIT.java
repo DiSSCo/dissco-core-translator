@@ -2,6 +2,8 @@ package eu.dissco.core.translator.repository;
 
 import static eu.dissco.core.translator.TestUtils.ENDPOINT;
 import static eu.dissco.core.translator.TestUtils.SOURCE_SYSTEM_ID;
+import static eu.dissco.core.translator.TestUtils.SOURCE_SYSTEM_NAME;
+import static eu.dissco.core.translator.TestUtils.givenSourceSystemInformation;
 import static eu.dissco.core.translator.database.jooq.Tables.SOURCE_SYSTEM;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -32,16 +34,16 @@ class SourceSystemRepositoryIT extends BaseRepositoryIT {
     givenInsertRecords();
 
     // When
-    var result = repository.getEndpoint(SOURCE_SYSTEM_ID);
+    var result = repository.getSourceSystem(SOURCE_SYSTEM_ID);
 
     // Then
-    assertThat(result).isEqualTo(ENDPOINT);
+    assertThat(result).isEqualTo(givenSourceSystemInformation());
   }
 
   private void givenInsertRecords() {
     context.insertInto(SOURCE_SYSTEM)
         .set(SOURCE_SYSTEM.ID, SOURCE_SYSTEM_ID)
-        .set(SOURCE_SYSTEM.NAME, "Royal Botanic Garden Edinburgh Living Plant Collections")
+        .set(SOURCE_SYSTEM.NAME, SOURCE_SYSTEM_NAME)
         .set(SOURCE_SYSTEM.ENDPOINT, ENDPOINT)
         .set(SOURCE_SYSTEM.CREATOR, "e2befba6-9324-4bb4-9f41-d7dfae4a44b0")
         .set(SOURCE_SYSTEM.DATE_CREATED, Instant.parse("2022-09-16T08:25:01.00Z"))

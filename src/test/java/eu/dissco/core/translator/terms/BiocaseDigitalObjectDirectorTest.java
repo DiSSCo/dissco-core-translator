@@ -1,6 +1,7 @@
 package eu.dissco.core.translator.terms;
 
 import static eu.dissco.core.translator.TestUtils.MAPPER;
+import static eu.dissco.core.translator.TestUtils.SOURCE_SYSTEM_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.mockito.ArgumentMatchers.any;
@@ -12,9 +13,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import eu.dissco.core.translator.component.OrganisationNameComponent;
+import eu.dissco.core.translator.component.SourceSystemComponent;
 import eu.dissco.core.translator.exception.UnknownPhysicalSpecimenIdType;
 import eu.dissco.core.translator.properties.FdoProperties;
-import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.schema.DigitalSpecimen.OdsPhysicalSpecimenIDType;
 import eu.dissco.core.translator.schema.DigitalSpecimen.OdsStatus;
 import eu.dissco.core.translator.terms.specimen.OrganisationID;
@@ -39,7 +40,7 @@ class BiocaseDigitalObjectDirectorTest {
   @Mock
   private OrganisationNameComponent institutionNameComponent;
   @Mock
-  private WebClientProperties webClientProperties;
+  private SourceSystemComponent sourceSystemComponent;
   @Mock
   private FdoProperties fdoProperties;
 
@@ -94,8 +95,7 @@ class BiocaseDigitalObjectDirectorTest {
   @BeforeEach
   void setup() {
     director = new BiocaseDigitalObjectDirector(MAPPER, termMapper, institutionNameComponent,
-        webClientProperties,
-        fdoProperties);
+        sourceSystemComponent, fdoProperties);
   }
 
   @ParameterizedTest

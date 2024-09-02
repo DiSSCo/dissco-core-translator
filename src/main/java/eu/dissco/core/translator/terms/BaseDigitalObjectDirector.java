@@ -3,6 +3,7 @@ package eu.dissco.core.translator.terms;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.dissco.core.translator.component.OrganisationNameComponent;
+import eu.dissco.core.translator.component.SourceSystemComponent;
 import eu.dissco.core.translator.exception.OrganisationException;
 import eu.dissco.core.translator.exception.UnknownPhysicalSpecimenIdType;
 import eu.dissco.core.translator.properties.FdoProperties;
@@ -210,7 +211,7 @@ public abstract class BaseDigitalObjectDirector {
   protected final ObjectMapper mapper;
   protected final TermMapper termMapper;
   private final OrganisationNameComponent organisationNameComponent;
-  private final WebClientProperties webClientProperties;
+  private final SourceSystemComponent sourceSystemComponent;
   private final FdoProperties fdoProperties;
   private final List<String> identifierTerms;
 
@@ -280,14 +281,14 @@ public abstract class BaseDigitalObjectDirector {
         .withOdsPhysicalSpecimenID(physicalSpecimenId)
         .withOdsIsKnownToContainMedia(parseToBoolean(new HasMedia(), data, dwc))
         .withOdsSourceSystemID(
-            "https://hdl.handle.net/" + webClientProperties.getSourceSystemId())
+            "https://hdl.handle.net/" + sourceSystemComponent.getSourceSystemID())
+        .withOdsSourceSystemName(sourceSystemComponent.getSourceSystemName())
         .withOdsLivingOrPreserved(
             retrieveEnum(new LivingOrPreserved(), data, dwc, OdsLivingOrPreserved.class))
         .withDwcPreparations(termMapper.retrieveTerm(new Preparations(), data, dwc))
         .withDwcCollectionID(termMapper.retrieveTerm(new CollectionID(), data, dwc))
         .withDctermsModified(termMapper.retrieveTerm(new Modified(), data, dwc))
-        .withOdsOrganisationName(
-            getOrganisationName(organisationId))
+        .withOdsOrganisationName(getOrganisationName(organisationId))
         .withDwcRecordedBy(termMapper.retrieveTerm(new RecordedBy(), data, dwc))
         .withDwcRecordedByID(termMapper.retrieveTerm(new RecordedByID(), data, dwc))
         .withDwcBasisOfRecord(termMapper.retrieveTerm(new BasisOfRecord(), data, dwc))
@@ -613,7 +614,8 @@ public abstract class BaseDigitalObjectDirector {
         .withOdsStatus(DigitalMedia.OdsStatus.ODS_ACTIVE)
         .withOdsType(fdoProperties.getDigitalMediaType())
         .withOdsSourceSystemID(
-            "https://hdl.handle.net/" + webClientProperties.getSourceSystemId())
+            "https://hdl.handle.net/" + sourceSystemComponent.getSourceSystemID())
+        .withOdsSourceSystemName(sourceSystemComponent.getSourceSystemName())
         .withOdsOrganisationID(organisationId)
         .withOdsOrganisationName(getOrganisationName(organisationId))
         .withAcAccessURI(termMapper.retrieveTerm(new AccessURI(), mediaRecord, dwc))

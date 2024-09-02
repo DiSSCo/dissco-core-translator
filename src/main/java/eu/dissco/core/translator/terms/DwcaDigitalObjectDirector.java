@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.dissco.core.translator.Profiles;
 import eu.dissco.core.translator.component.OrganisationNameComponent;
+import eu.dissco.core.translator.component.SourceSystemComponent;
 import eu.dissco.core.translator.properties.FdoProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.schema.Citation;
@@ -23,9 +24,9 @@ public class DwcaDigitalObjectDirector extends BaseDigitalObjectDirector {
   private static final String EXTENSION = "extensions";
 
   public DwcaDigitalObjectDirector(ObjectMapper mapper, TermMapper termMapper,
-      OrganisationNameComponent rorComponent, WebClientProperties webClientProperties,
+      OrganisationNameComponent rorComponent, SourceSystemComponent sourceSystemComponent,
       FdoProperties fdoProperties) {
-    super(mapper, termMapper, rorComponent, webClientProperties, fdoProperties, identifierTerms());
+    super(mapper, termMapper, rorComponent, sourceSystemComponent, fdoProperties, identifierTerms());
   }
 
   private static List<String> identifierTerms() {
