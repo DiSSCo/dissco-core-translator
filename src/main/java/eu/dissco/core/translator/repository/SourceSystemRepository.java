@@ -5,7 +5,6 @@ import static eu.dissco.core.translator.database.jooq.Tables.SOURCE_SYSTEM;
 import eu.dissco.core.translator.domain.SourceSystemInformation;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
-import org.jooq.Record1;
 import org.jooq.Record2;
 import org.springframework.stereotype.Repository;
 
@@ -23,7 +22,7 @@ public class SourceSystemRepository {
   }
 
   private SourceSystemInformation mapToSourceSystemInformation(
-      Record2<String, String> record) {
-    return new SourceSystemInformation(record.value1(), record.value2());
+      Record2<String, String> dbRecord) {
+    return new SourceSystemInformation(dbRecord.value1(), dbRecord.value2());
   }
 }

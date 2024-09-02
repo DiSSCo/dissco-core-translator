@@ -1,7 +1,6 @@
 package eu.dissco.core.translator.terms;
 
 import static eu.dissco.core.translator.TestUtils.MAPPER;
-import static eu.dissco.core.translator.TestUtils.SOURCE_SYSTEM_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.mockito.ArgumentMatchers.any;

@@ -1,16 +1,12 @@
 package eu.dissco.core.translator.service;
 
-import static eu.dissco.core.translator.TestUtils.SOURCE_SYSTEM_ID;
-import static eu.dissco.core.translator.TestUtils.SOURCE_SYSTEM_NAME;
 import static eu.dissco.core.translator.TestUtils.givenDigitalMedia;
 import static eu.dissco.core.translator.TestUtils.givenDigitalSpecimen;
-import static eu.dissco.core.translator.TestUtils.givenSourceSystemInformation;
 import static eu.dissco.core.translator.TestUtils.loadResourceFile;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
@@ -24,7 +20,6 @@ import eu.dissco.core.translator.domain.TranslatorJobResult;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.FdoProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
-import eu.dissco.core.translator.repository.SourceSystemRepository;
 import eu.dissco.core.translator.schema.DigitalMedia;
 import eu.dissco.core.translator.schema.DigitalSpecimen;
 import eu.dissco.core.translator.terms.BaseDigitalObjectDirector;
