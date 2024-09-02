@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import eu.dissco.core.translator.Profiles;
+import eu.dissco.core.translator.component.SourceSystemComponent;
 import eu.dissco.core.translator.database.jooq.enums.JobState;
 import eu.dissco.core.translator.domain.DigitalMediaEvent;
 import eu.dissco.core.translator.domain.DigitalMediaWrapper;
@@ -18,9 +19,7 @@ import eu.dissco.core.translator.exception.OrganisationException;
 import eu.dissco.core.translator.properties.DwcaProperties;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.FdoProperties;
-import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.DwcaRepository;
-import eu.dissco.core.translator.repository.SourceSystemRepository;
 import eu.dissco.core.translator.terms.BaseDigitalObjectDirector;
 import java.io.File;
 import java.io.FileInputStream;
@@ -73,12 +72,11 @@ public class DwcaService extends WebClientService {
   private static final String EXTENSIONS = "extensions";
 
   private final ObjectMapper mapper;
-  private final WebClientProperties webClientProperties;
   private final WebClient webClient;
   private final DwcaProperties dwcaProperties;
   private final KafkaService kafkaService;
   private final EnrichmentProperties enrichmentProperties;
-  private final SourceSystemRepository repository;
+  private final SourceSystemComponent sourceSystemComponent;
   private final DwcaRepository dwcaRepository;
   private final BaseDigitalObjectDirector digitalSpecimenDirector;
   private final FdoProperties fdoProperties;
@@ -88,7 +86,7 @@ public class DwcaService extends WebClientService {
 
   @Override
   public TranslatorJobResult retrieveData() {
-    var endpoint = repository.getEndpoint(webClientProperties.getSourceSystemId());
+    var endpoint = sourceSystemComponent.getSourceSystemEndpoint();
     Archive archive = null;
     var processedRecords = new AtomicInteger(0);
     try {
@@ -386,7 +384,7 @@ public class DwcaService extends WebClientService {
   }
 
   private String getTableName(ArchiveFile archiveFile) {
-    var fullSourceSystemId = webClientProperties.getSourceSystemId();
+    var fullSourceSystemId = sourceSystemComponent.getSourceSystemID();
     var minifiedSourceSystemId = fullSourceSystemId.substring(fullSourceSystemId.indexOf('/') + 1)
         .replace("-", "_");
     var tableName = "temp_" + (minifiedSourceSystemId + "_" + archiveFile.getRowType()

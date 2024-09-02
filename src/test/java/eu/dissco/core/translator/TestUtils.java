@@ -1,6 +1,7 @@
 package eu.dissco.core.translator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.dissco.core.translator.domain.SourceSystemInformation;
 import eu.dissco.core.translator.schema.DigitalMedia;
 import eu.dissco.core.translator.schema.DigitalSpecimen;
 import java.io.IOException;
@@ -15,6 +16,7 @@ public class TestUtils {
 
   public static final ObjectMapper MAPPER = new ObjectMapper().findAndRegisterModules();
   public static final String SOURCE_SYSTEM_ID = "20.5000.1025/GW0-TYL-YRU";
+  public static final String SOURCE_SYSTEM_NAME = "Naturalis Biodiversity Center (NL) - Vermes";
   public static final String ENDPOINT = "https://data.rbge.org.uk/service/dwca/data/darwin_core_living.zip";
 
   public static final String ORGANISATION_ID = "https://ror.org/02y22ws83";
@@ -100,5 +102,9 @@ public class TestUtils {
             NORMALISED_PHYSICAL_SPECIMEN_ID)),
         Arguments.of(new DigitalSpecimen().withOdsOrganisationID(ORGANISATION_ID))
     );
+  }
+
+  public static SourceSystemInformation givenSourceSystemInformation() {
+    return new SourceSystemInformation(SOURCE_SYSTEM_NAME, ENDPOINT);
   }
 }

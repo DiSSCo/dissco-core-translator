@@ -13,13 +13,13 @@ import static org.mockito.Mockito.times;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.dissco.core.translator.component.SourceSystemComponent;
 import eu.dissco.core.translator.database.jooq.enums.JobState;
 import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
 import eu.dissco.core.translator.domain.TranslatorJobResult;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.FdoProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
-import eu.dissco.core.translator.repository.SourceSystemRepository;
 import eu.dissco.core.translator.schema.DigitalMedia;
 import eu.dissco.core.translator.schema.DigitalSpecimen;
 import eu.dissco.core.translator.terms.BaseDigitalObjectDirector;
@@ -52,7 +52,7 @@ class BioCaseServiceTest {
   @Mock
   private WebClientProperties properties;
   @Mock
-  private SourceSystemRepository repository;
+  private SourceSystemComponent sourceSystemComponent;
   @Mock
   private RequestHeadersUriSpec headersSpec;
   @Mock
@@ -74,7 +74,7 @@ class BioCaseServiceTest {
     var configuration = new Configuration(Configuration.VERSION_2_3_31);
     configuration.setTemplateLoader(
         new FileTemplateLoader(new ClassPathResource("templates").getFile()));
-    service = new BioCaseService(mapper, properties, webClient, repository, configuration, factory,
+    service = new BioCaseService(mapper, properties, webClient, sourceSystemComponent, configuration, factory,
         kafkaService, enrichmentProperties, digitalSpecimenDirector, fdoProperties);
 
     // Given
@@ -85,8 +85,7 @@ class BioCaseServiceTest {
   void testRetrieveData206() throws Exception {
     // Given
     var expectedResult = new TranslatorJobResult(JobState.COMPLETED, 99);
-    given(properties.getSourceSystemId()).willReturn("ABC-DDD-ASD");
-    given(repository.getEndpoint(anyString())).willReturn("https://endpoint.com");
+    given(sourceSystemComponent.getSourceSystemEndpoint()).willReturn("https://endpoint.com");
     given(responseSpec.bodyToMono(any(Class.class))).willReturn(
             Mono.just(loadResourceFile("biocase/geocase-record-dropped.xml")))
         .willReturn(Mono.just(loadResourceFile("biocase/biocase-206-response.xml")));
@@ -109,8 +108,7 @@ class BioCaseServiceTest {
   void testRetrieveDataWithMedia206() throws Exception {
     // Given
     var expectedResult = new TranslatorJobResult(JobState.COMPLETED, 100);
-    given(properties.getSourceSystemId()).willReturn("ABC-DDD-ASD");
-    given(repository.getEndpoint(anyString())).willReturn("https://endpoint.com");
+    given(sourceSystemComponent.getSourceSystemEndpoint()).willReturn("https://endpoint.com");
     given(responseSpec.bodyToMono(any(Class.class))).willReturn(
         Mono.just(loadResourceFile("biocase/biocase-206-with-media.xml")));
     given(properties.getItemsPerRequest()).willReturn(101);
@@ -128,7 +126,7 @@ class BioCaseServiceTest {
     // Then
     assertThat(result).isEqualTo(expectedResult);
     then(webClient).should(times(1)).get();
-    then(kafkaService).should(times(100)).sendMessage( any(
+    then(kafkaService).should(times(100)).sendMessage(any(
         DigitalSpecimenEvent.class));
   }
 
@@ -136,8 +134,7 @@ class BioCaseServiceTest {
   void testRetrieveDataInvalidMedia() throws Exception {
     // Given
     var expectedResult = new TranslatorJobResult(JobState.COMPLETED, 1);
-    given(properties.getSourceSystemId()).willReturn("ABC-DDD-ASD");
-    given(repository.getEndpoint(anyString())).willReturn("https://endpoint.com");
+    given(sourceSystemComponent.getSourceSystemEndpoint()).willReturn("https://endpoint.com");
     given(responseSpec.bodyToMono(any(Class.class))).willReturn(
         Mono.just(loadResourceFile("biocase/biocase-206-with-invalid-media.xml")));
     given(properties.getItemsPerRequest()).willReturn(101);
@@ -163,8 +160,7 @@ class BioCaseServiceTest {
   void testRetrieveDataInvalidSpecimen(DigitalSpecimen digitalSpecimen) throws Exception {
     // Given
     var expectedResult = new TranslatorJobResult(JobState.FAILED, 0);
-    given(properties.getSourceSystemId()).willReturn("ABC-DDD-ASD");
-    given(repository.getEndpoint(anyString())).willReturn("https://endpoint.com");
+    given(sourceSystemComponent.getSourceSystemEndpoint()).willReturn("https://endpoint.com");
     given(responseSpec.bodyToMono(any(Class.class))).willReturn(
         Mono.just(loadResourceFile("biocase/biocase-206-with-media.xml")));
     given(properties.getItemsPerRequest()).willReturn(101);

@@ -13,6 +13,7 @@ import efg.MineralRockIdentifiedType;
 import efg.MultiMediaObject;
 import efg.Unit;
 import eu.dissco.core.translator.Profiles;
+import eu.dissco.core.translator.component.SourceSystemComponent;
 import eu.dissco.core.translator.database.jooq.enums.JobState;
 import eu.dissco.core.translator.domain.BioCasePartResult;
 import eu.dissco.core.translator.domain.DigitalMediaEvent;
@@ -26,7 +27,6 @@ import eu.dissco.core.translator.exception.DisscoEfgParsingException;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.FdoProperties;
 import eu.dissco.core.translator.properties.WebClientProperties;
-import eu.dissco.core.translator.repository.SourceSystemRepository;
 import eu.dissco.core.translator.terms.BaseDigitalObjectDirector;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
@@ -76,7 +76,7 @@ public class BioCaseService extends WebClientService {
   private final ObjectMapper mapper;
   private final WebClientProperties webClientProperties;
   private final WebClient webClient;
-  private final SourceSystemRepository repository;
+  private final SourceSystemComponent sourceSystemComponent;
   private final Configuration configuration;
   private final XMLInputFactory xmlFactory;
   private final KafkaService kafkaService;
@@ -94,7 +94,7 @@ public class BioCaseService extends WebClientService {
 
   @Override
   public TranslatorJobResult retrieveData() {
-    var uri = repository.getEndpoint(webClientProperties.getSourceSystemId());
+    var uri = sourceSystemComponent.getSourceSystemEndpoint();
     var templateProperties = getTemplateProperties();
     configuration.setNumberFormat("computer");
     var finished = false;

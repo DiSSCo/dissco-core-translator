@@ -1,6 +1,7 @@
 package eu.dissco.core.translator.service;
 
 import static eu.dissco.core.translator.TestUtils.MAPPER;
+import static eu.dissco.core.translator.TestUtils.SOURCE_SYSTEM_ID;
 import static eu.dissco.core.translator.TestUtils.givenDigitalMedia;
 import static eu.dissco.core.translator.TestUtils.givenDigitalSpecimen;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -17,6 +18,7 @@ import static org.mockito.Mockito.times;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import eu.dissco.core.translator.TestUtils;
+import eu.dissco.core.translator.component.SourceSystemComponent;
 import eu.dissco.core.translator.database.jooq.enums.JobState;
 import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
 import eu.dissco.core.translator.domain.TranslatorJobResult;
@@ -24,9 +26,7 @@ import eu.dissco.core.translator.exception.DisscoRepositoryException;
 import eu.dissco.core.translator.properties.DwcaProperties;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.FdoProperties;
-import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.repository.DwcaRepository;
-import eu.dissco.core.translator.repository.SourceSystemRepository;
 import eu.dissco.core.translator.schema.DigitalMedia;
 import eu.dissco.core.translator.schema.DigitalSpecimen;
 import eu.dissco.core.translator.terms.BaseDigitalObjectDirector;
@@ -62,8 +62,6 @@ class DwcaServiceTest {
 
   private final XMLInputFactory factory = XMLInputFactory.newFactory();
   @Mock
-  private WebClientProperties webClientProperties;
-  @Mock
   private WebClient webClient;
   @Mock
   private DwcaProperties dwcaProperties;
@@ -78,7 +76,7 @@ class DwcaServiceTest {
   @Mock
   private EnrichmentProperties enrichmentProperties;
   @Mock
-  private SourceSystemRepository repository;
+  private SourceSystemComponent sourceSystemComponent;
   @Mock
   private DwcaRepository dwcaRepository;
   @Mock
@@ -96,12 +94,12 @@ class DwcaServiceTest {
 
   @BeforeEach
   void setup() {
-    this.service = new DwcaService(MAPPER, webClientProperties, webClient, dwcaProperties,
-        kafkaService, enrichmentProperties, repository, dwcaRepository,
+    this.service = new DwcaService(MAPPER, webClient, dwcaProperties,
+        kafkaService, enrichmentProperties, sourceSystemComponent, dwcaRepository,
         digitalSpecimenDirector, fdoProperties, factory);
 
     // Given
-    givenEndpoint();
+    givenSourceSystem();
   }
 
   @Test
@@ -137,7 +135,7 @@ class DwcaServiceTest {
     var expected = new TranslatorJobResult(JobState.FAILED, 0);
     givenDWCA("/dwca-rbins.zip");
     doThrow(new DisscoRepositoryException("", new Exception())).when(dwcaRepository)
-        .postRecords(eq("temp_abc_ddd_asd_occurrence"), anyList());
+        .postRecords(eq("temp_gw0_tyl_yru_occurrence"), anyList());
 
     // When
     var result = service.retrieveData();
@@ -168,7 +166,7 @@ class DwcaServiceTest {
     assertThat(result).isEqualTo(expected);
     then(dwcaRepository).should(times(2)).createTable(anyString());
     then(dwcaRepository).should(times(2)).postRecords(anyString(), anyList());
-    then(kafkaService).should(times(9)).sendMessage( any(
+    then(kafkaService).should(times(9)).sendMessage(any(
         DigitalSpecimenEvent.class));
     assertThat(captor.getValue().get("eml:license")).isNull();
     assertThat(captor.getValue().get("eml:title")).isNull();
@@ -242,9 +240,9 @@ class DwcaServiceTest {
     var expected = new TranslatorJobResult(JobState.COMPLETED, 19);
     givenDWCA("/dwca-kew-gbif-media.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(19));
-    given(dwcaRepository.getRecords(anyList(), eq("temp_abc_ddd_asd_identification"))).willReturn(
+    given(dwcaRepository.getRecords(anyList(), eq("temp_gw0_tyl_yru_identification"))).willReturn(
         Map.of());
-    given(dwcaRepository.getRecords(anyList(), eq("temp_abc_ddd_asd_multimedia"))).willReturn(
+    given(dwcaRepository.getRecords(anyList(), eq("temp_gw0_tyl_yru_multimedia"))).willReturn(
         givenImageMap(19));
     given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
         .willReturn(givenDigitalSpecimen());
@@ -283,7 +281,7 @@ class DwcaServiceTest {
     givenDWCA("/dwca-naturalis-ac-media.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(14));
     given(dwcaRepository.getRecords(anyList(),
-        eq("temp_abc_ddd_asd_multimedia"))).willReturn(givenImageMap(14));
+        eq("temp_gw0_tyl_yru_multimedia"))).willReturn(givenImageMap(14));
     given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
         .willReturn(givenDigitalSpecimen());
     given(digitalSpecimenDirector.assembleDigitalMedia(anyBoolean(), any(JsonNode.class),
@@ -310,7 +308,7 @@ class DwcaServiceTest {
     givenDWCA("/dwca-invalid-ac-media.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(1));
     given(dwcaRepository.getRecords(anyList(),
-        eq("temp_abc_ddd_asd_multimedia"))).willReturn(givenImageMap(1));
+        eq("temp_gw0_tyl_yru_multimedia"))).willReturn(givenImageMap(1));
     given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
         .willReturn(givenDigitalSpecimen());
     given(digitalSpecimenDirector.assembleDigitalMedia(anyBoolean(), any(JsonNode.class),
@@ -386,9 +384,9 @@ class DwcaServiceTest {
     return givenMap;
   }
 
-  private void givenEndpoint() {
-    given(webClientProperties.getSourceSystemId()).willReturn("ABC-DDD-ASD");
-    given(repository.getEndpoint(anyString())).willReturn("https://endpoint.com");
+  private void givenSourceSystem() {
+    given(sourceSystemComponent.getSourceSystemEndpoint()).willReturn("https://endpoint.com");
+    given(sourceSystemComponent.getSourceSystemID()).willReturn(SOURCE_SYSTEM_ID);
   }
 
   private void givenDWCA(String file) {
