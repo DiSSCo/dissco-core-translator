@@ -8,7 +8,7 @@ import static eu.dissco.core.translator.TestUtils.TERM_MAPPING;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
-import eu.dissco.core.translator.properties.WebClientProperties;
+import eu.dissco.core.translator.properties.ApplicationProperties;
 import eu.dissco.core.translator.repository.DataMappingRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,7 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class DataMappingComponentTest {
 
   @Mock
-  private WebClientProperties properties;
+  private ApplicationProperties properties;
   @Mock
   private DataMappingRepository repository;
 

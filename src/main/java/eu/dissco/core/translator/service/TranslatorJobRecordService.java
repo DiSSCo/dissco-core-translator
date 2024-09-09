@@ -3,7 +3,7 @@ package eu.dissco.core.translator.service;
 import eu.dissco.core.translator.database.jooq.enums.ErrorCode;
 import eu.dissco.core.translator.database.jooq.enums.JobState;
 import eu.dissco.core.translator.domain.TranslatorJobResult;
-import eu.dissco.core.translator.properties.WebClientProperties;
+import eu.dissco.core.translator.properties.ApplicationProperties;
 import eu.dissco.core.translator.repository.TranslatorJobRecordRepository;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 public class TranslatorJobRecordService {
 
   private final TranslatorJobRecordRepository repository;
-  private final WebClientProperties properties;
+  private final ApplicationProperties properties;
 
   public UUID createNewJobRecord() {
     var jobId = UUID.randomUUID();

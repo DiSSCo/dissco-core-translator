@@ -23,6 +23,7 @@ import eu.dissco.core.translator.database.jooq.enums.JobState;
 import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
 import eu.dissco.core.translator.domain.TranslatorJobResult;
 import eu.dissco.core.translator.exception.DisscoRepositoryException;
+import eu.dissco.core.translator.properties.ApplicationProperties;
 import eu.dissco.core.translator.properties.DwcaProperties;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.FdoProperties;
@@ -44,6 +45,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -83,6 +86,7 @@ class DwcaServiceTest {
   private BaseDigitalObjectDirector digitalSpecimenDirector;
   @Mock
   private FdoProperties fdoProperties;
+  private final ApplicationProperties applicationProperties = new ApplicationProperties();
 
 
   private DwcaService service;
@@ -96,16 +100,22 @@ class DwcaServiceTest {
   void setup() {
     this.service = new DwcaService(MAPPER, webClient, dwcaProperties,
         kafkaService, enrichmentProperties, sourceSystemComponent, dwcaRepository,
-        digitalSpecimenDirector, fdoProperties, factory);
+        digitalSpecimenDirector, fdoProperties, applicationProperties, factory);
 
     // Given
     givenSourceSystem();
   }
 
-  @Test
-  void testRetrieveData() throws Exception {
+  @ParameterizedTest
+  @ValueSource(ints = {1, 6, 9})
+  @NullSource
+  void testRetrieveData(Integer processedRecords) throws Exception {
     // Given
-    var expected = new TranslatorJobResult(JobState.COMPLETED, 9);
+    applicationProperties.setMaxItems(processedRecords);
+    if (processedRecords == null) {
+      processedRecords = 9;
+    }
+    var expected = new TranslatorJobResult(JobState.COMPLETED, processedRecords);
     var captor = ArgumentCaptor.forClass(JsonNode.class);
     givenDWCA("/dwca-rbins.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(9));
@@ -120,7 +130,7 @@ class DwcaServiceTest {
     assertThat(result).isEqualTo(expected);
     then(dwcaRepository).should(times(2)).createTable(anyString());
     then(dwcaRepository).should(times(2)).postRecords(anyString(), anyList());
-    then(kafkaService).should(times(9)).sendMessage(any(
+    then(kafkaService).should(times(processedRecords)).sendMessage(any(
         DigitalSpecimenEvent.class));
     assertThat(captor.getValue().get("eml:license").asText()).isEqualTo(
         "http://creativecommons.org/licenses/by-nc/4.0/legalcode");

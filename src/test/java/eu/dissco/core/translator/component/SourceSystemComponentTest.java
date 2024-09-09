@@ -8,7 +8,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 
-import eu.dissco.core.translator.properties.WebClientProperties;
+import eu.dissco.core.translator.properties.ApplicationProperties;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,7 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class SourceSystemComponentTest {
 
   @Mock
-  private WebClientProperties properties;
+  private ApplicationProperties properties;
   @Mock
   private SourceSystemRepository repository;
 

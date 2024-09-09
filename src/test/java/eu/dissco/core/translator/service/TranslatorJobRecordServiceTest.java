@@ -9,7 +9,7 @@ import eu.dissco.core.translator.TestUtils;
 import eu.dissco.core.translator.database.jooq.enums.ErrorCode;
 import eu.dissco.core.translator.database.jooq.enums.JobState;
 import eu.dissco.core.translator.domain.TranslatorJobResult;
-import eu.dissco.core.translator.properties.WebClientProperties;
+import eu.dissco.core.translator.properties.ApplicationProperties;
 import eu.dissco.core.translator.repository.TranslatorJobRecordRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ class TranslatorJobRecordServiceTest {
   @Mock
   private TranslatorJobRecordRepository repository;
   @Mock
-  private WebClientProperties properties;
+  private ApplicationProperties properties;
 
   private TranslatorJobRecordService service;
 

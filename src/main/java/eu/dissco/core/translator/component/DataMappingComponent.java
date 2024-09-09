@@ -1,7 +1,7 @@
 package eu.dissco.core.translator.component;
 
 import eu.dissco.core.translator.exception.DisscoRepositoryException;
-import eu.dissco.core.translator.properties.WebClientProperties;
+import eu.dissco.core.translator.properties.ApplicationProperties;
 import eu.dissco.core.translator.repository.DataMappingRepository;
 import jakarta.annotation.PostConstruct;
 import java.util.HashMap;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class DataMappingComponent {
 
-  private final WebClientProperties properties;
+  private final ApplicationProperties properties;
   private final DataMappingRepository repository;
 
   @Getter
