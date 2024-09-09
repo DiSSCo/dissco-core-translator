@@ -17,9 +17,9 @@ import eu.dissco.core.translator.component.SourceSystemComponent;
 import eu.dissco.core.translator.database.jooq.enums.JobState;
 import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
 import eu.dissco.core.translator.domain.TranslatorJobResult;
+import eu.dissco.core.translator.properties.ApplicationProperties;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.FdoProperties;
-import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.schema.DigitalMedia;
 import eu.dissco.core.translator.schema.DigitalSpecimen;
 import eu.dissco.core.translator.terms.BaseDigitalObjectDirector;
@@ -32,6 +32,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -49,8 +51,7 @@ class BioCaseServiceTest {
   private final ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
   @Mock
   private WebClient webClient;
-  @Mock
-  private WebClientProperties properties;
+  private final ApplicationProperties properties = new ApplicationProperties();
   @Mock
   private SourceSystemComponent sourceSystemComponent;
   @Mock
@@ -81,15 +82,20 @@ class BioCaseServiceTest {
     givenJsonWebclient();
   }
 
-  @Test
-  void testRetrieveData206() throws Exception {
+  @ParameterizedTest
+  @ValueSource(ints = {1, 50, 99})
+  @NullSource
+  void testRetrieveData206(Integer processedRecords) throws Exception {
     // Given
-    var expectedResult = new TranslatorJobResult(JobState.COMPLETED, 99);
+    properties.setMaxItems(processedRecords);
+    if (processedRecords == null) {
+      processedRecords = 99;
+    }
+    var expectedResult = new TranslatorJobResult(JobState.COMPLETED, processedRecords);
     given(sourceSystemComponent.getSourceSystemEndpoint()).willReturn("https://endpoint.com");
     given(responseSpec.bodyToMono(any(Class.class))).willReturn(
             Mono.just(loadResourceFile("biocase/geocase-record-dropped.xml")))
         .willReturn(Mono.just(loadResourceFile("biocase/biocase-206-response.xml")));
-    given(properties.getItemsPerRequest()).willReturn(100);
     given(fdoProperties.getDigitalSpecimenType()).willReturn("Doi of the digital specimen");
     given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
         .willReturn(givenDigitalSpecimen());
@@ -99,8 +105,12 @@ class BioCaseServiceTest {
 
     // Then
     assertThat(result).isEqualTo(expectedResult);
-    then(webClient).should(times(2)).get();
-    then(kafkaService).should(times(99)).sendMessage(any(
+    if (processedRecords == 99) {
+      then(webClient).should(times(2)).get();
+    } else {
+      then(webClient).should(times(1)).get();
+    }
+    then(kafkaService).should(times(processedRecords)).sendMessage(any(
         DigitalSpecimenEvent.class));
   }
 
@@ -111,7 +121,7 @@ class BioCaseServiceTest {
     given(sourceSystemComponent.getSourceSystemEndpoint()).willReturn("https://endpoint.com");
     given(responseSpec.bodyToMono(any(Class.class))).willReturn(
         Mono.just(loadResourceFile("biocase/biocase-206-with-media.xml")));
-    given(properties.getItemsPerRequest()).willReturn(101);
+    properties.setItemsPerRequest(101);
     given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
         .willReturn(givenDigitalSpecimen());
     given(fdoProperties.getDigitalSpecimenType()).willReturn("Doi of the digital specimen");
@@ -137,7 +147,7 @@ class BioCaseServiceTest {
     given(sourceSystemComponent.getSourceSystemEndpoint()).willReturn("https://endpoint.com");
     given(responseSpec.bodyToMono(any(Class.class))).willReturn(
         Mono.just(loadResourceFile("biocase/biocase-206-with-invalid-media.xml")));
-    given(properties.getItemsPerRequest()).willReturn(101);
+    properties.setItemsPerRequest(101);
     given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
         .willReturn(givenDigitalSpecimen());
     given(fdoProperties.getDigitalSpecimenType()).willReturn("Doi of the digital specimen");
@@ -163,7 +173,7 @@ class BioCaseServiceTest {
     given(sourceSystemComponent.getSourceSystemEndpoint()).willReturn("https://endpoint.com");
     given(responseSpec.bodyToMono(any(Class.class))).willReturn(
         Mono.just(loadResourceFile("biocase/biocase-206-with-media.xml")));
-    given(properties.getItemsPerRequest()).willReturn(101);
+    properties.setItemsPerRequest(101);
     given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
         .willReturn(digitalSpecimen);
 

@@ -16,6 +16,8 @@ import eu.dissco.core.translator.domain.TranslatorJobResult;
 import eu.dissco.core.translator.exception.DiSSCoDataException;
 import eu.dissco.core.translator.exception.DisscoRepositoryException;
 import eu.dissco.core.translator.exception.OrganisationException;
+import eu.dissco.core.translator.exception.ReachedMaximumLimitException;
+import eu.dissco.core.translator.properties.ApplicationProperties;
 import eu.dissco.core.translator.properties.DwcaProperties;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.FdoProperties;
@@ -80,6 +82,7 @@ public class DwcaService extends WebClientService {
   private final DwcaRepository dwcaRepository;
   private final BaseDigitalObjectDirector digitalSpecimenDirector;
   private final FdoProperties fdoProperties;
+  private final ApplicationProperties applicationProperties;
   private final XMLInputFactory xmlFactory;
   private final List<String> allowedBasisOfRecord = List.of("PRESERVEDSPECIMEN", "FOSSIL", "OTHER",
       "ROCK", "MINERAL", "METEORITE", "FOSSILSPECIMEN", "LIVINGSPECIMEN", "MATERIALSAMPLE");
@@ -128,15 +131,21 @@ public class DwcaService extends WebClientService {
       throws JsonProcessingException {
     var batches = prepareChunks(ids, 10000);
     var optionalEmlData = addDatasetMeta(archive.getMetadataLocationFile());
-    for (var batch : batches) {
-      log.info("Starting to get records for: core");
-      var specimenData = dwcaRepository.getCoreRecords(batch, getTableName(archive.getCore()));
-      log.info("Got specimen batch: {}", batch.size());
-      addExtensionsToSpecimen(archive, batch, specimenData);
-      log.info("Start translation and publishing of batch: {}", specimenData.values().size());
-      processDigitalSpecimen(specimenData.values(), optionalEmlData, processedRecords);
+    try {
+      for (var batch : batches) {
+        log.info("Starting to get records for: core");
+        var specimenData = dwcaRepository.getCoreRecords(batch, getTableName(archive.getCore()));
+        log.info("Got specimen batch: {}", batch.size());
+        addExtensionsToSpecimen(archive, batch, specimenData);
+        log.info("Start translation and publishing of batch: {}", specimenData.values().size());
+        processDigitalSpecimen(specimenData.values(), optionalEmlData, processedRecords);
+      }
+    } catch (ReachedMaximumLimitException e) {
+      log.warn("Reached maximum limit of {} processed specimens out of {} specimens available",
+          applicationProperties.getMaxItems(), ids.size());
+      return;
     }
-    log.info("Finished processing {} specimens", ids.size());
+    log.info("Finished processing all {} specimens available", ids.size());
   }
 
   private void addExtensionsToSpecimen(Archive archive, List<String> batch,
@@ -161,9 +170,13 @@ public class DwcaService extends WebClientService {
 
   private void processDigitalSpecimen(Collection<ObjectNode> fullRecords,
       Optional<Map<String, String>> optionalEmlData, AtomicInteger processedRecords)
-      throws JsonProcessingException {
+      throws JsonProcessingException, ReachedMaximumLimitException {
     for (var fullRecord : fullRecords) {
       if (fullRecord != null) {
+        if (applicationProperties.getMaxItems() != null
+            && processedRecords.get() >= applicationProperties.getMaxItems()) {
+          throw new ReachedMaximumLimitException();
+        }
         try {
           optionalEmlData.ifPresent(emlData -> addEmlDataToRecord(fullRecord, emlData));
           var digitalObjects = createDigitalObjects(fullRecord);

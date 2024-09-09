@@ -1,6 +1,6 @@
 package eu.dissco.core.translator.component;
 
-import eu.dissco.core.translator.properties.WebClientProperties;
+import eu.dissco.core.translator.properties.ApplicationProperties;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
@@ -13,9 +13,9 @@ public class SourceSystemComponent {
   private final String sourceSystemName;
   private final String sourceSystemEndpoint;
 
-  public SourceSystemComponent(WebClientProperties webClientProperties,
+  public SourceSystemComponent(ApplicationProperties applicationProperties,
       SourceSystemRepository repository) {
-    this.sourceSystemID = webClientProperties.getSourceSystemId();
+    this.sourceSystemID = applicationProperties.getSourceSystemId();
     var sourceSystemInformation = repository.getSourceSystem(this.sourceSystemID);
     if (sourceSystemInformation == null) {
       throw new IllegalArgumentException("Source System Identifier: " + sourceSystemID + " not found");

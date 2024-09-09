@@ -24,9 +24,10 @@ import eu.dissco.core.translator.domain.Enrichment;
 import eu.dissco.core.translator.domain.TranslatorJobResult;
 import eu.dissco.core.translator.exception.DiSSCoDataException;
 import eu.dissco.core.translator.exception.DisscoEfgParsingException;
+import eu.dissco.core.translator.exception.ReachedMaximumLimitException;
+import eu.dissco.core.translator.properties.ApplicationProperties;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.FdoProperties;
-import eu.dissco.core.translator.properties.WebClientProperties;
 import eu.dissco.core.translator.terms.BaseDigitalObjectDirector;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
@@ -74,7 +75,7 @@ public class BioCaseService extends WebClientService {
       "METEORITESPECIMEN", "METEORITE SPECIMEN", "HERBARIUM SHEET", "HERBARIUMSHEET", "DRIED");
 
   private final ObjectMapper mapper;
-  private final WebClientProperties webClientProperties;
+  private final ApplicationProperties applicationProperties;
   private final WebClient webClient;
   private final SourceSystemComponent sourceSystemComponent;
   private final Configuration configuration;
@@ -146,10 +147,10 @@ public class BioCaseService extends WebClientService {
         }
         retrieveUnitData(xmlEventReader, processedRecords);
       }
-      if ((recordCount + recordDropped) % webClientProperties.getItemsPerRequest() != 0) {
+      if ((recordCount + recordDropped) % applicationProperties.getItemsPerRequest() != 0) {
         log.info("Received records {} does not match requested records {}. "
                 + "All records have been processed", (recordCount + recordDropped),
-            webClientProperties.getItemsPerRequest());
+            applicationProperties.getItemsPerRequest());
         return new BioCasePartResult(true, false);
       } else {
         return new BioCasePartResult(false, false);
@@ -157,11 +158,15 @@ public class BioCaseService extends WebClientService {
     } catch (XMLStreamException | JAXBException e) {
       log.error("Error converting response tot XML", e);
       return new BioCasePartResult(true, true);
+    } catch (ReachedMaximumLimitException e) {
+      log.warn("Reached maximum limit of {} processed specimens",
+          applicationProperties.getMaxItems());
+      return new BioCasePartResult(true, false);
     }
   }
 
   private void retrieveUnitData(XMLEventReader xmlEventReader, AtomicInteger processedRecords)
-      throws XMLStreamException, JAXBException {
+      throws XMLStreamException, JAXBException, ReachedMaximumLimitException {
     mapper.setSerializationInclusion(Include.NON_NULL);
     if (isStartElement(xmlEventReader.peek(), "DataSets")) {
       mapABCD206(xmlEventReader, processedRecords);
@@ -169,12 +174,16 @@ public class BioCaseService extends WebClientService {
   }
 
   private void mapABCD206(XMLEventReader xmlEventReader, AtomicInteger processedRecords)
-      throws JAXBException {
+      throws JAXBException, ReachedMaximumLimitException {
     var context = JAXBContext.newInstance(DataSets.class);
     var datasetsMarshaller = context.createUnmarshaller().unmarshal(xmlEventReader, DataSets.class);
     var datasets = datasetsMarshaller.getValue().getDataSet().get(0);
     for (var unit : datasets.getUnits().getUnit()) {
       try {
+        if (applicationProperties.getMaxItems() != null
+            && processedRecords.get() >= applicationProperties.getMaxItems()) {
+          throw new ReachedMaximumLimitException();
+        }
         processUnit(datasets, unit, processedRecords);
       } catch (DisscoEfgParsingException | JsonProcessingException e) {
         log.error("Unit could not be processed due to error", e);
@@ -406,7 +415,7 @@ public class BioCaseService extends WebClientService {
 
   private Map<String, Object> getTemplateProperties() {
     var map = new HashMap<String, Object>();
-    map.put(LIMIT, webClientProperties.getItemsPerRequest());
+    map.put(LIMIT, applicationProperties.getItemsPerRequest());
     map.put(START_AT, 0);
     return map;
   }
