@@ -9,44 +9,45 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class CreatedTest {
+class CommentsTest {
 
-  private final CreateDate created = new CreateDate();
+  private final Comments comments = new Comments();
+  private final String commentsString = "This object is not yet published";
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
     var unit = MAPPER.createObjectNode();
-    unit.put("xmp:CreateDate", MOCK_DATE);
+    unit.put("ac:comments", commentsString);
 
     // When
-    var result = created.retrieveFromDWCA(unit);
+    var result = comments.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(MOCK_DATE);
+    assertThat(result).isEqualTo(commentsString);
   }
 
   @Test
   void testRetrieveFromAbcd() {
     // Given
     var unit = MAPPER.createObjectNode();
-    unit.put("abcd:createdDate", MOCK_DATE);
+    unit.put("abcd:comment/value", commentsString);
 
     // When
-    var result = created.retrieveFromABCD(unit);
+    var result = comments.retrieveFromABCD(unit);
 
     // Then
-    assertThat(result).isEqualTo(MOCK_DATE);
+    assertThat(result).isEqualTo(commentsString);
   }
 
 
   @Test
   void testGetTerm() {
     // When
-    var result = created.getTerm();
+    var result = comments.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(CreateDate.TERM);
+    assertThat(result).isEqualTo(Comments.TERM);
   }
 
 }

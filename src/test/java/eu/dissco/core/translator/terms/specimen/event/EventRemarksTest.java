@@ -8,45 +8,45 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class OccurrenceRemarksTest {
+class EventRemarksTest {
 
-  private static final String OCCURRENCE_REMARKS_STRING = "Remarks about the event";
+  private static final String EVENT_REMARKS_STRING = "Remarks about the event";
 
-  private final OccurrenceRemarks occurrenceRemarks = new OccurrenceRemarks();
+  private final EventRemarks eventRemarks = new EventRemarks();
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
     var unit = MAPPER.createObjectNode();
-    unit.put("dwc:occurrenceRemarks", OCCURRENCE_REMARKS_STRING);
+    unit.put("dwc:eventRemarks", EVENT_REMARKS_STRING);
 
     // When
-    var result = occurrenceRemarks.retrieveFromDWCA(unit);
+    var result = eventRemarks.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(OCCURRENCE_REMARKS_STRING);
+    assertThat(result).isEqualTo(EVENT_REMARKS_STRING);
   }
 
   @Test
   void testRetrieveFromABCD() {
     // Given
     var unit = MAPPER.createObjectNode();
-    unit.put("abcd:notes/value", OCCURRENCE_REMARKS_STRING);
+    unit.put("abcd:notes/value", EVENT_REMARKS_STRING);
 
     // When
-    var result = occurrenceRemarks.retrieveFromABCD(unit);
+    var result = eventRemarks.retrieveFromABCD(unit);
 
     // Then
-    assertThat(result).isEqualTo(OCCURRENCE_REMARKS_STRING);
+    assertThat(result).isEqualTo(EVENT_REMARKS_STRING);
   }
 
   @Test
   void testGetTerm() {
     // When
-    var result = occurrenceRemarks.getTerm();
+    var result = eventRemarks.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(OccurrenceRemarks.TERM);
+    assertThat(result).isEqualTo(EventRemarks.TERM);
   }
 
 }

@@ -1,12 +1,14 @@
-package eu.dissco.core.translator.terms.specimen.identification.taxonomy;
+package eu.dissco.core.translator.terms.media;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import eu.dissco.core.translator.terms.Term;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
-public class NameAccordingTo extends AbstractTaxonomy {
+@Slf4j
+public class VariantDescription extends Term {
 
-  public static final String TERM = DWC_PREFIX + "nameAccordingTo";
-
+  public static final String TERM = "ac:variantDescription";
   private final List<String> dwcaTerms = List.of(TERM);
 
   @Override

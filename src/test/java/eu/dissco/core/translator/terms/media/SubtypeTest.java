@@ -8,31 +8,32 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class RightsHolderTest {
+class SubtypeTest {
 
-  private final RightsHolder rightsHolder = new RightsHolder();
+  private final Subtype subtype = new Subtype();
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var rightsHolderString = "The rightsHolder";
+    var subtypeString = "http://rs.tdwg.org/acsubtype/values/Photograph";
     var unit = MAPPER.createObjectNode();
-    unit.put("dcterms:rightsHolder", rightsHolderString);
+    unit.put("ac:subtype", subtypeString);
 
     // When
-    var result = rightsHolder.retrieveFromDWCA(unit);
+    var result = this.subtype.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(rightsHolderString);
+    assertThat(result).isEqualTo(subtypeString);
   }
+
 
   @Test
   void testGetTerm() {
     // When
-    var result = rightsHolder.getTerm();
+    var result = subtype.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(RightsHolder.TERM);
+    assertThat(result).isEqualTo(Subtype.TERM);
   }
 
 }

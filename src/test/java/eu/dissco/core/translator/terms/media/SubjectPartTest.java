@@ -8,31 +8,32 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class RightsTest {
+class SubjectPartTest {
 
-  private final Rights rights = new Rights();
+  private final SubjectPart subjectPart = new SubjectPart();
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var rightsString = "Some rights";
+    var subjectPartString = "http://rs.tdwg.org/acpart/values/p0027";
     var unit = MAPPER.createObjectNode();
-    unit.put("dc:rights", rightsString);
+    unit.put("ac:subjectPart", subjectPartString);
 
     // When
-    var result = rights.retrieveFromDWCA(unit);
+    var result = this.subjectPart.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(rightsString);
+    assertThat(result).isEqualTo(subjectPartString);
   }
+
 
   @Test
   void testGetTerm() {
     // When
-    var result = rights.getTerm();
+    var result = subjectPart.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(Rights.TERM);
+    assertThat(result).isEqualTo(SubjectPart.TERM);
   }
 
 }

@@ -8,31 +8,32 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class AccessRightsTest {
+class SubtypeLiteralTest {
 
-  private final AccessRights accessRights = new AccessRights();
+  private final SubtypeLiteral subtypeLiteral = new SubtypeLiteral();
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var accessRightsString = "Description of accessRights";
+    var subtypeLiteralString = "Photograph";
     var unit = MAPPER.createObjectNode();
-    unit.put("dcterms:accessRights", accessRightsString);
+    unit.put("ac:subtypeLiteral", subtypeLiteralString);
 
     // When
-    var result = accessRights.retrieveFromDWCA(unit);
+    var result = this.subtypeLiteral.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(accessRightsString);
+    assertThat(result).isEqualTo(subtypeLiteralString);
   }
+
 
   @Test
   void testGetTerm() {
     // When
-    var result = accessRights.getTerm();
+    var result = subtypeLiteral.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(AccessRights.TERM);
+    assertThat(result).isEqualTo(SubtypeLiteral.TERM);
   }
 
 }

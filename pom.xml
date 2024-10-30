@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.3.3</version>
+    <version>3.3.5</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
   <groupId>eu.dissco.core</groupId>
@@ -180,8 +180,8 @@
         <configuration>
           <mainClass>eu.dissco.core.translator.maven.MavenRunner</mainClass>
           <arguments>
-            <argument>https://schemas.dissco.tech/schemas/fdo-type/digital-specimen/0.3.0/digital-specimen.json</argument>
-            <argument>https://schemas.dissco.tech/schemas/fdo-type/digital-media/0.3.0/digital-media.json</argument>
+            <argument>https://schemas.dissco.tech/schemas/fdo-type/digital-specimen/0.4.0/digital-specimen.json</argument>
+            <argument>https://schemas.dissco.tech/schemas/fdo-type/digital-media/0.4.0/digital-media.json</argument>
           </arguments>
         </configuration>
       </plugin>
@@ -286,13 +286,14 @@
       <plugin>
         <groupId>org.jsonschema2pojo</groupId>
         <artifactId>jsonschema2pojo-maven-plugin</artifactId>
-        <version>1.2.1</version>
+        <version>1.2.2</version>
         <configuration>
           <sourceDirectory>${basedir}/src/main/resources/json-schema/</sourceDirectory>
           <targetPackage>eu.dissco.core.translator.schema</targetPackage>
           <generateBuilders>true</generateBuilders>
           <includeDynamicBuilders>true</includeDynamicBuilders>
           <includeAdditionalProperties>false</includeAdditionalProperties>
+          <inclusionLevel>NON_EMPTY</inclusionLevel>
         </configuration>
         <executions>
           <execution>

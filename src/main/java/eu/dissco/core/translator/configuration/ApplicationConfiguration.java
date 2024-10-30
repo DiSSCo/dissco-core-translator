@@ -2,6 +2,7 @@ package eu.dissco.core.translator.configuration;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import java.time.Instant;
 import java.util.Date;
@@ -21,7 +22,6 @@ public class ApplicationConfiguration {
     dateModule.addDeserializer(Instant.class, new InstantDeserializer());
     dateModule.addSerializer(Date.class, new DateSerializer());
     mapper.registerModule(dateModule);
-    mapper.setSerializationInclusion(Include.NON_NULL);
     return mapper;
   }
 }

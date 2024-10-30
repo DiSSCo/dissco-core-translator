@@ -4,11 +4,17 @@ import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
-public class ReferenceIRI extends Term {
+public class CitationDescription extends Term {
 
-  public static final String TERM = "dcterms:identifier";
+  public static final String TERM = "dcterms:description";
 
-  private final List<String> abcdTerms = List.of("uri");
+  private final List<String> dwcaTerms = List.of(TERM);
+  private final List<String> abcdTerms = List.of("citationDetail");
+
+  @Override
+  public String retrieveFromDWCA(JsonNode unit) {
+    return super.searchJsonForTerm(unit, dwcaTerms);
+  }
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
@@ -19,6 +25,4 @@ public class ReferenceIRI extends Term {
   public String getTerm() {
     return TERM;
   }
-
-
 }

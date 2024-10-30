@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.dissco.core.translator.schema.Agent;
 import eu.dissco.core.translator.schema.Agent.Type;
 import eu.dissco.core.translator.schema.Assertion;
+import eu.dissco.core.translator.schema.OdsHasRole;
 import eu.dissco.core.translator.terms.Term;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,15 +45,19 @@ public class EventAssertions extends Term {
       JsonNode assertionNode) {
     return new Assertion()
         .withType("ods:Assertion")
-        .withOdsAssertionByAgent(new Agent()
-            .withType(Type.SCHEMA_PERSON)
-            .withSchemaName(super.searchJsonForTerm(assertionNode, List.of("measurementOrFactAtomised/measuredBy"))))
+        .withOdsHasAgents(
+            List.of(new Agent()
+                .withType(Type.SCHEMA_PERSON)
+                .withSchemaName(super.searchJsonForTerm(assertionNode,
+                    List.of("measurementOrFactAtomised/measuredBy")))
+                .withOdsHasRoles(List.of(new OdsHasRole().withSchemaRoleName("measurer"))))
+        )
         .withDwcMeasurementUnit(super.searchJsonForTerm(assertionNode,
             List.of("measurementOrFactAtomised/unitOfMeasurement")))
         .withDwcMeasurementType(
             super.searchJsonForTerm(assertionNode,
                 List.of("measurementOrFactAtomised/parameter/value")))
-        .withOdsAssertionRemarks(
+        .withDwcMeasurementRemarks(
             super.searchJsonForTerm(assertionNode, List.of("measurementOrFactText/value")))
         .withDwcMeasurementValue(super.searchJsonForTerm(assertionNode,
             List.of("measurementOrFactAtomised/lowerValue",
@@ -76,7 +81,7 @@ public class EventAssertions extends Term {
                 super.searchJsonForTerm(jsonNode, List.of("dwc:measurementType")))
             .withDwcMeasurementValue(
                 super.searchJsonForTerm(jsonNode, List.of("dwc:measurementValue")))
-            .withOdsAssertionRemarks(
+            .withDwcMeasurementRemarks(
                 super.searchJsonForTerm(jsonNode, List.of("dwc:measurementRemarks")));
         assertions.add(assertion);
       }

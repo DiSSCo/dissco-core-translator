@@ -3,11 +3,12 @@ package eu.dissco.core.translator.terms.media;
 import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.terms.Term;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
-public class AccessRights extends Term {
+@Slf4j
+public class TimeOfDay extends Term {
 
-  public static final String TERM = DCTERMS_PREFIX + "accessRights";
-
+  public static final String TERM = "ac:timeOfDay";
   private final List<String> dwcaTerms = List.of(TERM);
 
   @Override

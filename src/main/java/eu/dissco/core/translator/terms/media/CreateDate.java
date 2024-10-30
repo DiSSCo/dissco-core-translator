@@ -1,14 +1,14 @@
-package eu.dissco.core.translator.terms.specimen.event;
+package eu.dissco.core.translator.terms.media;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
-public class OccurrenceRemarks extends Term {
+public class CreateDate extends Term {
 
-  public static final String TERM = DWC_PREFIX + "occurrenceRemarks";
+  public static final String TERM = "xmp:CreateDate";
   private final List<String> dwcaTerms = List.of(TERM);
-  private final List<String> abcdUnitTerms = List.of("abcd:notes/value");
+  private final List<String> abcdTerms = List.of("abcd:createdDate");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
@@ -17,7 +17,7 @@ public class OccurrenceRemarks extends Term {
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    return searchJsonForTerm(unit, abcdUnitTerms);
+    return super.searchJsonForTerm(unit, abcdTerms);
   }
 
   @Override
@@ -25,4 +25,3 @@ public class OccurrenceRemarks extends Term {
     return TERM;
   }
 }
-

@@ -1,15 +1,14 @@
-package eu.dissco.core.translator.terms.specimen.citation;
+package eu.dissco.core.translator.terms.specimen.event;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
-public class CitationRemarks extends Term {
+public class EventRemarks extends Term {
 
-  public static final String TERM = "???:citationRemarks";
-
-  private final List<String> dwcaTerms = List.of("dwc:taxonRemarks");
-  private final List<String> abcdTerms = List.of("citationDetail");
+  public static final String TERM = DWC_PREFIX + "eventRemarks";
+  private final List<String> dwcaTerms = List.of(TERM);
+  private final List<String> abcdUnitTerms = List.of("abcd:notes/value");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
@@ -18,7 +17,7 @@ public class CitationRemarks extends Term {
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    return super.searchJsonForTerm(unit, abcdTerms);
+    return searchJsonForTerm(unit, abcdUnitTerms);
   }
 
   @Override
@@ -26,3 +25,4 @@ public class CitationRemarks extends Term {
     return TERM;
   }
 }
+

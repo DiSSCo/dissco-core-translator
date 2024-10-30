@@ -62,11 +62,11 @@ class DwcaDigitalObjectDirectorTest {
 
     // Then
     assertThat(result).isNotNull();
-    assertThat(result.getOdsStatus()).isEqualTo(OdsStatus.ODS_ACTIVE);
-    assertThat(result.getOdsHasEntityRelationship()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(3);
-    assertThat(result.getOdsHasIdentifier()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(3);
-    assertThat(result.getOdsHasCitation()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(2);
-    assertThat(result.getOdsHasIdentification()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(2);
+    assertThat(result.getOdsStatus()).isEqualTo(OdsStatus.ACTIVE);
+    assertThat(result.getOdsHasEntityRelationships()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(3);
+    assertThat(result.getOdsHasIdentifiers()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(3);
+    assertThat(result.getOdsHasCitations()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(2);
+    assertThat(result.getOdsHasIdentifications()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(2);
   }
 
   @Test
@@ -87,11 +87,11 @@ class DwcaDigitalObjectDirectorTest {
 
     // Then
     assertThat(result).isNotNull();
-    assertThat(result.getOdsHasEntityRelationship()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(3);
-    assertThat(result.getOdsHasIdentifier()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(3);
-    assertThat(result.getOdsHasCitation()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(1);
-    assertThat(result.getOdsHasIdentification()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(1);
-    assertThat(((eu.dissco.core.translator.schema.Identification) result.getOdsHasIdentification()
+    assertThat(result.getOdsHasEntityRelationships()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(3);
+    assertThat(result.getOdsHasIdentifiers()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(3);
+    assertThat(result.getOdsHasCitations()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(1);
+    assertThat(result.getOdsHasIdentifications()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(1);
+    assertThat(((eu.dissco.core.translator.schema.Identification) result.getOdsHasIdentifications()
         .get(0)).getOdsIsVerifiedIdentification()).isTrue();
   }
 
@@ -111,8 +111,8 @@ class DwcaDigitalObjectDirectorTest {
 
     // Then
     assertThat(result).isNotNull();
-    assertThat(result.getOdsHasEntityRelationship()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(3);
-    assertThat(result.getOdsHasIdentifier()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(2);
+    assertThat(result.getOdsHasEntityRelationships()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(3);
+    assertThat(result.getOdsHasIdentifiers()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(2);
   }
 
   private JsonNode givenDwcaMediaObject() throws JsonProcessingException {

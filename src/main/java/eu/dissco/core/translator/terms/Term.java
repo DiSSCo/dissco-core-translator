@@ -116,11 +116,11 @@ public abstract class Term {
   }
 
   protected Identification retrieveAcceptedIdentification(DigitalSpecimen ds) {
-    if (ds.getOdsHasIdentification() != null && !ds.getOdsHasIdentification().isEmpty()) {
-      if (ds.getOdsHasIdentification().size() == 1) {
-        return ds.getOdsHasIdentification().get(0);
+    if (ds.getOdsHasIdentifications() != null && !ds.getOdsHasIdentifications().isEmpty()) {
+      if (ds.getOdsHasIdentifications().size() == 1) {
+        return ds.getOdsHasIdentifications().get(0);
       }
-      for (Identification identification : ds.getOdsHasIdentification()) {
+      for (Identification identification : ds.getOdsHasIdentifications()) {
         if (Boolean.TRUE.equals(identification.getOdsIsVerifiedIdentification())) {
           return identification;
         }

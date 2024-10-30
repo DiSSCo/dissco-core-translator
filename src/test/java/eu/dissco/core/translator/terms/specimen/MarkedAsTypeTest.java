@@ -20,7 +20,7 @@ class MarkedAsTypeTest {
   @ValueSource(strings = {"holotype", "haplotype", "some other type"})
   void testRetrieve(String typeStatus) {
     // Given
-    var ds = new DigitalSpecimen().withOdsHasIdentification(List.of(
+    var ds = new DigitalSpecimen().withOdsHasIdentifications(List.of(
         new Identification()
             .withOdsIsVerifiedIdentification(Boolean.FALSE),
         new Identification()
@@ -39,7 +39,7 @@ class MarkedAsTypeTest {
   @ValueSource(strings = {"", "   ", "specimen", "false"})
   void testRetrieveFalse(String typeStatus) {
     // Given
-    var ds = new DigitalSpecimen().withOdsHasIdentification(List.of(
+    var ds = new DigitalSpecimen().withOdsHasIdentifications(List.of(
         new Identification()
             .withOdsIsVerifiedIdentification(Boolean.FALSE),
         new Identification()
@@ -57,7 +57,7 @@ class MarkedAsTypeTest {
   @Test
   void testRetrieveNull() {
     // Given
-    var ds = new DigitalSpecimen().withOdsHasIdentification(List.of(
+    var ds = new DigitalSpecimen().withOdsHasIdentifications(List.of(
         new Identification()
             .withOdsIsVerifiedIdentification(Boolean.FALSE)
             .withDwcTypeStatus("holotype"),

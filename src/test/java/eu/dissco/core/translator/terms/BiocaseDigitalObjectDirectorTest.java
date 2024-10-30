@@ -117,11 +117,11 @@ class BiocaseDigitalObjectDirectorTest {
 
     // Then
     assertThat(result).isNotNull();
-    assertThat(result.getOdsStatus()).isEqualTo(OdsStatus.ODS_ACTIVE);
-    assertThat(result.getOdsHasEntityRelationship()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(4);
-    assertThat(result.getOdsHasIdentifier()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(4);
-    assertThat(result.getOdsHasCitation()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(1);
-    assertThat(result.getOdsHasIdentification()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(totalIdentifications);
+    assertThat(result.getOdsStatus()).isEqualTo(OdsStatus.ACTIVE);
+    assertThat(result.getOdsHasEntityRelationships()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(4);
+    assertThat(result.getOdsHasIdentifiers()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(4);
+    assertThat(result.getOdsHasCitations()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(1);
+    assertThat(result.getOdsHasIdentifications()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(totalIdentifications);
   }
 
   @ParameterizedTest
