@@ -15,15 +15,15 @@ class MetadataLanguageTest {
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var metadataLanguage = "http://id.loc.gov/vocabulary/iso639-2/eng";
+    var metadataLanguageString = "http://id.loc.gov/vocabulary/iso639-2/eng";
     var unit = MAPPER.createObjectNode();
-    unit.put("ac:metadataLanguage", metadataLanguage);
+    unit.put("ac:metadataLanguage", metadataLanguageString);
 
     // When
     var result = this.metadataLanguage.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(metadataLanguage);
+    assertThat(result).isEqualTo(metadataLanguageString);
   }
 
 

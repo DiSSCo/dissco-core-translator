@@ -1,7 +1,6 @@
 package eu.dissco.core.translator.terms.media;
 
 import static eu.dissco.core.translator.TestUtils.MAPPER;
-import static eu.dissco.core.translator.TestUtils.MOCK_DATE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;

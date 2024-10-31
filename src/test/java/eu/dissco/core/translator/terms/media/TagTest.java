@@ -8,32 +8,32 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class AvailableTest {
+class TagTest {
 
-  private final Available available = new Available();
+  private final Tag tag = new Tag();
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var availableString = "2023-10-01";
+    var tagString = "Herbarium | Botany";
     var unit = MAPPER.createObjectNode();
-    unit.put("dcterms:available", availableString);
+    unit.put("ac:tag", tagString);
 
     // When
-    var result = this.available.retrieveFromDWCA(unit);
+    var result = this.tag.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(availableString);
+    assertThat(result).isEqualTo(tagString);
   }
 
 
   @Test
   void testGetTerm() {
     // When
-    var result = available.getTerm();
+    var result = tag.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(Available.TERM);
+    assertThat(result).isEqualTo(Tag.TERM);
   }
 
 }

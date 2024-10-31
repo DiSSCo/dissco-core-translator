@@ -8,19 +8,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class AvailableTest {
+class FrameRateTest {
 
-  private final Available available = new Available();
+  private final FrameRate frameRate = new FrameRate();
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var availableString = "2023-10-01";
+    var availableString = "60";
     var unit = MAPPER.createObjectNode();
-    unit.put("dcterms:available", availableString);
+    unit.put("ac:frameRate", availableString);
 
     // When
-    var result = this.available.retrieveFromDWCA(unit);
+    var result = this.frameRate.retrieveFromDWCA(unit);
 
     // Then
     assertThat(result).isEqualTo(availableString);
@@ -30,10 +30,10 @@ class AvailableTest {
   @Test
   void testGetTerm() {
     // When
-    var result = available.getTerm();
+    var result = frameRate.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(Available.TERM);
+    assertThat(result).isEqualTo(FrameRate.TERM);
   }
 
 }
