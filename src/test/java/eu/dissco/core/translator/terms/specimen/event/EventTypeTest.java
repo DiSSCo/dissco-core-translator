@@ -34,7 +34,7 @@ class EventTypeTest {
     var result = eventType.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo("Collecting");
+    assertThat(result).isEqualTo("Collecting Event");
   }
 
   @Test
