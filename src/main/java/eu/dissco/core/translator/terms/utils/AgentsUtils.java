@@ -11,6 +11,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class AgentsUtils {
 
+  private AgentsUtils() {
+    // This is a Utility class
+  }
+
   public static void setAgent(List<Agent> currentAgents, String termValue, String id,
       AgenRoleType role, eu.dissco.core.translator.schema.Agent.Type type) {
     if (currentAgents == null){
@@ -21,33 +25,38 @@ public class AgentsUtils {
           id != null && (id.contains("&") || id.contains("|")))) {
         handleMultipleAgents(currentAgents, termValue, id, role, type);
       } else {
-        String name = termValue;
-        if (termValue != null && termValue.contains("http") && id == null) {
-          id = termValue;
-          name = null;
-        } else if (termValue != null && termValue.contains("http") && id != null
-            && !id.equals(termValue)) {
-          log.warn(
-              "The id and term value do not match for term: {} and id: {}. Adding value as name and id as identifier",
-              termValue, id);
-        }
-        var agent = new Agent()
-            .withId(id)
-            .withType(type)
-            .withSchemaName(name)
-            .withSchemaIdentifier(id)
-            .withOdsHasRoles(
-                List.of(new eu.dissco.core.translator.schema.OdsHasRole().withType("schema:Role")
-                    .withSchemaRoleName(role.getName())));
-        if (id != null) {
-          agent.withOdsHasIdentifiers(List.of(
-              new eu.dissco.core.translator.schema.Identifier().withId(id)
-                  .withType("ods:Identifier")
-                  .withDctermsIdentifier(id)));
-        }
-        currentAgents.add(agent);
+        constructAgent(currentAgents, termValue, id, role, type);
       }
     }
+  }
+
+  private static void constructAgent(List<Agent> currentAgents, String termValue, String id,
+      AgenRoleType role, Type type) {
+    String name = termValue;
+    if (termValue != null && termValue.contains("http") && id == null) {
+      id = termValue;
+      name = null;
+    } else if (termValue != null && termValue.contains("http") && id != null
+        && !id.equals(termValue)) {
+      log.warn(
+          "The id and term value do not match for term: {} and id: {}. Adding value as name and id as identifier",
+          termValue, id);
+    }
+    var agent = new Agent()
+        .withId(id)
+        .withType(type)
+        .withSchemaName(name)
+        .withSchemaIdentifier(id)
+        .withOdsHasRoles(
+            List.of(new eu.dissco.core.translator.schema.OdsHasRole().withType("schema:Role")
+                .withSchemaRoleName(role.getName())));
+    if (id != null) {
+      agent.withOdsHasIdentifiers(List.of(
+          new eu.dissco.core.translator.schema.Identifier().withId(id)
+              .withType("ods:Identifier")
+              .withDctermsIdentifier(id)));
+    }
+    currentAgents.add(agent);
   }
 
   private static void handleMultipleAgents(
