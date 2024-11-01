@@ -38,8 +38,8 @@ class IsKnowToContainMediaTest {
     var image = MAPPER.createObjectNode();
     array.add(image);
     var extensions = MAPPER.createObjectNode();
-    extensions.put(extensionName, array);
-    unit.put("extensions", extensions);
+    extensions.set(extensionName, array);
+    unit.set("extensions", extensions);
 
     // When
     var result = isKnowToContainMedia.retrieveFromDWCA(unit);
