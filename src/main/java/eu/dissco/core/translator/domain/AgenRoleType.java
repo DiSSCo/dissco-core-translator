@@ -6,7 +6,8 @@ public enum AgenRoleType {
   DATA_TRANSLATOR("data-translator"),
   CREATOR("creator"),
   IDENTIFIER("identifier"),
-  GEOREFERENCER("georeferencer");
+  GEOREFERENCER("georeferencer"),
+  RIGHTS_OWNER("rights-owner");
 
   private final String name;
 
