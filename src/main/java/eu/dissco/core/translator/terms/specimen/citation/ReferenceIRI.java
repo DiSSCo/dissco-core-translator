@@ -6,7 +6,7 @@ import java.util.List;
 
 public class ReferenceIRI extends Term {
 
-  public static final String TERM = "???:referenceIri";
+  public static final String TERM = "dcterms:identifier";
 
   private final List<String> abcdTerms = List.of("uri");
 

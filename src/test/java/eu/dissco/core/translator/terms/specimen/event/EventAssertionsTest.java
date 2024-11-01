@@ -5,6 +5,8 @@ import static eu.dissco.core.translator.TestUtils.MOCK_DATE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import eu.dissco.core.translator.schema.Agent.Type;
+import eu.dissco.core.translator.schema.OdsHasRole;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -39,7 +41,7 @@ class EventAssertionsTest {
         .withDwcMeasurementUnit(UNIT)
         .withDwcMeasurementType(TYPE)
         .withDwcMeasurementValue(VALUE)
-        .withOdsAssertionRemarks(REMARK);
+        .withDwcMeasurementRemarks(REMARK);
     // When
     var result = eventAssertions.gatherEventAssertions(MAPPER, unit, true);
 
@@ -72,12 +74,13 @@ class EventAssertionsTest {
         .withDwcMeasurementUnit(UNIT)
         .withDwcMeasurementType(TYPE)
         .withDwcMeasurementValue(VALUE)
-        .withOdsAssertionByAgent(
+        .withOdsHasAgents(List.of(
             new eu.dissco.core.translator.schema.Agent()
                 .withType(Type.SCHEMA_PERSON)
-                .withSchemaName(MEASURED_BY))
+                .withSchemaName(MEASURED_BY)
+                .withOdsHasRoles(List.of(new OdsHasRole().withSchemaRoleName("measurer")))))
         .withDwcMeasurementDeterminedDate(MOCK_DATE)
-        .withOdsAssertionRemarks(REMARK);
+        .withDwcMeasurementRemarks(REMARK);
     // When
     var result = eventAssertions.gatherEventAssertions(MAPPER, unit, false);
 

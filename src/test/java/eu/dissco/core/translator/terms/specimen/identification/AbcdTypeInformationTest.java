@@ -6,7 +6,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.schema.DigitalSpecimen;
 import eu.dissco.core.translator.schema.Identification;
-import eu.dissco.core.translator.schema.OdsHasTaxonIdentification;
+import eu.dissco.core.translator.schema.TaxonIdentification;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,7 +34,7 @@ class AbcdTypeInformationTest {
     abcdTypeInformation.addTypeInformation(digitalSpecimen, json, MAPPER);
 
     // Then
-    assertThat(digitalSpecimen.getOdsHasIdentification().get(0))
+    assertThat(digitalSpecimen.getOdsHasIdentifications().get(0))
         .extracting(Identification::getDwcTypeStatus)
         .isEqualTo("isotype");
   }
@@ -51,10 +51,10 @@ class AbcdTypeInformationTest {
     abcdTypeInformation.addTypeInformation(digitalSpecimen, json, MAPPER);
 
     // Then
-    assertThat(digitalSpecimen.getOdsHasIdentification().get(0))
+    assertThat(digitalSpecimen.getOdsHasIdentifications().get(0))
         .extracting(Identification::getDwcTypeStatus)
         .isEqualTo("isotype");
-    assertThat(digitalSpecimen.getOdsHasIdentification().get(1))
+    assertThat(digitalSpecimen.getOdsHasIdentifications().get(1))
         .extracting(Identification::getDwcTypeStatus)
         .isNull();
   }
@@ -71,7 +71,7 @@ class AbcdTypeInformationTest {
     abcdTypeInformation.addTypeInformation(digitalSpecimen, json, MAPPER);
 
     // Then
-    assertThat(digitalSpecimen.getOdsHasIdentification().get(0))
+    assertThat(digitalSpecimen.getOdsHasIdentifications().get(0))
         .extracting(Identification::getDwcTypeStatus)
         .isNull();
   }
@@ -92,11 +92,11 @@ class AbcdTypeInformationTest {
 
   private DigitalSpecimen givenDigitalSpecimenWithIdentification(List<String> names) {
     var identifications = names.stream().map(
-            name -> new Identification().withOdsHasTaxonIdentification(
-                List.of(new OdsHasTaxonIdentification().withDwcScientificName(name))))
+            name -> new Identification().withOdsHasTaxonIdentifications(
+                List.of(new TaxonIdentification().withDwcScientificName(name))))
         .toList();
     return new DigitalSpecimen()
-        .withOdsHasIdentification(identifications);
+        .withOdsHasIdentifications(identifications);
   }
 
 }

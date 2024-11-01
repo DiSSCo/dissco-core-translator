@@ -19,7 +19,7 @@ public class AbcdTypeInformation extends Term {
     if (typeDesignationNodes.isEmpty()) {
       return;
     }
-    var identifications = ds.getOdsHasIdentification();
+    var identifications = ds.getOdsHasIdentifications();
     if (typeDesignationNodes.size() == 1 && identifications.size() == 1) {
       setAdditionalIdentificationInfo(identifications.get(0), typeDesignationNodes.get(0));
     } else {
@@ -32,7 +32,7 @@ public class AbcdTypeInformation extends Term {
   private boolean isNameMatch(Identification identification, JsonNode node) {
     if (node.get("typifiedName/fullScientificNameString") != null) {
       return node.get("typifiedName/fullScientificNameString").asText()
-          .equals(identification.getOdsHasTaxonIdentification().get(0).getDwcScientificName());
+          .equals(identification.getOdsHasTaxonIdentifications().get(0).getDwcScientificName());
     } else {
       log.warn("No typifiedName found in typeDesignationNode: {}", node);
       return false;

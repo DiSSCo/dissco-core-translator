@@ -10,43 +10,43 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class CitationRemarksTest {
 
-  private final CitationRemarks citationRemarks = new CitationRemarks();
+  private final CitationDescription citationDescription = new CitationDescription();
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var citationRemarksString = "A new citation remark";
+    var citationDescriptionString = "A new citation remark";
     var unit = MAPPER.createObjectNode();
-    unit.put("dwc:taxonRemarks", citationRemarksString);
+    unit.put("dcterms:description", citationDescriptionString);
 
     // When
-    var result = citationRemarks.retrieveFromDWCA(unit);
+    var result = citationDescription.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(citationRemarksString);
+    assertThat(result).isEqualTo(citationDescriptionString);
   }
 
   @Test
   void testRetrieveFromABCD() {
     // Given
-    var citationRemarksString = "A new citation remark";
+    var citationDescriptionString = "A new citation remark";
     var unit = MAPPER.createObjectNode();
-    unit.put("citationDetail", citationRemarksString);
+    unit.put("citationDetail", citationDescriptionString);
 
     // When
-    var result = citationRemarks.retrieveFromABCD(unit);
+    var result = citationDescription.retrieveFromABCD(unit);
 
     // Then
-    assertThat(result).isEqualTo(citationRemarksString);
+    assertThat(result).isEqualTo(citationDescriptionString);
   }
 
   @Test
   void testGetTerm() {
     // When
-    var result = citationRemarks.getTerm();
+    var result = citationDescription.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(CitationRemarks.TERM);
+    assertThat(result).isEqualTo(CitationDescription.TERM);
   }
 
 }

@@ -11,13 +11,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class CreatedTest {
 
-  private final Created created = new Created();
+  private final CreateDate created = new CreateDate();
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
     var unit = MAPPER.createObjectNode();
-    unit.put("dcterms:created", MOCK_DATE);
+    unit.put("xmp:CreateDate", MOCK_DATE);
 
     // When
     var result = created.retrieveFromDWCA(unit);
@@ -46,7 +46,7 @@ class CreatedTest {
     var result = created.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(Created.TERM);
+    assertThat(result).isEqualTo(CreateDate.TERM);
   }
 
 }
