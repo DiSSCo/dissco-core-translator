@@ -3,10 +3,12 @@ package eu.dissco.core.translator.terms.media;
 import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.terms.Term;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
-public class WebStatement extends Term {
+@Slf4j
+public class UsageTerms extends Term {
 
-  public static final String TERM = "xmpRights:WebStatement";
+  public static final String TERM = "xmpRights:UsageTerms";
   private final List<String> dwcaTerms = List.of(TERM);
 
   @Override
