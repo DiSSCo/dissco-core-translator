@@ -14,7 +14,7 @@ public class EventType extends Term {
   public String retrieveFromDWCA(JsonNode unit) {
     var eventType = super.searchJsonForTerm(unit, dwcaTerms);
     if (eventType == null) {
-      eventType = "Collecting";
+      eventType = "Collecting Event";
     }
     return eventType;
   }
