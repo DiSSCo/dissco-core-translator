@@ -1,9 +1,8 @@
-package eu.dissco.core.translator.terms.specimen;
+package eu.dissco.core.translator.terms;
 
 import static eu.dissco.core.translator.configuration.ApplicationConfiguration.DATE_STRING;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import eu.dissco.core.translator.terms.Term;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;

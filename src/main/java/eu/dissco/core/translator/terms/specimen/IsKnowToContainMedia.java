@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
-public class HasMedia extends Term {
+public class IsKnowToContainMedia extends Term {
 
-  public static final String TERM = ODS_PREFIX + "hasMedia";
+  public static final String TERM = ODS_PREFIX + "isKnownToContainMedia";
   private final List<String> dwcaTerms = List.of("dwc:associatedMedia");
   private final List<String> abcdTerms = List.of(
       "abcd:multiMediaObjects/multiMediaObject/0/fileURI");

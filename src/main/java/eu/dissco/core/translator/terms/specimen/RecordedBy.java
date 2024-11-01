@@ -9,7 +9,7 @@ public class RecordedBy extends Term {
 
   public static final String TERM = DWC_PREFIX + "recordedBy";
 
-  private final List<String> dwcaTerms = List.of("dwc:recordedBy", "dwc:recordedByID");
+  private final List<String> dwcaTerms = List.of("dwc:recordedBy");
   private final List<Pair<String, String>> abcdTerms = List.of(
       Pair.of("abcd:gathering/agents/gatheringAgent/", "/person/fullName"),
       Pair.of("abcd:gathering/agents/gatheringAgent/", "/person/agentText"));

@@ -12,9 +12,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class MarkedAsTypeTest {
+class IsMarkedAsTypeTest {
 
-  private final MarkedAsType markedAsType = new MarkedAsType();
+  private final IsMarkedAsType isMarkedAsType = new IsMarkedAsType();
 
   @ParameterizedTest
   @ValueSource(strings = {"holotype", "haplotype", "some other type"})
@@ -29,7 +29,7 @@ class MarkedAsTypeTest {
     ));
 
     // When
-    var result = markedAsType.calculate(ds);
+    var result = isMarkedAsType.calculate(ds);
 
     // Then
     assertThat(result).isTrue();
@@ -48,7 +48,7 @@ class MarkedAsTypeTest {
     ));
 
     // When
-    var result = markedAsType.calculate(ds);
+    var result = isMarkedAsType.calculate(ds);
 
     // Then
     assertThat(result).isFalse();
@@ -66,7 +66,7 @@ class MarkedAsTypeTest {
     ));
 
     // When
-    var result = markedAsType.calculate(ds);
+    var result = isMarkedAsType.calculate(ds);
 
     // Then
     assertThat(result).isNull();
@@ -75,9 +75,9 @@ class MarkedAsTypeTest {
   @Test
   void testGetTerm() {
     // When
-    var result = markedAsType.getTerm();
+    var result = isMarkedAsType.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(MarkedAsType.TERM);
+    assertThat(result).isEqualTo(IsMarkedAsType.TERM);
   }
 }

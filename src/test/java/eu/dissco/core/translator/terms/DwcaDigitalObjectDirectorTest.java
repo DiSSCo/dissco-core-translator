@@ -1,6 +1,7 @@
 package eu.dissco.core.translator.terms;
 
 import static eu.dissco.core.translator.TestUtils.MAPPER;
+import static eu.dissco.core.translator.TestUtils.SOURCE_SYSTEM_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -42,6 +43,7 @@ class DwcaDigitalObjectDirectorTest {
   void setup() {
     director = new DwcaDigitalObjectDirector(MAPPER, termMapper, institutionNameComponent,
         sourceSystemComponent, fdoProperties);
+    given(sourceSystemComponent.getSourceSystemID()).willReturn(SOURCE_SYSTEM_ID);
   }
 
   @Test
