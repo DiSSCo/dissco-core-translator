@@ -1,8 +1,8 @@
 package eu.dissco.core.translator.terms.utils;
 
-import eu.dissco.core.translator.domain.AgenRoleType;
-import eu.dissco.core.translator.schema.Agent.Type;
+import eu.dissco.core.translator.domain.AgentRoleType;
 import eu.dissco.core.translator.schema.Agent;
+import eu.dissco.core.translator.schema.Agent.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -15,78 +15,79 @@ public class AgentsUtils {
     // This is a Utility class
   }
 
-  public static void setAgent(List<Agent> currentAgents, String termValue, String id,
-      AgenRoleType role, eu.dissco.core.translator.schema.Agent.Type type) {
-    if (currentAgents == null){
-      currentAgents = new ArrayList<>();
+  public static List<Agent> setAgent(List<Agent> currentAgents, String agentValue, String agentId,
+      AgentRoleType role, Type type) {
+    var agents = new ArrayList<Agent>();
+    if (currentAgents != null) {
+      agents.addAll(currentAgents);
     }
-    if (termValue != null || id != null) {
-      if ((termValue != null && (termValue.contains("&") || termValue.contains("|"))) || (
-          id != null && (id.contains("&") || id.contains("|")))) {
-        handleMultipleAgents(currentAgents, termValue, id, role, type);
+    if (agentValue != null || agentId != null) {
+      if ((agentValue != null && (agentValue.contains("&") || agentValue.contains("|"))) || (
+          agentId != null && (agentId.contains("&") || agentId.contains("|")))) {
+        handleMultipleAgents(agents, agentValue, agentId, role, type);
       } else {
-        constructAgent(currentAgents, termValue, id, role, type);
+        constructAgent(agents, agentValue, agentId, role, type);
       }
     }
+    return agents;
   }
 
-  private static void constructAgent(List<Agent> currentAgents, String termValue, String id,
-      AgenRoleType role, Type type) {
-    String name = termValue;
-    if (termValue != null && termValue.contains("http") && id == null) {
-      id = termValue;
-      name = null;
-    } else if (termValue != null && termValue.contains("http") && id != null
-        && !id.equals(termValue)) {
+  private static void constructAgent(List<Agent> agents, String agentValue, String agentId,
+      AgentRoleType role, Type type) {
+    String agentName = agentValue;
+    if (agentValue != null && agentValue.contains("http") && agentId == null) {
+      agentId = agentValue;
+      agentName = null;
+    } else if (agentValue != null && agentValue.contains("http") && agentId != null
+        && !agentId.equals(agentValue)) {
       log.warn(
-          "The id and term value do not match for term: {} and id: {}. Adding value as name and id as identifier",
-          termValue, id);
+          "The agentId and agentValue do not match for term: {} and agentId: {}. Adding value as agentName and agentId as identifier",
+          agentValue, agentId);
     }
     var agent = new Agent()
-        .withId(id)
+        .withId(agentId)
         .withType(type)
-        .withSchemaName(name)
-        .withSchemaIdentifier(id)
+        .withSchemaName(agentName)
+        .withSchemaIdentifier(agentId)
         .withOdsHasRoles(
             List.of(new eu.dissco.core.translator.schema.OdsHasRole().withType("schema:Role")
                 .withSchemaRoleName(role.getName())));
-    if (id != null) {
+    if (agentId != null) {
       agent.withOdsHasIdentifiers(List.of(
-          new eu.dissco.core.translator.schema.Identifier().withId(id)
+          new eu.dissco.core.translator.schema.Identifier().withId(agentId)
               .withType("ods:Identifier")
-              .withDctermsIdentifier(id)));
+              .withDctermsIdentifier(agentId)));
     }
-    currentAgents.add(agent);
+    agents.add(agent);
   }
 
   private static void handleMultipleAgents(
-      List<Agent> currentAgents, String termValue, String id, AgenRoleType role,
-      eu.dissco.core.translator.schema.Agent.Type type) {
+      List<Agent> agents, String agentValue, String agentId, AgentRoleType role, Type type) {
     var ids = new String[0];
-    var agents = new String[0];
-    if (termValue != null && (termValue.contains("&") || termValue.contains("|"))) {
-      agents = Arrays.stream(termValue.split("[&|]")).map(String::trim).toArray(String[]::new);
+    var agentValues = new String[0];
+    if (agentValue != null && (agentValue.contains("&") || agentValue.contains("|"))) {
+      agentValues = Arrays.stream(agentValue.split("[&|]")).map(String::trim).toArray(String[]::new);
     }
-    if (id != null && (id.contains("&") || id.contains("|"))) {
-      ids = Arrays.stream(id.split("[&|]")).map(String::trim).toArray(String[]::new);
+    if (agentId != null && (agentId.contains("&") || agentId.contains("|"))) {
+      ids = Arrays.stream(agentId.split("[&|]")).map(String::trim).toArray(String[]::new);
     }
-    if (agents.length == ids.length) {
-      for (int i = 0; i < agents.length; i++) {
-        setAgent(currentAgents, agents[i], ids[i], role, type);
+    if (agentValues.length == ids.length) {
+      for (int i = 0; i < agentValues.length; i++) {
+        constructAgent(agents, agentValues[i], ids[i], role, type);
       }
-    } else if (agents.length > ids.length) {
+    } else if (agentValues.length > ids.length) {
       log.warn(
-          "The number of agents values is greater than ids, ignoring ids for term: {} and id: {}",
-          termValue, id);
-      for (String agent : agents) {
-        setAgent(currentAgents, agent, null, role, type);
+          "The number of agentValues values is greater than ids, ignoring ids for term: {} and agentId: {}",
+          agentValue, agentId);
+      for (String agent : agentValues) {
+        constructAgent(agents, agent, null, role, type);
       }
     } else {
       log.warn(
-          "The number of ids is greater than agent values, ignoring agent values for term: {} and id: {}",
-          termValue, id);
+          "The number of ids is greater than agentValue, ignoring agentValue values for term: {} and agentId: {}",
+          agentValue, agentId);
       for (String idValue : ids) {
-        setAgent(currentAgents, null, idValue, role, type);
+        constructAgent(agents, null, idValue, role, type);
       }
     }
   }

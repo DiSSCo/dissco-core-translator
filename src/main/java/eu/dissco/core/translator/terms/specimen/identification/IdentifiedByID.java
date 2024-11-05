@@ -6,7 +6,7 @@ import java.util.List;
 
 public class IdentifiedByID extends Term {
 
-  public static final String TERM = DWC_PREFIX + "identifiedById";
+  public static final String TERM = DWC_PREFIX + "identifiedByID";
 
   private final List<String> dwcaTerms = List.of(TERM);
 

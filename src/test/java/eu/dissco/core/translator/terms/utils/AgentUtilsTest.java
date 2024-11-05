@@ -1,13 +1,13 @@
 package eu.dissco.core.translator.terms.utils;
 
-import static eu.dissco.core.translator.domain.AgenRoleType.CREATOR;
+import static eu.dissco.core.translator.domain.AgentRoleType.CREATOR;
 import static eu.dissco.core.translator.schema.Agent.Type.SCHEMA_PERSON;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import eu.dissco.core.translator.schema.Agent;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -80,15 +80,28 @@ class AgentUtilsTest {
 
   @ParameterizedTest
   @MethodSource("agentProvider")
-  void testSimpleAgent(String termValue, String id, List<Agent> expected) {
-    // Given
-    var result = new ArrayList<Agent>();
+  void testSetAgent(String termValue, String id, List<Agent> expected) {
 
     // When
-    AgentsUtils.setAgent(result, termValue, id, CREATOR, SCHEMA_PERSON);
+    var result = AgentsUtils.setAgent(null, termValue, id, CREATOR, SCHEMA_PERSON);
 
     // Then
     assertThat(result).isEqualTo(expected);
+  }
+
+  @Test
+  void testSetAgentUnmutableLiat() {
+    // Given
+    var agentOne = createAgent("Tom Dijkema", "https://orcid.org/0000-0001-9790-9277");
+    var agentTwo = createAgent("Fricke, Ronald", "http://orcid.org/0000-0002-9079-593X");
+
+    // When
+    var result = AgentsUtils.setAgent(
+        List.of(agentOne),
+        "Fricke, Ronald", "http://orcid.org/0000-0002-9079-593X", CREATOR, SCHEMA_PERSON);
+
+    // Then
+    assertThat(result).isEqualTo(List.of(agentOne, agentTwo));
   }
 
 }

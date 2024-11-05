@@ -8,7 +8,7 @@ public class EventType extends Term {
 
   public static final String TERM = DWC_PREFIX + "eventType";
 
-  private final List<String> dwcaTerms = List.of(TERM, VerbatimEventDate.TERM);
+  private final List<String> dwcaTerms = List.of(TERM);
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {

@@ -1,11 +1,11 @@
 package eu.dissco.core.translator.terms;
 
-import static eu.dissco.core.translator.domain.AgenRoleType.COLLECTOR;
-import static eu.dissco.core.translator.domain.AgenRoleType.CREATOR;
-import static eu.dissco.core.translator.domain.AgenRoleType.DATA_TRANSLATOR;
-import static eu.dissco.core.translator.domain.AgenRoleType.GEOREFERENCER;
-import static eu.dissco.core.translator.domain.AgenRoleType.IDENTIFIER;
-import static eu.dissco.core.translator.domain.AgenRoleType.RIGHTS_OWNER;
+import static eu.dissco.core.translator.domain.AgentRoleType.COLLECTOR;
+import static eu.dissco.core.translator.domain.AgentRoleType.CREATOR;
+import static eu.dissco.core.translator.domain.AgentRoleType.DATA_TRANSLATOR;
+import static eu.dissco.core.translator.domain.AgentRoleType.GEOREFERENCER;
+import static eu.dissco.core.translator.domain.AgentRoleType.IDENTIFIER;
+import static eu.dissco.core.translator.domain.AgentRoleType.RIGHTS_OWNER;
 import static eu.dissco.core.translator.domain.RelationshipType.HAS_FDO_TYPE;
 import static eu.dissco.core.translator.domain.RelationshipType.HAS_LICENSE;
 import static eu.dissco.core.translator.domain.RelationshipType.HAS_ORGANISATION_ID;
