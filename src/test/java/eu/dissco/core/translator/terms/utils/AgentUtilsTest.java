@@ -80,23 +80,23 @@ class AgentUtilsTest {
 
   @ParameterizedTest
   @MethodSource("agentProvider")
-  void testSetAgent(String termValue, String id, List<Agent> expected) {
+  void testAddAgent(String termValue, String id, List<Agent> expected) {
 
     // When
-    var result = AgentsUtils.setAgent(null, termValue, id, CREATOR, SCHEMA_PERSON);
+    var result = AgentsUtils.addAgent(null, termValue, id, CREATOR, SCHEMA_PERSON);
 
     // Then
     assertThat(result).isEqualTo(expected);
   }
 
   @Test
-  void testSetAgentUnmutableLiat() {
+  void testAddAgentUnmutableLiat() {
     // Given
     var agentOne = createAgent("Tom Dijkema", "https://orcid.org/0000-0001-9790-9277");
     var agentTwo = createAgent("Fricke, Ronald", "http://orcid.org/0000-0002-9079-593X");
 
     // When
-    var result = AgentsUtils.setAgent(
+    var result = AgentsUtils.addAgent(
         List.of(agentOne),
         "Fricke, Ronald", "http://orcid.org/0000-0002-9079-593X", CREATOR, SCHEMA_PERSON);
 

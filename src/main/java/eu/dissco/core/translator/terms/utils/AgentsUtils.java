@@ -15,7 +15,7 @@ public class AgentsUtils {
     // This is a Utility class
   }
 
-  public static List<Agent> setAgent(List<Agent> currentAgents, String agentValue, String agentId,
+  public static List<Agent> addAgent(List<Agent> currentAgents, String agentValue, String agentId,
       AgentRoleType role, Type type) {
     var agents = new ArrayList<Agent>();
     if (currentAgents != null) {

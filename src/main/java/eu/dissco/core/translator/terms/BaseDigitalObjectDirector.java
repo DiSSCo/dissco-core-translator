@@ -16,7 +16,7 @@ import static eu.dissco.core.translator.domain.RelationshipType.HAS_SOURCE_SYSTE
 import static eu.dissco.core.translator.domain.RelationshipType.HAS_URL;
 import static eu.dissco.core.translator.schema.Agent.Type.SCHEMA_PERSON;
 import static eu.dissco.core.translator.schema.Agent.Type.SCHEMA_SOFTWARE_APPLICATION;
-import static eu.dissco.core.translator.terms.utils.AgentsUtils.setAgent;
+import static eu.dissco.core.translator.terms.utils.AgentsUtils.addAgent;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -294,9 +294,9 @@ public abstract class BaseDigitalObjectDirector {
         .withDctermsType(termMapper.retrieveTerm(new Type(), data, dwc))
         .withDctermsDate(termMapper.retrieveTerm(new Date(), data, dwc))
         .withDctermsTitle(termMapper.retrieveTerm(new Title(), data, dwc));
-    setAgent(citation.getOdsHasAgents(), termMapper.retrieveTerm(
+    citation.setOdsHasAgents(addAgent(citation.getOdsHasAgents(), termMapper.retrieveTerm(
         new eu.dissco.core.translator.terms.specimen.citation.Creator(),
-        data, dwc), null, CREATOR, SCHEMA_PERSON);
+        data, dwc), null, CREATOR, SCHEMA_PERSON));
     return citation;
   }
 
@@ -389,8 +389,8 @@ public abstract class BaseDigitalObjectDirector {
         .withDwcRelationshipOfResource(relationshipType.getName())
         .withDwcRelatedResourceID(relatedResource)
         .withDwcRelationshipEstablishedDate(java.util.Date.from(Instant.now()));
-    setAgent(entityRelationship.getOdsHasAgents(), fdoProperties.getApplicationName(),
-        fdoProperties.getApplicationPID(), DATA_TRANSLATOR, SCHEMA_SOFTWARE_APPLICATION);
+    entityRelationship.setOdsHasAgents(addAgent(entityRelationship.getOdsHasAgents(), fdoProperties.getApplicationName(),
+        fdoProperties.getApplicationPID(), DATA_TRANSLATOR, SCHEMA_SOFTWARE_APPLICATION));
     return entityRelationship;
   }
 
@@ -461,8 +461,8 @@ public abstract class BaseDigitalObjectDirector {
             termMapper.retrieveTerm(new VerbatimIdentification(), data, dwc))
         .withOdsHasTaxonIdentifications(List.of(mappedTaxonIdentification))
         .withOdsHasCitations(assembleIdentificationCitations(data, dwc));
-    setAgent(identification.getOdsHasAgents(), termMapper.retrieveTerm(new IdentifiedBy(), data, dwc),
-        termMapper.retrieveTerm(new IdentifiedByID(), data, dwc), IDENTIFIER, SCHEMA_PERSON);
+    identification.setOdsHasAgents(addAgent(identification.getOdsHasAgents(), termMapper.retrieveTerm(new IdentifiedBy(), data, dwc),
+        termMapper.retrieveTerm(new IdentifiedByID(), data, dwc), IDENTIFIER, SCHEMA_PERSON));
     return identification;
   }
 
@@ -491,8 +491,8 @@ public abstract class BaseDigitalObjectDirector {
         .withDwcGeoreferenceRemarks(termMapper.retrieveTerm(new GeoreferenceRemarks(), data, dwc))
         .withDwcGeoreferenceSources(termMapper.retrieveTerm(new GeoreferenceSources(), data, dwc))
         .withDwcPointRadiusSpatialFit(parseToDouble(new PointRadiusSpatialFit(), data, dwc));
-    setAgent(geoReference.getOdsHasAgents(), termMapper.retrieveTerm(
-        new GeoreferencedBy(), data, dwc), null, GEOREFERENCER, SCHEMA_PERSON);
+    geoReference.setOdsHasAgents(addAgent(geoReference.getOdsHasAgents(), termMapper.retrieveTerm(
+        new GeoreferencedBy(), data, dwc), null, GEOREFERENCER, SCHEMA_PERSON));
     var geologicalContext = new GeologicalContext()
         .withType("ods:GeologicalContext")
         .withDwcLowestBiostratigraphicZone(
@@ -590,8 +590,8 @@ public abstract class BaseDigitalObjectDirector {
         .withDwcVitality(termMapper.retrieveTerm(new Vitality(), data, dwc))
         .withOdsHasLocation(location)
         .withOdsHasAssertions(assertions);
-    setAgent(event.getOdsHasAgents(), termMapper.retrieveTerm(new RecordedBy(), data, dwc),
-        termMapper.retrieveTerm(new RecordedByID(), data, dwc), COLLECTOR, SCHEMA_PERSON);
+    event.setOdsHasAgents(addAgent(event.getOdsHasAgents(), termMapper.retrieveTerm(new RecordedBy(), data, dwc),
+        termMapper.retrieveTerm(new RecordedByID(), data, dwc), COLLECTOR, SCHEMA_PERSON));
     return List.of(event);
   }
 
@@ -703,10 +703,10 @@ public abstract class BaseDigitalObjectDirector {
         .withDctermsDescription(termMapper.retrieveTerm(new Description(), mediaRecord, dwc))
         .withOdsHasIdentifiers(assembleIdentifiers(mediaRecord))
         .withOdsHasAssertions(new MediaAssertions().gatherAssertions(mediaRecord, dwc));
-    setAgent(digitalMedia.getOdsHasAgents(), termMapper
-        .retrieveTerm(new Creator(), mediaRecord, dwc), null, CREATOR, SCHEMA_PERSON);
-    setAgent(digitalMedia.getOdsHasAgents(), termMapper
-        .retrieveTerm(new RightsOwner(), mediaRecord, dwc), null, RIGHTS_OWNER, SCHEMA_PERSON);
+    digitalMedia.setOdsHasAgents(addAgent(digitalMedia.getOdsHasAgents(), termMapper
+        .retrieveTerm(new Creator(), mediaRecord, dwc), null, CREATOR, SCHEMA_PERSON));
+    digitalMedia.setOdsHasAgents(addAgent(digitalMedia.getOdsHasAgents(), termMapper
+        .retrieveTerm(new RightsOwner(), mediaRecord, dwc), null, RIGHTS_OWNER, SCHEMA_PERSON));
     digitalMedia.withOdsHasEntityRelationships(
         assembleDigitalMediaEntityRelationships(digitalMedia));
     return digitalMedia;
