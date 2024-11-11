@@ -8,32 +8,32 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class WebStatementTest {
+class UsageTermsTest {
 
-  private final WebStatement webStatement = new WebStatement();
+  private final UsageTerms usageTerms = new UsageTerms();
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
-    var webStatementString = "https://creativecommons.org/licenses/by/4.0/";
+    var usageTermsString = "CC BY-NC-SA 4.0";
     var unit = MAPPER.createObjectNode();
-    unit.put("xmpRights:WebStatement", webStatementString);
+    unit.put("xmpRights:UsageTerms", usageTermsString);
 
     // When
-    var result = webStatement.retrieveFromDWCA(unit);
+    var result = usageTerms.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(webStatementString);
+    assertThat(result).isEqualTo(usageTermsString);
   }
 
 
   @Test
   void testGetTerm() {
     // When
-    var result = webStatement.getTerm();
+    var result = usageTerms.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(WebStatement.TERM);
+    assertThat(result).isEqualTo(UsageTerms.TERM);
   }
 
 }

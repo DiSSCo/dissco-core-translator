@@ -17,7 +17,7 @@ class IdentifiedByIDTest {
     // Given
     var identifiedByString = "https://orcid.org/0000-0002-5669-2769";
     var unit = MAPPER.createObjectNode();
-    unit.put("dwc:identifiedById", identifiedByString);
+    unit.put("dwc:identifiedByID", identifiedByString);
 
     // When
     var result = identifiedById.retrieveFromDWCA(unit);

@@ -1,9 +1,11 @@
 package eu.dissco.core.translator.terms;
 
-import static eu.dissco.core.translator.domain.AgenRoleType.CREATOR;
-import static eu.dissco.core.translator.domain.AgenRoleType.DATA_TRANSLATOR;
-import static eu.dissco.core.translator.domain.AgenRoleType.GEOREFERENCER;
-import static eu.dissco.core.translator.domain.AgenRoleType.IDENTIFIER;
+import static eu.dissco.core.translator.domain.AgentRoleType.COLLECTOR;
+import static eu.dissco.core.translator.domain.AgentRoleType.CREATOR;
+import static eu.dissco.core.translator.domain.AgentRoleType.DATA_TRANSLATOR;
+import static eu.dissco.core.translator.domain.AgentRoleType.GEOREFERENCER;
+import static eu.dissco.core.translator.domain.AgentRoleType.IDENTIFIER;
+import static eu.dissco.core.translator.domain.AgentRoleType.RIGHTS_OWNER;
 import static eu.dissco.core.translator.domain.RelationshipType.HAS_FDO_TYPE;
 import static eu.dissco.core.translator.domain.RelationshipType.HAS_LICENSE;
 import static eu.dissco.core.translator.domain.RelationshipType.HAS_ORGANISATION_ID;
@@ -14,17 +16,16 @@ import static eu.dissco.core.translator.domain.RelationshipType.HAS_SOURCE_SYSTE
 import static eu.dissco.core.translator.domain.RelationshipType.HAS_URL;
 import static eu.dissco.core.translator.schema.Agent.Type.SCHEMA_PERSON;
 import static eu.dissco.core.translator.schema.Agent.Type.SCHEMA_SOFTWARE_APPLICATION;
+import static eu.dissco.core.translator.terms.utils.AgentsUtils.addAgent;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.dissco.core.translator.component.OrganisationNameComponent;
 import eu.dissco.core.translator.component.SourceSystemComponent;
-import eu.dissco.core.translator.domain.AgenRoleType;
 import eu.dissco.core.translator.domain.RelationshipType;
 import eu.dissco.core.translator.exception.OrganisationException;
 import eu.dissco.core.translator.exception.UnknownPhysicalSpecimenIdType;
 import eu.dissco.core.translator.properties.FdoProperties;
-import eu.dissco.core.translator.schema.Agent;
 import eu.dissco.core.translator.schema.Citation;
 import eu.dissco.core.translator.schema.DigitalMedia;
 import eu.dissco.core.translator.schema.DigitalMedia.DctermsType;
@@ -39,7 +40,6 @@ import eu.dissco.core.translator.schema.Georeference;
 import eu.dissco.core.translator.schema.Identification;
 import eu.dissco.core.translator.schema.Identifier;
 import eu.dissco.core.translator.schema.Location;
-import eu.dissco.core.translator.schema.OdsHasRole;
 import eu.dissco.core.translator.schema.TaxonIdentification;
 import eu.dissco.core.translator.terms.media.AccessURI;
 import eu.dissco.core.translator.terms.media.Available;
@@ -70,9 +70,11 @@ import eu.dissco.core.translator.terms.media.SubjectPartLiteral;
 import eu.dissco.core.translator.terms.media.Subtype;
 import eu.dissco.core.translator.terms.media.SubtypeLiteral;
 import eu.dissco.core.translator.terms.media.TimeOfDay;
+import eu.dissco.core.translator.terms.media.UsageTerms;
 import eu.dissco.core.translator.terms.media.Variant;
 import eu.dissco.core.translator.terms.media.VariantDescription;
 import eu.dissco.core.translator.terms.media.VariantLiteral;
+import eu.dissco.core.translator.terms.media.WebStatement;
 import eu.dissco.core.translator.terms.specimen.AccessRights;
 import eu.dissco.core.translator.terms.specimen.BasisOfRecord;
 import eu.dissco.core.translator.terms.specimen.CollectionID;
@@ -116,6 +118,7 @@ import eu.dissco.core.translator.terms.specimen.event.EventAssertions;
 import eu.dissco.core.translator.terms.specimen.event.EventDate;
 import eu.dissco.core.translator.terms.specimen.event.EventRemark;
 import eu.dissco.core.translator.terms.specimen.event.EventRemarks;
+import eu.dissco.core.translator.terms.specimen.event.EventType;
 import eu.dissco.core.translator.terms.specimen.event.FieldNotes;
 import eu.dissco.core.translator.terms.specimen.event.FieldNumber;
 import eu.dissco.core.translator.terms.specimen.event.GeoreferenceVerificationStatus;
@@ -138,6 +141,7 @@ import eu.dissco.core.translator.terms.specimen.identification.IdentificationID;
 import eu.dissco.core.translator.terms.specimen.identification.IdentificationRemarks;
 import eu.dissco.core.translator.terms.specimen.identification.IdentificationVerificationStatus;
 import eu.dissco.core.translator.terms.specimen.identification.IdentifiedBy;
+import eu.dissco.core.translator.terms.specimen.identification.IdentifiedByID;
 import eu.dissco.core.translator.terms.specimen.identification.TypeStatus;
 import eu.dissco.core.translator.terms.specimen.identification.VerbatimIdentification;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.AcceptedNameUsage;
@@ -280,19 +284,20 @@ public abstract class BaseDigitalObjectDirector {
   protected abstract List<Identification> assembleIdentifications(JsonNode data, boolean dwc);
 
   protected Citation createCitation(JsonNode data, boolean dwc) {
-    return new Citation()
+    var citation = new Citation()
         .withId(termMapper.retrieveTerm(new ReferenceIRI(), data, dwc))
         .withType("ods:Citation")
         .withDctermsBibliographicCitation(
             termMapper.retrieveTerm(new BibliographicCitation(), data, dwc))
         .withDctermsDescription(termMapper.retrieveTerm(new CitationDescription(), data, dwc))
         .withDctermsIdentifier(termMapper.retrieveTerm(new ReferenceIRI(), data, dwc))
-        .withOdsHasAgents(getAgent(termMapper.retrieveTerm(
-            new eu.dissco.core.translator.terms.specimen.citation.Creator(),
-            data, dwc), null, CREATOR, SCHEMA_PERSON))
         .withDctermsType(termMapper.retrieveTerm(new Type(), data, dwc))
         .withDctermsDate(termMapper.retrieveTerm(new Date(), data, dwc))
         .withDctermsTitle(termMapper.retrieveTerm(new Title(), data, dwc));
+    citation.setOdsHasAgents(addAgent(citation.getOdsHasAgents(), termMapper.retrieveTerm(
+        new eu.dissco.core.translator.terms.specimen.citation.Creator(),
+        data, dwc), null, CREATOR, SCHEMA_PERSON));
+    return citation;
   }
 
   private DigitalSpecimen assembleDigitalSpecimenTerms(JsonNode data, boolean dwc)
@@ -338,10 +343,7 @@ public abstract class BaseDigitalObjectDirector {
         .withDwcDisposition(termMapper.retrieveTerm(new Disposition(), data, dwc))
         .withDwcInformationWithheld(termMapper.retrieveTerm(new InformationWithheld(), data, dwc))
         .withDwcVerbatimLabel(termMapper.retrieveTerm(new VerbatimLabel(), data, dwc))
-        .withDwcDataGeneralizations(termMapper.retrieveTerm(new DataGeneralizations(), data, dwc))
-        .withOdsHasAgents(getAgent(termMapper.retrieveTerm(new RecordedBy(), data, dwc),
-            termMapper.retrieveTerm(new RecordedByID(), data, dwc), AgenRoleType.COLLECTOR,
-            SCHEMA_PERSON));
+        .withDwcDataGeneralizations(termMapper.retrieveTerm(new DataGeneralizations(), data, dwc));
   }
 
   private String getOrganisationName(String organisationId) throws OrganisationException {
@@ -382,14 +384,14 @@ public abstract class BaseDigitalObjectDirector {
 
   private EntityRelationship getEntityRelationship(RelationshipType relationshipType,
       String relatedResource) {
-    return new EntityRelationship()
+    var entityRelationship = new EntityRelationship()
         .withType("ods:EntityRelationship")
         .withDwcRelationshipOfResource(relationshipType.getName())
         .withDwcRelatedResourceID(relatedResource)
-        .withOdsHasAgents(
-            getAgent(fdoProperties.getApplicationName(), fdoProperties.getApplicationPID(),
-                DATA_TRANSLATOR, SCHEMA_SOFTWARE_APPLICATION))
         .withDwcRelationshipEstablishedDate(java.util.Date.from(Instant.now()));
+    entityRelationship.setOdsHasAgents(addAgent(entityRelationship.getOdsHasAgents(), fdoProperties.getApplicationName(),
+        fdoProperties.getApplicationPID(), DATA_TRANSLATOR, SCHEMA_SOFTWARE_APPLICATION));
+    return entityRelationship;
   }
 
   private List<eu.dissco.core.translator.schema.Identifier> assembleIdentifiers(JsonNode data) {
@@ -445,7 +447,7 @@ public abstract class BaseDigitalObjectDirector {
         .withDwcSuperfamily(termMapper.retrieveTerm(new Superfamily(), data, dwc))
         .withDwcTribe(termMapper.retrieveTerm(new Tribe(), data, dwc));
     var identificationId = termMapper.retrieveTerm(new IdentificationID(), data, dwc);
-    return new Identification()
+    var identification = new Identification()
         .withId(identificationId)
         .withType("ods:Identification")
         .withDwcIdentificationID(identificationId)
@@ -457,11 +459,11 @@ public abstract class BaseDigitalObjectDirector {
             termMapper.retrieveTerm(new IdentificationRemarks(), data, dwc))
         .withDwcVerbatimIdentification(
             termMapper.retrieveTerm(new VerbatimIdentification(), data, dwc))
-        .withOdsHasAgents(
-            getAgent(termMapper.retrieveTerm(new IdentifiedBy(), data, dwc), null, IDENTIFIER,
-                SCHEMA_PERSON))
         .withOdsHasTaxonIdentifications(List.of(mappedTaxonIdentification))
         .withOdsHasCitations(assembleIdentificationCitations(data, dwc));
+    identification.setOdsHasAgents(addAgent(identification.getOdsHasAgents(), termMapper.retrieveTerm(new IdentifiedBy(), data, dwc),
+        termMapper.retrieveTerm(new IdentifiedByID(), data, dwc), IDENTIFIER, SCHEMA_PERSON));
+    return identification;
   }
 
 
@@ -488,10 +490,9 @@ public abstract class BaseDigitalObjectDirector {
         .withDwcGeoreferencedDate(termMapper.retrieveTerm(new GeoreferencedDate(), data, dwc))
         .withDwcGeoreferenceRemarks(termMapper.retrieveTerm(new GeoreferenceRemarks(), data, dwc))
         .withDwcGeoreferenceSources(termMapper.retrieveTerm(new GeoreferenceSources(), data, dwc))
-        .withDwcPointRadiusSpatialFit(parseToDouble(new PointRadiusSpatialFit(), data, dwc))
-        .withOdsHasAgents(
-            getAgent(termMapper.retrieveTerm(new GeoreferencedBy(), data, dwc), null,
-                GEOREFERENCER, SCHEMA_PERSON));
+        .withDwcPointRadiusSpatialFit(parseToDouble(new PointRadiusSpatialFit(), data, dwc));
+    geoReference.setOdsHasAgents(addAgent(geoReference.getOdsHasAgents(), termMapper.retrieveTerm(
+        new GeoreferencedBy(), data, dwc), null, GEOREFERENCER, SCHEMA_PERSON));
     var geologicalContext = new GeologicalContext()
         .withType("ods:GeologicalContext")
         .withDwcLowestBiostratigraphicZone(
@@ -559,6 +560,7 @@ public abstract class BaseDigitalObjectDirector {
     var assertions = new EventAssertions().gatherEventAssertions(mapper, data, dwc);
     var event = new Event()
         .withType("ods:Event")
+        .withDwcEventType(termMapper.retrieveTerm(new EventType(), data, dwc))
         .withDwcFieldNumber(termMapper.retrieveTerm(new FieldNumber(), data, dwc))
         .withDwcEventDate(termMapper.retrieveTerm(new EventDate(), data, dwc))
         .withDwcVerbatimEventDate(termMapper.retrieveTerm(new VerbatimEventDate(), data, dwc))
@@ -588,6 +590,8 @@ public abstract class BaseDigitalObjectDirector {
         .withDwcVitality(termMapper.retrieveTerm(new Vitality(), data, dwc))
         .withOdsHasLocation(location)
         .withOdsHasAssertions(assertions);
+    event.setOdsHasAgents(addAgent(event.getOdsHasAgents(), termMapper.retrieveTerm(new RecordedBy(), data, dwc),
+        termMapper.retrieveTerm(new RecordedByID(), data, dwc), COLLECTOR, SCHEMA_PERSON));
     return List.of(event);
   }
 
@@ -653,6 +657,8 @@ public abstract class BaseDigitalObjectDirector {
         .withOdsOrganisationName(getOrganisationName(organisationId))
         .withAcAccessURI(termMapper.retrieveTerm(new AccessURI(), mediaRecord, dwc))
         .withDctermsRights(termMapper.retrieveTerm(new License(), mediaRecord, dwc))
+        .withXmpRightsUsageTerms(termMapper.retrieveTerm(new UsageTerms(), mediaRecord, dwc))
+        .withXmpRightsWebStatement(termMapper.retrieveTerm(new WebStatement(), mediaRecord, dwc))
         .withDctermsFormat(termMapper.retrieveTerm(new Format(), mediaRecord, dwc))
         .withDctermsType(retrieveEnum(new MediaType(), mediaRecord, dwc, DctermsType.class))
         .withDctermsSource(termMapper.retrieveTerm(new Source(), mediaRecord, dwc))
@@ -696,31 +702,14 @@ public abstract class BaseDigitalObjectDirector {
             termMapper.retrieveTerm(new Modified(), mediaRecord, dwc))
         .withDctermsDescription(termMapper.retrieveTerm(new Description(), mediaRecord, dwc))
         .withOdsHasIdentifiers(assembleIdentifiers(mediaRecord))
-        .withOdsHasAssertions(new MediaAssertions().gatherAssertions(mediaRecord, dwc))
-        .withOdsHasAgents(getAgent(termMapper.retrieveTerm(new Creator(), mediaRecord, dwc),
-            null, AgenRoleType.CREATOR, SCHEMA_PERSON));
+        .withOdsHasAssertions(new MediaAssertions().gatherAssertions(mediaRecord, dwc));
+    digitalMedia.setOdsHasAgents(addAgent(digitalMedia.getOdsHasAgents(), termMapper
+        .retrieveTerm(new Creator(), mediaRecord, dwc), null, CREATOR, SCHEMA_PERSON));
+    digitalMedia.setOdsHasAgents(addAgent(digitalMedia.getOdsHasAgents(), termMapper
+        .retrieveTerm(new RightsOwner(), mediaRecord, dwc), null, RIGHTS_OWNER, SCHEMA_PERSON));
     digitalMedia.withOdsHasEntityRelationships(
         assembleDigitalMediaEntityRelationships(digitalMedia));
     return digitalMedia;
-  }
-
-  private List<Agent> getAgent(String name, String id, AgenRoleType role, Agent.Type type) {
-    if (name != null || id != null) {
-      var agent = new Agent()
-          .withId(id)
-          .withType(type)
-          .withSchemaName(name)
-          .withSchemaIdentifier(id)
-          .withOdsHasRoles(
-              List.of(new OdsHasRole().withType("schema:Role").withSchemaRoleName(role.getName())));
-      if (id != null) {
-        agent.withOdsHasIdentifiers(List.of(
-            new Identifier().withId(id).withType("ods:Identifier").withDctermsIdentifier(id)));
-
-      }
-      return List.of(agent);
-    }
-    return null;
   }
 
   private List<EntityRelationship> assembleDigitalMediaEntityRelationships(

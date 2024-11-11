@@ -6,7 +6,7 @@ import java.util.List;
 
 public class WebStatement extends Term {
 
-  public static final String TERM = "xmpRights:webStatement";
+  public static final String TERM = "xmpRights:WebStatement";
   private final List<String> dwcaTerms = List.of(TERM);
 
   @Override
