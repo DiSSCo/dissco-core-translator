@@ -16,20 +16,19 @@ import reactor.core.scheduler.Schedulers;
 public class OrganisationNameComponent {
 
   private final WebClient webClient;
+  private static final String NAMES = "names";
+  private static final String ORG_NAME_ERROR = "Unable to retrieve organisationName";
 
   @Cacheable("ror")
   public String getRorName(String ror) throws OrganisationException {
     log.info("Requesting organisation details for organisation: {} with ror", ror);
-    String url = "https://api.ror.org/organizations/" + ror;
+    String url = "https://api.ror.org/v2/organizations/" + ror;
     var response = webClient.get().uri(url).retrieve().bodyToMono(JsonNode.class)
         .publishOn(Schedulers.boundedElastic());
     try {
       var json = response.toFuture().get();
       if (json != null) {
-        var name = json.get("name");
-        if (name != null) {
-          return name.asText();
-        }
+        return getRorInstitutionName(json);
       }
     } catch (InterruptedException e) {
       log.error("Failed to make request to RoR service", e);
@@ -38,7 +37,28 @@ public class OrganisationNameComponent {
       log.error("Failed to make request to RoR service", e);
     }
     log.warn("Could not match name to a ROR id for: {}", url);
-    throw new OrganisationException("Unable to retrieve organisationName");
+    throw new OrganisationException(ORG_NAME_ERROR);
+  }
+
+  private static String getRorInstitutionName(JsonNode rorResult) throws OrganisationException {
+    try {
+      if (rorResult.get(NAMES).isArray() && !rorResult.get(NAMES).isEmpty()) {
+        for (var name : rorResult.get(NAMES)) {
+          for (var type : name.get("types")) {
+            if ("ror_display".equals(type.asText())) {
+              return name.get("value").asText();
+            }
+          }
+        }
+        log.warn("No ror display names provided in ROR record. Using first name");
+        return rorResult.get(NAMES).get(0).get("value").asText();
+      }
+      log.error("Unable to parse ROR result {}", rorResult);
+      throw new OrganisationException(ORG_NAME_ERROR);
+    } catch (NullPointerException e) {
+      log.error("Unexpected ROR result {}", rorResult, e);
+      throw new OrganisationException(ORG_NAME_ERROR);
+    }
   }
 
   @Cacheable("wikidata")
@@ -59,6 +79,6 @@ public class OrganisationNameComponent {
       log.error("Failed to make request to wikidata service", e);
     }
     log.warn("Could not match to an English (en) label to a wikidata id for: {}", url);
-    throw new OrganisationException("Unable to retrieve organisationName");
+    throw new OrganisationException(ORG_NAME_ERROR);
   }
 }
