@@ -469,7 +469,7 @@ public abstract class BaseDigitalObjectDirector {
 
   private List<Event> assembleEventTerms(JsonNode data, boolean dwc) {
     var geoReference = new Georeference()
-        .withType("ods:GeoReference")
+        .withType("ods:Georeference")
         .withDwcDecimalLatitude(
             parseToDouble(new DecimalLatitude(), data, dwc))
         .withDwcVerbatimLatitude(termMapper.retrieveTerm(new VerbatimLatitude(), data, dwc))
@@ -666,7 +666,6 @@ public abstract class BaseDigitalObjectDirector {
         .withAcMetadataLanguageLiteral(
             termMapper.retrieveTerm(new MetadataLanguageLiteral(), mediaRecord, dwc))
         .withDctermsLanguage(termMapper.retrieveTerm(new Language(), mediaRecord, dwc))
-        .withXmpRightsOwner(termMapper.retrieveTerm(new RightsOwner(), mediaRecord, dwc))
         .withDctermsAvailable(termMapper.retrieveTerm(new Available(), mediaRecord, dwc))
         .withAcComments(termMapper.retrieveTerm(new Comments(), mediaRecord, dwc))
         .withIptc4xmpExtCVterm(termMapper.retrieveTerm(new Iptc4xmpExtCVterm(), mediaRecord, dwc))

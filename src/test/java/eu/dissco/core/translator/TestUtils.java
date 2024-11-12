@@ -40,8 +40,8 @@ public class TestUtils {
       {
          "@id": "https://hdl.handle.net/TEST/PH1-C7E-Q4J",
          "@type": "ods:DataMapping",
-         "ods:ID": "https://hdl.handle.net/TEST/PH1-C7E-Q4J",
-         "ods:type": "https://hdl.handle.net/21.T11148/ce794a6f4df42eb7e77e",
+         "schema:identifier": "https://hdl.handle.net/TEST/PH1-C7E-Q4J",
+         "ods:fdoType": "https://hdl.handle.net/21.T11148/ce794a6f4df42eb7e77e",
          "ods:status": "ods:Active",
          "schema:version": 2,
          "schema:name": "RBINS default mapping",
@@ -53,7 +53,7 @@ public class TestUtils {
              "@type": "schema:Person",
              "ods:hasIdentifier": []
          },
-        "ods:FieldMapping": [
+        "ods:hasTermMapping": [
           {
             "ods:physicalSpecimenID": "dwc:occurrenceID"
           },
@@ -67,7 +67,7 @@ public class TestUtils {
             "ods:datasetID": "dwc:datasetID"
           }
         ],
-        "ods:DefaultMapping": [
+        "ods:hasDefaultMapping": [
           {
             "ods:physicalSpecimenIDType": "cetaf"
           },
@@ -78,7 +78,7 @@ public class TestUtils {
             "ods:organisationID": "https://ror.org/02y22ws83"
           }
         ],
-        "ods:mappingDataStandard": "dwc"
+        "ods:mappingDataStandard": "DwC"
       }""";
 
   public static String loadResourceFile(String fileName) throws IOException {
