@@ -1,6 +1,29 @@
 {
   "id": "https://ror.org/03srysw20",
-  "name": "The MuseumFactory",
+  "names": [
+    {
+      "lang": null,
+      "types": [
+        "acronym"
+      ],
+      "value": "DMF"
+    },
+    {
+      "lang": "nl",
+      "types": [
+        "label"
+      ],
+      "value": "De MuseumFabriek"
+    },
+    {
+      "lang": "en",
+      "types": [
+        "ror_display",
+        "label"
+      ],
+      "value": "The MuseumFactory"
+    }
+  ],
   "email_address": null,
   "ip_addresses": [],
   "established": 2008,

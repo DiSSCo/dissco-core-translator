@@ -1,5 +1,6 @@
 package eu.dissco.core.translator.component;
 
+import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static eu.dissco.core.translator.TestUtils.loadResourceFile;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -7,14 +8,19 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.dissco.core.translator.exception.OrganisationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -62,6 +68,63 @@ class OrganisationNameComponentTest {
 
     // Then
     assertThat(result).isEqualTo("The MuseumFactory");
+  }
+
+  @Test
+  void testGetRorIdFirst() throws Exception {
+    // Given
+    givenWebclient();
+    given(jsonFuture.get()).willReturn(
+        mapper.readTree("""
+            {
+              "names": [
+                {
+                  "lang": "nl",
+                  "types": [
+                    "label"
+                    ],
+                  "value": "De MuseumFabriek"
+                  }
+              ]
+            }
+            """));
+
+    // When
+    var result = rorComponent.getRorName(ROR);
+
+    // Then
+    assertThat(result).isEqualTo("De MuseumFabriek");
+  }
+
+  @ParameterizedTest
+  @MethodSource("badRorResponse")
+  void testBadRorResponse(JsonNode rorResponse) throws Exception  {
+    // Given
+    givenWebclient();
+    given(jsonFuture.get()).willReturn(rorResponse);
+
+    // When / Then
+    assertThrows(OrganisationException.class, () -> rorComponent.getRorName(ROR));
+
+  }
+
+  private static Stream<Arguments> badRorResponse() throws JsonProcessingException {
+    return Stream.of(
+        Arguments.of(
+            MAPPER.readTree("""
+                {
+                  "names":"De MuseumFabriek"
+                }
+                """)
+        ),
+        Arguments.of(
+            MAPPER.readTree("""
+                {
+                  "names": ["De MuseumFabriek"]
+                }
+                """)
+        )
+    );
   }
 
   @Test
