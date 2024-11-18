@@ -65,11 +65,11 @@ public class AgentsUtils {
       List<Agent> agents, String agentValue, String agentId, AgentRoleType role, Type type) {
     var ids = new String[0];
     var agentValues = new String[0];
-    if (agentValue != null && (agentValue.contains("&") || agentValue.contains("|"))) {
+    if (checkIfNeedsParsing(agentValue)) {
       agentValues = Arrays.stream(agentValue.split("[&|]")).map(String::trim)
           .toArray(String[]::new);
     }
-    if (agentId != null && (agentId.contains("&") || agentId.contains("|"))) {
+    if (checkIfNeedsParsing(agentId)) {
       ids = Arrays.stream(agentId.split("[&|]")).map(String::trim).toArray(String[]::new);
     }
     if (agentValues.length == ids.length) {
@@ -95,5 +95,9 @@ public class AgentsUtils {
         constructAgent(agents, null, idValue, role, type);
       }
     }
+  }
+
+  private static boolean checkIfNeedsParsing(String value) {
+    return value != null && (value.contains("&") || value.contains("|"));
   }
 }
