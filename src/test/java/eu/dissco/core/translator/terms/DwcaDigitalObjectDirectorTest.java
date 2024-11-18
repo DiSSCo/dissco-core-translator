@@ -58,6 +58,8 @@ class DwcaDigitalObjectDirectorTest {
         .willReturn("https://ror.org/0443cwa12");
     given(termMapper.retrieveTerm(any(PhysicalSpecimenIDType.class), eq(specimenJson), eq(true)))
         .willReturn(OdsPhysicalSpecimenIDType.LOCAL.value());
+    given(fdoProperties.getDigitalSpecimenType()).willReturn(
+        "https://hdl.handle.net/21.T11148/ce794a6f4df42eb7e77e");
 
     // When
     var result = director.assembleDigitalSpecimenTerm(specimenJson, true);
@@ -86,6 +88,8 @@ class DwcaDigitalObjectDirectorTest {
         .willReturn("https://ror.org/0443cwa12");
     given(termMapper.retrieveTerm(any(PhysicalSpecimenIDType.class), eq(specimenJson), eq(true)))
         .willReturn(OdsPhysicalSpecimenIDType.LOCAL.value());
+    given(fdoProperties.getDigitalSpecimenType()).willReturn(
+        "https://hdl.handle.net/21.T11148/ce794a6f4df42eb7e77e");
 
     // When
     var result = director.assembleDigitalSpecimenTerm(specimenJson, true);
@@ -112,6 +116,8 @@ class DwcaDigitalObjectDirectorTest {
         "National Museum of Natural History");
     given(termMapper.retrieveTerm(any(Term.class), eq(specimenJson), eq(true))).willReturn(
         "a mapped term");
+    given(fdoProperties.getDigitalMediaType()).willReturn(
+        "https://hdl.handle.net/21.T11148/ce794a6f4df42eb7e77e");
 
     // When
     var result = director.assembleDigitalMedia(true, specimenJson,

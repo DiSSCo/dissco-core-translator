@@ -1,6 +1,7 @@
 package eu.dissco.core.translator.terms.utils;
 
 import static eu.dissco.core.translator.domain.AgentRoleType.DATA_TRANSLATOR;
+import static eu.dissco.core.translator.domain.RelationshipType.HAS_FDO_TYPE;
 import static eu.dissco.core.translator.domain.RelationshipType.HAS_ORGANISATION_ID;
 import static eu.dissco.core.translator.schema.Agent.Type.SCHEMA_SOFTWARE_APPLICATION;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -13,6 +14,7 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -45,11 +47,22 @@ class EntityRelationshipUtilsTest {
     var expected = createEntityRelationship(relationshipType, relatedResource, relatedResourceURI);
 
     // When
-    var result = EntityRelationshipUtils.addEntityRelationship(relationshipType, relatedResource, APP_NAME, APP_PID);
+    var result = EntityRelationshipUtils.addEntityRelationship(relationshipType, relatedResource,
+        APP_NAME, APP_PID);
 
     // Then
     assertThat(result).usingRecursiveComparison().ignoringFields("dwcRelationshipEstablishedDate")
         .isEqualTo(expected);
+  }
+
+  @Test
+  void testNullRelatedResource() {
+    // When
+    var result = EntityRelationshipUtils.addEntityRelationship(HAS_FDO_TYPE, null, APP_NAME,
+        APP_PID);
+
+    // Then
+    assertThat(result).isNull();
   }
 
   private EntityRelationship createEntityRelationship(RelationshipType relationshipType,

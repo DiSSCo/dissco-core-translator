@@ -21,6 +21,11 @@ public class EntityRelationshipUtils {
 
   public static EntityRelationship addEntityRelationship(
       RelationshipType relationshipType, String relatedResource, String agentName, String agentId) {
+    if (relatedResource == null) {
+      log.warn("Related resource for type {} is null. Skipping entity relationship creation.",
+          relationshipType.getName());
+      return null;
+    }
     var entityRelationship = new EntityRelationship()
         .withType("ods:EntityRelationship")
         .withDwcRelationshipOfResource(relationshipType.getName())
