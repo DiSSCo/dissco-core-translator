@@ -50,11 +50,29 @@ class OrganisationNameComponentTest {
   private CompletableFuture<JsonNode> jsonFuture;
   private OrganisationNameComponent rorComponent;
 
+  private static Stream<Arguments> badRorResponse() throws JsonProcessingException {
+    return Stream.of(
+        Arguments.of(
+            MAPPER.readTree("""
+                {
+                  "names":"De MuseumFabriek"
+                }
+                """)
+        ),
+        Arguments.of(
+            MAPPER.readTree("""
+                {
+                  "names": ["De MuseumFabriek"]
+                }
+                """)
+        )
+    );
+  }
+
   @BeforeEach
   void setup() {
     this.rorComponent = new OrganisationNameComponent(client);
   }
-
 
   @Test
   void testGetRorId() throws Exception {
@@ -98,7 +116,7 @@ class OrganisationNameComponentTest {
 
   @ParameterizedTest
   @MethodSource("badRorResponse")
-  void testBadRorResponse(JsonNode rorResponse) throws Exception  {
+  void testBadRorResponse(JsonNode rorResponse) throws Exception {
     // Given
     givenWebclient();
     given(jsonFuture.get()).willReturn(rorResponse);
@@ -106,25 +124,6 @@ class OrganisationNameComponentTest {
     // When / Then
     assertThrows(OrganisationException.class, () -> rorComponent.getRorName(ROR));
 
-  }
-
-  private static Stream<Arguments> badRorResponse() throws JsonProcessingException {
-    return Stream.of(
-        Arguments.of(
-            MAPPER.readTree("""
-                {
-                  "names":"De MuseumFabriek"
-                }
-                """)
-        ),
-        Arguments.of(
-            MAPPER.readTree("""
-                {
-                  "names": ["De MuseumFabriek"]
-                }
-                """)
-        )
-    );
   }
 
   @Test

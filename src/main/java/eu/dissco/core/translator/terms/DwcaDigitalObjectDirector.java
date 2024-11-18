@@ -25,7 +25,8 @@ public class DwcaDigitalObjectDirector extends BaseDigitalObjectDirector {
   public DwcaDigitalObjectDirector(ObjectMapper mapper, TermMapper termMapper,
       OrganisationNameComponent rorComponent, SourceSystemComponent sourceSystemComponent,
       FdoProperties fdoProperties) {
-    super(mapper, termMapper, rorComponent, sourceSystemComponent, fdoProperties, identifierTerms());
+    super(mapper, termMapper, rorComponent, sourceSystemComponent, fdoProperties,
+        identifierTerms());
   }
 
   private static List<String> identifierTerms() {
@@ -52,7 +53,7 @@ public class DwcaDigitalObjectDirector extends BaseDigitalObjectDirector {
       var references = data.get(EXTENSION).get("gbif:Reference");
       for (int i = 0; i < references.size(); i++) {
         var citationJson = references.get(i);
-        if (citationJson.properties().size() <= 1){
+        if (citationJson.properties().size() <= 1) {
           log.debug("Skipping citation with only one property: {}", citationJson);
         } else {
           citations.add(createCitation(citationJson, dwc));

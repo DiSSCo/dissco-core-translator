@@ -137,7 +137,7 @@ public class DwcaService extends WebClientService {
         var specimenData = dwcaRepository.getCoreRecords(batch, getTableName(archive.getCore()));
         log.info("Got specimen batch: {}", batch.size());
         addExtensionsToSpecimen(archive, batch, specimenData);
-        log.info("Start translation and publishing of batch: {}", specimenData.values().size());
+        log.info("Start translation and publishing of batch: {}", specimenData.size());
         processDigitalSpecimen(specimenData.values(), optionalEmlData, processedRecords);
       }
     } catch (ReachedMaximumLimitException e) {

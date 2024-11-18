@@ -5,6 +5,7 @@ import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
 public class OrganismScope extends Term {
+
   public static final String TERM = DWC_PREFIX + "organismScope";
 
   private final List<String> dwcaTerms = List.of(TERM);

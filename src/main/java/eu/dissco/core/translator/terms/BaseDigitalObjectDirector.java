@@ -2,7 +2,6 @@ package eu.dissco.core.translator.terms;
 
 import static eu.dissco.core.translator.domain.AgentRoleType.COLLECTOR;
 import static eu.dissco.core.translator.domain.AgentRoleType.CREATOR;
-import static eu.dissco.core.translator.domain.AgentRoleType.DATA_TRANSLATOR;
 import static eu.dissco.core.translator.domain.AgentRoleType.GEOREFERENCER;
 import static eu.dissco.core.translator.domain.AgentRoleType.IDENTIFIER;
 import static eu.dissco.core.translator.domain.AgentRoleType.RIGHTS_OWNER;
@@ -15,14 +14,13 @@ import static eu.dissco.core.translator.domain.RelationshipType.HAS_SOURCE;
 import static eu.dissco.core.translator.domain.RelationshipType.HAS_SOURCE_SYSTEM_ID;
 import static eu.dissco.core.translator.domain.RelationshipType.HAS_URL;
 import static eu.dissco.core.translator.schema.Agent.Type.SCHEMA_PERSON;
-import static eu.dissco.core.translator.schema.Agent.Type.SCHEMA_SOFTWARE_APPLICATION;
 import static eu.dissco.core.translator.terms.utils.AgentsUtils.addAgent;
+import static eu.dissco.core.translator.terms.utils.EntityRelationshipUtils.addEntityRelationship;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.dissco.core.translator.component.OrganisationNameComponent;
 import eu.dissco.core.translator.component.SourceSystemComponent;
-import eu.dissco.core.translator.domain.RelationshipType;
 import eu.dissco.core.translator.exception.OrganisationException;
 import eu.dissco.core.translator.exception.UnknownPhysicalSpecimenIdType;
 import eu.dissco.core.translator.properties.FdoProperties;
@@ -235,7 +233,6 @@ import eu.dissco.core.translator.terms.specimen.stratigraphy.lithostratigraphic.
 import eu.dissco.core.translator.terms.specimen.stratigraphy.lithostratigraphic.Group;
 import eu.dissco.core.translator.terms.specimen.stratigraphy.lithostratigraphic.LithostratigraphicTerms;
 import eu.dissco.core.translator.terms.specimen.stratigraphy.lithostratigraphic.Member;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -362,36 +359,30 @@ public abstract class BaseDigitalObjectDirector {
   private List<EntityRelationship> assembleDigitalSpecimenEntityRelationships(
       DigitalSpecimen ds) {
     var relationships = new ArrayList<EntityRelationship>();
-    relationships.add(getEntityRelationship(HAS_ORGANISATION_ID, ds.getOdsOrganisationID()));
-    relationships.add(getEntityRelationship(HAS_SOURCE_SYSTEM_ID, ds.getOdsSourceSystemID()));
-    relationships.add(getEntityRelationship(HAS_FDO_TYPE, fdoProperties.getDigitalSpecimenType()));
+    relationships.add(addEntityRelationship(HAS_ORGANISATION_ID, ds.getOdsOrganisationID(),
+        fdoProperties.getApplicationName(), fdoProperties.getApplicationPID()));
+    relationships.add(addEntityRelationship(HAS_SOURCE_SYSTEM_ID, ds.getOdsSourceSystemID(),
+        fdoProperties.getApplicationName(), fdoProperties.getApplicationPID()));
+    relationships.add(addEntityRelationship(HAS_FDO_TYPE, fdoProperties.getDigitalSpecimenType(),
+        fdoProperties.getApplicationName(), fdoProperties.getApplicationPID()));
     if (ds.getOdsPhysicalSpecimenIDType().equals(OdsPhysicalSpecimenIDType.RESOLVABLE)) {
       relationships.add(
-          getEntityRelationship(HAS_PHYSICAL_IDENTIFIER, ds.getOdsPhysicalSpecimenID()));
+          addEntityRelationship(HAS_PHYSICAL_IDENTIFIER, ds.getOdsPhysicalSpecimenID(),
+              fdoProperties.getApplicationName(), fdoProperties.getApplicationPID()));
     }
     if (ds.getDctermsLicense() != null && ds.getDctermsLicense().startsWith("http")) {
-      relationships.add(getEntityRelationship(HAS_LICENSE, ds.getDctermsLicense()));
+      relationships.add(addEntityRelationship(HAS_LICENSE, ds.getDctermsLicense(),
+          fdoProperties.getApplicationName(), fdoProperties.getApplicationPID()));
     }
     if (ds.getOdsHasCitations() != null) {
       for (Citation citation : ds.getOdsHasCitations()) {
         if (citation.getId() != null && citation.getId().startsWith("http")) {
-          relationships.add(getEntityRelationship(HAS_REFERENCE, citation.getId()));
+          relationships.add(addEntityRelationship(HAS_REFERENCE, citation.getId(),
+              fdoProperties.getApplicationName(), fdoProperties.getApplicationPID()));
         }
       }
     }
     return relationships;
-  }
-
-  private EntityRelationship getEntityRelationship(RelationshipType relationshipType,
-      String relatedResource) {
-    var entityRelationship = new EntityRelationship()
-        .withType("ods:EntityRelationship")
-        .withDwcRelationshipOfResource(relationshipType.getName())
-        .withDwcRelatedResourceID(relatedResource)
-        .withDwcRelationshipEstablishedDate(java.util.Date.from(Instant.now()));
-    entityRelationship.setOdsHasAgents(addAgent(entityRelationship.getOdsHasAgents(), fdoProperties.getApplicationName(),
-        fdoProperties.getApplicationPID(), DATA_TRANSLATOR, SCHEMA_SOFTWARE_APPLICATION));
-    return entityRelationship;
   }
 
   private List<eu.dissco.core.translator.schema.Identifier> assembleIdentifiers(JsonNode data) {
@@ -461,7 +452,8 @@ public abstract class BaseDigitalObjectDirector {
             termMapper.retrieveTerm(new VerbatimIdentification(), data, dwc))
         .withOdsHasTaxonIdentifications(List.of(mappedTaxonIdentification))
         .withOdsHasCitations(assembleIdentificationCitations(data, dwc));
-    identification.setOdsHasAgents(addAgent(identification.getOdsHasAgents(), termMapper.retrieveTerm(new IdentifiedBy(), data, dwc),
+    identification.setOdsHasAgents(addAgent(identification.getOdsHasAgents(),
+        termMapper.retrieveTerm(new IdentifiedBy(), data, dwc),
         termMapper.retrieveTerm(new IdentifiedByID(), data, dwc), IDENTIFIER, SCHEMA_PERSON));
     return identification;
   }
@@ -590,8 +582,9 @@ public abstract class BaseDigitalObjectDirector {
         .withDwcVitality(termMapper.retrieveTerm(new Vitality(), data, dwc))
         .withOdsHasLocation(location)
         .withOdsHasAssertions(assertions);
-    event.setOdsHasAgents(addAgent(event.getOdsHasAgents(), termMapper.retrieveTerm(new RecordedBy(), data, dwc),
-        termMapper.retrieveTerm(new RecordedByID(), data, dwc), COLLECTOR, SCHEMA_PERSON));
+    event.setOdsHasAgents(
+        addAgent(event.getOdsHasAgents(), termMapper.retrieveTerm(new RecordedBy(), data, dwc),
+            termMapper.retrieveTerm(new RecordedByID(), data, dwc), COLLECTOR, SCHEMA_PERSON));
     return List.of(event);
   }
 
@@ -714,19 +707,24 @@ public abstract class BaseDigitalObjectDirector {
   private List<EntityRelationship> assembleDigitalMediaEntityRelationships(
       DigitalMedia digitalMedia) {
     var relationships = new ArrayList<EntityRelationship>();
-    relationships.add(getEntityRelationship(HAS_URL, digitalMedia.getAcAccessURI()));
+    relationships.add(addEntityRelationship(HAS_URL, digitalMedia.getAcAccessURI(),
+        fdoProperties.getApplicationName(), fdoProperties.getApplicationPID()));
     relationships.add(
-        getEntityRelationship(HAS_ORGANISATION_ID, digitalMedia.getOdsOrganisationID()));
+        addEntityRelationship(HAS_ORGANISATION_ID, digitalMedia.getOdsOrganisationID(),
+            fdoProperties.getApplicationName(), fdoProperties.getApplicationPID()));
     relationships.add(
-        getEntityRelationship(HAS_FDO_TYPE, fdoProperties.getDigitalMediaType()));
+        addEntityRelationship(HAS_FDO_TYPE, fdoProperties.getDigitalMediaType(),
+            fdoProperties.getApplicationName(), fdoProperties.getApplicationPID()));
     if (digitalMedia.getDctermsRights() != null && digitalMedia.getDctermsRights()
         .startsWith("http")) {
       relationships.add(
-          getEntityRelationship(HAS_LICENSE, digitalMedia.getDctermsRights()));
+          addEntityRelationship(HAS_LICENSE, digitalMedia.getDctermsRights(),
+              fdoProperties.getApplicationName(), fdoProperties.getApplicationPID()));
     }
     if (digitalMedia.getDctermsSource() != null && digitalMedia.getDctermsSource()
         .startsWith("http")) {
-      relationships.add(getEntityRelationship(HAS_SOURCE, digitalMedia.getDctermsSource()));
+      relationships.add(addEntityRelationship(HAS_SOURCE, digitalMedia.getDctermsSource(),
+          fdoProperties.getApplicationName(), fdoProperties.getApplicationPID()));
     }
     return relationships;
   }

@@ -20,6 +20,7 @@
     <commons-beanutils.version>1.9.4</commons-beanutils.version>
     <jaxb2-maven-plugin.version>3.1.0</jaxb2-maven-plugin.version>
     <commons-compress.version>1.27.1</commons-compress.version>
+    <netty-common.version>4.1.115.Final</netty-common.version>
     <jakarta.activation-api.version>2.1.3</jakarta.activation-api.version>
     <jakarta.xml.bind-api.version>4.0.2</jakarta.xml.bind-api.version>
     <mockito-inline.version>5.2.0</mockito-inline.version>
@@ -87,8 +88,15 @@
       <groupId>org.gbif</groupId>
       <artifactId>dwca-io</artifactId>
       <version>${dwca-io.version}</version>
+      <!-- Needed to exclude this dep from dwca-io because of CVE-2024-47554 -->
+      <exclusions>
+        <exclusion>
+          <groupId>commons-io</groupId>
+          <artifactId>commons-io</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
-    <!--    Needed to overwrite gbif dep with security issue in this lib -->
+    <!-- Needed to overwrite gbif dep with security issue in this lib -->
     <dependency>
       <groupId>commons-beanutils</groupId>
       <artifactId>commons-beanutils</artifactId>
@@ -99,6 +107,12 @@
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-compress</artifactId>
       <version>${commons-compress.version}</version>
+    </dependency>
+    <!-- Necessary to mitigate CVE-2024-47535 in spring-boot 3.3.5 (18-11-2024) -->
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-common</artifactId>
+      <version>${netty-common.version}</version>
     </dependency>
     <dependency>
       <groupId>org.codehaus.mojo</groupId>

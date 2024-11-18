@@ -64,6 +64,7 @@ import org.springframework.web.reactive.function.client.WebClient.ResponseSpec;
 class DwcaServiceTest {
 
   private final XMLInputFactory factory = XMLInputFactory.newFactory();
+  private final ApplicationProperties applicationProperties = new ApplicationProperties();
   @Mock
   private WebClient webClient;
   @Mock
@@ -86,9 +87,6 @@ class DwcaServiceTest {
   private BaseDigitalObjectDirector digitalSpecimenDirector;
   @Mock
   private FdoProperties fdoProperties;
-  private final ApplicationProperties applicationProperties = new ApplicationProperties();
-
-
   private DwcaService service;
 
   private static void cleanup(String first) throws IOException {

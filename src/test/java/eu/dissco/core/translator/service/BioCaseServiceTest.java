@@ -49,9 +49,9 @@ class BioCaseServiceTest {
 
   private final XMLInputFactory factory = XMLInputFactory.newFactory();
   private final ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
+  private final ApplicationProperties properties = new ApplicationProperties();
   @Mock
   private WebClient webClient;
-  private final ApplicationProperties properties = new ApplicationProperties();
   @Mock
   private SourceSystemComponent sourceSystemComponent;
   @Mock
@@ -75,7 +75,8 @@ class BioCaseServiceTest {
     var configuration = new Configuration(Configuration.VERSION_2_3_31);
     configuration.setTemplateLoader(
         new FileTemplateLoader(new ClassPathResource("templates").getFile()));
-    service = new BioCaseService(mapper, properties, webClient, sourceSystemComponent, configuration, factory,
+    service = new BioCaseService(mapper, properties, webClient, sourceSystemComponent,
+        configuration, factory,
         kafkaService, enrichmentProperties, digitalSpecimenDirector, fdoProperties);
 
     // Given
