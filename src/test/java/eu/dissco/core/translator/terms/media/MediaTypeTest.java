@@ -40,7 +40,7 @@ class MediaTypeTest {
   private static Stream<Arguments> provideABCDFormats() {
     return Stream.of(
         Arguments.of("image/jpeg", "Still_Image"),
-        Arguments.of("APPLICATION/JSON", "Dataset"),
+        Arguments.of("APPLICATION/JSON", "Interactive_Resource"),
         Arguments.of("unknown/format", null),
         Arguments.of(null, null)
     );
