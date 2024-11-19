@@ -1,11 +1,14 @@
 package eu.dissco.core.translator.terms.utils;
 
+import static eu.dissco.core.translator.schema.Identifier.DctermsType.ARK;
 import static eu.dissco.core.translator.schema.Identifier.DctermsType.DOI;
 import static eu.dissco.core.translator.schema.Identifier.DctermsType.HANDLE;
+import static eu.dissco.core.translator.schema.Identifier.DctermsType.PURL;
 import static eu.dissco.core.translator.schema.Identifier.DctermsType.URL;
 import static eu.dissco.core.translator.schema.Identifier.OdsGupriLevel.GLOBALLY_UNIQUE_STABLE;
 import static eu.dissco.core.translator.schema.Identifier.OdsGupriLevel.GLOBALLY_UNIQUE_STABLE_PERSISTENT_RESOLVABLE;
 import static eu.dissco.core.translator.schema.Identifier.OdsGupriLevel.GLOBALLY_UNIQUE_STABLE_PERSISTENT_RESOLVABLE_FDO_COMPLIANT;
+import static java.util.regex.Pattern.compile;
 
 import eu.dissco.core.translator.schema.Identifier;
 import eu.dissco.core.translator.schema.Identifier.DctermsType;
@@ -15,31 +18,38 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Triple;
 
 @Slf4j
 public class IdentifierUtils {
 
-  private static final Map<List<String>, Triple<DctermsType, String, OdsGupriLevel>> map = getPrefixMap();
+  private static final Map<List<Pattern>, Triple<DctermsType, String, OdsGupriLevel>> map = getPrefixMap();
 
   private IdentifierUtils() {
     // This is a Utility class
   }
 
-  private static Map<List<String>, Triple<DctermsType, String, OdsGupriLevel>> getPrefixMap() {
-    var linkedMap = new LinkedHashMap<List<String>, Triple<DctermsType, String, OdsGupriLevel>>();
-    linkedMap.put(List.of("https://doi.org"),
+  private static Map<List<Pattern>, Triple<DctermsType, String, OdsGupriLevel>> getPrefixMap() {
+    var linkedMap = new LinkedHashMap<List<Pattern>, Triple<DctermsType, String, OdsGupriLevel>>();
+    linkedMap.put(List.of(compile("^https?://doi.org")),
         Triple.of(DOI, "DOI", GLOBALLY_UNIQUE_STABLE_PERSISTENT_RESOLVABLE_FDO_COMPLIANT));
-    linkedMap.put(List.of("https://hdl.handle.net"),
+    linkedMap.put(List.of(compile("^https?://hdl.handle.net")),
         Triple.of(HANDLE, "Handle", GLOBALLY_UNIQUE_STABLE_PERSISTENT_RESOLVABLE_FDO_COMPLIANT));
-    linkedMap.put(List.of("http://www.wikidata.org", "https://www.wikidata.org"),
+    linkedMap.put(List.of(compile("^https?://www.wikidata.org")),
         Triple.of(URL, "Wikidata", GLOBALLY_UNIQUE_STABLE_PERSISTENT_RESOLVABLE));
-    linkedMap.put(List.of("http://orcid.org", "https://orcid.org"),
+    linkedMap.put(List.of(compile("^https?://orcid.org")),
         Triple.of(URL, "ORCID", GLOBALLY_UNIQUE_STABLE_PERSISTENT_RESOLVABLE));
-    linkedMap.put(List.of("http", "https"),
+    linkedMap.put(List.of(compile("^https?://orcid.org")),
+        Triple.of(URL, "ORCID", GLOBALLY_UNIQUE_STABLE_PERSISTENT_RESOLVABLE));
+    linkedMap.put(List.of(compile("^https?://\\w+.\\w+/ark:/\\w+/\\w+")),
+        Triple.of(ARK, "ARK", GLOBALLY_UNIQUE_STABLE_PERSISTENT_RESOLVABLE));
+    linkedMap.put(List.of(compile("https?://purl.org")),
+        Triple.of(PURL, "PURL", GLOBALLY_UNIQUE_STABLE_PERSISTENT_RESOLVABLE));
+    linkedMap.put(List.of(compile("^https?")),
         Triple.of(URL, "URL", GLOBALLY_UNIQUE_STABLE_PERSISTENT_RESOLVABLE));
-    linkedMap.put(List.of("urn:uuid"),
+    linkedMap.put(List.of(compile("^urn:uuid")),
         Triple.of(DctermsType.UUID, "UUID", GLOBALLY_UNIQUE_STABLE));
     return linkedMap;
   }
@@ -64,7 +74,7 @@ public class IdentifierUtils {
         .withOdsIdentifierStatus(identifierStatus);
     for (var entry : map.entrySet()) {
       for (var prefix : entry.getKey()) {
-        if (identifierString.startsWith(prefix)) {
+        if (prefix.matcher(identifierString).find()) {
           identifier.setDctermsType(entry.getValue().getLeft());
           identifier.setDctermsTitle(getDcTermsTitle(identifierName, entry.getValue().getMiddle()));
           identifier.setOdsGupriLevel(entry.getValue().getRight());

@@ -1,7 +1,9 @@
 package eu.dissco.core.translator.terms.utils;
 
+import static eu.dissco.core.translator.schema.Identifier.DctermsType.ARK;
 import static eu.dissco.core.translator.schema.Identifier.DctermsType.HANDLE;
 import static eu.dissco.core.translator.schema.Identifier.DctermsType.LOCALLY_UNIQUE_IDENTIFIER;
+import static eu.dissco.core.translator.schema.Identifier.DctermsType.PURL;
 import static eu.dissco.core.translator.schema.Identifier.DctermsType.URL;
 import static eu.dissco.core.translator.schema.Identifier.DctermsType.UUID;
 import static eu.dissco.core.translator.schema.Identifier.OdsGupriLevel.GLOBALLY_UNIQUE_STABLE;
@@ -43,6 +45,12 @@ class IdentifierUtilsTest {
                 GLOBALLY_UNIQUE_STABLE, null)),
         Arguments.of("https://geocollections.info/specimen/126758", "abcd:unitGUID", null,
             createIdentifier("https://geocollections.info/specimen/126758", URL, "abcd:unitGUID",
+                GLOBALLY_UNIQUE_STABLE_PERSISTENT_RESOLVABLE, null)),
+        Arguments.of("http://n2t.net/ark:/65665/3173bef93-f5c6-4534-bd31-42289606938b", "dwc:catalogueNumber", null,
+            createIdentifier("http://n2t.net/ark:/65665/3173bef93-f5c6-4534-bd31-42289606938b", ARK, "dwc:catalogueNumber",
+                GLOBALLY_UNIQUE_STABLE_PERSISTENT_RESOLVABLE, null)),
+        Arguments.of("http://purl.org/dc/terms/accessRights", null, null,
+            createIdentifier("http://purl.org/dc/terms/accessRights", PURL, "PURL",
                 GLOBALLY_UNIQUE_STABLE_PERSISTENT_RESOLVABLE, null)),
         Arguments.of("AVES-071259", "dwc:occurrenceID", null,
             createIdentifier("AVES-071259", LOCALLY_UNIQUE_IDENTIFIER, "dwc:occurrenceID",
