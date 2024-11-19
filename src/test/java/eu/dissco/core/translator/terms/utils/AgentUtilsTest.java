@@ -72,8 +72,7 @@ class AgentUtilsTest {
                 .withSchemaRoleName(CREATOR.getName())));
     if (id != null) {
       agent.withOdsHasIdentifiers(
-          List.of(new eu.dissco.core.translator.schema.Identifier().withType("ods:Identifier")
-              .withId(id).withDctermsIdentifier(id)));
+          List.of(IdentifierUtils.addIdentifier(id)));
     }
     return agent;
   }
