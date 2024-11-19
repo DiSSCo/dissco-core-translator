@@ -1,10 +1,6 @@
 package eu.dissco.core.translator.terms.utils;
 
-import static eu.dissco.core.translator.schema.Identifier.DctermsType.ARK;
-import static eu.dissco.core.translator.schema.Identifier.DctermsType.DOI;
-import static eu.dissco.core.translator.schema.Identifier.DctermsType.HANDLE;
-import static eu.dissco.core.translator.schema.Identifier.DctermsType.PURL;
-import static eu.dissco.core.translator.schema.Identifier.DctermsType.URL;
+import static eu.dissco.core.translator.schema.Identifier.DctermsType.*;
 import static eu.dissco.core.translator.schema.Identifier.OdsGupriLevel.GLOBALLY_UNIQUE_STABLE;
 import static eu.dissco.core.translator.schema.Identifier.OdsGupriLevel.GLOBALLY_UNIQUE_STABLE_PERSISTENT_RESOLVABLE;
 import static eu.dissco.core.translator.schema.Identifier.OdsGupriLevel.GLOBALLY_UNIQUE_STABLE_PERSISTENT_RESOLVABLE_FDO_COMPLIANT;
@@ -17,7 +13,6 @@ import eu.dissco.core.translator.schema.Identifier.OdsIdentifierStatus;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Triple;
@@ -49,7 +44,7 @@ public class IdentifierUtils {
         Triple.of(URL, "URL", GLOBALLY_UNIQUE_STABLE_PERSISTENT_RESOLVABLE));
     linkedMap.put(List.of(compile(
             "(uuid:)*[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}")),
-        Triple.of(DctermsType.UUID, "UUID", GLOBALLY_UNIQUE_STABLE));
+        Triple.of(UUID, "UUID", GLOBALLY_UNIQUE_STABLE));
     return linkedMap;
   }
 
@@ -95,16 +90,6 @@ public class IdentifierUtils {
       return identifierName;
     } else {
       return defaultValue;
-    }
-  }
-
-  private static boolean isValidUUID(String identifierString) {
-    try {
-      UUID.fromString(identifierString);
-      return true;
-    } catch (IllegalArgumentException e) {
-      log.debug("Identifier {} is not a valid UUID", identifierString);
-      return false;
     }
   }
 }
