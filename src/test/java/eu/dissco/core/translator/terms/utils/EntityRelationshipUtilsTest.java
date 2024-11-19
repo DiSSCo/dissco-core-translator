@@ -4,6 +4,7 @@ import static eu.dissco.core.translator.domain.AgentRoleType.DATA_TRANSLATOR;
 import static eu.dissco.core.translator.domain.RelationshipType.HAS_FDO_TYPE;
 import static eu.dissco.core.translator.domain.RelationshipType.HAS_ORGANISATION_ID;
 import static eu.dissco.core.translator.schema.Agent.Type.SCHEMA_SOFTWARE_APPLICATION;
+import static eu.dissco.core.translator.terms.utils.AgentsUtils.addAgent;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import eu.dissco.core.translator.domain.RelationshipType;
@@ -73,7 +74,7 @@ class EntityRelationshipUtilsTest {
         .withDwcRelatedResourceID(relatedResource)
         .withOdsRelatedResourceURI(relatedResourceURI)
         .withDwcRelationshipEstablishedDate(Date.from(Instant.now()))
-        .withOdsHasAgents(AgentsUtils.addAgent(List.of(), APP_NAME, APP_PID,
+        .withOdsHasAgents(addAgent(List.of(), APP_NAME, APP_PID,
             DATA_TRANSLATOR, SCHEMA_SOFTWARE_APPLICATION));
 
   }
