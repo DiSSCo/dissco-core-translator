@@ -72,11 +72,11 @@ public class AgentsUtils {
       OdsIdentifierStatus identifierStatus) {
     var ids = new String[0];
     var agentValues = new String[0];
-    if (checkIfNeedsParsing(agentValue)) {
+    if (needsParsing(agentValue)) {
       agentValues = Arrays.stream(agentValue.split("[&|]")).map(String::trim)
           .toArray(String[]::new);
     }
-    if (checkIfNeedsParsing(agentId)) {
+    if (needsParsing(agentId)) {
       ids = Arrays.stream(agentId.split("[&|]")).map(String::trim).toArray(String[]::new);
     }
     if (agentValues.length == ids.length) {
@@ -104,7 +104,7 @@ public class AgentsUtils {
     }
   }
 
-  private static boolean checkIfNeedsParsing(String value) {
+  private static boolean needsParsing(String value) {
     return value != null && (value.contains("&") || value.contains("|"));
   }
 }
