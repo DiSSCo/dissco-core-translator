@@ -58,6 +58,8 @@ class DwcaDigitalObjectDirectorTest {
         .willReturn("https://ror.org/0443cwa12");
     given(termMapper.retrieveTerm(any(PhysicalSpecimenIDType.class), eq(specimenJson), eq(true)))
         .willReturn(OdsPhysicalSpecimenIDType.LOCAL.value());
+    given(fdoProperties.getDigitalSpecimenType()).willReturn(
+        "https://hdl.handle.net/21.T11148/ce794a6f4df42eb7e77e");
 
     // When
     var result = director.assembleDigitalSpecimenTerm(specimenJson, true);
@@ -65,10 +67,13 @@ class DwcaDigitalObjectDirectorTest {
     // Then
     assertThat(result).isNotNull();
     assertThat(result.getOdsStatus()).isEqualTo(OdsStatus.ACTIVE);
-    assertThat(result.getOdsHasEntityRelationships()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(3);
-    assertThat(result.getOdsHasIdentifiers()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(3);
+    assertThat(result.getOdsHasEntityRelationships()).asInstanceOf(InstanceOfAssertFactories.LIST)
+        .hasSize(3);
+    assertThat(result.getOdsHasIdentifiers()).asInstanceOf(InstanceOfAssertFactories.LIST)
+        .hasSize(3);
     assertThat(result.getOdsHasCitations()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(2);
-    assertThat(result.getOdsHasIdentifications()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(2);
+    assertThat(result.getOdsHasIdentifications()).asInstanceOf(InstanceOfAssertFactories.LIST)
+        .hasSize(2);
   }
 
   @Test
@@ -83,16 +88,21 @@ class DwcaDigitalObjectDirectorTest {
         .willReturn("https://ror.org/0443cwa12");
     given(termMapper.retrieveTerm(any(PhysicalSpecimenIDType.class), eq(specimenJson), eq(true)))
         .willReturn(OdsPhysicalSpecimenIDType.LOCAL.value());
+    given(fdoProperties.getDigitalSpecimenType()).willReturn(
+        "https://hdl.handle.net/21.T11148/ce794a6f4df42eb7e77e");
 
     // When
     var result = director.assembleDigitalSpecimenTerm(specimenJson, true);
 
     // Then
     assertThat(result).isNotNull();
-    assertThat(result.getOdsHasEntityRelationships()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(3);
-    assertThat(result.getOdsHasIdentifiers()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(3);
+    assertThat(result.getOdsHasEntityRelationships()).asInstanceOf(InstanceOfAssertFactories.LIST)
+        .hasSize(3);
+    assertThat(result.getOdsHasIdentifiers()).asInstanceOf(InstanceOfAssertFactories.LIST)
+        .hasSize(3);
     assertThat(result.getOdsHasCitations()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(1);
-    assertThat(result.getOdsHasIdentifications()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(1);
+    assertThat(result.getOdsHasIdentifications()).asInstanceOf(InstanceOfAssertFactories.LIST)
+        .hasSize(1);
     assertThat(((eu.dissco.core.translator.schema.Identification) result.getOdsHasIdentifications()
         .get(0)).getOdsIsVerifiedIdentification()).isTrue();
   }
@@ -106,6 +116,8 @@ class DwcaDigitalObjectDirectorTest {
         "National Museum of Natural History");
     given(termMapper.retrieveTerm(any(Term.class), eq(specimenJson), eq(true))).willReturn(
         "a mapped term");
+    given(fdoProperties.getDigitalMediaType()).willReturn(
+        "https://hdl.handle.net/21.T11148/ce794a6f4df42eb7e77e");
 
     // When
     var result = director.assembleDigitalMedia(true, specimenJson,
@@ -113,8 +125,10 @@ class DwcaDigitalObjectDirectorTest {
 
     // Then
     assertThat(result).isNotNull();
-    assertThat(result.getOdsHasEntityRelationships()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(3);
-    assertThat(result.getOdsHasIdentifiers()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(2);
+    assertThat(result.getOdsHasEntityRelationships()).asInstanceOf(InstanceOfAssertFactories.LIST)
+        .hasSize(3);
+    assertThat(result.getOdsHasIdentifiers()).asInstanceOf(InstanceOfAssertFactories.LIST)
+        .hasSize(2);
   }
 
   private JsonNode givenDwcaMediaObject() throws JsonProcessingException {

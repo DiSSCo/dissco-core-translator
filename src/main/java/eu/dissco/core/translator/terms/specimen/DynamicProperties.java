@@ -5,6 +5,7 @@ import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
 public class DynamicProperties extends Term {
+
   public static final String TERM = DWC_PREFIX + "dynamicProperties";
 
   private final List<String> dwcaTerms = List.of(TERM);

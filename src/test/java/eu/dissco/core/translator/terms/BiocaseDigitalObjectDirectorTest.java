@@ -111,6 +111,8 @@ class BiocaseDigitalObjectDirectorTest {
         .willReturn("https://www.wikidata.org/wiki/Q604487");
     given(termMapper.retrieveTerm(any(PhysicalSpecimenIDType.class), eq(specimenJson), eq(false)))
         .willReturn(OdsPhysicalSpecimenIDType.RESOLVABLE.value());
+    given(fdoProperties.getDigitalSpecimenType()).willReturn(
+        "https://hdl.handle.net/21.T11148/ce794a6f4df42eb7e77e");
 
     // When
     var result = director.assembleDigitalSpecimenTerm(specimenJson, false);
@@ -118,10 +120,13 @@ class BiocaseDigitalObjectDirectorTest {
     // Then
     assertThat(result).isNotNull();
     assertThat(result.getOdsStatus()).isEqualTo(OdsStatus.ACTIVE);
-    assertThat(result.getOdsHasEntityRelationships()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(4);
-    assertThat(result.getOdsHasIdentifiers()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(4);
+    assertThat(result.getOdsHasEntityRelationships()).asInstanceOf(InstanceOfAssertFactories.LIST)
+        .hasSize(4);
+    assertThat(result.getOdsHasIdentifiers()).asInstanceOf(InstanceOfAssertFactories.LIST)
+        .hasSize(4);
     assertThat(result.getOdsHasCitations()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(1);
-    assertThat(result.getOdsHasIdentifications()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(totalIdentifications);
+    assertThat(result.getOdsHasIdentifications()).asInstanceOf(InstanceOfAssertFactories.LIST)
+        .hasSize(totalIdentifications);
   }
 
   @ParameterizedTest

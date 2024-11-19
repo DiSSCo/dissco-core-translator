@@ -9,7 +9,8 @@ public class SpecimenName extends Term {
 
   public String calculate(DigitalSpecimen ds) {
     var acceptedIdentification = retrieveAcceptedIdentification(ds);
-    if (acceptedIdentification != null && acceptedIdentification.getOdsHasTaxonIdentifications() != null
+    if (acceptedIdentification != null
+        && acceptedIdentification.getOdsHasTaxonIdentifications() != null
         && !acceptedIdentification.getOdsHasTaxonIdentifications().isEmpty()) {
       if (acceptedIdentification.getOdsHasTaxonIdentifications().get(0)
           .getDwcScientificName() != null) {

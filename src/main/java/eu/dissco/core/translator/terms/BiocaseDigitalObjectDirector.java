@@ -24,7 +24,8 @@ public class BiocaseDigitalObjectDirector extends BaseDigitalObjectDirector {
   public BiocaseDigitalObjectDirector(ObjectMapper mapper, TermMapper termMapper,
       OrganisationNameComponent rorComponent, SourceSystemComponent sourceSystemComponent,
       FdoProperties fdoProperties) {
-    super(mapper, termMapper, rorComponent, sourceSystemComponent, fdoProperties, identifierTerms());
+    super(mapper, termMapper, rorComponent, sourceSystemComponent, fdoProperties,
+        identifierTerms());
   }
 
   private static List<String> identifierTerms() {

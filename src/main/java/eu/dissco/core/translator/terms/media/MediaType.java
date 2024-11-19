@@ -12,9 +12,11 @@ public class MediaType extends Term {
   private static final String STILL_IMAGE = "Still_Image";
   private static final String SOUND = "Sound";
   private static final String MOVING_IMAGE = "Moving_Image";
+  private static final String INTERACTIVE_RESOURCE = "Interactive_Resource";
   private final List<String> dwcaTerms = List.of(TERM, "dc:type");
   private final List<String> imageFormats = List.of("IMAGE/JPG", "JPG", "IMAGE/JPEG",
       "JPEG", "IMAGE/PNG", "PNG", "IMAGE/TIF", "TIF");
+  private final List<String> interactiveResourceFormats = List.of("APPLICATION/JSON");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
@@ -51,6 +53,8 @@ public class MediaType extends Term {
       format = format.toUpperCase();
       if (imageFormats.contains(format)) {
         return STILL_IMAGE;
+      } else if (interactiveResourceFormats.contains(format)) {
+        return INTERACTIVE_RESOURCE;
       } else {
         log.warn("Unable to determine media type of digital media object");
         return null;

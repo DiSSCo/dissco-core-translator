@@ -19,7 +19,8 @@ public class TopicDiscipline extends Term {
   public OdsTopicDiscipline calculate(DigitalSpecimen ds) {
     var basisOfRecord = ds.getDwcBasisOfRecord();
     var acceptedIdentification = retrieveAcceptedIdentification(ds);
-    if (acceptedIdentification != null && acceptedIdentification.getOdsHasTaxonIdentifications() != null
+    if (acceptedIdentification != null
+        && acceptedIdentification.getOdsHasTaxonIdentifications() != null
         && !acceptedIdentification.getOdsHasTaxonIdentifications().isEmpty()) {
       return getDiscipline(basisOfRecord,
           acceptedIdentification.getOdsHasTaxonIdentifications().get(0).getDwcKingdom());

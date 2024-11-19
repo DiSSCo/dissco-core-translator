@@ -65,10 +65,11 @@ public class AgentsUtils {
       List<Agent> agents, String agentValue, String agentId, AgentRoleType role, Type type) {
     var ids = new String[0];
     var agentValues = new String[0];
-    if (agentValue != null && (agentValue.contains("&") || agentValue.contains("|"))) {
-      agentValues = Arrays.stream(agentValue.split("[&|]")).map(String::trim).toArray(String[]::new);
+    if (needsParsing(agentValue)) {
+      agentValues = Arrays.stream(agentValue.split("[&|]")).map(String::trim)
+          .toArray(String[]::new);
     }
-    if (agentId != null && (agentId.contains("&") || agentId.contains("|"))) {
+    if (needsParsing(agentId)) {
       ids = Arrays.stream(agentId.split("[&|]")).map(String::trim).toArray(String[]::new);
     }
     if (agentValues.length == ids.length) {
@@ -76,19 +77,27 @@ public class AgentsUtils {
         constructAgent(agents, agentValues[i], ids[i], role, type);
       }
     } else if (agentValues.length > ids.length) {
-      log.warn(
-          "The number of agentValues values is greater than ids, ignoring ids for term: {} and agentId: {}",
-          agentValue, agentId);
+      if (ids.length != 0) {
+        log.warn(
+            "The number of agentValues values is greater than ids, ignoring ids for term: {} and agentId: {}",
+            agentValue, agentId);
+      }
       for (String agent : agentValues) {
         constructAgent(agents, agent, null, role, type);
       }
     } else {
-      log.warn(
-          "The number of ids is greater than agentValue, ignoring agentValue values for term: {} and agentId: {}",
-          agentValue, agentId);
+      if (agentValues.length != 0) {
+        log.warn(
+            "The number of ids is greater than agentValue, ignoring agentValue values for term: {} and agentId: {}",
+            agentValue, agentId);
+      }
       for (String idValue : ids) {
         constructAgent(agents, null, idValue, role, type);
       }
     }
+  }
+
+  private static boolean needsParsing(String value) {
+    return value != null && (value.contains("&") || value.contains("|"));
   }
 }

@@ -55,7 +55,7 @@ class DataMappingRepositoryIT extends BaseRepositoryIT {
         .set(DATA_MAPPING.VERSION, 1)
         .set(DATA_MAPPING.NAME, "Royal Botanic Garden Edinburgh Living Plant Collections Mapping")
         .set(DATA_MAPPING.CREATOR, "e2befba6-9324-4bb4-9f41-d7dfae4a44b0")
-        .set(DATA_MAPPING.DATE_CREATED,Instant.parse("2022-09-16T08:25:01.00Z"))
+        .set(DATA_MAPPING.DATE_CREATED, Instant.parse("2022-09-16T08:25:01.00Z"))
         .set(DATA_MAPPING.DATE_MODIFIED, Instant.parse("2022-09-16T08:25:01.00Z"))
         .set(DATA_MAPPING.MAPPING_DATA_STANDARD, "dwc")
         .set(DATA_MAPPING.DATA, JSONB.valueOf(mapping))
