@@ -16,6 +16,7 @@ import static eu.dissco.core.translator.domain.RelationshipType.HAS_URL;
 import static eu.dissco.core.translator.schema.Agent.Type.SCHEMA_PERSON;
 import static eu.dissco.core.translator.terms.utils.AgentsUtils.addAgent;
 import static eu.dissco.core.translator.terms.utils.EntityRelationshipUtils.addEntityRelationship;
+import static eu.dissco.core.translator.terms.utils.IdentifierUtils.addIdentifier;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -389,11 +390,7 @@ public abstract class BaseDigitalObjectDirector {
     var identifiers = new ArrayList<Identifier>();
     for (String identifierTerm : identifierTerms) {
       if (data.get(identifierTerm) != null) {
-        var identifier = new Identifier()
-            .withId(data.get(identifierTerm).asText())
-            .withType("ods:Identifier")
-            .withDctermsTitle(identifierTerm)
-            .withDctermsIdentifier(data.get(identifierTerm).asText());
+        var identifier = addIdentifier(data.get(identifierTerm).asText(), identifierTerm);
         identifiers.add(identifier);
       }
     }
