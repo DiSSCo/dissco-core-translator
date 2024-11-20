@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
-public class MinimumDistanceAboveSurfaceInMeters extends Term {
+public class MinimumDistanceAboveSurfaceInMeters extends AbstractMeterTerm {
 
   public static final String TERM = DWC_PREFIX + "minimumDistanceAboveSurfaceInMeters";
 
@@ -14,12 +14,22 @@ public class MinimumDistanceAboveSurfaceInMeters extends Term {
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
-    return super.searchJsonForTerm(unit, dwcaTerms);
+    var rawResult = super.searchJsonForTerm(unit, dwcaTerms);
+    if (rawResult != null) {
+      return sanitizeInput(rawResult);
+    } else {
+      return null;
+    }
   }
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    return super.searchJsonForTerm(unit, abcdTerms);
+    var rawResult = super.searchJsonForTerm(unit, abcdTerms);
+    if (rawResult != null) {
+      return sanitizeInput(rawResult);
+    } else {
+      return null;
+    }
   }
 
   @Override
