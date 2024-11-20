@@ -1,6 +1,11 @@
 package eu.dissco.core.translator.terms.utils;
 
-import static eu.dissco.core.translator.schema.Identifier.DctermsType.*;
+import static eu.dissco.core.translator.schema.Identifier.DctermsType.ARK;
+import static eu.dissco.core.translator.schema.Identifier.DctermsType.DOI;
+import static eu.dissco.core.translator.schema.Identifier.DctermsType.HANDLE;
+import static eu.dissco.core.translator.schema.Identifier.DctermsType.PURL;
+import static eu.dissco.core.translator.schema.Identifier.DctermsType.URL;
+import static eu.dissco.core.translator.schema.Identifier.DctermsType.UUID;
 import static eu.dissco.core.translator.schema.Identifier.OdsGupriLevel.GLOBALLY_UNIQUE_STABLE;
 import static eu.dissco.core.translator.schema.Identifier.OdsGupriLevel.GLOBALLY_UNIQUE_STABLE_PERSISTENT_RESOLVABLE;
 import static eu.dissco.core.translator.schema.Identifier.OdsGupriLevel.GLOBALLY_UNIQUE_STABLE_PERSISTENT_RESOLVABLE_FDO_COMPLIANT;
