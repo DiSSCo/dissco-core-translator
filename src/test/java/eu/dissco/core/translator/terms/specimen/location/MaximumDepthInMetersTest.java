@@ -41,6 +41,20 @@ class MaximumDepthInMetersTest {
     // Then
     assertThat(result).isNull();
   }
+
+  @Test
+  void testRetrieveFromDWCAUnSanitizable() {
+    // Given
+    var unit = MAPPER.createObjectNode();
+    unit.put("dwc:maximumDepthInMeters", "235 ft");
+
+    // When
+    var result = maximumDepthInMeters.retrieveFromDWCA(unit);
+
+    // Then
+    assertThat(result).isEqualTo("235 ft");
+  }
+
   @ParameterizedTest
   @ValueSource(strings = {"-350m.", "-350meter", "-350 m", "-350 MTR"})
   void testRetrieveFromABCD(String input) {
