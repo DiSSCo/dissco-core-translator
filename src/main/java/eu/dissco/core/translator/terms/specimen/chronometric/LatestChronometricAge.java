@@ -6,7 +6,7 @@ import java.util.List;
 
 public class LatestChronometricAge extends Term {
 
-  public static final String TERM = "chrono:latestChronometricAge";
+  public static final String TERM = CHRONO_PREFIX + "latestChronometricAge";
 
   private final List<String> dwcaTerms = List.of(TERM);
   private final List<String> abcdTerms = List.of("latestDate");

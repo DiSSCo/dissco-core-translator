@@ -6,7 +6,7 @@ import java.util.List;
 
 public class ChronometricAgeUncertaintyMethod extends Term {
 
-  public static final String TERM = "chrono:chronometricAgeUncertaintyMethod";
+  public static final String TERM = CHRONO_PREFIX + "chronometricAgeUncertaintyMethod";
 
   private final List<String> dwcaTerms = List.of(TERM);
 

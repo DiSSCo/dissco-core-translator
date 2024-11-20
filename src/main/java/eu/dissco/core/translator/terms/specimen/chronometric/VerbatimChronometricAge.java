@@ -6,7 +6,7 @@ import java.util.List;
 
 public class VerbatimChronometricAge extends Term {
 
-  public static final String TERM = "chrono:verbatimChronometricAge";
+  public static final String TERM = CHRONO_PREFIX + "verbatimChronometricAge";
 
   private final List<String> dwcaTerms = List.of(TERM);
   private final List<String> abcdTerms = List.of("datingAccuracy");

@@ -6,7 +6,7 @@ import java.util.List;
 
 public class MaterialDated extends Term {
 
-  public static final String TERM = "chrono:materialDated";
+  public static final String TERM = CHRONO_PREFIX + "materialDated";
 
   private final List<String> dwcaTerms = List.of(TERM);
   private final List<String> abcdTerms = List.of("materialDated");

@@ -6,7 +6,7 @@ import java.util.List;
 
 public class ChronometricAgeConversionProtocol extends Term {
 
-  public static final String TERM = "chrono:chronometricAgeConversionProtocol";
+  public static final String TERM = CHRONO_PREFIX + "chronometricAgeConversionProtocol";
 
   private final List<String> dwcaTerms = List.of(TERM);
 

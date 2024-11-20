@@ -6,7 +6,7 @@ import java.util.List;
 
 public class ChronometricAgeRemarks extends Term {
 
-  public static final String TERM = "chrono:chronometricAgeRemarks";
+  public static final String TERM = CHRONO_PREFIX + "chronometricAgeRemarks";
 
   private final List<String> dwcaTerms = List.of(TERM);
   private final List<String> abcdTerms = List.of("datingComment");

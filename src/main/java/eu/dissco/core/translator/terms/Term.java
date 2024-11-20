@@ -15,6 +15,7 @@ public abstract class Term {
   protected static final String ODS_PREFIX = "ods:";
   protected static final String DWC_PREFIX = "dwc:";
   protected static final String DCTERMS_PREFIX = "dcterms:";
+  protected static final String CHRONO_PREFIX = "chrono:";
   protected static final Pair<String, String> ABCD_NAMED_AREA_KEY =
       Pair.of(
           "abcd:gathering/namedAreas/namedArea/",
