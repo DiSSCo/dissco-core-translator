@@ -1,5 +1,6 @@
 package eu.dissco.core.translator.terms;
 
+import static eu.dissco.core.translator.domain.AgentRoleType.CHRONOMETRIC_AGE_DETERMINER;
 import static eu.dissco.core.translator.domain.AgentRoleType.COLLECTOR;
 import static eu.dissco.core.translator.domain.AgentRoleType.CREATOR;
 import static eu.dissco.core.translator.domain.AgentRoleType.GEOREFERENCER;
@@ -25,6 +26,7 @@ import eu.dissco.core.translator.component.SourceSystemComponent;
 import eu.dissco.core.translator.exception.OrganisationException;
 import eu.dissco.core.translator.exception.UnknownPhysicalSpecimenIdType;
 import eu.dissco.core.translator.properties.FdoProperties;
+import eu.dissco.core.translator.schema.ChronometricAge;
 import eu.dissco.core.translator.schema.Citation;
 import eu.dissco.core.translator.schema.DigitalMedia;
 import eu.dissco.core.translator.schema.DigitalMedia.DctermsType;
@@ -102,6 +104,24 @@ import eu.dissco.core.translator.terms.specimen.TopicDiscipline;
 import eu.dissco.core.translator.terms.specimen.TopicDomain;
 import eu.dissco.core.translator.terms.specimen.TopicOrigin;
 import eu.dissco.core.translator.terms.specimen.VerbatimLabel;
+import eu.dissco.core.translator.terms.specimen.chronometric.ChronometricAgeConversionProtocol;
+import eu.dissco.core.translator.terms.specimen.chronometric.ChronometricAgeDeterminedBy;
+import eu.dissco.core.translator.terms.specimen.chronometric.ChronometricAgeDeterminedDate;
+import eu.dissco.core.translator.terms.specimen.chronometric.ChronometricAgeID;
+import eu.dissco.core.translator.terms.specimen.chronometric.ChronometricAgeProtocol;
+import eu.dissco.core.translator.terms.specimen.chronometric.ChronometricAgeReferences;
+import eu.dissco.core.translator.terms.specimen.chronometric.ChronometricAgeRemarks;
+import eu.dissco.core.translator.terms.specimen.chronometric.ChronometricAgeUncertaintyInYears;
+import eu.dissco.core.translator.terms.specimen.chronometric.ChronometricAgeUncertaintyMethod;
+import eu.dissco.core.translator.terms.specimen.chronometric.EarliestChronometricAge;
+import eu.dissco.core.translator.terms.specimen.chronometric.EarliestChronometricAgeReferenceSystem;
+import eu.dissco.core.translator.terms.specimen.chronometric.LatestChronometricAge;
+import eu.dissco.core.translator.terms.specimen.chronometric.LatestChronometricAgeReferenceSystem;
+import eu.dissco.core.translator.terms.specimen.chronometric.MaterialDated;
+import eu.dissco.core.translator.terms.specimen.chronometric.MaterialDatedID;
+import eu.dissco.core.translator.terms.specimen.chronometric.MaterialDatedRelationship;
+import eu.dissco.core.translator.terms.specimen.chronometric.UncalibratedChronometricAge;
+import eu.dissco.core.translator.terms.specimen.chronometric.VerbatimChronometricAge;
 import eu.dissco.core.translator.terms.specimen.citation.BibliographicCitation;
 import eu.dissco.core.translator.terms.specimen.citation.CitationDescription;
 import eu.dissco.core.translator.terms.specimen.citation.Date;
@@ -260,6 +280,7 @@ public abstract class BaseDigitalObjectDirector {
     ds.withOdsHasIdentifiers(assembleIdentifiers(data));
     ds.withOdsHasCitations(assembleSpecimenCitations(data, dwc));
     ds.withOdsHasEntityRelationships(assembleDigitalSpecimenEntityRelationships(ds));
+    ds.withOdsHasChronometricAges(assembleChronometricAges(data, dwc));
     setCalculatedFields(ds, data);
     return ds;
   }
@@ -280,6 +301,8 @@ public abstract class BaseDigitalObjectDirector {
   protected abstract List<Citation> assembleIdentificationCitations(JsonNode data, boolean dwc);
 
   protected abstract List<Identification> assembleIdentifications(JsonNode data, boolean dwc);
+
+  protected abstract List<ChronometricAge> assembleChronometricAges(JsonNode data, boolean dwc);
 
   protected Citation createCitation(JsonNode data, boolean dwc) {
     var citation = new Citation()
@@ -395,6 +418,45 @@ public abstract class BaseDigitalObjectDirector {
       }
     }
     return identifiers;
+  }
+
+  protected ChronometricAge createChronometricAge(JsonNode data, boolean dwc) {
+    var chronometricAge = new ChronometricAge()
+        .withChronoChronometricAgeConversionProtocol(
+            termMapper.retrieveTerm(new ChronometricAgeConversionProtocol(), data, dwc))
+        .withChronoChronometricAgeDeterminedDate(
+            termMapper.retrieveTerm(new ChronometricAgeDeterminedDate(), data, dwc))
+        .withChronoChronometricAgeID(termMapper.retrieveTerm(new ChronometricAgeID(), data, dwc))
+        .withChronoChronometricAgeReferences(
+            termMapper.retrieveTerm(new ChronometricAgeReferences(), data, dwc))
+        .withChronoChronometricAgeRemarks(
+            termMapper.retrieveTerm(new ChronometricAgeRemarks(), data, dwc))
+        .withChronoChronometricAgeUncertaintyInYears(
+            parseToInteger(new ChronometricAgeUncertaintyInYears(), data, dwc))
+        .withChronoChronometricAgeUncertaintyMethod(
+            termMapper.retrieveTerm(new ChronometricAgeUncertaintyMethod(), data, dwc))
+        .withChronoEarliestChronometricAge(parseToInteger(new EarliestChronometricAge(), data, dwc))
+        .withChronoEarliestChronometricAgeReferenceSystem(
+            termMapper.retrieveTerm(new EarliestChronometricAgeReferenceSystem(), data, dwc))
+        .withChronoLatestChronometricAge(parseToInteger(new LatestChronometricAge(), data, dwc))
+        .withChronoLatestChronometricAgeReferenceSystem(
+            termMapper.retrieveTerm(new LatestChronometricAgeReferenceSystem(), data, dwc))
+        .withChronoMaterialDated(termMapper.retrieveTerm(new MaterialDated(), data, dwc))
+        .withChronoMaterialDatedID(termMapper.retrieveTerm(new MaterialDatedID(), data, dwc))
+        .withChronoMaterialDatedRelationship(
+            termMapper.retrieveTerm(new MaterialDatedRelationship(), data, dwc))
+        .withChronoUncalibratedChronometricAge(
+            termMapper.retrieveTerm(new UncalibratedChronometricAge(), data, dwc))
+        .withChronoVerbatimChronometricAge(
+            termMapper.retrieveTerm(new VerbatimChronometricAge(), data, dwc))
+        .withChronoChronometricAgeProtocol(
+            termMapper.retrieveTerm(new ChronometricAgeProtocol(), data, dwc))
+        .withChronoVerbatimChronometricAge(
+            termMapper.retrieveTerm(new VerbatimChronometricAge(), data, dwc));
+    chronometricAge.setOdsHasAgents(addAgent(chronometricAge.getOdsHasAgents(),
+        termMapper.retrieveTerm(new ChronometricAgeDeterminedBy(), data, dwc), null,
+        CHRONOMETRIC_AGE_DETERMINER, SCHEMA_PERSON));
+    return chronometricAge;
   }
 
   protected Identification createIdentification(JsonNode data, boolean dwc) {

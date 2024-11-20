@@ -6,6 +6,7 @@ import eu.dissco.core.translator.Profiles;
 import eu.dissco.core.translator.component.OrganisationNameComponent;
 import eu.dissco.core.translator.component.SourceSystemComponent;
 import eu.dissco.core.translator.properties.FdoProperties;
+import eu.dissco.core.translator.schema.ChronometricAge;
 import eu.dissco.core.translator.schema.Citation;
 import eu.dissco.core.translator.schema.DigitalSpecimen;
 import eu.dissco.core.translator.schema.Identification;
@@ -80,6 +81,24 @@ public class BiocaseDigitalObjectDirector extends BaseDigitalObjectDirector {
       identifications.get(0).setOdsIsVerifiedIdentification(Boolean.TRUE);
     }
     return identifications;
+  }
+
+  @Override
+  protected List<ChronometricAge> assembleChronometricAges(JsonNode data, boolean dwc) {
+    var chronometricAges = new ArrayList<ChronometricAge>();
+    var iterateOverElements = true;
+    var count = 0;
+    while (iterateOverElements) {
+      var chronometricAgeNode = getSubJsonAbcd(data, count,
+          List.of("abcd-efg:earthScienceSpecimen:unitStratigraphicDetermination/radiometricDates/radiometricDate"));
+      if (!chronometricAgeNode.isEmpty()) {
+        chronometricAges.add(createChronometricAge(chronometricAgeNode, dwc));
+        count++;
+      } else {
+        iterateOverElements = false;
+      }
+    }
+    return chronometricAges;
   }
 
   private ArrayList<Citation> getCitations(JsonNode data, boolean dwc, String subPath) {

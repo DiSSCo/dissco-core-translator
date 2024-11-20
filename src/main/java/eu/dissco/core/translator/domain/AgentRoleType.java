@@ -10,7 +10,8 @@ public enum AgentRoleType {
   CREATOR("creator"),
   IDENTIFIER("identifier"),
   GEOREFERENCER("georeferencer"),
-  RIGHTS_OWNER("rights-owner");
+  RIGHTS_OWNER("rights-owner"),
+  CHRONOMETRIC_AGE_DETERMINER("chronometric-age-determiner"),;
 
   private final String name;
 
