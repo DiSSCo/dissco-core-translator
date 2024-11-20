@@ -6,6 +6,7 @@ import eu.dissco.core.translator.Profiles;
 import eu.dissco.core.translator.component.OrganisationNameComponent;
 import eu.dissco.core.translator.component.SourceSystemComponent;
 import eu.dissco.core.translator.properties.FdoProperties;
+import eu.dissco.core.translator.schema.ChronometricAge;
 import eu.dissco.core.translator.schema.Citation;
 import eu.dissco.core.translator.schema.DigitalSpecimen;
 import eu.dissco.core.translator.schema.Identification;
@@ -90,6 +91,20 @@ public class DwcaDigitalObjectDirector extends BaseDigitalObjectDirector {
       mappedIdentifications.get(0).setOdsIsVerifiedIdentification(Boolean.TRUE);
     }
     return mappedIdentifications;
+  }
+
+  @Override
+  protected List<ChronometricAge> assembleChronometricAges(JsonNode data, boolean dwc) {
+    var mappedChrono = new ArrayList<ChronometricAge>();
+    if (data.get(EXTENSION) != null
+        && data.get(EXTENSION).get("http://rs.tdwg.org/chrono/terms/ChronometricAge") != null) {
+      var chronometricAges = data.get(EXTENSION).get("http://rs.tdwg.org/chrono/terms/ChronometricAge");
+      for (int i = 0; i < chronometricAges.size(); i++) {
+        var chronometricAge = chronometricAges.get(i);
+        mappedChrono.add(createChronometricAge(chronometricAge, dwc));
+      }
+    }
+    return mappedChrono;
   }
 }
 
