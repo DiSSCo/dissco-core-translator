@@ -41,9 +41,8 @@ class MaximumDepthInMetersTest {
     // Then
     assertThat(result).isNull();
   }
-
   @ParameterizedTest
-  @ValueSource(strings = {"-350", "-350.0", "-350.00", "-350.000"})
+  @ValueSource(strings = {"-350m.", "-350meter", "-350 m", "-350 MTR"})
   void testRetrieveFromABCD(String input) {
     // Given
     var unit = MAPPER.createObjectNode();
