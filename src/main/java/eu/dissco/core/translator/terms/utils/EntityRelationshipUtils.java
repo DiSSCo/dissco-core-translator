@@ -2,6 +2,7 @@ package eu.dissco.core.translator.terms.utils;
 
 import static eu.dissco.core.translator.domain.AgentRoleType.DATA_TRANSLATOR;
 import static eu.dissco.core.translator.schema.Agent.Type.SCHEMA_SOFTWARE_APPLICATION;
+import static eu.dissco.core.translator.schema.Identifier.OdsIdentifierStatus.PREFERRED;
 import static eu.dissco.core.translator.terms.utils.AgentsUtils.addAgent;
 
 import eu.dissco.core.translator.domain.RelationshipType;
@@ -33,7 +34,7 @@ public class EntityRelationshipUtils {
         .withDwcRelationshipEstablishedDate(Date.from(Instant.now()));
     entityRelationship.setOdsHasAgents(
         addAgent(entityRelationship.getOdsHasAgents(), agentName, agentId, DATA_TRANSLATOR,
-            SCHEMA_SOFTWARE_APPLICATION));
+            SCHEMA_SOFTWARE_APPLICATION, PREFERRED));
     if (relatedResource.startsWith("http")) {
       try {
         entityRelationship.setOdsRelatedResourceURI(new URI(relatedResource));

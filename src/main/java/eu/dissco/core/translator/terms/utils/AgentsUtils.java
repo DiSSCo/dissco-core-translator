@@ -1,8 +1,12 @@
 package eu.dissco.core.translator.terms.utils;
 
+import static eu.dissco.core.translator.terms.utils.IdentifierUtils.addIdentifier;
+
 import eu.dissco.core.translator.domain.AgentRoleType;
 import eu.dissco.core.translator.schema.Agent;
 import eu.dissco.core.translator.schema.Agent.Type;
+import eu.dissco.core.translator.schema.Identifier.OdsIdentifierStatus;
+import eu.dissco.core.translator.schema.OdsHasRole;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -17,6 +21,11 @@ public class AgentsUtils {
 
   public static List<Agent> addAgent(List<Agent> currentAgents, String agentValue, String agentId,
       AgentRoleType role, Type type) {
+    return addAgent(currentAgents, agentValue, agentId, role, type, null);
+  }
+
+  public static List<Agent> addAgent(List<Agent> currentAgents, String agentValue, String agentId,
+      AgentRoleType role, Type type, OdsIdentifierStatus identifierStatus) {
     var agents = new ArrayList<Agent>();
     if (currentAgents != null) {
       agents.addAll(currentAgents);
@@ -24,16 +33,16 @@ public class AgentsUtils {
     if (agentValue != null || agentId != null) {
       if ((agentValue != null && (agentValue.contains("&") || agentValue.contains("|"))) || (
           agentId != null && (agentId.contains("&") || agentId.contains("|")))) {
-        handleMultipleAgents(agents, agentValue, agentId, role, type);
+        handleMultipleAgents(agents, agentValue, agentId, role, type, identifierStatus);
       } else {
-        constructAgent(agents, agentValue, agentId, role, type);
+        constructAgent(agents, agentValue, agentId, role, type, identifierStatus);
       }
     }
     return agents;
   }
 
   private static void constructAgent(List<Agent> agents, String agentValue, String agentId,
-      AgentRoleType role, Type type) {
+      AgentRoleType role, Type type, OdsIdentifierStatus identifierStatus) {
     String agentName = agentValue;
     if (agentValue != null && agentValue.contains("http") && agentId == null) {
       agentId = agentValue;
@@ -50,19 +59,17 @@ public class AgentsUtils {
         .withSchemaName(agentName)
         .withSchemaIdentifier(agentId)
         .withOdsHasRoles(
-            List.of(new eu.dissco.core.translator.schema.OdsHasRole().withType("schema:Role")
+            List.of(new OdsHasRole().withType("schema:Role")
                 .withSchemaRoleName(role.getName())));
     if (agentId != null) {
-      agent.withOdsHasIdentifiers(List.of(
-          new eu.dissco.core.translator.schema.Identifier().withId(agentId)
-              .withType("ods:Identifier")
-              .withDctermsIdentifier(agentId)));
+      agent.withOdsHasIdentifiers(List.of(addIdentifier(agentId, null, identifierStatus)));
     }
     agents.add(agent);
   }
 
   private static void handleMultipleAgents(
-      List<Agent> agents, String agentValue, String agentId, AgentRoleType role, Type type) {
+      List<Agent> agents, String agentValue, String agentId, AgentRoleType role, Type type,
+      OdsIdentifierStatus identifierStatus) {
     var ids = new String[0];
     var agentValues = new String[0];
     if (needsParsing(agentValue)) {
@@ -74,7 +81,7 @@ public class AgentsUtils {
     }
     if (agentValues.length == ids.length) {
       for (int i = 0; i < agentValues.length; i++) {
-        constructAgent(agents, agentValues[i], ids[i], role, type);
+        constructAgent(agents, agentValues[i], ids[i], role, type, identifierStatus);
       }
     } else if (agentValues.length > ids.length) {
       if (ids.length != 0) {
@@ -83,7 +90,7 @@ public class AgentsUtils {
             agentValue, agentId);
       }
       for (String agent : agentValues) {
-        constructAgent(agents, agent, null, role, type);
+        constructAgent(agents, agent, null, role, type, identifierStatus);
       }
     } else {
       if (agentValues.length != 0) {
@@ -92,7 +99,7 @@ public class AgentsUtils {
             agentValue, agentId);
       }
       for (String idValue : ids) {
-        constructAgent(agents, null, idValue, role, type);
+        constructAgent(agents, null, idValue, role, type, identifierStatus);
       }
     }
   }
