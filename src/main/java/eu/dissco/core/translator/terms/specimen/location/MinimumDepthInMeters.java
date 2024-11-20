@@ -15,21 +15,13 @@ public class MinimumDepthInMeters extends AbstractMeterTerm {
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
     var rawResult = super.searchJsonForTerm(unit, dwcaTerms);
-    if (rawResult != null) {
-      return sanitizeInput(rawResult);
-    } else {
-      return null;
-    }
+    return sanitizeInput(rawResult);
   }
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
     var rawResult = super.searchJsonForTerm(unit, abcdTerms);
-    if (rawResult != null) {
-      return sanitizeInput(rawResult);
-    } else {
-      return null;
-    }
+    return sanitizeInput(rawResult);
   }
 
   @Override

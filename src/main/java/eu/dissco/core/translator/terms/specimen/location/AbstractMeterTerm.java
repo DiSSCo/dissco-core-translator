@@ -11,6 +11,9 @@ public abstract class AbstractMeterTerm extends Term {
   private static final Pattern M_PATTERN = Pattern.compile("((-\\s?)?\\d+([.,]\\d+)?)\\s*m\\.?(eter)?(tr)?(\\sm.?)?");
 
   protected String sanitizeInput(String input) {
+    if (input == null) {
+      return null;
+    }
     input = input.trim().toLowerCase();
     Matcher matcher = M_PATTERN.matcher(input);
     if (matcher.matches()) {
