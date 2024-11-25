@@ -12,6 +12,7 @@ import eu.dissco.core.translator.schema.DigitalSpecimen;
 import eu.dissco.core.translator.schema.Identification;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Component;
 public class DwcaDigitalObjectDirector extends BaseDigitalObjectDirector {
 
   private static final String EXTENSION = "extensions";
+  private static final Citation EMTPY_CITATION = new Citation().withType("ods:Citation");
 
   public DwcaDigitalObjectDirector(ObjectMapper mapper, TermMapper termMapper,
       OrganisationNameComponent rorComponent, SourceSystemComponent sourceSystemComponent,
@@ -61,7 +63,10 @@ public class DwcaDigitalObjectDirector extends BaseDigitalObjectDirector {
         }
       }
     } else {
-      citations.add(createCitation(data, dwc));
+      var citation = createCitation(data, dwc);
+      if (!Objects.equals(citation, EMTPY_CITATION)) {
+        citations.add(citation);
+      }
     }
     return citations;
   }

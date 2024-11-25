@@ -257,6 +257,7 @@ import eu.dissco.core.translator.terms.specimen.stratigraphy.lithostratigraphic.
 import eu.dissco.core.translator.terms.specimen.stratigraphy.lithostratigraphic.Member;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -265,6 +266,12 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public abstract class BaseDigitalObjectDirector {
+
+  private static final Georeference EMPTY_GEOREFERENCE = new Georeference().withType(
+      "ods:Georeference");
+  private static final GeologicalContext EMPTY_GEOLOGICAL_CONTEXT = new GeologicalContext().withType(
+      "ods:GeologicalContext");
+  private static final Location EMPTY_LOCATION = new Location().withType("ods:Location");
 
   protected final ObjectMapper mapper;
   protected final TermMapper termMapper;
@@ -619,6 +626,12 @@ public abstract class BaseDigitalObjectDirector {
     setMinMaxMeterField(new MaximumElevationInMeters(), location, data, dwc);
     setMinMaxMeterField(new MinimumDepthInMeters(), location, data, dwc);
     setMinMaxMeterField(new MaximumDepthInMeters(), location, data, dwc);
+    if (!Objects.equals(geoReference, EMPTY_GEOREFERENCE)) {
+      location.setOdsHasGeoreference(geoReference);
+    }
+    if (!Objects.equals(geologicalContext, EMPTY_GEOLOGICAL_CONTEXT)) {
+      location.setOdsHasGeologicalContext(geologicalContext);
+    }
     var assertions = new EventAssertions().gatherEventAssertions(mapper, data, dwc);
     var event = new Event()
         .withType("ods:Event")
@@ -650,8 +663,10 @@ public abstract class BaseDigitalObjectDirector {
         .withDwcSampleSizeValue(parseToDouble(new SampleSizeValue(), data, dwc))
         .withDwcCaste(termMapper.retrieveTerm(new Caste(), data, dwc))
         .withDwcVitality(termMapper.retrieveTerm(new Vitality(), data, dwc))
-        .withOdsHasLocation(location)
         .withOdsHasAssertions(assertions);
+    if (!Objects.equals(location, EMPTY_LOCATION)) {
+      event.setOdsHasLocation(location);
+    }
     event.setOdsHasAgents(
         addAgent(event.getOdsHasAgents(), termMapper.retrieveTerm(new RecordedBy(), data, dwc),
             termMapper.retrieveTerm(new RecordedByID(), data, dwc), COLLECTOR, SCHEMA_PERSON));
