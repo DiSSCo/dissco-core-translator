@@ -267,11 +267,11 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public abstract class BaseDigitalObjectDirector {
 
-  private final static Georeference EMPTY_GEOREFERENCE = new Georeference().withType(
+  private static final Georeference EMPTY_GEOREFERENCE = new Georeference().withType(
       "ods:Georeference");
-  private final static GeologicalContext EMPTY_GEOLOGICAL_CONTEXT = new GeologicalContext().withType(
+  private static final GeologicalContext EMPTY_GEOLOGICAL_CONTEXT = new GeologicalContext().withType(
       "ods:GeologicalContext");
-  private final static Location EMPTY_LOCATION = new Location().withType("ods:Location");
+  private static final Location EMPTY_LOCATION = new Location().withType("ods:Location");
 
   protected final ObjectMapper mapper;
   protected final TermMapper termMapper;
