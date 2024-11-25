@@ -194,6 +194,7 @@ import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Taxonomi
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.Tribe;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.VerbatimTaxonRank;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.VernacularName;
+import eu.dissco.core.translator.terms.specimen.location.AbstractMeterTerm;
 import eu.dissco.core.translator.terms.specimen.location.Continent;
 import eu.dissco.core.translator.terms.specimen.location.Country;
 import eu.dissco.core.translator.terms.specimen.location.CountryCode;
@@ -278,6 +279,17 @@ public abstract class BaseDigitalObjectDirector {
   private final SourceSystemComponent sourceSystemComponent;
   private final FdoProperties fdoProperties;
   private final List<String> identifierTerms;
+
+  private static Double stringToDouble(Term term, String value) {
+    try {
+      if (value != null) {
+        return Double.valueOf(value);
+      }
+    } catch (NumberFormatException ex) {
+      log.warn("Unable to parse value: {} to a double for term: {}", value, term.getTerm());
+    }
+    return null;
+  }
 
   public DigitalSpecimen assembleDigitalSpecimenTerm(JsonNode data, boolean dwc)
       throws OrganisationException, UnknownPhysicalSpecimenIdType {
@@ -524,7 +536,6 @@ public abstract class BaseDigitalObjectDirector {
     return identification;
   }
 
-
   private List<Event> assembleEventTerms(JsonNode data, boolean dwc) {
     var geoReference = new Georeference()
         .withType("ods:Georeference")
@@ -600,29 +611,27 @@ public abstract class BaseDigitalObjectDirector {
         .withDwcStateProvince(termMapper.retrieveTerm(new StateProvince(), data, dwc))
         .withDwcWaterBody(termMapper.retrieveTerm(new WaterBody(), data, dwc))
         .withDwcHigherGeography(termMapper.retrieveTerm(new HigherGeography(), data, dwc))
-        .withDwcMaximumDepthInMeters(parseToDouble(new MaximumDepthInMeters(), data, dwc))
         .withDwcMaximumDistanceAboveSurfaceInMeters(
             parseToDouble(new MaximumDistanceAboveSurfaceInMeters(), data, dwc))
-        .withDwcMaximumElevationInMeters(parseToDouble(new MaximumElevationInMeters(), data, dwc))
-        .withDwcMinimumDepthInMeters(parseToDouble(new MinimumDepthInMeters(), data, dwc))
         .withDwcMinimumDistanceAboveSurfaceInMeters(
             parseToDouble(new MinimumDistanceAboveSurfaceInMeters(), data, dwc))
-        .withDwcMinimumElevationInMeters(parseToDouble(new MinimumElevationInMeters(), data, dwc))
         .withDwcVerbatimDepth(termMapper.retrieveTerm(new VerbatimDepth(), data, dwc))
         .withDwcVerbatimElevation(termMapper.retrieveTerm(new VerbatimElevation(), data, dwc))
         .withDwcVerticalDatum(termMapper.retrieveTerm(new VerticalDatum(), data, dwc))
         .withDwcLocationAccordingTo(termMapper.retrieveTerm(new LocationAccordingTo(), data, dwc))
-        .withDwcLocationRemarks(termMapper.retrieveTerm(new LocationRemarks(), data, dwc));
+        .withDwcLocationRemarks(termMapper.retrieveTerm(new LocationRemarks(), data, dwc))
+        .withOdsHasGeoreference(geoReference)
+        .withOdsHasGeologicalContext(geologicalContext);
+    setMinMaxMeterField(new MinimumElevationInMeters(), location, data, dwc);
+    setMinMaxMeterField(new MaximumElevationInMeters(), location, data, dwc);
+    setMinMaxMeterField(new MinimumDepthInMeters(), location, data, dwc);
+    setMinMaxMeterField(new MaximumDepthInMeters(), location, data, dwc);
     if (!Objects.equals(geoReference, EMPTY_GEOREFERENCE)) {
       location.setOdsHasGeoreference(geoReference);
     }
     if (!Objects.equals(geologicalContext, EMPTY_GEOLOGICAL_CONTEXT)) {
       location.setOdsHasGeologicalContext(geologicalContext);
     }
-    setMinMaxMeterField(new MinimumElevationInMeters(), location, data, dwc);
-    setMinMaxMeterField(new MaximumElevationInMeters(), location, data, dwc);
-    setMinMaxMeterField(new MinimumDepthInMeters(), location, data, dwc);
-    setMinMaxMeterField(new MaximumDepthInMeters(), location, data, dwc);
     var assertions = new EventAssertions().gatherEventAssertions(mapper, data, dwc);
     var event = new Event()
         .withType("ods:Event")
@@ -664,6 +673,31 @@ public abstract class BaseDigitalObjectDirector {
     return List.of(event);
   }
 
+  private void setMinMaxMeterField(AbstractMeterTerm term, Location location, JsonNode data,
+      boolean dwc) {
+    var sanitizedValue = termMapper.retrieveTerm(term, data, dwc);
+    var doubleElevation = stringToDouble(term, sanitizedValue);
+    if (doubleElevation == null && sanitizedValue != null) {
+      if (term instanceof MaximumElevationInMeters) {
+        location.setDwcVerbatimElevation(
+            location.getDwcVerbatimElevation() + "| unparseable value maximumElevationInMeters: "
+                + sanitizedValue);
+      } else if (term instanceof MinimumElevationInMeters) {
+        location.setDwcVerbatimElevation(
+            location.getDwcVerbatimElevation() + "| unparseable value minimumElevationInMeters: "
+                + sanitizedValue);
+      } else if (term instanceof MaximumDepthInMeters) {
+        location.setDwcVerbatimDepth(
+            location.getDwcVerbatimDepth() + "| unparseable value maximumDepthInMeters: "
+                + sanitizedValue);
+      } else if (term instanceof MinimumDepthInMeters) {
+        location.setDwcVerbatimDepth(
+            location.getDwcVerbatimDepth() + "| unparseable value minimumDepthInMeters: "
+                + sanitizedValue);
+      }
+    }
+  }
+
   private <T extends Enum<T>> T retrieveEnum(Term term, JsonNode data, boolean dwc,
       java.lang.Class<T> enumClass) {
     var value = termMapper.retrieveTerm(term, data, dwc);
@@ -691,14 +725,7 @@ public abstract class BaseDigitalObjectDirector {
 
   private Double parseToDouble(Term term, JsonNode data, boolean dwc) {
     var value = termMapper.retrieveTerm(term, data, dwc);
-    try {
-      if (value != null) {
-        return Double.valueOf(value);
-      }
-    } catch (NumberFormatException ex) {
-      log.warn("Unable to parse value: {} to a double for term: {}", value, term.getTerm());
-    }
-    return null;
+    return stringToDouble(term, value);
   }
 
   private Boolean parseToBoolean(Term term, JsonNode data, boolean dwc) {
