@@ -1,6 +1,7 @@
 package eu.dissco.core.translator.terms.utils;
 
 import static eu.dissco.core.translator.schema.Identifier.DctermsType.ARK;
+import static eu.dissco.core.translator.schema.Identifier.DctermsType.DOI;
 import static eu.dissco.core.translator.schema.Identifier.DctermsType.HANDLE;
 import static eu.dissco.core.translator.schema.Identifier.DctermsType.LOCALLY_UNIQUE_IDENTIFIER;
 import static eu.dissco.core.translator.schema.Identifier.DctermsType.PURL;
@@ -31,6 +32,12 @@ class IdentifierUtilsTest {
 
   public static Stream<Arguments> identifierProvider() {
     return Stream.of(
+        Arguments.of("https://doi.org/10.3535/M42-Z4P-DRD", null, PREFERRED,
+            createIdentifier("https://doi.org/10.3535/M42-Z4P-DRD", DOI, "DOI",
+                GLOBALLY_UNIQUE_STABLE_PERSISTENT_RESOLVABLE_FDO_COMPLIANT, PREFERRED)),
+        Arguments.of("https://doi.org/21.T11148/894b1e6cad57e921764e", null, PREFERRED,
+            createIdentifier("https://doi.org/21.T11148/894b1e6cad57e921764e", HANDLE, "Handle",
+                GLOBALLY_UNIQUE_STABLE_PERSISTENT_RESOLVABLE_FDO_COMPLIANT, PREFERRED)),
         Arguments.of("https://www.wikidata.org/wiki/Q66581882", null, null,
             createIdentifier("https://www.wikidata.org/wiki/Q66581882", URL, "Wikidata",
                 GLOBALLY_UNIQUE_STABLE_PERSISTENT_RESOLVABLE, null)),

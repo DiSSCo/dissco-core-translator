@@ -33,9 +33,9 @@ public class IdentifierUtils {
 
   private static Map<List<Pattern>, Triple<DctermsType, String, OdsGupriLevel>> patternMap() {
     var linkedMap = new LinkedHashMap<List<Pattern>, Triple<DctermsType, String, OdsGupriLevel>>();
-    linkedMap.put(List.of(compile("^https?://doi.org")),
+    linkedMap.put(List.of(compile("^https?://doi.org/10.")),
         Triple.of(DOI, "DOI", GLOBALLY_UNIQUE_STABLE_PERSISTENT_RESOLVABLE_FDO_COMPLIANT));
-    linkedMap.put(List.of(compile("^https?://hdl.handle.net")),
+    linkedMap.put(List.of(compile("^https?://hdl.handle.net"), compile("^https?://doi.org/")),
         Triple.of(HANDLE, "Handle", GLOBALLY_UNIQUE_STABLE_PERSISTENT_RESOLVABLE_FDO_COMPLIANT));
     linkedMap.put(List.of(compile("^https?://www.wikidata.org")),
         Triple.of(URL, "Wikidata", GLOBALLY_UNIQUE_STABLE_PERSISTENT_RESOLVABLE));
