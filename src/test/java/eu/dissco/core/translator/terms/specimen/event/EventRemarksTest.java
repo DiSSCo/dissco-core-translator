@@ -28,6 +28,20 @@ class EventRemarksTest {
   }
 
   @Test
+  void testRetrieveFromDWCABoth() {
+    // Given
+    var unit = MAPPER.createObjectNode();
+    unit.put("dwc:eventRemarks", EVENT_REMARKS_STRING);
+    unit.put("dwc:occurrenceRemarks", "an occurrence remark");
+
+    // When
+    var result = eventRemarks.retrieveFromDWCA(unit);
+
+    // Then
+    assertThat(result).isEqualTo(EVENT_REMARKS_STRING + " | an occurrence remark");
+  }
+
+  @Test
   void testRetrieveFromABCD() {
     // Given
     var unit = MAPPER.createObjectNode();
