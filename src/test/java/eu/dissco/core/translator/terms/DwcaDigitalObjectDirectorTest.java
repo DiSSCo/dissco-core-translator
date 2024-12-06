@@ -73,7 +73,7 @@ class DwcaDigitalObjectDirectorTest {
         .hasSize(3);
     assertThat(result.getOdsHasCitations()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(2);
     assertThat(result.getOdsHasIdentifications()).asInstanceOf(InstanceOfAssertFactories.LIST)
-        .hasSize(2);
+        .hasSize(3);
   }
 
   @Test
@@ -102,9 +102,7 @@ class DwcaDigitalObjectDirectorTest {
         .hasSize(3);
     assertThat(result.getOdsHasCitations()).asInstanceOf(InstanceOfAssertFactories.LIST).hasSize(1);
     assertThat(result.getOdsHasIdentifications()).asInstanceOf(InstanceOfAssertFactories.LIST)
-        .hasSize(1);
-    assertThat(((eu.dissco.core.translator.schema.Identification) result.getOdsHasIdentifications()
-        .get(0)).getOdsIsVerifiedIdentification()).isTrue();
+        .hasSize(2);
   }
 
 

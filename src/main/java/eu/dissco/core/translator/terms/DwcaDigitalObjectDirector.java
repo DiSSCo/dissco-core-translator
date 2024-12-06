@@ -10,6 +10,7 @@ import eu.dissco.core.translator.schema.ChronometricAge;
 import eu.dissco.core.translator.schema.Citation;
 import eu.dissco.core.translator.schema.DigitalSpecimen;
 import eu.dissco.core.translator.schema.Identification;
+import eu.dissco.core.translator.schema.TaxonIdentification;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -24,6 +25,9 @@ public class DwcaDigitalObjectDirector extends BaseDigitalObjectDirector {
 
   private static final String EXTENSION = "extensions";
   private static final Citation EMTPY_CITATION = new Citation().withType("ods:Citation");
+  private static final Identification EMPTY_IDENTIFICIATION = new Identification().withType(
+      "ods:Identification").withOdsHasTaxonIdentifications(
+      List.of(new TaxonIdentification().withType("ods:TaxonIdentification")));
 
   public DwcaDigitalObjectDirector(ObjectMapper mapper, TermMapper termMapper,
       OrganisationNameComponent rorComponent, SourceSystemComponent sourceSystemComponent,
@@ -87,9 +91,12 @@ public class DwcaDigitalObjectDirector extends BaseDigitalObjectDirector {
         var identification = identifications.get(i);
         mappedIdentifications.add(createIdentification(identification, dwc));
       }
-    } else {
-      mappedIdentifications.add(createIdentification(data, dwc));
     }
+    var occurrenceIdentification = createIdentification(data, dwc);
+    if (!Objects.equals(occurrenceIdentification, EMPTY_IDENTIFICIATION)) {
+      mappedIdentifications.add(occurrenceIdentification);
+    }
+
     if (mappedIdentifications.size() == 1
         && mappedIdentifications.get(0).getOdsIsVerifiedIdentification() == null) {
       //If there is only one identification, and it doesn't have a verification status, set it to true
@@ -103,7 +110,8 @@ public class DwcaDigitalObjectDirector extends BaseDigitalObjectDirector {
     var mappedChrono = new ArrayList<ChronometricAge>();
     if (data.get(EXTENSION) != null
         && data.get(EXTENSION).get("http://rs.tdwg.org/chrono/terms/ChronometricAge") != null) {
-      var chronometricAges = data.get(EXTENSION).get("http://rs.tdwg.org/chrono/terms/ChronometricAge");
+      var chronometricAges = data.get(EXTENSION)
+          .get("http://rs.tdwg.org/chrono/terms/ChronometricAge");
       for (int i = 0; i < chronometricAges.size(); i++) {
         var chronometricAge = chronometricAges.get(i);
         mappedChrono.add(createChronometricAge(chronometricAge, dwc));
