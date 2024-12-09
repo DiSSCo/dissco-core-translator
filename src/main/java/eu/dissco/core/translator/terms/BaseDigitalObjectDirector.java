@@ -135,7 +135,6 @@ import eu.dissco.core.translator.terms.specimen.event.DegreeOfEstablishment;
 import eu.dissco.core.translator.terms.specimen.event.EstablishmentMeans;
 import eu.dissco.core.translator.terms.specimen.event.EventAssertions;
 import eu.dissco.core.translator.terms.specimen.event.EventDate;
-import eu.dissco.core.translator.terms.specimen.event.EventRemark;
 import eu.dissco.core.translator.terms.specimen.event.EventRemarks;
 import eu.dissco.core.translator.terms.specimen.event.EventType;
 import eu.dissco.core.translator.terms.specimen.event.FieldNotes;
@@ -645,7 +644,7 @@ public abstract class BaseDigitalObjectDirector {
         .withDwcSex(termMapper.retrieveTerm(new Sex(), data, dwc))
         .withDwcSamplingProtocol(termMapper.retrieveTerm(new SamplingProtocol(), data, dwc))
         .withDwcLifeStage(termMapper.retrieveTerm(new LifeStage(), data, dwc))
-        .withDwcEventRemarks(termMapper.retrieveTerm(new EventRemark(), data, dwc))
+        .withDwcEventRemarks(termMapper.retrieveTerm(new EventRemarks(), data, dwc))
         .withDwcFieldNumber(termMapper.retrieveTerm(new FieldNumber(), data, dwc))
         .withDwcFieldNotes(termMapper.retrieveTerm(new FieldNotes(), data, dwc))
         .withDwcHabitat(termMapper.retrieveTerm(new Habitat(), data, dwc))
@@ -658,7 +657,6 @@ public abstract class BaseDigitalObjectDirector {
             termMapper.retrieveTerm(new DegreeOfEstablishment(), data, dwc))
         .withDwcGeoreferenceVerificationStatus(
             termMapper.retrieveTerm(new GeoreferenceVerificationStatus(), data, dwc))
-        .withDwcEventRemarks(termMapper.retrieveTerm(new EventRemarks(), data, dwc))
         .withDwcSampleSizeUnit(termMapper.retrieveTerm(new SampleSizeUnit(), data, dwc))
         .withDwcSampleSizeValue(parseToDouble(new SampleSizeValue(), data, dwc))
         .withDwcCaste(termMapper.retrieveTerm(new Caste(), data, dwc))
