@@ -20,6 +20,6 @@ public class FdoProperties {
   private String applicationName = "DiSSCo Translator Service";
 
   @NotBlank
-  private String applicationPID = "https://hdl.handle.net/TEST/XXX-XXX-XXX";
+  private String applicationPID = "https://doi.org/10.5281/zenodo.14379776";
 
 }
