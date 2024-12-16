@@ -618,9 +618,7 @@ public abstract class BaseDigitalObjectDirector {
         .withDwcVerbatimElevation(termMapper.retrieveTerm(new VerbatimElevation(), data, dwc))
         .withDwcVerticalDatum(termMapper.retrieveTerm(new VerticalDatum(), data, dwc))
         .withDwcLocationAccordingTo(termMapper.retrieveTerm(new LocationAccordingTo(), data, dwc))
-        .withDwcLocationRemarks(termMapper.retrieveTerm(new LocationRemarks(), data, dwc))
-        .withOdsHasGeoreference(geoReference)
-        .withOdsHasGeologicalContext(geologicalContext);
+        .withDwcLocationRemarks(termMapper.retrieveTerm(new LocationRemarks(), data, dwc));
     setMinMaxMeterField(new MinimumElevationInMeters(), location, data, dwc);
     setMinMaxMeterField(new MaximumElevationInMeters(), location, data, dwc);
     setMinMaxMeterField(new MinimumDepthInMeters(), location, data, dwc);
