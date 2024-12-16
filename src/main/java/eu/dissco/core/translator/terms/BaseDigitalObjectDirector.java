@@ -814,6 +814,8 @@ public abstract class BaseDigitalObjectDirector {
     relationships.add(
         addEntityRelationship(HAS_FDO_TYPE, fdoProperties.getDigitalMediaType(),
             fdoProperties.getApplicationName(), fdoProperties.getApplicationPID()));
+    relationships.add(addEntityRelationship(HAS_SOURCE_SYSTEM_ID, digitalMedia.getOdsSourceSystemID(),
+        fdoProperties.getApplicationName(), fdoProperties.getApplicationPID()));
     if (digitalMedia.getDctermsRights() != null && digitalMedia.getDctermsRights()
         .startsWith("http")) {
       relationships.add(
