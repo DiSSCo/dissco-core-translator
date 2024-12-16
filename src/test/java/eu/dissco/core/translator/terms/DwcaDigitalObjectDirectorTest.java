@@ -124,7 +124,7 @@ class DwcaDigitalObjectDirectorTest {
     // Then
     assertThat(result).isNotNull();
     assertThat(result.getOdsHasEntityRelationships()).asInstanceOf(InstanceOfAssertFactories.LIST)
-        .hasSize(3);
+        .hasSize(4);
     assertThat(result.getOdsHasIdentifiers()).asInstanceOf(InstanceOfAssertFactories.LIST)
         .hasSize(2);
   }
