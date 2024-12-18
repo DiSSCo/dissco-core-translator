@@ -6,6 +6,7 @@ import static eu.dissco.core.translator.domain.AgentRoleType.CREATOR;
 import static eu.dissco.core.translator.domain.AgentRoleType.GEOREFERENCER;
 import static eu.dissco.core.translator.domain.AgentRoleType.IDENTIFIER;
 import static eu.dissco.core.translator.domain.AgentRoleType.RIGHTS_OWNER;
+import static eu.dissco.core.translator.domain.RelationshipType.HAS_COLLECTION_ID;
 import static eu.dissco.core.translator.domain.RelationshipType.HAS_FDO_TYPE;
 import static eu.dissco.core.translator.domain.RelationshipType.HAS_LICENSE;
 import static eu.dissco.core.translator.domain.RelationshipType.HAS_ORGANISATION_ID;
@@ -414,6 +415,10 @@ public abstract class BaseDigitalObjectDirector {
     }
     if (ds.getDctermsLicense() != null && ds.getDctermsLicense().startsWith("http")) {
       relationships.add(addEntityRelationship(HAS_LICENSE, ds.getDctermsLicense(),
+          fdoProperties.getApplicationName(), fdoProperties.getApplicationPID()));
+    }
+    if (ds.getDwcCollectionID() != null && ds.getDwcCollectionID().startsWith("http")) {
+      relationships.add(addEntityRelationship(HAS_COLLECTION_ID, ds.getDctermsLicense(),
           fdoProperties.getApplicationName(), fdoProperties.getApplicationPID()));
     }
     if (ds.getOdsHasCitations() != null) {
