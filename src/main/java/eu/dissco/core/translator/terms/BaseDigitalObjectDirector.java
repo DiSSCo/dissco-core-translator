@@ -418,7 +418,7 @@ public abstract class BaseDigitalObjectDirector {
           fdoProperties.getApplicationName(), fdoProperties.getApplicationPID()));
     }
     if (ds.getDwcCollectionID() != null && ds.getDwcCollectionID().startsWith("http")) {
-      relationships.add(addEntityRelationship(HAS_COLLECTION_ID, ds.getDctermsLicense(),
+      relationships.add(addEntityRelationship(HAS_COLLECTION_ID, ds.getDwcCollectionID(),
           fdoProperties.getApplicationName(), fdoProperties.getApplicationPID()));
     }
     if (ds.getOdsHasCitations() != null) {
