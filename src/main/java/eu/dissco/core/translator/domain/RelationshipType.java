@@ -8,7 +8,8 @@ public enum RelationshipType {
   HAS_LICENSE("hasLicense"),
   HAS_REFERENCE("hasReference"),
   HAS_URL("hasURL"),
-  HAS_SOURCE("hasSource"),;
+  HAS_SOURCE("hasSource"),
+  HAS_COLLECTION_ID("hasCollectionID");
 
   private final String name;
 
