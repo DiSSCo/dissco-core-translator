@@ -40,6 +40,7 @@ import eu.dissco.core.translator.schema.Event;
 import eu.dissco.core.translator.schema.GeologicalContext;
 import eu.dissco.core.translator.schema.Georeference;
 import eu.dissco.core.translator.schema.Identification;
+import eu.dissco.core.translator.schema.Identification.OdsIdentificationType;
 import eu.dissco.core.translator.schema.Identifier;
 import eu.dissco.core.translator.schema.Location;
 import eu.dissco.core.translator.schema.TaxonIdentification;
@@ -524,6 +525,7 @@ public abstract class BaseDigitalObjectDirector {
         .withId(identificationId)
         .withType("ods:Identification")
         .withDwcIdentificationID(identificationId)
+        .withOdsIdentificationType(OdsIdentificationType.TAXON_IDENTIFICATION)
         .withOdsIsVerifiedIdentification(
             parseToBoolean(new IdentificationVerificationStatus(), data, dwc))
         .withDwcTypeStatus(termMapper.retrieveTerm(new TypeStatus(), data, dwc))

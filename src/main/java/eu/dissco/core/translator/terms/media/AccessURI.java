@@ -7,12 +7,12 @@ import java.util.List;
 public class AccessURI extends Term {
 
   public static final String TERM = "ac:accessURI";
-  private final List<String> dwcaTerms = List.of(TERM, "dcterms:identifier", "dc:identifier");
+  public static final List<String> DWCA_TERMS = List.of(TERM, "dcterms:identifier", "dc:identifier");
   private final List<String> abcdTerms = List.of("abcd:fileURI");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
-    return super.searchJsonForTerm(unit, dwcaTerms);
+    return super.searchJsonForTerm(unit, DWCA_TERMS);
   }
 
   @Override
