@@ -37,6 +37,7 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class DwcaRepository {
 
+  private static final String AC_MULTIMEDIA = "http://rs.tdwg.org/ac/terms/Multimedia";
   private final Field<String> dwcaIDField = DSL.field("dwcaid", String.class);
   private final Field<String> uniqueIDField = DSL.field("id", String.class);
   private final Field<JSONB> dataField = DSL.field("data", JSONB.class);
@@ -45,29 +46,21 @@ public class DwcaRepository {
   private final DSLContext context;
   private final DataMappingComponent dataMappingComponent;
 
-  private static String getAccessURI(Pair<String, JsonNode> dbRecord, String uniqueField) {
-    var fieldsToCheck = new ArrayList<>(AccessURI.DWCA_TERMS);
-    fieldsToCheck.add(0, uniqueField);
+  private static String getUniqueIDValue(Pair<String, JsonNode> dbRecord,
+      List<String> fieldsToCheck, boolean isOccurrence) {
     for (var fieldName : fieldsToCheck) {
       if (dbRecord.getRight().has(fieldName) && !dbRecord.getRight().get(fieldName).isNull()) {
         return dbRecord.getRight().get(fieldName).asText();
       }
     }
-    log.warn("No accessURI found for record: {}", dbRecord.getLeft());
-    throw new IllegalDataException("No accessURI found for record: " + dbRecord.getRight());
-  }
-
-  private static String getPhysicalSpecimenID(Pair<String, JsonNode> dbRecord, String uniqueField) {
-    var fieldsToCheck = new ArrayList<>(PhysicalSpecimenID.DWCA_TERMS);
-    fieldsToCheck.add(0, uniqueField);
-    for (var fieldName : fieldsToCheck) {
-      if (dbRecord.getRight().has(fieldName) && !dbRecord.getRight().get(fieldName).isNull()) {
-        return dbRecord.getRight().get(fieldName).asText();
-      }
+    if (isOccurrence) {
+      log.warn("No physicalSpecimenID found for record: {}", dbRecord.getLeft());
+      throw new IllegalDataException(
+          "No physicalSpecimenID found for record: " + dbRecord.getRight());
+    } else {
+      log.warn("No accessURI found for record: {}", dbRecord.getLeft());
+      throw new IllegalDataException("No accessURI found for record: " + dbRecord.getRight());
     }
-    log.warn("No physicalSpecimenID found for record: {}", dbRecord.getLeft());
-    throw new IllegalDataException(
-        "No physicalSpecimenID found for record: " + dbRecord.getRight());
   }
 
   public void createTable(String tableName, Term fileType) {
@@ -78,7 +71,7 @@ public class DwcaRepository {
         .execute();
     if (fileType.equals(DwcTerm.Occurrence)) {
       context.createUniqueIndex().on(tableName, uniqueIDField.getName()).execute();
-    } else if (fileType.prefixedName().equals("http://rs.tdwg.org/ac/terms/Multimedia")
+    } else if (fileType.prefixedName().equals(AC_MULTIMEDIA)
         || fileType.equals(GbifTerm.Multimedia)) {
       context.createUniqueIndex().on(tableName, dwcaIDField.getName(), uniqueIDField.getName())
           .execute();
@@ -105,13 +98,18 @@ public class DwcaRepository {
       if (fileType.equals(DwcTerm.Occurrence)) {
         var uniqueField = dataMappingComponent.getFieldMappings()
             .getOrDefault("ods:physicalSpecimenID", "dwc:occurrenceID");
-        return query.set(uniqueIDField, getPhysicalSpecimenID(dbRecord, uniqueField));
+        var fieldsToCheck = new ArrayList<>(PhysicalSpecimenID.DWCA_TERMS);
+        fieldsToCheck.add(0, uniqueField);
+        return query.set(uniqueIDField,
+            getUniqueIDValue(dbRecord, fieldsToCheck, true));
       }
-      if (fileType.prefixedName().equals("http://rs.tdwg.org/ac/terms/Multimedia")
+      if (fileType.prefixedName().equals(AC_MULTIMEDIA)
           || fileType.equals(GbifTerm.Multimedia)) {
         var uniqueField = dataMappingComponent.getFieldMappings()
             .getOrDefault("ac:accessURI", "ac:accessURI");
-        return query.set(uniqueIDField, getAccessURI(dbRecord, uniqueField))
+        var fieldsToCheck = new ArrayList<>(AccessURI.DWCA_TERMS);
+        fieldsToCheck.add(0, uniqueField);
+        return query.set(uniqueIDField, getUniqueIDValue(dbRecord, fieldsToCheck, false))
             .onConflict(dwcaIDField, uniqueIDField)
             .doUpdate().set(dataField,
                 JSONB.jsonb(mapper.writeValueAsString(dbRecord.getRight()).replace("\\u0000", "")));
