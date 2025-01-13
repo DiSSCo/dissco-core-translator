@@ -5,22 +5,21 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.then;
+import static org.junit.Assert.assertThrows;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import eu.dissco.core.translator.component.DataMappingComponent;
+import eu.dissco.core.translator.exception.IllegalDataException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
-import org.jooq.Field;
-import org.jooq.JSONB;
-import org.jooq.Query;
-import org.jooq.Record;
-import org.jooq.Table;
-import org.jooq.impl.DSL;
+import org.gbif.dwc.terms.DwcTerm;
+import org.gbif.dwc.terms.GbifTerm;
+import org.jooq.exception.IntegrityConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,22 +29,29 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class DwcaRepositoryTest extends BaseRepositoryIT {
 
-  private final Field<String> idField = DSL.field("dwcaid", String.class);
-  private final Field<JSONB> dataField = DSL.field("data", JSONB.class);
   @Mock
-  BatchInserter batchInserter;
+  private DataMappingComponent mappingComponent;
   private DwcaRepository repository;
 
-  private static JsonNode givenRecord(String corruptedValue) {
+  private static JsonNode givenRecord(String corruptedValue, String id) {
     var objectNode = MAPPER.createObjectNode();
     objectNode.put("someRandomInformation", "someRandomInformation");
+    objectNode.put("dwc:occurrenceID", id);
     objectNode.put("someCorruptedInformation", corruptedValue);
     return objectNode;
   }
 
+  private static ObjectNode getExtensionNode(String accessURI) {
+    return MAPPER.createObjectNode().put("ac:accessURI", accessURI);
+  }
+
+  private static ObjectNode getCoreNode(String uuid) {
+    return MAPPER.createObjectNode().put("dwc:occurrenceID", uuid);
+  }
+
   @BeforeEach
   void setup() {
-    repository = new DwcaRepository(MAPPER, context, batchInserter);
+    repository = new DwcaRepository(MAPPER, context, mappingComponent);
   }
 
   @Test
@@ -53,8 +59,8 @@ class DwcaRepositoryTest extends BaseRepositoryIT {
     // Given
     var tableName = "temp_XXX-XXX-XXX_Core";
     var records = givenCoreRecords();
-    repository.createTable(tableName);
-    postRecords(tableName, records);
+    repository.createTable(tableName, DwcTerm.Occurrence);
+    repository.postRecords(tableName, DwcTerm.Occurrence, records);
 
     // When
     var results = repository.getCoreRecords(records.stream().map(Pair::getLeft).toList(),
@@ -70,10 +76,11 @@ class DwcaRepositoryTest extends BaseRepositoryIT {
   void getCorruptCoreRecords() {
     // Given
     var tableName = "temp_XXX-XXX-XXX_Core";
+    String id = UUID.randomUUID().toString();
     var records = List.of(
-        Pair.of(UUID.randomUUID().toString(), givenRecord("\u0000 someCorruptedInformation")));
-    repository.createTable(tableName);
-    postRecords(tableName, records);
+        Pair.of(id, givenRecord("\u0000 someCorruptedInformation", id)));
+    repository.createTable(tableName, DwcTerm.Occurrence);
+    repository.postRecords(tableName, DwcTerm.Occurrence, records);
 
     // When
     var results = repository.getCoreRecords(records.stream().map(Pair::getLeft).toList(),
@@ -82,7 +89,38 @@ class DwcaRepositoryTest extends BaseRepositoryIT {
 
     // Then
     assertThat(results).isEqualTo(
-        Map.of(records.get(0).getLeft(), givenRecord(" someCorruptedInformation")));
+        Map.of(records.get(0).getLeft(), givenRecord(" someCorruptedInformation", id)));
+  }
+
+  @Test
+  void exceptionDuplicatePhysicalSpecimenID() {
+    // Given
+    var tableName = "temp_XXX-XXX-XXX_Core";
+    String id = UUID.randomUUID().toString();
+    var records = List.of(
+        Pair.of(id, (JsonNode) getCoreNode(id)),
+        Pair.of(id, (JsonNode) getCoreNode(id)));
+    repository.createTable(tableName, DwcTerm.Occurrence);
+
+    // When / Then
+    assertThrows(IntegrityConstraintViolationException.class,
+        () -> repository.postRecords(tableName, DwcTerm.Occurrence, records));
+    repository.deleteTable(tableName);
+  }
+
+  @Test
+  void exceptionNoPhysicalSpecimenID() {
+    // Given
+    var tableName = "temp_XXX-XXX-XXX_Core";
+    String id = UUID.randomUUID().toString();
+    var records = List.of(
+        Pair.of(id, (JsonNode) getCoreNode(null)));
+    repository.createTable(tableName, DwcTerm.Occurrence);
+
+    // When / Then
+    assertThrows(IllegalDataException.class,
+        () -> repository.postRecords(tableName, DwcTerm.Occurrence, records));
+    repository.deleteTable(tableName);
   }
 
   @Test
@@ -90,29 +128,34 @@ class DwcaRepositoryTest extends BaseRepositoryIT {
     // Given
     var tableName = "temp_XXX-XXX-XXX_Extension";
     var records = givenExtensionRecord();
-    repository.createTable(tableName);
-    postRecords(tableName, records);
+    repository.createTable(tableName, GbifTerm.Multimedia);
+    repository.postRecords(tableName, GbifTerm.Multimedia, records);
 
     // When
     var results = repository.getRecords(records.stream().map(Pair::getLeft).toList(), tableName);
     repository.deleteTable(tableName);
 
     // Then
-    assertThat(results).isEqualTo(
-        records.stream().collect(groupingBy(Pair::getLeft, mapping(Pair::getRight, toList()))));
+    assertThat(results)
+        .hasSize(10)
+        .isEqualTo(
+            records.stream().distinct()
+                .collect(groupingBy(Pair::getLeft, mapping(Pair::getRight, toList()))));
   }
 
   @Test
-  void testPostRecords() throws Exception {
+  void exceptionNoAccessURI() {
     // Given
-    var tableName = "temp_XXX-XXX-XXX_Extension";
-    var records = givenExtensionRecord();
+    var tableName = "temp_XXX-XXX-XXX_Core";
+    String id = UUID.randomUUID().toString();
+    var records = List.of(
+        Pair.of(id, (JsonNode) getExtensionNode(null)));
+    repository.createTable(tableName, GbifTerm.Multimedia);
 
-    // When
-    repository.postRecords(tableName, records);
-
-    // Then
-    then(batchInserter).should().batchCopy(tableName, records);
+    // When / Then
+    assertThrows(IllegalDataException.class,
+        () -> repository.postRecords(tableName, GbifTerm.Multimedia, records));
+    repository.deleteTable(tableName);
   }
 
   private ArrayList<Pair<String, JsonNode>> givenExtensionRecord() {
@@ -122,7 +165,7 @@ class DwcaRepositoryTest extends BaseRepositoryIT {
       for (int j = 0; j < 3; j++) {
         var pair = Pair.of(
             id,
-            (JsonNode) MAPPER.createObjectNode()
+            (JsonNode) getExtensionNode("http://example.com/" + j)
         );
         records.add(pair);
       }
@@ -133,32 +176,14 @@ class DwcaRepositoryTest extends BaseRepositoryIT {
   private List<Pair<String, JsonNode>> givenCoreRecords() {
     var records = new ArrayList<Pair<String, JsonNode>>();
     for (int i = 0; i < 10; i++) {
+      var uuid = UUID.randomUUID().toString();
       var pair = Pair.of(
-          UUID.randomUUID().toString(),
-          (JsonNode) MAPPER.createObjectNode()
+          uuid,
+          (JsonNode) getCoreNode(uuid)
       );
       records.add(pair);
     }
     return records;
-  }
-
-  private void postRecords(String tableName, List<Pair<String, JsonNode>> dbRecords) {
-    var queries = dbRecords.stream().map(dbRecord -> recordToQuery(tableName, dbRecord)).toList();
-    context.batch(queries).execute();
-  }
-
-  private Query recordToQuery(String tableName, Pair<String, JsonNode> dbRecord) {
-    try {
-      return context.insertInto(getTable(tableName)).set(idField, dbRecord.getLeft())
-          .set(dataField,
-              JSONB.jsonb(MAPPER.writeValueAsString(dbRecord.getRight()).replace("\\u0000", "")));
-    } catch (JsonProcessingException e) {
-      return null;
-    }
-  }
-
-  private Table<Record> getTable(String tableName) {
-    return DSL.table("\"" + tableName + "\"");
   }
 
 }

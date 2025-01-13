@@ -39,11 +39,13 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
@@ -211,9 +213,9 @@ public class BioCaseService extends WebClientService {
             attributes,
             cleanupRedundantFields(unitAttributes)
         );
-        var digitalMedia = processDigitalMedia(
+        var digitalMedia = makeDigitalMediaUnique(processDigitalMedia(
             attributes.getOdsNormalisedPhysicalSpecimenID(), unit,
-            attributes.getOdsOrganisationID());
+            attributes.getOdsOrganisationID()));
         log.debug("Result digital Specimen: {}", digitalSpecimen);
         kafkaService.sendMessage(
             new DigitalSpecimenEvent(
@@ -228,6 +230,18 @@ public class BioCaseService extends WebClientService {
       log.info("Record with record basis: {} and id: {} is ignored ", unit.getRecordBasis(),
           unit.getUnitID());
     }
+  }
+
+  private List<DigitalMediaEvent> makeDigitalMediaUnique(List<DigitalMediaEvent> digitalMedia) {
+    return digitalMedia.stream()
+        .collect(Collectors.toMap(
+            mediaEvent -> mediaEvent.digitalMedia().attributes().getAcAccessURI(),
+            mediaEvent -> mediaEvent,
+            (existing, replacement) -> replacement,
+            LinkedHashMap::new))
+        .values()
+        .stream()
+        .toList();
   }
 
   private ObjectNode parseToJson(Unit unit) throws DisscoEfgParsingException {

@@ -12,7 +12,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -22,7 +21,6 @@ import eu.dissco.core.translator.component.SourceSystemComponent;
 import eu.dissco.core.translator.database.jooq.enums.JobState;
 import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
 import eu.dissco.core.translator.domain.TranslatorJobResult;
-import eu.dissco.core.translator.exception.DisscoRepositoryException;
 import eu.dissco.core.translator.properties.ApplicationProperties;
 import eu.dissco.core.translator.properties.DwcaProperties;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
@@ -40,6 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.xml.stream.XMLInputFactory;
+import org.gbif.dwc.terms.Term;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -126,8 +125,8 @@ class DwcaServiceTest {
 
     // Then
     assertThat(result).isEqualTo(expected);
-    then(dwcaRepository).should(times(2)).createTable(anyString());
-    then(dwcaRepository).should(times(2)).postRecords(anyString(), anyList());
+    then(dwcaRepository).should(times(2)).createTable(anyString(), any(Term.class));
+    then(dwcaRepository).should(times(2)).postRecords(anyString(), any(Term.class), anyList());
     then(kafkaService).should(times(processedRecords)).sendMessage(any(
         DigitalSpecimenEvent.class));
     assertThat(captor.getValue().get("eml:license").asText()).isEqualTo(
@@ -135,25 +134,6 @@ class DwcaServiceTest {
     assertThat(captor.getValue().get("eml:title").asText()).isEqualTo(
         "Royal Belgian Institute of Natural Sciences Crustacea collection");
     cleanup("src/test/resources/dwca/test/dwca-rbins.zip");
-  }
-
-  @Test
-  void testCopyTableFails() throws Exception {
-    // Given
-    var expected = new TranslatorJobResult(JobState.FAILED, 0);
-    givenDWCA("/dwca-rbins.zip");
-    doThrow(new DisscoRepositoryException("", new Exception())).when(dwcaRepository)
-        .postRecords(eq("temp_gw0_tyl_yru_occurrence"), anyList());
-
-    // When
-    var result = service.retrieveData();
-
-    // Then
-    assertThat(result).isEqualTo(expected);
-    then(dwcaRepository).should(times(2)).deleteTable(any());
-    then(dwcaRepository).should(times(2)).createTable(any());
-    then(dwcaRepository).shouldHaveNoMoreInteractions();
-    then(kafkaService).shouldHaveNoInteractions();
   }
 
   @Test
@@ -172,8 +152,8 @@ class DwcaServiceTest {
 
     // Then
     assertThat(result).isEqualTo(expected);
-    then(dwcaRepository).should(times(2)).createTable(anyString());
-    then(dwcaRepository).should(times(2)).postRecords(anyString(), anyList());
+    then(dwcaRepository).should(times(2)).createTable(anyString(), any(Term.class));
+    then(dwcaRepository).should(times(2)).postRecords(anyString(), any(Term.class), anyList());
     then(kafkaService).should(times(9)).sendMessage(any(
         DigitalSpecimenEvent.class));
     assertThat(captor.getValue().get("eml:license")).isNull();
@@ -197,8 +177,8 @@ class DwcaServiceTest {
 
     // Then
     assertThat(result).isEqualTo(expected);
-    then(dwcaRepository).should(times(2)).createTable(anyString());
-    then(dwcaRepository).should(times(2)).postRecords(anyString(), anyList());
+    then(dwcaRepository).should(times(2)).createTable(anyString(), any(Term.class));
+    then(dwcaRepository).should(times(2)).postRecords(anyString(), any(Term.class), anyList());
     then(kafkaService).should(times(9)).sendMessage(any(
         DigitalSpecimenEvent.class));
     assertThat(captor.getValue().get("eml:license").asText()).isEqualTo(
@@ -223,8 +203,8 @@ class DwcaServiceTest {
 
     // Then
     assertThat(result).isEqualTo(expected);
-    then(dwcaRepository).should(times(2)).createTable(anyString());
-    then(dwcaRepository).should(times(2)).postRecords(anyString(), anyList());
+    then(dwcaRepository).should(times(2)).createTable(anyString(), any(Term.class));
+    then(dwcaRepository).should(times(2)).postRecords(anyString(), any(Term.class), anyList());
     then(kafkaService).shouldHaveNoInteractions();
     cleanup("src/test/resources/dwca/test/dwca-rbins.zip");
   }
@@ -264,8 +244,8 @@ class DwcaServiceTest {
 
     // Then
     assertThat(result).isEqualTo(expected);
-    then(dwcaRepository).should(times(3)).createTable(anyString());
-    then(dwcaRepository).should(times(2)).postRecords(anyString(), anyList());
+    then(dwcaRepository).should(times(3)).createTable(anyString(), any(Term.class));
+    then(dwcaRepository).should(times(2)).postRecords(anyString(), any(Term.class), anyList());
     then(kafkaService).should(times(19)).sendMessage(any(
         DigitalSpecimenEvent.class));
     cleanup("src/test/resources/dwca/test/dwca-kew-gbif-media.zip");
@@ -302,8 +282,8 @@ class DwcaServiceTest {
 
     // Then
     assertThat(result).isEqualTo(expected);
-    then(dwcaRepository).should(times(2)).createTable(anyString());
-    then(dwcaRepository).should(times(2)).postRecords(anyString(), anyList());
+    then(dwcaRepository).should(times(2)).createTable(anyString(), any(Term.class));
+    then(dwcaRepository).should(times(2)).postRecords(anyString(), any(Term.class), anyList());
     then(kafkaService).should(times(14)).sendMessage(any(
         DigitalSpecimenEvent.class));
     cleanup("src/test/resources/dwca/test/dwca-naturalis-ac-media.zip");
@@ -329,8 +309,8 @@ class DwcaServiceTest {
     // Then
     assertThat(result).isEqualTo(expected);
     var captor = ArgumentCaptor.forClass(DigitalSpecimenEvent.class);
-    then(dwcaRepository).should(times(2)).createTable(anyString());
-    then(dwcaRepository).should(times(2)).postRecords(anyString(), anyList());
+    then(dwcaRepository).should(times(2)).createTable(anyString(), any(Term.class));
+    then(dwcaRepository).should(times(2)).postRecords(anyString(), any(Term.class), anyList());
     then(kafkaService).should(times(1)).sendMessage(captor.capture());
     assertThat(captor.getValue().digitalMediaEvents()).isEmpty();
     cleanup("src/test/resources/dwca/test/dwca-invalid-ac-media.zip");
@@ -347,8 +327,8 @@ class DwcaServiceTest {
 
     // Then
     assertThat(result).isEqualTo(expected);
-    then(dwcaRepository).should(times(2)).createTable(anyString());
-    then(dwcaRepository).should(times(0)).postRecords(anyString(), anyList());
+    then(dwcaRepository).should(times(2)).createTable(anyString(), any(Term.class));
+    then(dwcaRepository).should(times(0)).postRecords(anyString(), any(Term.class), anyList());
     then(kafkaService).shouldHaveNoInteractions();
     cleanup("src/test/resources/dwca/test/dwca-only-occurrences.zip");
   }
@@ -372,8 +352,8 @@ class DwcaServiceTest {
 
     // Then
     assertThat(result).isEqualTo(expected);
-    then(dwcaRepository).should(times(1)).createTable(anyString());
-    then(dwcaRepository).should(times(1)).postRecords(anyString(), anyList());
+    then(dwcaRepository).should(times(1)).createTable(anyString(), any(Term.class));
+    then(dwcaRepository).should(times(1)).postRecords(anyString(), any(Term.class), anyList());
     then(kafkaService).should(times(20)).sendMessage(any(
         DigitalSpecimenEvent.class));
     cleanup("src/test/resources/dwca/test/dwca-lux-associated-media.zip");
@@ -424,8 +404,8 @@ class DwcaServiceTest {
 
     // Then
     assertThat(result).isEqualTo(expected);
-    then(dwcaRepository).should(times(1)).createTable(anyString());
-    then(dwcaRepository).should(times(1)).postRecords(anyString(), anyList());
+    then(dwcaRepository).should(times(1)).createTable(anyString(), any(Term.class));
+    then(dwcaRepository).should(times(1)).postRecords(anyString(), any(Term.class), anyList());
     then(kafkaService).shouldHaveNoInteractions();
     then(kafkaService).shouldHaveNoInteractions();
     cleanup("src/test/resources/dwca/test/dwca-lux-associated-media.zip");

@@ -31,10 +31,12 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -55,6 +57,7 @@ import org.gbif.dwc.DwcFiles;
 import org.gbif.dwc.record.Record;
 import org.gbif.dwc.terms.DwcTerm;
 import org.gbif.dwc.terms.DwcaTerm;
+import org.gbif.dwc.terms.Term;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
@@ -321,7 +324,7 @@ public class DwcaService extends WebClientService {
       throws OrganisationException {
     log.debug("Digital Specimen: {}, has associatedMedia {}", recordId,
         associatedMedia);
-    String[] mediaUrls = associatedMedia.split("\\|");
+    var mediaUrls = new LinkedHashSet<>(Arrays.asList(associatedMedia.split("\\|")));
     var digitalMedia = new ArrayList<DigitalMediaEvent>();
     for (var mediaUrl : mediaUrls) {
       var digitalMediaEvent = new DigitalMediaEvent(enrichmentServices(true),
@@ -383,15 +386,15 @@ public class DwcaService extends WebClientService {
   private void removeTempTables(Archive archive) {
     var tableNames = generateTableNames(archive);
     for (var tableName : tableNames) {
-      dwcaRepository.deleteTable(tableName);
+      dwcaRepository.deleteTable(tableName.getLeft());
     }
   }
 
-  private List<String> generateTableNames(Archive archive) {
-    var list = new ArrayList<String>();
-    list.add(getTableName(archive.getCore()));
+  private List<Pair<String, Term>> generateTableNames(Archive archive) {
+    var list = new ArrayList<Pair<String, Term>>();
+    list.add(Pair.of(getTableName(archive.getCore()), archive.getCore().getRowType()));
     for (var extension : archive.getExtensions()) {
-      list.add(getTableName(extension));
+      list.add(Pair.of(getTableName(extension), extension.getRowType()));
     }
     return list;
   }
@@ -407,9 +410,9 @@ public class DwcaService extends WebClientService {
     return tableName.replace(".", "_");
   }
 
-  private void createTempTables(List<String> tableNames) {
+  private void createTempTables(List<Pair<String, Term>> tableNames) {
     for (var tableName : tableNames) {
-      dwcaRepository.createTable(tableName);
+      dwcaRepository.createTable(tableName.getLeft(), tableName.getRight());
     }
   }
 
@@ -441,7 +444,7 @@ public class DwcaService extends WebClientService {
   private void postToDatabase(ArchiveFile archiveFile,
       ArrayList<Pair<String, JsonNode>> dbRecords) throws DisscoRepositoryException {
     log.info("Persisting {} records to database", dbRecords.size());
-    dwcaRepository.postRecords(getTableName(archiveFile), dbRecords);
+    dwcaRepository.postRecords(getTableName(archiveFile), archiveFile.getRowType(), dbRecords);
     dbRecords.clear();
   }
 
