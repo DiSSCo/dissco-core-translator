@@ -265,7 +265,7 @@ public class DwcaService extends WebClientService {
   private List<DigitalMediaEvent> processMedia(String recordId, JsonNode fullDigitalSpecimen,
       String organisationId) throws OrganisationException {
     var extensions = fullDigitalSpecimen.get(EXTENSIONS);
-    if (extensions != null && !extensions.equals(mapper.createObjectNode())) {
+    if (extensions != null) {
       if (extensions.get(AC_MULTIMEDIA) != null) {
         var imageArray = extensions.get(AC_MULTIMEDIA);
         addDatasetMetadata(imageArray, fullDigitalSpecimen);
@@ -279,7 +279,7 @@ public class DwcaService extends WebClientService {
           return extractMultiMedia(recordId, imageArray, organisationId);
         }
       }
-    } else if (fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA) != null) {
+    } if (fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA) != null) {
       return publishAssociatedMedia(recordId,
           fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA).asText(), organisationId,
           fullDigitalSpecimen.get(EML_LICENSE));
