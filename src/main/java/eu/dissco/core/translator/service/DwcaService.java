@@ -22,7 +22,9 @@ import eu.dissco.core.translator.properties.DwcaProperties;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.FdoProperties;
 import eu.dissco.core.translator.repository.DwcaRepository;
+import eu.dissco.core.translator.schema.DigitalMedia;
 import eu.dissco.core.translator.terms.BaseDigitalObjectDirector;
+import eu.dissco.core.translator.terms.specimen.IsKnownToContainMedia;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -263,7 +265,7 @@ public class DwcaService extends WebClientService {
   private List<DigitalMediaEvent> processMedia(String recordId, JsonNode fullDigitalSpecimen,
       String organisationId) throws OrganisationException {
     var extensions = fullDigitalSpecimen.get(EXTENSIONS);
-    if (extensions != null) {
+    if (extensions != null && !extensions.equals(mapper.createObjectNode())) {
       if (extensions.get(AC_MULTIMEDIA) != null) {
         var imageArray = extensions.get(AC_MULTIMEDIA);
         addDatasetMetadata(imageArray, fullDigitalSpecimen);
@@ -332,7 +334,7 @@ public class DwcaService extends WebClientService {
               fdoProperties.getDigitalMediaType(),
               recordId,
               digitalSpecimenDirector.assembleDigitalMedia(true,
-                  mapper.createObjectNode().put("ac:accessUri", mediaUrl)
+                  mapper.createObjectNode().put("ac:accessURI", mediaUrl)
                       .set(EML_LICENSE, licenseNode),
                   organisationId),
               null));
