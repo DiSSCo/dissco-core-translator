@@ -87,7 +87,7 @@ import eu.dissco.core.translator.terms.specimen.DatasetName;
 import eu.dissco.core.translator.terms.specimen.Disposition;
 import eu.dissco.core.translator.terms.specimen.DynamicProperties;
 import eu.dissco.core.translator.terms.specimen.InformationWithheld;
-import eu.dissco.core.translator.terms.specimen.IsKnownToContainMedia;
+import eu.dissco.core.translator.terms.specimen.IsKnowToContainMedia;
 import eu.dissco.core.translator.terms.specimen.IsMarkedAsType;
 import eu.dissco.core.translator.terms.specimen.LivingOrPreserved;
 import eu.dissco.core.translator.terms.specimen.OrganisationID;
@@ -359,8 +359,7 @@ public abstract class BaseDigitalObjectDirector {
         .withOdsPhysicalSpecimenIDType(physicalSpecimenIdTypeHarmonised)
         .withOdsOrganisationID(organisationId)
         .withOdsPhysicalSpecimenID(physicalSpecimenId)
-        .withOdsIsKnownToContainMedia(
-            parseToBoolean(new IsKnownToContainMedia(), data, dwc))
+        .withOdsIsKnownToContainMedia(parseToBoolean(new IsKnowToContainMedia(), data, dwc))
         .withOdsSourceSystemID(
             "https://hdl.handle.net/" + sourceSystemComponent.getSourceSystemID())
         .withOdsSourceSystemName(sourceSystemComponent.getSourceSystemName())
