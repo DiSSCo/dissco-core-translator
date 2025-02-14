@@ -10,11 +10,11 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class IsKnownToContainMediaTest {
+class IsKnowToContainMediaTest {
 
   private static final String MEDIA_URL = "https://archimg.mnhn.lu/Collections/Collections/ZS536.JPG";
 
-  private final IsKnownToContainMedia isKnownToContainMedia = new IsKnownToContainMedia();
+  private final IsKnowToContainMedia isKnowToContainMedia = new IsKnowToContainMedia();
 
   @Test
   void testRetrieveFromDWCA() {
@@ -23,7 +23,7 @@ class IsKnownToContainMediaTest {
     unit.put("dwc:associatedMedia", MEDIA_URL);
 
     // When
-    var result = isKnownToContainMedia.retrieveFromDWCA(unit);
+    var result = isKnowToContainMedia.retrieveFromDWCA(unit);
 
     // Then
     assertThat(result).isEqualTo("true");
@@ -42,7 +42,7 @@ class IsKnownToContainMediaTest {
     unit.set("extensions", extensions);
 
     // When
-    var result = isKnownToContainMedia.retrieveFromDWCA(unit);
+    var result = isKnowToContainMedia.retrieveFromDWCA(unit);
 
     // Then
     assertThat(result).isEqualTo("true");
@@ -55,7 +55,7 @@ class IsKnownToContainMediaTest {
     unit.put("abcd:multiMediaObjects/multiMediaObject/0/fileURI", MEDIA_URL);
 
     // When
-    var result = isKnownToContainMedia.retrieveFromABCD(unit);
+    var result = isKnowToContainMedia.retrieveFromABCD(unit);
 
     // Then
     assertThat(result).isEqualTo("true");
@@ -68,7 +68,7 @@ class IsKnownToContainMediaTest {
     unit.put("", MEDIA_URL);
 
     // When
-    var result = isKnownToContainMedia.retrieveFromABCD(unit);
+    var result = isKnowToContainMedia.retrieveFromABCD(unit);
 
     // Then
     assertThat(result).isEqualTo("false");
@@ -77,10 +77,10 @@ class IsKnownToContainMediaTest {
   @Test
   void testGetTerm() {
     // When
-    var result = isKnownToContainMedia.getTerm();
+    var result = isKnowToContainMedia.getTerm();
 
     // Then
-    assertThat(result).isEqualTo(IsKnownToContainMedia.TERM);
+    assertThat(result).isEqualTo(IsKnowToContainMedia.TERM);
   }
 
 }
