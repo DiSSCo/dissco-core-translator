@@ -29,6 +29,18 @@ class IsKnownToContainMediaTest {
     assertThat(result).isEqualTo("true");
   }
 
+  @Test
+  void testRetrieveFromDWCAFalse() {
+    // Given
+    var unit = MAPPER.createObjectNode();
+
+    // When
+    var result = isKnownToContainMedia.retrieveFromDWCA(unit);
+
+    // Then
+    assertThat(result).isEqualTo("false");
+  }
+
   @ParameterizedTest
   @ValueSource(strings = {"gbif:Multimedia", "http://rs.tdwg.org/ac/terms/Multimedia"})
   void testRetrieveFromDWCAExtension(String extensionName) {
