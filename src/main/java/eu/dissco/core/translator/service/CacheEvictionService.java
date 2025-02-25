@@ -16,7 +16,7 @@ public class CacheEvictionService {
 
   @Scheduled(fixedRateString = "43200000")
   public void evictAllCaches() {
-    log.info("Evicting all caches");
+    log.info("Clearing caches");
     cacheManager.getCacheNames()
         .forEach(cacheName -> Objects.requireNonNull(cacheManager.getCache(cacheName)).clear());
   }
