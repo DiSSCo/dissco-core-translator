@@ -36,6 +36,7 @@ import jakarta.xml.bind.JAXBException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -59,6 +60,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.w3c.dom.Node;
 import reactor.core.scheduler.Schedulers;
+import reactor.util.retry.Retry;
 
 @Slf4j
 @Service
@@ -110,6 +112,7 @@ public class BioCaseService extends WebClientService {
             .retrieve()
             .bodyToMono(String.class).publishOn(Schedulers.boundedElastic()).map(
                 (String xml) -> mapToABCD(xml, processedRecords))
+            .retryWhen(Retry.backoff(3, Duration.ofSeconds(2)))
             .toFuture().get();
         if (partResult.exception()) {
           return new TranslatorJobResult(JobState.FAILED, processedRecords.get());
@@ -118,9 +121,12 @@ public class BioCaseService extends WebClientService {
         if (finished) {
           log.info("Unable to get records from xml");
         }
-      } catch (InterruptedException | ExecutionException e) {
+      } catch (InterruptedException e) {
         log.error("Failed to get response from uri", e);
         Thread.currentThread().interrupt();
+        return new TranslatorJobResult(JobState.FAILED, processedRecords.get());
+      } catch (ExecutionException e) {
+        log.error("Failed to get response from uri", e);
         return new TranslatorJobResult(JobState.FAILED, processedRecords.get());
       }
       updateStartAtParameter(templateProperties);
