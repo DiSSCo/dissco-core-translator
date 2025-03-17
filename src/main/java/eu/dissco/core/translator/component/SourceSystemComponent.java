@@ -12,6 +12,7 @@ public class SourceSystemComponent {
   private final String sourceSystemID;
   private final String sourceSystemName;
   private final String sourceSystemEndpoint;
+  private final String sourceSystemFilters;
 
   public SourceSystemComponent(ApplicationProperties applicationProperties,
       SourceSystemRepository repository) {
@@ -22,5 +23,8 @@ public class SourceSystemComponent {
     }
     this.sourceSystemName = sourceSystemInformation.sourceSystemName();
     this.sourceSystemEndpoint = sourceSystemInformation.sourceSystemUrl();
+    var stringBuilder = new StringBuilder();
+    sourceSystemInformation.sourceSystemFilters().forEach(stringBuilder::append);
+    this.sourceSystemFilters = stringBuilder.toString();
   }
 }
