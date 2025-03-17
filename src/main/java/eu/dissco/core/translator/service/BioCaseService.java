@@ -118,9 +118,12 @@ public class BioCaseService extends WebClientService {
         if (finished) {
           log.info("Unable to get records from xml");
         }
-      } catch (InterruptedException | ExecutionException e) {
+      } catch (InterruptedException e) {
         log.error("Failed to get response from uri", e);
         Thread.currentThread().interrupt();
+        return new TranslatorJobResult(JobState.FAILED, processedRecords.get());
+      } catch ( ExecutionException e) {
+        log.error("Failed to get response from uri", e);
         return new TranslatorJobResult(JobState.FAILED, processedRecords.get());
       }
       updateStartAtParameter(templateProperties);
