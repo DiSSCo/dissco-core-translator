@@ -1,6 +1,7 @@
 package eu.dissco.core.translator.repository;
 
 import static eu.dissco.core.translator.TestUtils.ENDPOINT;
+import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static eu.dissco.core.translator.TestUtils.SOURCE_SYSTEM_ID;
 import static eu.dissco.core.translator.TestUtils.SOURCE_SYSTEM_NAME;
 import static eu.dissco.core.translator.TestUtils.givenSourceSystemInformation;
@@ -20,7 +21,7 @@ class SourceSystemRepositoryIT extends BaseRepositoryIT {
 
   @BeforeEach
   void setup() {
-    repository = new SourceSystemRepository(context);
+    repository = new SourceSystemRepository(context, MAPPER);
   }
 
   @AfterEach

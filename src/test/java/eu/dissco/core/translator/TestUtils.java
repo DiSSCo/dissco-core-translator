@@ -6,6 +6,7 @@ import eu.dissco.core.translator.schema.DigitalMedia;
 import eu.dissco.core.translator.schema.DigitalSpecimen;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -105,6 +106,6 @@ public class TestUtils {
   }
 
   public static SourceSystemInformation givenSourceSystemInformation() {
-    return new SourceSystemInformation(SOURCE_SYSTEM_NAME, ENDPOINT);
+    return new SourceSystemInformation(SOURCE_SYSTEM_NAME, ENDPOINT, List.of());
   }
 }
