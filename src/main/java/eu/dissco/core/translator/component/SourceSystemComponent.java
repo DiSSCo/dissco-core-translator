@@ -23,8 +23,13 @@ public class SourceSystemComponent {
     }
     this.sourceSystemName = sourceSystemInformation.sourceSystemName();
     this.sourceSystemEndpoint = sourceSystemInformation.sourceSystemUrl();
-    var stringBuilder = new StringBuilder();
-    sourceSystemInformation.sourceSystemFilters().forEach(stringBuilder::append);
-    this.sourceSystemFilters = stringBuilder.toString();
+    if (!sourceSystemInformation.sourceSystemFilters().isEmpty()) {
+      var stringBuilder = new StringBuilder();
+      sourceSystemInformation.sourceSystemFilters().forEach(stringBuilder::append);
+      this.sourceSystemFilters = stringBuilder.toString();
+    } else {
+      sourceSystemFilters = "";
+    }
+
   }
 }

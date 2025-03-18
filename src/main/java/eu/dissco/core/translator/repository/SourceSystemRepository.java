@@ -2,8 +2,6 @@ package eu.dissco.core.translator.repository;
 
 import static eu.dissco.core.translator.database.jooq.Tables.SOURCE_SYSTEM;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.dissco.core.translator.domain.SourceSystemInformation;
 import java.io.IOException;

@@ -8,8 +8,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 
+import eu.dissco.core.translator.domain.SourceSystemInformation;
 import eu.dissco.core.translator.properties.ApplicationProperties;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -36,6 +38,25 @@ class SourceSystemComponentTest {
     assertThat(component.getSourceSystemName()).isEqualTo(SOURCE_SYSTEM_NAME);
     assertThat(component.getSourceSystemID()).isEqualTo(SOURCE_SYSTEM_ID);
     assertThat(component.getSourceSystemEndpoint()).isEqualTo(ENDPOINT);
+    assertThat(component.getSourceSystemFilters()).isEmpty();
+  }
+
+  @Test
+  void testGetSourceSystemWithFilter() {
+    // Given
+    var filterStr = "<filter>foo</filter><filter>bar</filter>";
+    given(properties.getSourceSystemId()).willReturn(SOURCE_SYSTEM_ID);
+    given(repository.getSourceSystem(SOURCE_SYSTEM_ID)).willReturn(
+        new SourceSystemInformation(SOURCE_SYSTEM_NAME, ENDPOINT, List.of("<filter>foo</filter>", "<filter>bar</filter>")));
+
+    // When
+    var component = new SourceSystemComponent(properties, repository);
+
+    // Then
+    assertThat(component.getSourceSystemName()).isEqualTo(SOURCE_SYSTEM_NAME);
+    assertThat(component.getSourceSystemID()).isEqualTo(SOURCE_SYSTEM_ID);
+    assertThat(component.getSourceSystemEndpoint()).isEqualTo(ENDPOINT);
+    assertThat(component.getSourceSystemFilters()).isEqualTo(filterStr);
   }
 
   @Test
