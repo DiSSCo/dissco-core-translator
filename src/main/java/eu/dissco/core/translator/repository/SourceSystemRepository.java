@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.dissco.core.translator.domain.SourceSystemInformation;
+import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,9 +36,9 @@ public class SourceSystemRepository {
     try {
       var data = mapper.readTree(dbRecord.value3().data());
       if (data.get("ods:hasFilters") != null) {
-        filters = mapper.readValue(data.get("ods:hasFilters").asText(), new TypeReference<List<String>>() {});
+        filters = mapper.readerForListOf(String.class).readValue(data.get("ods:hasFilters"));
       }
-    } catch (JsonProcessingException e){
+    } catch (IOException e){
       log.error("Unable to read source system data", e);
     }
     return new SourceSystemInformation(dbRecord.value1(), dbRecord.value2(), filters);
