@@ -8,5 +8,8 @@
         <requestFormat>http://www.tdwg.org/schemas/abcd/2.06</requestFormat>
         <responseFormat start="${startAt}" limit="${limit}">http://www.tdwg.org/schemas/abcd/2.06</responseFormat>
         <count>false</count>
+        <filter>
+            ${filters}
+        </filter>
     </search>
 </request>

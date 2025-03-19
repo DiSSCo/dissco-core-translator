@@ -1,5 +1,7 @@
 package eu.dissco.core.translator.domain;
 
-public record SourceSystemInformation(String sourceSystemName, String sourceSystemUrl) {
+import java.util.List;
+
+public record SourceSystemInformation(String sourceSystemName, String sourceSystemUrl, List<String> sourceSystemFilters) {
 
 }

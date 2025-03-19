@@ -70,6 +70,7 @@ public class BioCaseService extends WebClientService {
 
   private static final String START_AT = "startAt";
   private static final String LIMIT = "limit";
+  private static final String FILTERS = "filters";
   private static final String ABCD = "abcd:";
   private static final String ABCDEFG = "abcd-efg:";
 
@@ -437,6 +438,7 @@ public class BioCaseService extends WebClientService {
     var map = new HashMap<String, Object>();
     map.put(LIMIT, applicationProperties.getItemsPerRequest());
     map.put(START_AT, 0);
+    map.put(FILTERS, sourceSystemComponent.getSourceSystemFilters());
     return map;
   }
 
