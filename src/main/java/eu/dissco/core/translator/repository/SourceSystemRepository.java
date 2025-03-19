@@ -33,8 +33,8 @@ public class SourceSystemRepository {
     List<String> filters = List.of();
     try {
       var data = mapper.readTree(dbRecord.value3().data());
-      if (data.get("ods:hasFilters") != null) {
-        filters = mapper.readerForListOf(String.class).readValue(data.get("ods:hasFilters"));
+      if (data.get("ods:filters") != null) {
+        filters = mapper.readerForListOf(String.class).readValue(data.get("ods:filters"));
       }
     } catch (IOException e){
       log.error("Unable to read source system data", e);
