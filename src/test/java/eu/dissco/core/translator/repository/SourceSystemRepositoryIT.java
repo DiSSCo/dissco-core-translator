@@ -48,7 +48,7 @@ class SourceSystemRepositoryIT extends BaseRepositoryIT {
     // Given
     givenInsertRecords("""
         {
-          "ods:hasFilters": ["dataset=AVES"]
+          "ods:filters": ["dataset=AVES"]
         }
         """);
     var expected = new SourceSystemInformation(SOURCE_SYSTEM_NAME, ENDPOINT, List.of("dataset=AVES"));
