@@ -7,7 +7,7 @@ import java.util.List;
 public class AccessURI extends Term {
 
   public static final String TERM = "ac:accessURI";
-  public static final List<String> DWCA_TERMS = List.of(TERM, "dcterms:identifier", "dc:identifier");
+  public static final List<String> DWCA_TERMS = List.of(TERM, "dcterms:identifier", "dc:identifier", "dcterms:references");
   private final List<String> abcdTerms = List.of("abcd:fileURI");
 
   @Override

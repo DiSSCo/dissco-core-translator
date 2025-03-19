@@ -90,7 +90,7 @@ public class DwcaService extends WebClientService {
   private final ApplicationProperties applicationProperties;
   private final XMLInputFactory xmlFactory;
   private final List<String> allowedBasisOfRecord = List.of("PRESERVEDSPECIMEN", "FOSSIL", "OTHER",
-      "ROCK", "MINERAL", "METEORITE", "FOSSILSPECIMEN", "LIVINGSPECIMEN", "MATERIALSAMPLE");
+      "ROCK", "MINERAL", "METEORITE", "FOSSILSPECIMEN", "LIVINGSPECIMEN", "MATERIALSAMPLE", "PRESERVED_SPECIMEN");
 
   @Override
   public TranslatorJobResult retrieveData() {
@@ -139,7 +139,7 @@ public class DwcaService extends WebClientService {
     try {
       for (var batch : batches) {
         log.info("Starting to get records for: core");
-        var specimenData = dwcaRepository.getCoreRecords(batch, getTableName(archive.getCore()));
+        var specimenData = dwcaRepository.getCoreRecords(batch, getTableName(archive.getCore(), true));
         log.info("Got specimen batch: {}", batch.size());
         addExtensionsToSpecimen(archive, batch, specimenData);
         log.info("Start translation and publishing of batch: {}", specimenData.size());
@@ -156,9 +156,9 @@ public class DwcaService extends WebClientService {
   private void addExtensionsToSpecimen(Archive archive, List<String> batch,
       Map<String, ObjectNode> specimenData) {
     for (var extension : archive.getExtensions()) {
-      log.info("Starting to get records for: {} ", getTableName(extension));
-      var extensionData = dwcaRepository.getRecords(batch, getTableName(extension));
-      log.info("Got {} with records: {} ", getTableName(extension), extensionData.size());
+      log.info("Starting to get records for: {} ", getTableName(extension, false));
+      var extensionData = dwcaRepository.getRecords(batch, getTableName(extension, false));
+      log.info("Got {} with records: {} ", getTableName(extension, false), extensionData.size());
       for (var specimenValue : specimenData.entrySet()) {
         var extensionValue = extensionData.get(specimenValue.getKey());
         if (extensionValue != null && specimenValue.getValue() != null) {
@@ -394,19 +394,19 @@ public class DwcaService extends WebClientService {
 
   private List<Pair<String, Term>> generateTableNames(Archive archive) {
     var list = new ArrayList<Pair<String, Term>>();
-    list.add(Pair.of(getTableName(archive.getCore()), archive.getCore().getRowType()));
+    list.add(Pair.of(getTableName(archive.getCore(), true), archive.getCore().getRowType()));
     for (var extension : archive.getExtensions()) {
-      list.add(Pair.of(getTableName(extension), extension.getRowType()));
+      list.add(Pair.of(getTableName(extension, false), extension.getRowType()));
     }
     return list;
   }
 
-  private String getTableName(ArchiveFile archiveFile) {
+  private String getTableName(ArchiveFile archiveFile, boolean isCore) {
     var fullSourceSystemId = sourceSystemComponent.getSourceSystemID();
+    var tableType= isCore? "_core_" : "_extension_";
     var minifiedSourceSystemId = fullSourceSystemId.substring(fullSourceSystemId.indexOf('/') + 1)
         .replace("-", "_");
-    var tableName = "temp_" + (minifiedSourceSystemId + "_" + archiveFile.getRowType()
-        .simpleName()).toLowerCase()
+    var tableName = "temp" +  tableType + (minifiedSourceSystemId + "_" + archiveFile.getRowType().simpleName()).toLowerCase()
         .replace(":", "_");
     tableName = tableName.replace("/", "_");
     return tableName.replace(".", "_");
@@ -418,7 +418,7 @@ public class DwcaService extends WebClientService {
     }
   }
 
-  private Set<String> postCore(ArchiveFile core) throws DisscoRepositoryException {
+  private Set<String> postCore(ArchiveFile core) {
     var dbRecords = new ArrayList<Pair<String, JsonNode>>();
     var idList = new HashSet<String>();
     for (var rec : core) {
@@ -429,7 +429,7 @@ public class DwcaService extends WebClientService {
         json.set(EXTENSIONS, mapper.createObjectNode());
         dbRecords.add(Pair.of(rec.id(), json));
         if (dbRecords.size() % 10000 == 0) {
-          postToDatabase(core, dbRecords);
+          postToDatabase(core, dbRecords, true);
         }
       } else {
         log.debug("Record with id: {} has basisOfRecord: {} which is not an accepted basisOfRecord",
@@ -437,21 +437,20 @@ public class DwcaService extends WebClientService {
       }
     }
     if (!dbRecords.isEmpty()) {
-      postToDatabase(core, dbRecords);
+      postToDatabase(core, dbRecords, true);
     }
     log.info("Finished posting core archive to database, total records: {}", idList.size());
     return idList;
   }
 
   private void postToDatabase(ArchiveFile archiveFile,
-      ArrayList<Pair<String, JsonNode>> dbRecords) throws DisscoRepositoryException {
+      ArrayList<Pair<String, JsonNode>> dbRecords, boolean isCore) {
     log.info("Persisting {} records to database", dbRecords.size());
-    dwcaRepository.postRecords(getTableName(archiveFile), archiveFile.getRowType(), dbRecords);
+    dwcaRepository.postRecords(getTableName(archiveFile, isCore), archiveFile.getRowType(), dbRecords);
     dbRecords.clear();
   }
 
-  private void postExtensions(Set<ArchiveFile> extensions, Set<String> idsList)
-      throws DisscoRepositoryException {
+  private void postExtensions(Set<ArchiveFile> extensions, Set<String> idsList) {
     var dbRecords = new ArrayList<Pair<String, JsonNode>>();
     for (var extension : extensions) {
       log.info("Processing records of extension: {}", extension.getRowType().toString());
@@ -459,12 +458,12 @@ public class DwcaService extends WebClientService {
         if (idsList.contains(rec.id())) {
           dbRecords.add(Pair.of(rec.id(), convertToJson(extension, rec)));
           if (dbRecords.size() % 10000 == 0) {
-            postToDatabase(extension, dbRecords);
+            postToDatabase(extension, dbRecords, false);
           }
         }
       }
       if (!dbRecords.isEmpty()) {
-        postToDatabase(extension, dbRecords);
+        postToDatabase(extension, dbRecords, false);
       }
     }
     log.info("Finished posting extensions archive to database");
