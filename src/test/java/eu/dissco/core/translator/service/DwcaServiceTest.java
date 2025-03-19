@@ -228,9 +228,9 @@ class DwcaServiceTest {
     var expected = new TranslatorJobResult(JobState.COMPLETED, 19);
     givenDWCA("/dwca-kew-gbif-media.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(19));
-    given(dwcaRepository.getRecords(anyList(), eq("temp_gw0_tyl_yru_identification"))).willReturn(
+    given(dwcaRepository.getRecords(anyList(), eq("temp_extension_gw0_tyl_yru_identification"))).willReturn(
         Map.of());
-    given(dwcaRepository.getRecords(anyList(), eq("temp_gw0_tyl_yru_multimedia"))).willReturn(
+    given(dwcaRepository.getRecords(anyList(), eq("temp_extension_gw0_tyl_yru_multimedia"))).willReturn(
         givenImageMap(19));
     given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
         .willReturn(givenDigitalSpecimen());
@@ -269,7 +269,7 @@ class DwcaServiceTest {
     givenDWCA("/dwca-naturalis-ac-media.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(14));
     given(dwcaRepository.getRecords(anyList(),
-        eq("temp_gw0_tyl_yru_multimedia"))).willReturn(givenImageMap(14));
+        eq("temp_extension_gw0_tyl_yru_multimedia"))).willReturn(givenImageMap(14));
     given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
         .willReturn(givenDigitalSpecimen());
     given(digitalSpecimenDirector.assembleDigitalMedia(anyBoolean(), any(JsonNode.class),
@@ -296,7 +296,7 @@ class DwcaServiceTest {
     givenDWCA("/dwca-invalid-ac-media.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(1));
     given(dwcaRepository.getRecords(anyList(),
-        eq("temp_gw0_tyl_yru_multimedia"))).willReturn(givenImageMap(1));
+        eq("temp_extension_gw0_tyl_yru_multimedia"))).willReturn(givenImageMap(1));
     given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
         .willReturn(givenDigitalSpecimen());
     given(digitalSpecimenDirector.assembleDigitalMedia(anyBoolean(), any(JsonNode.class),
