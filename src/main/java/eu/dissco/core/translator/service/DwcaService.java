@@ -81,7 +81,7 @@ public class DwcaService extends WebClientService {
   private final ObjectMapper mapper;
   private final WebClient webClient;
   private final DwcaProperties dwcaProperties;
-  private final KafkaService kafkaService;
+  private final RabbitMQService rabbitMQService;
   private final EnrichmentProperties enrichmentProperties;
   private final SourceSystemComponent sourceSystemComponent;
   private final DwcaRepository dwcaRepository;
@@ -188,7 +188,7 @@ public class DwcaService extends WebClientService {
           log.debug("Digital Specimen: {}", digitalObjects);
           var translatorEvent = new DigitalSpecimenEvent(enrichmentServices(false),
               digitalObjects.getLeft(), digitalObjects.getRight());
-          kafkaService.sendMessage(translatorEvent);
+          rabbitMQService.sendMessage(translatorEvent);
           processedRecords.incrementAndGet();
         } catch (DiSSCoDataException e) {
           log.error("Encountered data issue with record: {}", fullRecord, e);

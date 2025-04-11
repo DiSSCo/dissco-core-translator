@@ -85,7 +85,7 @@ public class BioCaseService extends WebClientService {
   private final SourceSystemComponent sourceSystemComponent;
   private final Configuration configuration;
   private final XMLInputFactory xmlFactory;
-  private final KafkaService kafkaService;
+  private final RabbitMQService rabbitMQService;
   private final EnrichmentProperties enrichmentProperties;
   private final BaseDigitalObjectDirector digitalSpecimenDirector;
   private final FdoProperties fdoProperties;
@@ -224,7 +224,7 @@ public class BioCaseService extends WebClientService {
             attributes.getOdsNormalisedPhysicalSpecimenID(), unit,
             attributes.getOdsOrganisationID()));
         log.debug("Result digital Specimen: {}", digitalSpecimen);
-        kafkaService.sendMessage(
+        rabbitMQService.sendMessage(
             new DigitalSpecimenEvent(
                 enrichmentServices(false),
                 digitalSpecimen,
