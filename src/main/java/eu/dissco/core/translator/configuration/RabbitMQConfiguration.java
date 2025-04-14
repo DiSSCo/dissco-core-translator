@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfiguration {
 
-  @Bean("compressed")
+  @Bean
   public RabbitTemplate compressedTemplate(ConnectionFactory connectionFactory,
       MessageCompressionComponent compressedMessageConverter) {
     final RabbitTemplate rabbitTemplate =

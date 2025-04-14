@@ -15,6 +15,6 @@ public class RabbitMQProperties {
   private String exchangeName = "nu-search-exchange";
 
   @NotNull
-  private String routingKeyName = "";
+  private String routingKeyName = "nu-search";
 
 }
