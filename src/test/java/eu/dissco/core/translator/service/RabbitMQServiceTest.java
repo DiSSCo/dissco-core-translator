@@ -39,7 +39,7 @@ class RabbitMQServiceTest {
     container.execInContainer("rabbitmqadmin", "declare", "queue", "name=nu-search-queue",
         "queue_type=quorum", "durable=true");
     container.execInContainer("rabbitmqadmin", "declare", "binding", "source=nu-search-exchange",
-        "destination_type=queue", "destination=nu-search-queue", "routing_key=");
+        "destination_type=queue", "destination=nu-search-queue", "routing_key=nu-search");
 
     CachingConnectionFactory factory = new CachingConnectionFactory(container.getHost());
     factory.setPort(container.getAmqpPort());
@@ -68,7 +68,8 @@ class RabbitMQServiceTest {
     rabbitMQService.sendMessage(message);
 
     // Then
-    Thread.sleep(100); // Avoid race condition between rabbitMQ and test, give RabbitMQ 100 milisec to process
+    Thread.sleep(
+        100); // Avoid race condition between rabbitMQ and test, give RabbitMQ 100 milisec to process
     var string = new String(rabbitTemplate.receive("nu-search-queue").getBody());
     assertThat(string).isEqualTo(MAPPER.writeValueAsString(message));
   }
