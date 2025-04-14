@@ -407,7 +407,6 @@ class DwcaServiceTest {
     then(dwcaRepository).should(times(1)).createTable(anyString(), any(Term.class));
     then(dwcaRepository).should(times(1)).postRecords(anyString(), any(Term.class), anyList());
     then(rabbitMQService).shouldHaveNoInteractions();
-    then(rabbitMQService).shouldHaveNoInteractions();
     cleanup("src/test/resources/dwca/test/dwca-lux-associated-media.zip");
   }
 
