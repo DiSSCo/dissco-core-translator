@@ -25,10 +25,11 @@ public class MessageCompressionComponent implements MessageConverter {
 
   private static byte[] deflateMessage(byte[] message) throws IOException {
     final int BUFFER_SIZE = 8192; // 8KB
-    try (var rstBao = new ByteArrayOutputStream(BUFFER_SIZE);
-        var zos = new GZIPOutputStream(rstBao, BUFFER_SIZE)) {
-      zos.write(message);
-      zos.flush();
+    try (var rstBao = new ByteArrayOutputStream(BUFFER_SIZE)) {
+      try (var zos = new GZIPOutputStream(rstBao, BUFFER_SIZE)) {
+        zos.write(message);
+        zos.flush();
+      }
       return rstBao.toByteArray();
     }
   }
@@ -62,12 +63,10 @@ public class MessageCompressionComponent implements MessageConverter {
     var useGzip = "gzip".equals(message.getMessageProperties().getContentEncoding());
     if (useGzip) {
       try {
-        return new BufferedReader(
-            new InputStreamReader(
-                new GZIPInputStream(
-                    new ByteArrayInputStream(message.getBody()))))
-            .lines()
-            .collect(Collectors.joining(System.lineSeparator()));
+        try (var reader = new BufferedReader(new InputStreamReader(
+            new GZIPInputStream(new ByteArrayInputStream(message.getBody()))))) {
+          return reader.lines().collect(Collectors.joining(System.lineSeparator()));
+        }
       } catch (IOException e) {
         throw new MessageConversionException(
             "Failed to decompress message " + new String(message.getBody()), e);
