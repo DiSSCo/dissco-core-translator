@@ -11,7 +11,7 @@ import eu.dissco.core.translator.domain.DigitalMediaEvent;
 import eu.dissco.core.translator.domain.DigitalMediaWrapper;
 import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
 import eu.dissco.core.translator.domain.DigitalSpecimenWrapper;
-import eu.dissco.core.translator.properties.RabbitMQProperties;
+import eu.dissco.core.translator.properties.RabbitMqProperties;
 import java.io.IOException;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
@@ -23,10 +23,10 @@ import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Testcontainers
-class RabbitMQServiceTest {
+class RabbitMqServiceTest {
 
   private RabbitMQContainer container;
-  private RabbitMQService rabbitMQService;
+  private RabbitMqService rabbitMqService;
   private RabbitTemplate rabbitTemplate;
 
   @BeforeEach
@@ -46,7 +46,8 @@ class RabbitMQServiceTest {
     factory.setUsername(container.getAdminUsername());
     factory.setPassword(container.getAdminPassword());
     rabbitTemplate = new RabbitTemplate(factory);
-    rabbitMQService = new RabbitMQService(MAPPER, rabbitTemplate, new RabbitMQProperties());
+    rabbitTemplate.setReceiveTimeout(100L);
+    rabbitMqService = new RabbitMqService(MAPPER, rabbitTemplate, new RabbitMqProperties());
   }
 
   @AfterEach
@@ -55,7 +56,7 @@ class RabbitMQServiceTest {
   }
 
   @Test
-  void testSendMessage() throws JsonProcessingException, InterruptedException {
+  void testSendMessage() throws JsonProcessingException {
     // Given
     var message = new DigitalSpecimenEvent(List.of(), new DigitalSpecimenWrapper(
         NORMALISED_PHYSICAL_SPECIMEN_ID, "https://doi.org/21.T11148/894b1e6cad57e921764e",
@@ -65,11 +66,9 @@ class RabbitMQServiceTest {
                 NORMALISED_PHYSICAL_SPECIMEN_ID, givenDigitalMedia(), MAPPER.createObjectNode()))));
 
     // When
-    rabbitMQService.sendMessage(message);
+    rabbitMqService.sendMessage(message);
 
     // Then
-    Thread.sleep(
-        100); // Avoid race condition between rabbitMQ and test, give RabbitMQ 100 milisec to process
     var string = new String(rabbitTemplate.receive("nu-search-queue").getBody());
     assertThat(string).isEqualTo(MAPPER.writeValueAsString(message));
   }

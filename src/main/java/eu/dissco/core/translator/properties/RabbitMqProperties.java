@@ -9,7 +9,7 @@ import org.springframework.validation.annotation.Validated;
 @Data
 @Validated
 @ConfigurationProperties(prefix = "rabbitmq")
-public class RabbitMQProperties {
+public class RabbitMqProperties {
 
   @NotBlank
   private String exchangeName = "nu-search-exchange";

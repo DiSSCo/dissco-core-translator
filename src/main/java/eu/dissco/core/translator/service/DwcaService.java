@@ -22,9 +22,7 @@ import eu.dissco.core.translator.properties.DwcaProperties;
 import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.FdoProperties;
 import eu.dissco.core.translator.repository.DwcaRepository;
-import eu.dissco.core.translator.schema.DigitalMedia;
 import eu.dissco.core.translator.terms.BaseDigitalObjectDirector;
-import eu.dissco.core.translator.terms.specimen.IsKnownToContainMedia;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -81,7 +79,7 @@ public class DwcaService extends WebClientService {
   private final ObjectMapper mapper;
   private final WebClient webClient;
   private final DwcaProperties dwcaProperties;
-  private final RabbitMQService rabbitMQService;
+  private final RabbitMqService rabbitMqService;
   private final EnrichmentProperties enrichmentProperties;
   private final SourceSystemComponent sourceSystemComponent;
   private final DwcaRepository dwcaRepository;
@@ -188,7 +186,7 @@ public class DwcaService extends WebClientService {
           log.debug("Digital Specimen: {}", digitalObjects);
           var translatorEvent = new DigitalSpecimenEvent(enrichmentServices(false),
               digitalObjects.getLeft(), digitalObjects.getRight());
-          rabbitMQService.sendMessage(translatorEvent);
+          rabbitMqService.sendMessage(translatorEvent);
           processedRecords.incrementAndGet();
         } catch (DiSSCoDataException e) {
           log.error("Encountered data issue with record: {}", fullRecord, e);

@@ -61,7 +61,7 @@ class BioCaseServiceTest {
   @Mock
   private ResponseSpec responseSpec;
   @Mock
-  private RabbitMQService rabbitMQService;
+  private RabbitMqService rabbitMqService;
   @Mock
   private EnrichmentProperties enrichmentProperties;
   @Mock
@@ -77,7 +77,7 @@ class BioCaseServiceTest {
         new FileTemplateLoader(new ClassPathResource("templates").getFile()));
     service = new BioCaseService(mapper, properties, webClient, sourceSystemComponent,
         configuration, factory,
-        rabbitMQService, enrichmentProperties, digitalSpecimenDirector, fdoProperties);
+        rabbitMqService, enrichmentProperties, digitalSpecimenDirector, fdoProperties);
 
     // Given
     givenJsonWebclient();
@@ -111,7 +111,7 @@ class BioCaseServiceTest {
     } else {
       then(webClient).should(times(1)).get();
     }
-    then(rabbitMQService).should(times(processedRecords)).sendMessage(any(
+    then(rabbitMqService).should(times(processedRecords)).sendMessage(any(
         DigitalSpecimenEvent.class));
   }
 
@@ -137,7 +137,7 @@ class BioCaseServiceTest {
     // Then
     assertThat(result).isEqualTo(expectedResult);
     then(webClient).should(times(1)).get();
-    then(rabbitMQService).should(times(100)).sendMessage(any(
+    then(rabbitMqService).should(times(100)).sendMessage(any(
         DigitalSpecimenEvent.class));
   }
 
@@ -162,7 +162,7 @@ class BioCaseServiceTest {
     assertThat(result).isEqualTo(expectedResult);
     var captor = ArgumentCaptor.forClass(DigitalSpecimenEvent.class);
     then(webClient).should(times(1)).get();
-    then(rabbitMQService).should(times(1)).sendMessage(captor.capture());
+    then(rabbitMqService).should(times(1)).sendMessage(captor.capture());
     assertThat(captor.getValue().digitalMediaEvents()).isEmpty();
   }
 
@@ -184,7 +184,7 @@ class BioCaseServiceTest {
     // Then
     assertThat(result).isEqualTo(expectedResult);
     then(webClient).should(times(1)).get();
-    then(rabbitMQService).shouldHaveNoInteractions();
+    then(rabbitMqService).shouldHaveNoInteractions();
   }
 
   private void givenJsonWebclient() {
