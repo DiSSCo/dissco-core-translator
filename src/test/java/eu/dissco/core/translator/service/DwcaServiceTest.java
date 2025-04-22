@@ -75,7 +75,7 @@ class DwcaServiceTest {
   @Mock
   private ResponseSpec responseSpec;
   @Mock
-  private KafkaService kafkaService;
+  private RabbitMqService rabbitMqService;
   @Mock
   private EnrichmentProperties enrichmentProperties;
   @Mock
@@ -96,7 +96,7 @@ class DwcaServiceTest {
   @BeforeEach
   void setup() {
     this.service = new DwcaService(MAPPER, webClient, dwcaProperties,
-        kafkaService, enrichmentProperties, sourceSystemComponent, dwcaRepository,
+        rabbitMqService, enrichmentProperties, sourceSystemComponent, dwcaRepository,
         digitalSpecimenDirector, fdoProperties, applicationProperties, factory);
 
     // Given
@@ -127,7 +127,7 @@ class DwcaServiceTest {
     assertThat(result).isEqualTo(expected);
     then(dwcaRepository).should(times(2)).createTable(anyString(), any(Term.class));
     then(dwcaRepository).should(times(2)).postRecords(anyString(), any(Term.class), anyList());
-    then(kafkaService).should(times(processedRecords)).sendMessage(any(
+    then(rabbitMqService).should(times(processedRecords)).sendMessage(any(
         DigitalSpecimenEvent.class));
     assertThat(captor.getValue().get("eml:license").asText()).isEqualTo(
         "http://creativecommons.org/licenses/by-nc/4.0/legalcode");
@@ -154,7 +154,7 @@ class DwcaServiceTest {
     assertThat(result).isEqualTo(expected);
     then(dwcaRepository).should(times(2)).createTable(anyString(), any(Term.class));
     then(dwcaRepository).should(times(2)).postRecords(anyString(), any(Term.class), anyList());
-    then(kafkaService).should(times(9)).sendMessage(any(
+    then(rabbitMqService).should(times(9)).sendMessage(any(
         DigitalSpecimenEvent.class));
     assertThat(captor.getValue().get("eml:license")).isNull();
     assertThat(captor.getValue().get("eml:title")).isNull();
@@ -179,7 +179,7 @@ class DwcaServiceTest {
     assertThat(result).isEqualTo(expected);
     then(dwcaRepository).should(times(2)).createTable(anyString(), any(Term.class));
     then(dwcaRepository).should(times(2)).postRecords(anyString(), any(Term.class), anyList());
-    then(kafkaService).should(times(9)).sendMessage(any(
+    then(rabbitMqService).should(times(9)).sendMessage(any(
         DigitalSpecimenEvent.class));
     assertThat(captor.getValue().get("eml:license").asText()).isEqualTo(
         "Creative Commons Attribution Non Commercial (CC-BY-NC) 4.0 License");
@@ -205,7 +205,7 @@ class DwcaServiceTest {
     assertThat(result).isEqualTo(expected);
     then(dwcaRepository).should(times(2)).createTable(anyString(), any(Term.class));
     then(dwcaRepository).should(times(2)).postRecords(anyString(), any(Term.class), anyList());
-    then(kafkaService).shouldHaveNoInteractions();
+    then(rabbitMqService).shouldHaveNoInteractions();
     cleanup("src/test/resources/dwca/test/dwca-rbins.zip");
   }
 
@@ -246,7 +246,7 @@ class DwcaServiceTest {
     assertThat(result).isEqualTo(expected);
     then(dwcaRepository).should(times(3)).createTable(anyString(), any(Term.class));
     then(dwcaRepository).should(times(2)).postRecords(anyString(), any(Term.class), anyList());
-    then(kafkaService).should(times(19)).sendMessage(any(
+    then(rabbitMqService).should(times(19)).sendMessage(any(
         DigitalSpecimenEvent.class));
     cleanup("src/test/resources/dwca/test/dwca-kew-gbif-media.zip");
   }
@@ -284,7 +284,7 @@ class DwcaServiceTest {
     assertThat(result).isEqualTo(expected);
     then(dwcaRepository).should(times(2)).createTable(anyString(), any(Term.class));
     then(dwcaRepository).should(times(2)).postRecords(anyString(), any(Term.class), anyList());
-    then(kafkaService).should(times(14)).sendMessage(any(
+    then(rabbitMqService).should(times(14)).sendMessage(any(
         DigitalSpecimenEvent.class));
     cleanup("src/test/resources/dwca/test/dwca-naturalis-ac-media.zip");
   }
@@ -311,7 +311,7 @@ class DwcaServiceTest {
     var captor = ArgumentCaptor.forClass(DigitalSpecimenEvent.class);
     then(dwcaRepository).should(times(2)).createTable(anyString(), any(Term.class));
     then(dwcaRepository).should(times(2)).postRecords(anyString(), any(Term.class), anyList());
-    then(kafkaService).should(times(1)).sendMessage(captor.capture());
+    then(rabbitMqService).should(times(1)).sendMessage(captor.capture());
     assertThat(captor.getValue().digitalMediaEvents()).isEmpty();
     cleanup("src/test/resources/dwca/test/dwca-invalid-ac-media.zip");
   }
@@ -329,7 +329,7 @@ class DwcaServiceTest {
     assertThat(result).isEqualTo(expected);
     then(dwcaRepository).should(times(2)).createTable(anyString(), any(Term.class));
     then(dwcaRepository).should(times(0)).postRecords(anyString(), any(Term.class), anyList());
-    then(kafkaService).shouldHaveNoInteractions();
+    then(rabbitMqService).shouldHaveNoInteractions();
     cleanup("src/test/resources/dwca/test/dwca-only-occurrences.zip");
   }
 
@@ -354,7 +354,7 @@ class DwcaServiceTest {
     assertThat(result).isEqualTo(expected);
     then(dwcaRepository).should(times(1)).createTable(anyString(), any(Term.class));
     then(dwcaRepository).should(times(1)).postRecords(anyString(), any(Term.class), anyList());
-    then(kafkaService).should(times(20)).sendMessage(any(
+    then(rabbitMqService).should(times(20)).sendMessage(any(
         DigitalSpecimenEvent.class));
     cleanup("src/test/resources/dwca/test/dwca-lux-associated-media.zip");
   }
@@ -406,8 +406,7 @@ class DwcaServiceTest {
     assertThat(result).isEqualTo(expected);
     then(dwcaRepository).should(times(1)).createTable(anyString(), any(Term.class));
     then(dwcaRepository).should(times(1)).postRecords(anyString(), any(Term.class), anyList());
-    then(kafkaService).shouldHaveNoInteractions();
-    then(kafkaService).shouldHaveNoInteractions();
+    then(rabbitMqService).shouldHaveNoInteractions();
     cleanup("src/test/resources/dwca/test/dwca-lux-associated-media.zip");
   }
 
