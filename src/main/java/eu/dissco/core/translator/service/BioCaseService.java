@@ -406,7 +406,6 @@ public class BioCaseService extends WebClientService {
     var digitalMediaEvent = new DigitalMediaEvent(enrichmentServices(true),
         new DigitalMediaWrapper(
             fdoProperties.getDigitalMediaType(),
-            physicalSpecimenId,
             digitalMedia,
             attributes
         ));
