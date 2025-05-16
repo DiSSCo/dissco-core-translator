@@ -384,7 +384,7 @@ public class BioCaseService extends WebClientService {
       for (MultiMediaObject media : unit.getMultiMediaObjects().getMultiMediaObject()) {
         try {
           digitalMediaEvents.add(
-              processDigitalMedia(physicalSpecimenId, media, organisationId));
+              processDigitalMedia(media, organisationId));
         } catch (DiSSCoDataException e) {
           log.error("Failed to process digital media object for digital specimen: {}",
               physicalSpecimenId, e);
@@ -394,8 +394,7 @@ public class BioCaseService extends WebClientService {
     return digitalMediaEvents;
   }
 
-  private DigitalMediaEvent processDigitalMedia(String physicalSpecimenId,
-      MultiMediaObject media, String organisationId) throws DiSSCoDataException {
+  private DigitalMediaEvent processDigitalMedia(MultiMediaObject media, String organisationId) throws DiSSCoDataException {
     var attributes = getData(mapper.valueToTree(media));
     var digitalMedia = digitalSpecimenDirector.assembleDigitalMedia(false, attributes,
         organisationId);
