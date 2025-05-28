@@ -307,7 +307,6 @@ public class DwcaService extends WebClientService {
         var digitalMediaEvent = new DigitalMediaEvent(enrichmentServices(true),
             new DigitalMediaWrapper(
                 fdoProperties.getDigitalMediaType(),
-                recordId,
                 digitalMedia,
                 image));
         digitalMediaEvents.add(digitalMediaEvent);
@@ -330,7 +329,6 @@ public class DwcaService extends WebClientService {
       var digitalMediaEvent = new DigitalMediaEvent(enrichmentServices(true),
           new DigitalMediaWrapper(
               fdoProperties.getDigitalMediaType(),
-              recordId,
               digitalSpecimenDirector.assembleDigitalMedia(true,
                   mapper.createObjectNode().put("ac:accessURI", mediaUrl)
                       .set(EML_LICENSE, licenseNode),

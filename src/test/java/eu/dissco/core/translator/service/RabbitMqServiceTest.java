@@ -63,7 +63,7 @@ class RabbitMqServiceTest {
         givenDigitalSpecimen(), MAPPER.createObjectNode()),
         List.of(new DigitalMediaEvent(List.of(),
             new DigitalMediaWrapper("https://doi.org/21.T11148/bbad8c4e101e8af01115",
-                NORMALISED_PHYSICAL_SPECIMEN_ID, givenDigitalMedia(), MAPPER.createObjectNode()))));
+                givenDigitalMedia(), MAPPER.createObjectNode()))));
 
     // When
     rabbitMqService.sendMessage(message);
