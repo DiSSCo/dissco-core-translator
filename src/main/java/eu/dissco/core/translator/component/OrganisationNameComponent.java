@@ -64,7 +64,7 @@ public class OrganisationNameComponent {
   @Cacheable("wikidata")
   public String getWikiDataName(String wikidata) throws OrganisationException {
     log.info("Requesting organisation details for organisation: {} with wikidata", wikidata);
-    String url = "https://www.wikidata.org/w/rest.php/wikibase/v0/entities/items/" + wikidata + "/labels/en";
+    String url = "https://www.wikidata.org/w/rest.php/wikibase/v1/entities/items/" + wikidata + "/labels/en";
     var response = webClient.get().uri(url).retrieve().bodyToMono(JsonNode.class)
         .publishOn(Schedulers.boundedElastic());
     try {
