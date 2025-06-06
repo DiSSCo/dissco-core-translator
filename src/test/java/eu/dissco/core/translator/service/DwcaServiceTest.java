@@ -62,9 +62,6 @@ import org.springframework.web.reactive.function.client.WebClient.ResponseSpec;
 @ExtendWith(MockitoExtension.class)
 class DwcaServiceTest {
 
-  private static final File EML_FILE = new File(
-      "/home/sam-leeflang/Documents/repos/dissco-core-translator/src/test/resources/dwca/test/temp/eml.xml");
-
   private final XMLInputFactory factory = XMLInputFactory.newFactory();
   private final ApplicationProperties applicationProperties = new ApplicationProperties();
   @Mock
@@ -130,7 +127,7 @@ class DwcaServiceTest {
     assertThat(result).isEqualTo(expected);
     then(dwcaRepository).should(times(2)).createTable(anyString(), any(Term.class));
     then(dwcaRepository).should(times(2)).postRecords(anyString(), any(Term.class), anyList());
-    then(sourceSystemComponent).should().storeEmlRecord(EML_FILE);
+    then(sourceSystemComponent).should().storeEmlRecord(any(File.class));
     then(rabbitMqService).should(times(processedRecords)).sendMessage(any(
         DigitalSpecimenEvent.class));
     assertThat(captor.getValue().get("eml:license").asText()).isEqualTo(
@@ -183,7 +180,7 @@ class DwcaServiceTest {
     assertThat(result).isEqualTo(expected);
     then(dwcaRepository).should(times(2)).createTable(anyString(), any(Term.class));
     then(dwcaRepository).should(times(2)).postRecords(anyString(), any(Term.class), anyList());
-    then(sourceSystemComponent).should().storeEmlRecord(EML_FILE);
+    then(sourceSystemComponent).should().storeEmlRecord(any(File.class));
     then(rabbitMqService).should(times(9)).sendMessage(any(
         DigitalSpecimenEvent.class));
     assertThat(captor.getValue().get("eml:license").asText()).isEqualTo(
@@ -210,7 +207,7 @@ class DwcaServiceTest {
     assertThat(result).isEqualTo(expected);
     then(dwcaRepository).should(times(2)).createTable(anyString(), any(Term.class));
     then(dwcaRepository).should(times(2)).postRecords(anyString(), any(Term.class), anyList());
-    then(sourceSystemComponent).should().storeEmlRecord(EML_FILE);
+    then(sourceSystemComponent).should().storeEmlRecord(any(File.class));
     then(rabbitMqService).shouldHaveNoInteractions();
     cleanup("src/test/resources/dwca/test/dwca-rbins.zip");
   }
@@ -254,7 +251,7 @@ class DwcaServiceTest {
     assertThat(result).isEqualTo(expected);
     then(dwcaRepository).should(times(3)).createTable(anyString(), any(Term.class));
     then(dwcaRepository).should(times(2)).postRecords(anyString(), any(Term.class), anyList());
-    then(sourceSystemComponent).should().storeEmlRecord(EML_FILE);
+    then(sourceSystemComponent).should().storeEmlRecord(any(File.class));
     then(rabbitMqService).should(times(19)).sendMessage(any(
         DigitalSpecimenEvent.class));
     cleanup("src/test/resources/dwca/test/dwca-kew-gbif-media.zip");
@@ -293,7 +290,7 @@ class DwcaServiceTest {
     assertThat(result).isEqualTo(expected);
     then(dwcaRepository).should(times(2)).createTable(anyString(), any(Term.class));
     then(dwcaRepository).should(times(2)).postRecords(anyString(), any(Term.class), anyList());
-    then(sourceSystemComponent).should().storeEmlRecord(EML_FILE);
+    then(sourceSystemComponent).should().storeEmlRecord(any(File.class));
     then(rabbitMqService).should(times(14)).sendMessage(any(
         DigitalSpecimenEvent.class));
     cleanup("src/test/resources/dwca/test/dwca-naturalis-ac-media.zip");
@@ -321,7 +318,7 @@ class DwcaServiceTest {
     var captor = ArgumentCaptor.forClass(DigitalSpecimenEvent.class);
     then(dwcaRepository).should(times(2)).createTable(anyString(), any(Term.class));
     then(dwcaRepository).should(times(2)).postRecords(anyString(), any(Term.class), anyList());
-    then(sourceSystemComponent).should().storeEmlRecord(EML_FILE);
+    then(sourceSystemComponent).should().storeEmlRecord(any(File.class));
     then(rabbitMqService).should(times(1)).sendMessage(captor.capture());
     assertThat(captor.getValue().digitalMediaEvents()).isEmpty();
     cleanup("src/test/resources/dwca/test/dwca-invalid-ac-media.zip");
@@ -340,7 +337,7 @@ class DwcaServiceTest {
     assertThat(result).isEqualTo(expected);
     then(dwcaRepository).should(times(2)).createTable(anyString(), any(Term.class));
     then(dwcaRepository).should(times(0)).postRecords(anyString(), any(Term.class), anyList());
-    then(sourceSystemComponent).should().storeEmlRecord(EML_FILE);
+    then(sourceSystemComponent).should().storeEmlRecord(any(File.class));
     then(rabbitMqService).shouldHaveNoInteractions();
     cleanup("src/test/resources/dwca/test/dwca-only-occurrences.zip");
   }
@@ -366,7 +363,7 @@ class DwcaServiceTest {
     assertThat(result).isEqualTo(expected);
     then(dwcaRepository).should(times(1)).createTable(anyString(), any(Term.class));
     then(dwcaRepository).should(times(1)).postRecords(anyString(), any(Term.class), anyList());
-    then(sourceSystemComponent).should().storeEmlRecord(EML_FILE);
+    then(sourceSystemComponent).should().storeEmlRecord(any(File.class));
     then(rabbitMqService).should(times(20)).sendMessage(any(
         DigitalSpecimenEvent.class));
     cleanup("src/test/resources/dwca/test/dwca-lux-associated-media.zip");
@@ -419,7 +416,7 @@ class DwcaServiceTest {
     assertThat(result).isEqualTo(expected);
     then(dwcaRepository).should(times(1)).createTable(anyString(), any(Term.class));
     then(dwcaRepository).should(times(1)).postRecords(anyString(), any(Term.class), anyList());
-    then(sourceSystemComponent).should().storeEmlRecord(EML_FILE);
+    then(sourceSystemComponent).should().storeEmlRecord(any(File.class));
     then(rabbitMqService).shouldHaveNoInteractions();
     cleanup("src/test/resources/dwca/test/dwca-lux-associated-media.zip");
   }
