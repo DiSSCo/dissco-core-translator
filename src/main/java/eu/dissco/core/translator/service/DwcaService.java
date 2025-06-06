@@ -131,8 +131,9 @@ public class DwcaService extends WebClientService {
   }
 
   public void getSpecimenData(Set<String> ids, Archive archive, AtomicInteger processedRecords)
-      throws JsonProcessingException {
+      throws IOException {
     var batches = prepareChunks(ids, 10000);
+    sourceSystemComponent.storeEmlRecord(archive.getMetadataLocationFile());
     var optionalEmlData = addDatasetMeta(archive.getMetadataLocationFile());
     try {
       for (var batch : batches) {

@@ -3,18 +3,20 @@ create type translator_type as enum ('biocase', 'dwca');
 create table source_system
 (
     id text not null
-        constraint newnew_source_system_pkey
-            primary key,
+        primary key,
+    version integer default 1 not null,
     name text not null,
     endpoint text not null,
-    date_created timestamp with time zone not null,
-    date_modified timestamp with time zone not null,
-    date_tombstoned timestamp with time zone,
+    created timestamp with time zone not null,
+    modified timestamp with time zone not null,
+    tombstoned timestamp with time zone,
     mapping_id text not null,
-    version integer default 1 not null,
     creator text not null,
-    translator_type translator_type,
-    data jsonb not null
+    translator_type translator_type not null,
+    data jsonb not null,
+    dwc_dp_link text,
+    dwca_link text,
+    eml bytea
 );
 
 create table data_mapping
@@ -22,8 +24,8 @@ create table data_mapping
     id                   text                     not null,
     version              integer                  not null,
     name                 text                     not null,
-    date_created         timestamp with time zone not null,
-    date_modified        timestamp with time zone not null,
+    created              timestamp with time zone not null,
+    modified             timestamp with time zone not null,
     date_tombstoned      timestamp with time zone,
     creator              text                     not null,
     mapping_data_standard varchar                  not null,
