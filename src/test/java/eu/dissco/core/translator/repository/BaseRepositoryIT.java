@@ -15,7 +15,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 @Testcontainers
-public class BaseRepositoryIT {
+class BaseRepositoryIT {
 
   private static final DockerImageName POSTGIS =
       DockerImageName.parse("postgres:15.2").asCompatibleSubstituteFor(IMAGE);

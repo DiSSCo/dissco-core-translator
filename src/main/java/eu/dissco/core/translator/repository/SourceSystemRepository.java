@@ -41,4 +41,11 @@ public class SourceSystemRepository {
     }
     return new SourceSystemInformation(dbRecord.value1(), dbRecord.value2(), filters);
   }
+
+  public void storeEml(byte[] bytes, String sourceSystemID) {
+    context.update(SOURCE_SYSTEM)
+        .set(SOURCE_SYSTEM.EML, bytes)
+        .where(SOURCE_SYSTEM.ID.eq(sourceSystemID))
+        .execute();
+  }
 }

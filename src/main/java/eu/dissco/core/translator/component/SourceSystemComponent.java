@@ -2,6 +2,9 @@ package eu.dissco.core.translator.component;
 
 import eu.dissco.core.translator.properties.ApplicationProperties;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
 
@@ -13,10 +16,12 @@ public class SourceSystemComponent {
   private final String sourceSystemName;
   private final String sourceSystemEndpoint;
   private final String sourceSystemFilters;
+  private final SourceSystemRepository repository;
 
   public SourceSystemComponent(ApplicationProperties applicationProperties,
       SourceSystemRepository repository) {
     this.sourceSystemID = applicationProperties.getSourceSystemId();
+    this.repository = repository;
     var sourceSystemInformation = repository.getSourceSystem(this.sourceSystemID);
     if (sourceSystemInformation == null) {
       throw new IllegalArgumentException("Source System Identifier: " + sourceSystemID + " not found");
@@ -30,6 +35,9 @@ public class SourceSystemComponent {
     } else {
       sourceSystemFilters = "";
     }
+  }
 
+  public void storeEmlRecord(File emlFile) throws IOException {
+    repository.storeEml(Files.readAllBytes(emlFile.toPath()), sourceSystemID);
   }
 }
