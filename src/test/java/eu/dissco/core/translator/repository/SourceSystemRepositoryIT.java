@@ -19,6 +19,7 @@ import org.jooq.JSONB;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.io.ClassPathResource;
 
 class SourceSystemRepositoryIT extends BaseRepositoryIT {
 
@@ -68,7 +69,7 @@ class SourceSystemRepositoryIT extends BaseRepositoryIT {
   void testStoreEml() throws IOException {
     //Given
     givenInsertRecords("{}");
-    var expected = Files.readAllBytes(new File("src/test/resources/sample-eml.xml").toPath());
+    var expected = Files.readAllBytes(new ClassPathResource("sample-eml.xml").getFile().toPath());
 
     // When
     repository.storeEml(expected, SOURCE_SYSTEM_ID);
