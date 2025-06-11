@@ -10,7 +10,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import eu.dissco.core.translator.database.jooq.enums.TranslatorType;
 import eu.dissco.core.translator.domain.SourceSystemInformation;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.time.Instant;
