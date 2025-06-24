@@ -17,7 +17,6 @@ import java.time.Instant;
 import java.util.stream.Stream;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -38,22 +37,38 @@ class EmlComponentTest {
   private static Stream<Arguments> generateDataset() throws DatatypeConfigurationException {
     return Stream.of(
         Arguments.of(generateFullDataset(), "This is a test dataset"),
+        Arguments.of(generateDataSetWithEmptyLists(), "Dataset with empty lists"),
         Arguments.of(generateMinimalDataset(), "Minimal Dataset")
     );
   }
 
-
-
-  @Test
-  void testGenerateEmlMinimal() throws IOException {
-    // Given
-    var dataset = generateMinimalDataset();
-
-    // When
-    var result = EmlComponent.generateEML(dataset);
-
-    // Then
-    assertThat(result).isNotNull();
+  private static DataSets.DataSet generateDataSetWithEmptyLists() {
+    var dataset = new DataSets.DataSet();
+    var metadata = new ContentMetadata();
+    var description = new Description();
+    var representation = new MetadataDescriptionRepr();
+    representation.setTitle("Dataset with empty lists");
+    description.getRepresentation().add(representation);
+    metadata.setDescription(description);
+    dataset.setMetadata(metadata);
+    var licenses = new Licenses();
+    licenses.getLicense();
+    var iprStatements = new efg.IPRStatements();
+    var termsOfUseStatements = new TermsOfUseStatements();
+    termsOfUseStatements.getTermsOfUse();
+    iprStatements.setTermsOfUseStatements(termsOfUseStatements);
+    var copyRights = new Copyrights();
+    copyRights.getCopyright();
+    iprStatements.setCopyrights(copyRights);
+    iprStatements.setLicenses(licenses);
+    metadata.setIPRStatements(iprStatements);
+    var contentContacts = new ContentContacts();
+    contentContacts.getContentContact();
+    var technicalContacts = new efg.DataSets.DataSet.TechnicalContacts();
+    technicalContacts.getTechnicalContact();
+    dataset.setTechnicalContacts(technicalContacts);
+    dataset.setContentContacts(contentContacts);
+    return  dataset;
   }
 
   private static DataSets.DataSet generateMinimalDataset() {
