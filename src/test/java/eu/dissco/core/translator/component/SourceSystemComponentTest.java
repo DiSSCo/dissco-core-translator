@@ -90,4 +90,20 @@ class SourceSystemComponentTest {
     // Then
     then(repository).should().storeEml(Files.readAllBytes(emlFile.toPath()), SOURCE_SYSTEM_ID);
   }
+
+  @Test
+  void testStoreEmlString() throws IOException {
+    // Given
+    var emlFile = new File("src/test/resources/sample-eml.xml");
+    given(properties.getSourceSystemId()).willReturn(SOURCE_SYSTEM_ID);
+    given(repository.getSourceSystem(SOURCE_SYSTEM_ID)).willReturn(givenSourceSystemInformation());
+
+    var component = new SourceSystemComponent(properties, repository);
+
+    // When
+    component.storeEmlRecord(Files.readString(emlFile.toPath()));
+
+    // Then
+    then(repository).should().storeEml(Files.readAllBytes(emlFile.toPath()), SOURCE_SYSTEM_ID);
+  }
 }

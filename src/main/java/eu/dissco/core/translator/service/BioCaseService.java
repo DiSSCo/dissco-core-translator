@@ -13,6 +13,7 @@ import efg.MineralRockIdentifiedType;
 import efg.MultiMediaObject;
 import efg.Unit;
 import eu.dissco.core.translator.Profiles;
+import eu.dissco.core.translator.component.EmlComponent;
 import eu.dissco.core.translator.component.SourceSystemComponent;
 import eu.dissco.core.translator.database.jooq.enums.JobState;
 import eu.dissco.core.translator.domain.BioCasePartResult;
@@ -164,7 +165,7 @@ public class BioCaseService extends WebClientService {
       } else {
         return new BioCasePartResult(false, false);
       }
-    } catch (XMLStreamException | JAXBException e) {
+    } catch (XMLStreamException | JAXBException | IOException e) {
       log.error("Error converting response tot XML", e);
       return new BioCasePartResult(true, true);
     } catch (ReachedMaximumLimitException e) {
@@ -175,7 +176,7 @@ public class BioCaseService extends WebClientService {
   }
 
   private void retrieveUnitData(XMLEventReader xmlEventReader, AtomicInteger processedRecords)
-      throws XMLStreamException, JAXBException, ReachedMaximumLimitException {
+      throws XMLStreamException, JAXBException, ReachedMaximumLimitException, IOException {
     mapper.setSerializationInclusion(Include.NON_NULL);
     if (isStartElement(xmlEventReader.peek(), "DataSets")) {
       mapABCD206(xmlEventReader, processedRecords);
@@ -183,10 +184,11 @@ public class BioCaseService extends WebClientService {
   }
 
   private void mapABCD206(XMLEventReader xmlEventReader, AtomicInteger processedRecords)
-      throws JAXBException, ReachedMaximumLimitException {
+      throws JAXBException, ReachedMaximumLimitException, IOException {
     var context = JAXBContext.newInstance(DataSets.class);
     var datasetsMarshaller = context.createUnmarshaller().unmarshal(xmlEventReader, DataSets.class);
     var datasets = datasetsMarshaller.getValue().getDataSet().get(0);
+    sourceSystemComponent.storeEmlRecord(EmlComponent.generateEML(datasets));
     for (var unit : datasets.getUnits().getUnit()) {
       try {
         if (applicationProperties.getMaxItems() != null
@@ -394,7 +396,8 @@ public class BioCaseService extends WebClientService {
     return digitalMediaEvents;
   }
 
-  private DigitalMediaEvent processDigitalMedia(MultiMediaObject media, String organisationId) throws DiSSCoDataException {
+  private DigitalMediaEvent processDigitalMedia(MultiMediaObject media, String organisationId)
+      throws DiSSCoDataException {
     var attributes = getData(mapper.valueToTree(media));
     var digitalMedia = digitalSpecimenDirector.assembleDigitalMedia(false, attributes,
         organisationId);
