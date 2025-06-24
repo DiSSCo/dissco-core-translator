@@ -166,7 +166,7 @@ public class BioCaseService extends WebClientService {
         return new BioCasePartResult(false, false);
       }
     } catch (XMLStreamException | JAXBException | IOException e) {
-      log.error("Error converting response tot XML", e);
+      log.error("Error converting response to XML", e);
       return new BioCasePartResult(true, true);
     } catch (ReachedMaximumLimitException e) {
       log.warn("Reached maximum limit of {} processed specimens",

@@ -2,7 +2,6 @@ package eu.dissco.core.translator.component;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
 import efg.DataSets;
 import efg.DataSets.DataSet;
 import efg.DataSets.DataSet.ContentContacts;
@@ -30,23 +29,26 @@ import org.springframework.stereotype.Component;
 @Component
 public class EmlComponent {
 
-  public static String generateEML(DataSets.DataSet datasets) throws IOException {
-    var representation = datasets.getMetadata().getDescription().getRepresentation().get(0);
-    var dataset = new Dataset(
+  private EmlComponent() {
+    // Private constructor to prevent instantiation
+  }
+
+  public static String generateEML(DataSets.DataSet abcdDataset) throws IOException {
+    var representation = abcdDataset.getMetadata().getDescription().getRepresentation().get(0);
+    var emlDataset = new Dataset(
         representation.getTitle(),
-        formatPubDate(datasets),
+        formatPubDate(abcdDataset),
         representation.getLanguage(),
         representation.getDetails(),
-        parseContentCreators(datasets.getContentContacts()),
-        parseTechnicalContacts(datasets.getTechnicalContacts()),
-        getCopyRight(datasets.getMetadata().getIPRStatements()),
-        parseLicense(datasets.getMetadata().getIPRStatements()),
+        parseContentCreators(abcdDataset.getContentContacts()),
+        parseTechnicalContacts(abcdDataset.getTechnicalContacts()),
+        getCopyRight(abcdDataset.getMetadata().getIPRStatements()),
+        parseLicense(abcdDataset.getMetadata().getIPRStatements()),
         getDistribution(representation),
         getGeographicCoverage(representation));
-    var eml = new Eml(UUID.randomUUID().toString(), "https://dissco.eu", "en", dataset);
+    var eml = new Eml(UUID.randomUUID().toString(), "https://dissco.eu", "en", emlDataset);
     var xmlMapper = new XmlMapper();
     xmlMapper.setSerializationInclusion(Include.NON_NULL);
-    xmlMapper.configure(ToXmlGenerator.Feature.WRITE_XML_DECLARATION, false);
     return xmlMapper.writeValueAsString(eml);
   }
 
@@ -88,8 +90,7 @@ public class EmlComponent {
     if (iprStatement != null && iprStatement.getCopyrights() != null
         && !iprStatement.getCopyrights().getCopyright().isEmpty()) {
       return iprStatement.getCopyrights().getCopyright().get(0).getText();
-    }
-    else if (iprStatement != null && iprStatement.getTermsOfUseStatements() != null
+    } else if (iprStatement != null && iprStatement.getTermsOfUseStatements() != null
         && !iprStatement.getTermsOfUseStatements().getTermsOfUse().isEmpty()) {
       return iprStatement.getTermsOfUseStatements().getTermsOfUse().get(0).getText();
     }
