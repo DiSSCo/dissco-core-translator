@@ -33,6 +33,15 @@ public class EmlComponent {
     // Private constructor to prevent instantiation
   }
 
+  /**
+   * Generates an EML XML representation from the given ABCD dataset.
+   * Maps fields such as title, publication date, language, details.
+   * ContentCreators are seen as contact and technical contacts are seen as associatedParty.
+   *
+   * @param abcdDataset the ABCD dataset to convert
+   * @return the EML XML as a String
+   * @throws IOException if there is an error converting the domain object to an XML string
+   */
   public static String generateEML(DataSets.DataSet abcdDataset) throws IOException {
     var representation = abcdDataset.getMetadata().getDescription().getRepresentation().get(0);
     var emlDataset = new Dataset(
@@ -42,7 +51,7 @@ public class EmlComponent {
         representation.getDetails(),
         parseContentCreators(abcdDataset.getContentContacts()),
         parseTechnicalContacts(abcdDataset.getTechnicalContacts()),
-        getCopyRight(abcdDataset.getMetadata().getIPRStatements()),
+        getCopyright(abcdDataset.getMetadata().getIPRStatements()),
         parseLicense(abcdDataset.getMetadata().getIPRStatements()),
         getDistribution(representation),
         getGeographicCoverage(representation));
@@ -80,13 +89,13 @@ public class EmlComponent {
   private static License parseLicense(IPRStatements iprStatements) {
     if (iprStatements != null && iprStatements.getLicenses() != null
         && !iprStatements.getLicenses().getLicense().isEmpty()) {
-      var abcdlicense = iprStatements.getLicenses().getLicense().get(0);
-      return new License(abcdlicense.getText(), abcdlicense.getURI());
+      var abcdLicense = iprStatements.getLicenses().getLicense().get(0);
+      return new License(abcdLicense.getText(), abcdLicense.getURI());
     }
     return null;
   }
 
-  private static String getCopyRight(IPRStatements iprStatement) {
+  private static String getCopyright(IPRStatements iprStatement) {
     if (iprStatement != null && iprStatement.getCopyrights() != null
         && !iprStatement.getCopyrights().getCopyright().isEmpty()) {
       return iprStatement.getCopyrights().getCopyright().get(0).getText();
@@ -100,15 +109,15 @@ public class EmlComponent {
   private static List<Agent> parseContentCreators(ContentContacts contentContacts) {
     if (contentContacts != null) {
       return contentContacts.getContentContact().stream()
-          .map((MicroAgentP abcdAgent) -> parseAgent(abcdAgent, null)).toList();
+          .map(abcdAgent -> parseAgent(abcdAgent, null)).toList();
     }
     return null;
   }
 
   private static List<Agent> parseTechnicalContacts(TechnicalContacts technicalContacts) {
     if (technicalContacts != null) {
-      return technicalContacts.getTechnicalContact().stream().map(
-          (MicroAgentP abcdAgent) -> parseAgent(abcdAgent, "TECHNICAL_POINT_OF_CONTACT")).toList();
+      return technicalContacts.getTechnicalContact().stream()
+          .map(abcdAgent -> parseAgent(abcdAgent, "TECHNICAL_POINT_OF_CONTACT")).toList();
     }
     return null;
   }
