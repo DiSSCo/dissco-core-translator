@@ -1,0 +1,8 @@
+package eu.dissco.core.translator.domain.eml;
+
+public record Coverage(
+    GeographicCoverage geographicCoverage
+) {
+
+}
+

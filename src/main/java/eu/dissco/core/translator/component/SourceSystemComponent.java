@@ -4,6 +4,7 @@ import eu.dissco.core.translator.properties.ApplicationProperties;
 import eu.dissco.core.translator.repository.SourceSystemRepository;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
@@ -24,7 +25,8 @@ public class SourceSystemComponent {
     this.repository = repository;
     var sourceSystemInformation = repository.getSourceSystem(this.sourceSystemID);
     if (sourceSystemInformation == null) {
-      throw new IllegalArgumentException("Source System Identifier: " + sourceSystemID + " not found");
+      throw new IllegalArgumentException(
+          "Source System Identifier: " + sourceSystemID + " not found");
     }
     this.sourceSystemName = sourceSystemInformation.sourceSystemName();
     this.sourceSystemEndpoint = sourceSystemInformation.sourceSystemUrl();
@@ -39,5 +41,9 @@ public class SourceSystemComponent {
 
   public void storeEmlRecord(File emlFile) throws IOException {
     repository.storeEml(Files.readAllBytes(emlFile.toPath()), sourceSystemID);
+  }
+
+  public void storeEmlRecord(String eml) {
+    repository.storeEml(eml.getBytes(StandardCharsets.UTF_8), sourceSystemID);
   }
 }
