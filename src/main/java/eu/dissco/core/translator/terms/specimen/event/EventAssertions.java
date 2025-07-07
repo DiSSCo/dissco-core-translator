@@ -1,5 +1,9 @@
 package eu.dissco.core.translator.terms.specimen.event;
 
+import static eu.dissco.core.translator.domain.AgentRoleType.MEASURER;
+import static eu.dissco.core.translator.schema.Agent.Type.SCHEMA_PERSON;
+import static eu.dissco.core.translator.terms.utils.AgentsUtils.addAgent;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.dissco.core.translator.schema.Agent;
@@ -69,24 +73,58 @@ public class EventAssertions extends Term {
   private List<Assertion> gatherEventAssertionsForDwc(
       JsonNode data) {
     var assertions = new ArrayList<Assertion>();
-    if (data.get(EXTENSIONS) != null
-        && data.get(EXTENSIONS).get("dwc:MeasurementOrFact") != null) {
-      var measurementOrFactExtension = data.get(EXTENSIONS).get("dwc:MeasurementOrFact");
-      for (var jsonNode : measurementOrFactExtension) {
-        var assertion = new Assertion()
-            .withType("ods:Assertion")
-            .withDwcMeasurementUnit(
-                super.searchJsonForTerm(jsonNode, List.of("dwc:measurementUnit")))
-            .withDwcMeasurementType(
-                super.searchJsonForTerm(jsonNode, List.of("dwc:measurementType")))
-            .withDwcMeasurementValue(
-                super.searchJsonForTerm(jsonNode, List.of("dwc:measurementValue")))
-            .withDwcMeasurementRemarks(
-                super.searchJsonForTerm(jsonNode, List.of("dwc:measurementRemarks")));
-        assertions.add(assertion);
+    if (data.get(EXTENSIONS) != null) {
+      if (data.get(EXTENSIONS).get("dwc:MeasurementOrFact") != null) {
+        var measurementOrFactExtension = data.get(EXTENSIONS).get("dwc:MeasurementOrFact");
+        mapMeasurementOrFact(measurementOrFactExtension, assertions);
+      }
+      if (data.get(EXTENSIONS).get("http://rs.iobis.org/obis/terms/ExtendedMeasurementOrFact")
+          != null) {
+        var eventAssertionsExtension = data.get(EXTENSIONS).get("http://rs.iobis.org/obis/terms/ExtendedMeasurementOrFact");
+        mapMeasurementOrFact(eventAssertionsExtension, assertions);
       }
     }
     return assertions;
+  }
+
+  private void mapMeasurementOrFact(JsonNode measurementOrFactExtension,
+      ArrayList<Assertion> assertions) {
+    for (var jsonNode : measurementOrFactExtension) {
+      var assertion = new Assertion()
+          .withType("ods:Assertion")
+          .withDwcMeasurementID(super.searchJsonForTerm(jsonNode, List.of("dwc:measurementID")))
+          .withDwcParentMeasurementID(
+              super.searchJsonForTerm(jsonNode, List.of("dwc:parentMeasurementID")))
+          .withDwcMeasurementUnit(
+              super.searchJsonForTerm(jsonNode, List.of("dwc:measurementUnit")))
+          .withDwciriMeasurementUnit(
+              super.searchJsonForTerm(jsonNode,
+                  List.of("http://rs.iobis.org/obis/terms/measurementUnitID")))
+          .withDwcMeasurementType(
+              super.searchJsonForTerm(jsonNode, List.of("dwc:measurementType")))
+          .withDwciriMeasurementType(
+              super.searchJsonForTerm(jsonNode,
+                  List.of("http://rs.iobis.org/obis/terms/measurementTypeID")))
+          .withDwcMeasurementValue(
+              super.searchJsonForTerm(jsonNode, List.of("dwc:measurementValue")))
+          .withDwciriMeasurementValue(
+              super.searchJsonForTerm(jsonNode,
+                  List.of("http://rs.iobis.org/obis/terms/measurementValueID")))
+          .withDwcMeasurementValue(
+              super.searchJsonForTerm(jsonNode, List.of("dwc:measurementValue")))
+          .withDwcMeasurementAccuracy(
+              super.searchJsonForTerm(jsonNode, List.of("dwc:measurementAccuracy")))
+          .withDwcMeasurementDeterminedDate(
+              super.searchJsonForTerm(jsonNode, List.of("dwc:measurementDeterminedDate")))
+          .withDwcMeasurementMethod(
+              super.searchJsonForTerm(jsonNode, List.of("dwc:measurementMethod")))
+          .withDwcMeasurementRemarks(
+              super.searchJsonForTerm(jsonNode, List.of("dwc:measurementRemarks")));
+      assertion.setOdsHasAgents(addAgent(assertion.getOdsHasAgents(),
+          super.searchJsonForTerm(jsonNode, List.of("dwc:measurementDeterminedBy")), null, MEASURER,
+          SCHEMA_PERSON));
+      assertions.add(assertion);
+    }
   }
 
   @Override

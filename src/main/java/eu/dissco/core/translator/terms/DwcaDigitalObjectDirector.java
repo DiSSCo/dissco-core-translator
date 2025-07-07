@@ -44,6 +44,7 @@ public class DwcaDigitalObjectDirector extends BaseDigitalObjectDirector {
     list.add("dwc:otherCatalogNumbers");
     list.add("dcterms:identifier");
     list.add("dwc:materialEntityID");
+    list.add("http://rs.tdwg.org/dwc/terms/materialEntityID");
     return list;
   }
 
