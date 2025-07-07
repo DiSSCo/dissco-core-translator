@@ -51,6 +51,38 @@ class EventAssertionsTest {
   }
 
   @Test
+  void testRetrieveFromExtendedDWCA() {
+    // Given
+    var unit = MAPPER.createObjectNode();
+    var extensions = MAPPER.createObjectNode();
+    var measurementOrFacts = MAPPER.createArrayNode();
+    var measurementOrFact = MAPPER.createObjectNode();
+    measurementOrFact.put("dwc:measurementUnit", "sex");
+    measurementOrFact.put("http://rs.iobis.org/obis/terms/measurementUnitID",
+        "vocab.nerc.ac.uk/collection/P01/current/ENTSEX01");
+    measurementOrFact.put("dwc:measurementValue", "female");
+    measurementOrFact.put("http://rs.iobis.org/obis/terms/measurementValueID",
+        "http://vocab.nerc.ac.uk/collection/S10/current/S102");
+    measurementOrFacts.add(measurementOrFact);
+    extensions.set("http://rs.iobis.org/obis/terms/ExtendedMeasurementOrFact", measurementOrFacts);
+    unit.set("extensions", extensions);
+
+    var expected = new eu.dissco.core.translator.schema.Assertion()
+        .withType("ods:Assertion")
+        .withDwcMeasurementUnit("sex")
+        .withDwciriMeasurementUnit("vocab.nerc.ac.uk/collection/P01/current/ENTSEX01")
+        .withDwcMeasurementValue("female")
+        .withDwciriMeasurementValue("http://vocab.nerc.ac.uk/collection/S10/current/S102");
+
+    // When
+    var result = eventAssertions.gatherEventAssertions(MAPPER, unit, true);
+
+    // Then
+    assertThat(result).hasSize(1);
+    assertThat(result.get(0)).isEqualTo(expected);
+  }
+
+  @Test
   void testRetrieveFromABCD() {
     // Given
     var unit = MAPPER.createObjectNode();
