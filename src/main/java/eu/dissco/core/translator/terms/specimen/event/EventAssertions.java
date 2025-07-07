@@ -75,20 +75,21 @@ public class EventAssertions extends Term {
     var assertions = new ArrayList<Assertion>();
     if (data.get(EXTENSIONS) != null) {
       if (data.get(EXTENSIONS).get("dwc:MeasurementOrFact") != null) {
-        var measurementOrFactExtension = data.get(EXTENSIONS).get("dwc:MeasurementOrFact");
-        mapMeasurementOrFact(measurementOrFactExtension, assertions);
+        var measurementOrFact = data.get(EXTENSIONS).get("dwc:MeasurementOrFact");
+        mapMeasurementOrFact(measurementOrFact, assertions);
       }
       if (data.get(EXTENSIONS).get("http://rs.iobis.org/obis/terms/ExtendedMeasurementOrFact")
           != null) {
-        var eventAssertionsExtension = data.get(EXTENSIONS).get("http://rs.iobis.org/obis/terms/ExtendedMeasurementOrFact");
-        mapMeasurementOrFact(eventAssertionsExtension, assertions);
+        var extendedMeasurementOrFact = data.get(EXTENSIONS)
+            .get("http://rs.iobis.org/obis/terms/ExtendedMeasurementOrFact");
+        mapMeasurementOrFact(extendedMeasurementOrFact, assertions);
       }
     }
     return assertions;
   }
 
   private void mapMeasurementOrFact(JsonNode measurementOrFactExtension,
-      ArrayList<Assertion> assertions) {
+      List<Assertion> assertions) {
     for (var jsonNode : measurementOrFactExtension) {
       var assertion = new Assertion()
           .withType("ods:Assertion")
@@ -110,8 +111,6 @@ public class EventAssertions extends Term {
           .withDwciriMeasurementValue(
               super.searchJsonForTerm(jsonNode,
                   List.of("http://rs.iobis.org/obis/terms/measurementValueID")))
-          .withDwcMeasurementValue(
-              super.searchJsonForTerm(jsonNode, List.of("dwc:measurementValue")))
           .withDwcMeasurementAccuracy(
               super.searchJsonForTerm(jsonNode, List.of("dwc:measurementAccuracy")))
           .withDwcMeasurementDeterminedDate(
