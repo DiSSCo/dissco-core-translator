@@ -6,11 +6,21 @@ import static eu.dissco.core.translator.terms.utils.AgentsUtils.addAgent;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.dissco.core.translator.schema.Agent;
-import eu.dissco.core.translator.schema.Agent.Type;
 import eu.dissco.core.translator.schema.Assertion;
-import eu.dissco.core.translator.schema.OdsHasRole;
 import eu.dissco.core.translator.terms.Term;
+import eu.dissco.core.translator.terms.TermMapper;
+import eu.dissco.core.translator.terms.specimen.assertion.MeasurementAccuracy;
+import eu.dissco.core.translator.terms.specimen.assertion.MeasurementDeterminedDate;
+import eu.dissco.core.translator.terms.specimen.assertion.MeasurementID;
+import eu.dissco.core.translator.terms.specimen.assertion.MeasurementMethod;
+import eu.dissco.core.translator.terms.specimen.assertion.MeasurementRemarks;
+import eu.dissco.core.translator.terms.specimen.assertion.MeasurementType;
+import eu.dissco.core.translator.terms.specimen.assertion.MeasurementTypeIRI;
+import eu.dissco.core.translator.terms.specimen.assertion.MeasurementUnit;
+import eu.dissco.core.translator.terms.specimen.assertion.MeasurementUnitIRI;
+import eu.dissco.core.translator.terms.specimen.assertion.MeasurementValue;
+import eu.dissco.core.translator.terms.specimen.assertion.MeasurementValueIRI;
+import eu.dissco.core.translator.terms.specimen.assertion.ParentMeasurementID;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,16 +29,16 @@ public class EventAssertions extends Term {
   private static final String EXTENSIONS = "extensions";
 
   public List<Assertion> gatherEventAssertions(
-      ObjectMapper mapper, JsonNode data, boolean dwc) {
+      TermMapper termMapper, ObjectMapper mapper, JsonNode data, boolean dwc) {
     if (dwc) {
-      return gatherEventAssertionsForDwc(data);
+      return gatherEventAssertionsForDwc(termMapper, data);
     } else {
-      return gatherEventAssertionsForABCD(mapper, data);
+      return gatherEventAssertionsForABCD(termMapper, mapper, data);
     }
   }
 
   private List<Assertion> gatherEventAssertionsForABCD(
-      ObjectMapper mapper, JsonNode data) {
+      TermMapper termMapper, ObjectMapper mapper, JsonNode data) {
     var assertions = new ArrayList<Assertion>();
     var iterateOverElements = true;
     var count = 0;
@@ -36,7 +46,8 @@ public class EventAssertions extends Term {
       var assertionNode = getSubJsonAbcd(mapper, data, count,
           "abcd:measurementsOrFacts/measurementOrFact/");
       if (!assertionNode.isEmpty()) {
-        assertions.add(createEventAssertion(assertionNode));
+        assertions.add(
+            mapAssertion(termMapper, assertionNode, false, "measurementOrFactAtomised/measuredBy"));
         count++;
       } else {
         iterateOverElements = false;
@@ -45,85 +56,54 @@ public class EventAssertions extends Term {
     return assertions;
   }
 
-  private Assertion createEventAssertion(
-      JsonNode assertionNode) {
-    return new Assertion()
-        .withType("ods:Assertion")
-        .withOdsHasAgents(
-            List.of(new Agent()
-                .withType(Type.SCHEMA_PERSON)
-                .withSchemaName(super.searchJsonForTerm(assertionNode,
-                    List.of("measurementOrFactAtomised/measuredBy")))
-                .withOdsHasRoles(List.of(new OdsHasRole().withSchemaRoleName("measurer"))))
-        )
-        .withDwcMeasurementUnit(super.searchJsonForTerm(assertionNode,
-            List.of("measurementOrFactAtomised/unitOfMeasurement")))
-        .withDwcMeasurementType(
-            super.searchJsonForTerm(assertionNode,
-                List.of("measurementOrFactAtomised/parameter/value")))
-        .withDwcMeasurementRemarks(
-            super.searchJsonForTerm(assertionNode, List.of("measurementOrFactText/value")))
-        .withDwcMeasurementValue(super.searchJsonForTerm(assertionNode,
-            List.of("measurementOrFactAtomised/lowerValue",
-                "measurementOrFactAtomised/upperValue")))
-        .withDwcMeasurementDeterminedDate(super.searchJsonForTerm(assertionNode,
-            List.of("measurementOrFactAtomised/MeasurementDateTime")));
-  }
-
   private List<Assertion> gatherEventAssertionsForDwc(
-      JsonNode data) {
+      TermMapper termMapper, JsonNode data) {
     var assertions = new ArrayList<Assertion>();
     if (data.get(EXTENSIONS) != null) {
       if (data.get(EXTENSIONS).get("dwc:MeasurementOrFact") != null) {
         var measurementOrFact = data.get(EXTENSIONS).get("dwc:MeasurementOrFact");
-        mapMeasurementOrFact(measurementOrFact, assertions);
+        mapMeasurementOrFact(termMapper, measurementOrFact, assertions);
       }
       if (data.get(EXTENSIONS).get("http://rs.iobis.org/obis/terms/ExtendedMeasurementOrFact")
           != null) {
         var extendedMeasurementOrFact = data.get(EXTENSIONS)
             .get("http://rs.iobis.org/obis/terms/ExtendedMeasurementOrFact");
-        mapMeasurementOrFact(extendedMeasurementOrFact, assertions);
+        mapMeasurementOrFact(termMapper, extendedMeasurementOrFact, assertions);
       }
     }
     return assertions;
   }
 
-  private void mapMeasurementOrFact(JsonNode measurementOrFactExtension,
+  private void mapMeasurementOrFact(TermMapper termMapper, JsonNode measurementOrFactExtension,
       List<Assertion> assertions) {
-    for (var jsonNode : measurementOrFactExtension) {
-      var assertion = new Assertion()
-          .withType("ods:Assertion")
-          .withDwcMeasurementID(super.searchJsonForTerm(jsonNode, List.of("dwc:measurementID")))
-          .withDwcParentMeasurementID(
-              super.searchJsonForTerm(jsonNode, List.of("dwc:parentMeasurementID")))
-          .withDwcMeasurementUnit(
-              super.searchJsonForTerm(jsonNode, List.of("dwc:measurementUnit")))
-          .withDwciriMeasurementUnit(
-              super.searchJsonForTerm(jsonNode,
-                  List.of("http://rs.iobis.org/obis/terms/measurementUnitID")))
-          .withDwcMeasurementType(
-              super.searchJsonForTerm(jsonNode, List.of("dwc:measurementType")))
-          .withDwciriMeasurementType(
-              super.searchJsonForTerm(jsonNode,
-                  List.of("http://rs.iobis.org/obis/terms/measurementTypeID")))
-          .withDwcMeasurementValue(
-              super.searchJsonForTerm(jsonNode, List.of("dwc:measurementValue")))
-          .withDwciriMeasurementValue(
-              super.searchJsonForTerm(jsonNode,
-                  List.of("http://rs.iobis.org/obis/terms/measurementValueID")))
-          .withDwcMeasurementAccuracy(
-              super.searchJsonForTerm(jsonNode, List.of("dwc:measurementAccuracy")))
-          .withDwcMeasurementDeterminedDate(
-              super.searchJsonForTerm(jsonNode, List.of("dwc:measurementDeterminedDate")))
-          .withDwcMeasurementMethod(
-              super.searchJsonForTerm(jsonNode, List.of("dwc:measurementMethod")))
-          .withDwcMeasurementRemarks(
-              super.searchJsonForTerm(jsonNode, List.of("dwc:measurementRemarks")));
-      assertion.setOdsHasAgents(addAgent(assertion.getOdsHasAgents(),
-          super.searchJsonForTerm(jsonNode, List.of("dwc:measurementDeterminedBy")), null, MEASURER,
-          SCHEMA_PERSON));
-      assertions.add(assertion);
+    for (var data : measurementOrFactExtension) {
+      assertions.add(mapAssertion(termMapper, data, true, "dwc:measurementDeterminedBy"));
     }
+  }
+
+  private Assertion mapAssertion(TermMapper termMapper, JsonNode data, boolean dwc,
+      String agentNameField) {
+    var assertion = new Assertion()
+        .withId(termMapper.retrieveTerm(new MeasurementID(), data, dwc))
+        .withType("ods:Assertion")
+        .withDwcMeasurementID(termMapper.retrieveTerm(new MeasurementID(), data, dwc))
+        .withDwcParentMeasurementID(termMapper.retrieveTerm(new ParentMeasurementID(), data
+            , dwc))
+        .withDwcMeasurementUnit(termMapper.retrieveTerm(new MeasurementUnit(), data, dwc))
+        .withDwciriMeasurementUnit(termMapper.retrieveTerm(new MeasurementUnitIRI(), data, dwc))
+        .withDwcMeasurementType(termMapper.retrieveTerm(new MeasurementType(), data, dwc))
+        .withDwciriMeasurementType(termMapper.retrieveTerm(new MeasurementTypeIRI(), data, dwc))
+        .withDwcMeasurementValue(termMapper.retrieveTerm(new MeasurementValue(), data, dwc))
+        .withDwciriMeasurementValue(termMapper.retrieveTerm(new MeasurementValueIRI(), data, dwc))
+        .withDwcMeasurementAccuracy(termMapper.retrieveTerm(new MeasurementAccuracy(), data, dwc))
+        .withDwcMeasurementDeterminedDate(
+            termMapper.retrieveTerm(new MeasurementDeterminedDate(), data, dwc))
+        .withDwcMeasurementMethod(termMapper.retrieveTerm(new MeasurementMethod(), data, dwc))
+        .withDwcMeasurementRemarks(termMapper.retrieveTerm(new MeasurementRemarks(), data, dwc));
+    assertion.setOdsHasAgents(addAgent(assertion.getOdsHasAgents(),
+        super.searchJsonForTerm(data, List.of(agentNameField)), null, MEASURER,
+        SCHEMA_PERSON));
+    return assertion;
   }
 
   @Override

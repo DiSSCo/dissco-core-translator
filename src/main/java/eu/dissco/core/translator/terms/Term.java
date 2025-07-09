@@ -70,7 +70,7 @@ public abstract class Term {
 
   protected JsonNode getSubJsonAbcd(ObjectMapper mapper, JsonNode data, int count, String path) {
     var subNode = mapper.createObjectNode();
-    data.fields().forEachRemaining(field -> {
+    data.properties().forEach(field -> {
       if (field.getKey().startsWith(path + count)) {
         subNode.set(
             field.getKey().replace(path + count + "/", ""),

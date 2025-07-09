@@ -637,7 +637,7 @@ public abstract class BaseDigitalObjectDirector {
     if (!Objects.equals(geologicalContext, EMPTY_GEOLOGICAL_CONTEXT)) {
       location.setOdsHasGeologicalContext(geologicalContext);
     }
-    var assertions = new EventAssertions().gatherEventAssertions(mapper, data, dwc);
+    var assertions = new EventAssertions().gatherEventAssertions(termMapper, mapper, data, dwc);
     var event = new Event()
         .withType("ods:Event")
         .withDwcEventType(termMapper.retrieveTerm(new EventType(), data, dwc))
