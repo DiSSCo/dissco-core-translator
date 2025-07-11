@@ -8,6 +8,7 @@ public enum AgentRoleType {
   COLLECTOR("collector"),
   DATA_TRANSLATOR("data-translator"),
   CREATOR("creator"),
+  MEASURER("measurer"),
   IDENTIFIER("identifier"),
   GEOREFERENCER("georeferencer"),
   RIGHTS_OWNER("rights-owner"),

@@ -16,6 +16,7 @@ import org.springframework.core.io.ClassPathResource;
 public class TestUtils {
 
   public static final ObjectMapper MAPPER = new ObjectMapper().findAndRegisterModules();
+  public static final String SOME_VALUE = "someValue";
   public static final String SOURCE_SYSTEM_ID = "20.5000.1025/GW0-TYL-YRU";
   public static final String SOURCE_SYSTEM_NAME = "Naturalis Biodiversity Center (NL) - Vermes";
   public static final String ENDPOINT = "https://data.rbge.org.uk/service/dwca/data/darwin_core_living.zip";

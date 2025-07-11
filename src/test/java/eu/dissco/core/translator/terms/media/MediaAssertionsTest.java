@@ -27,7 +27,6 @@ class MediaAssertionsTest {
   @Test
   void testRetrieveFromABCD() {
     // Given
-    var formatString = "SpecimenName";
     var unit = MAPPER.createObjectNode();
     unit.put("abcd:fileSize", "38");
     unit.put("abcd:imageSize/width", "500");

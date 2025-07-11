@@ -10,20 +10,20 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class OrganismScopeTest {
 
-  private static final String ORGANISM_Scope_STRING = "colony";
+  private static final String ORGANISM_SCOPE_STRING = "colony";
   private final OrganismScope organismScope = new OrganismScope();
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
     var unit = MAPPER.createObjectNode();
-    unit.put("dwc:organismScope", ORGANISM_Scope_STRING);
+    unit.put("dwc:organismScope", ORGANISM_SCOPE_STRING);
 
     // When
     var result = organismScope.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(ORGANISM_Scope_STRING);
+    assertThat(result).isEqualTo(ORGANISM_SCOPE_STRING);
   }
 
   @Test

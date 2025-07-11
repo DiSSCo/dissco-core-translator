@@ -11,19 +11,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class IdentificationQualifierTest {
 
   private final IdentificationQualifier identificationQualifier = new IdentificationQualifier();
-  private final String IdentificationQualifierString = "cf. var. oxyadenia";
+  private final String identificationQualifierString = "cf. var. oxyadenia";
 
   @Test
   void testRetrieveFromDWCA() {
     // Given
     var unit = MAPPER.createObjectNode();
-    unit.put("dwc:identificationQualifier", IdentificationQualifierString);
+    unit.put("dwc:identificationQualifier", identificationQualifierString);
 
     // When
     var result = identificationQualifier.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo(IdentificationQualifierString);
+    assertThat(result).isEqualTo(identificationQualifierString);
   }
 
   @Test
@@ -31,13 +31,13 @@ class IdentificationQualifierTest {
     // Given
     var unit = MAPPER.createObjectNode();
     unit.put("result/taxonIdentified/scientificName/identificationQualifier/nameAddendum",
-        IdentificationQualifierString);
+        identificationQualifierString);
 
     // When
     var result = identificationQualifier.retrieveFromABCD(unit);
 
     // Then
-    assertThat(result).isEqualTo(IdentificationQualifierString);
+    assertThat(result).isEqualTo(identificationQualifierString);
   }
 
   @Test
