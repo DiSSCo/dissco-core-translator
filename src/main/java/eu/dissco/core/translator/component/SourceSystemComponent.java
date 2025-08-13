@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.List;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +18,8 @@ public class SourceSystemComponent {
   private final String sourceSystemName;
   private final String sourceSystemEndpoint;
   private final String sourceSystemFilters;
+  private final List<String> specimenMass;
+  private final List<String> mediaMass;
   private final SourceSystemRepository repository;
 
   public SourceSystemComponent(ApplicationProperties applicationProperties,
@@ -37,6 +40,8 @@ public class SourceSystemComponent {
     } else {
       sourceSystemFilters = "";
     }
+    this.specimenMass = sourceSystemInformation.specimenMass();
+    this.mediaMass = sourceSystemInformation.mediaMass();
   }
 
   public void storeEmlRecord(File emlFile) throws IOException {

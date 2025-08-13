@@ -107,6 +107,7 @@ public class TestUtils {
   }
 
   public static SourceSystemInformation givenSourceSystemInformation() {
-    return new SourceSystemInformation(SOURCE_SYSTEM_NAME, ENDPOINT, List.of());
+    return new SourceSystemInformation(SOURCE_SYSTEM_NAME, ENDPOINT, List.of(), List.of(),
+        List.of());
   }
 }

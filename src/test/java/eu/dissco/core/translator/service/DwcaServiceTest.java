@@ -23,8 +23,8 @@ import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
 import eu.dissco.core.translator.domain.TranslatorJobResult;
 import eu.dissco.core.translator.properties.ApplicationProperties;
 import eu.dissco.core.translator.properties.DwcaProperties;
-import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.FdoProperties;
+import eu.dissco.core.translator.properties.MasProperties;
 import eu.dissco.core.translator.repository.DwcaRepository;
 import eu.dissco.core.translator.schema.DigitalMedia;
 import eu.dissco.core.translator.schema.DigitalSpecimen;
@@ -77,7 +77,7 @@ class DwcaServiceTest {
   @Mock
   private RabbitMqService rabbitMqService;
   @Mock
-  private EnrichmentProperties enrichmentProperties;
+  private MasProperties masProperties;
   @Mock
   private SourceSystemComponent sourceSystemComponent;
   @Mock
@@ -96,7 +96,7 @@ class DwcaServiceTest {
   @BeforeEach
   void setup() {
     this.service = new DwcaService(MAPPER, webClient, dwcaProperties,
-        rabbitMqService, enrichmentProperties, sourceSystemComponent, dwcaRepository,
+        rabbitMqService, masProperties, sourceSystemComponent, dwcaRepository,
         digitalSpecimenDirector, fdoProperties, applicationProperties, factory);
 
     // Given

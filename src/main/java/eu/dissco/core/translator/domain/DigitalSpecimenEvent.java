@@ -1,10 +1,12 @@
 package eu.dissco.core.translator.domain;
 
 import java.util.List;
+import java.util.Set;
 
 public record DigitalSpecimenEvent(
-    List<String> enrichmentList,
+    Set<String> masList,
     DigitalSpecimenWrapper digitalSpecimenWrapper,
-    List<DigitalMediaEvent> digitalMediaEvents) {
+    List<DigitalMediaEvent> digitalMediaEvents,
+    Boolean forceMasSchedule) {
 
 }

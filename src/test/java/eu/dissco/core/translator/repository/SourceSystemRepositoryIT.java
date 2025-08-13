@@ -55,7 +55,7 @@ class SourceSystemRepositoryIT extends BaseRepositoryIT {
         }
         """);
     var expected = new SourceSystemInformation(SOURCE_SYSTEM_NAME, ENDPOINT,
-        List.of("dataset=AVES"));
+        List.of("dataset=AVES"), List.of(), List.of());
 
     // When
     var result = repository.getSourceSystem(SOURCE_SYSTEM_ID);

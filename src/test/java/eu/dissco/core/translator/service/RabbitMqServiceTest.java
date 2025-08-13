@@ -14,6 +14,7 @@ import eu.dissco.core.translator.domain.DigitalSpecimenWrapper;
 import eu.dissco.core.translator.properties.RabbitMqProperties;
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,12 +59,12 @@ class RabbitMqServiceTest {
   @Test
   void testSendMessage() throws JsonProcessingException {
     // Given
-    var message = new DigitalSpecimenEvent(List.of(), new DigitalSpecimenWrapper(
+    var message = new DigitalSpecimenEvent(Set.of(), new DigitalSpecimenWrapper(
         NORMALISED_PHYSICAL_SPECIMEN_ID, "https://doi.org/21.T11148/894b1e6cad57e921764e",
         givenDigitalSpecimen(), MAPPER.createObjectNode()),
-        List.of(new DigitalMediaEvent(List.of(),
+        List.of(new DigitalMediaEvent(Set.of(),
             new DigitalMediaWrapper("https://doi.org/21.T11148/bbad8c4e101e8af01115",
-                givenDigitalMedia(), MAPPER.createObjectNode()))));
+                givenDigitalMedia(), MAPPER.createObjectNode()), false)), false);
 
     // When
     rabbitMqService.sendMessage(message);

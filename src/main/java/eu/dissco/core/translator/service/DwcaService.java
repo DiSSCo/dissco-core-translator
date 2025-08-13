@@ -11,7 +11,6 @@ import eu.dissco.core.translator.domain.DigitalMediaEvent;
 import eu.dissco.core.translator.domain.DigitalMediaWrapper;
 import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
 import eu.dissco.core.translator.domain.DigitalSpecimenWrapper;
-import eu.dissco.core.translator.domain.Enrichment;
 import eu.dissco.core.translator.domain.TranslatorJobResult;
 import eu.dissco.core.translator.exception.DiSSCoDataException;
 import eu.dissco.core.translator.exception.DisscoRepositoryException;
@@ -19,8 +18,8 @@ import eu.dissco.core.translator.exception.OrganisationException;
 import eu.dissco.core.translator.exception.ReachedMaximumLimitException;
 import eu.dissco.core.translator.properties.ApplicationProperties;
 import eu.dissco.core.translator.properties.DwcaProperties;
-import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.FdoProperties;
+import eu.dissco.core.translator.properties.MasProperties;
 import eu.dissco.core.translator.repository.DwcaRepository;
 import eu.dissco.core.translator.terms.BaseDigitalObjectDirector;
 import java.io.File;
@@ -33,7 +32,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -44,6 +42,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
@@ -80,7 +79,7 @@ public class DwcaService extends WebClientService {
   private final WebClient webClient;
   private final DwcaProperties dwcaProperties;
   private final RabbitMqService rabbitMqService;
-  private final EnrichmentProperties enrichmentProperties;
+  private final MasProperties masProperties;
   private final SourceSystemComponent sourceSystemComponent;
   private final DwcaRepository dwcaRepository;
   private final BaseDigitalObjectDirector digitalSpecimenDirector;
@@ -88,7 +87,8 @@ public class DwcaService extends WebClientService {
   private final ApplicationProperties applicationProperties;
   private final XMLInputFactory xmlFactory;
   private final List<String> allowedBasisOfRecord = List.of("PRESERVEDSPECIMEN", "FOSSIL", "OTHER",
-      "ROCK", "MINERAL", "METEORITE", "FOSSILSPECIMEN", "LIVINGSPECIMEN", "MATERIALSAMPLE", "PRESERVED_SPECIMEN");
+      "ROCK", "MINERAL", "METEORITE", "FOSSILSPECIMEN", "LIVINGSPECIMEN", "MATERIALSAMPLE",
+      "PRESERVED_SPECIMEN");
 
   @Override
   public TranslatorJobResult retrieveData() {
@@ -138,7 +138,8 @@ public class DwcaService extends WebClientService {
     try {
       for (var batch : batches) {
         log.info("Starting to get records for: core");
-        var specimenData = dwcaRepository.getCoreRecords(batch, getTableName(archive.getCore(), true));
+        var specimenData = dwcaRepository.getCoreRecords(batch,
+            getTableName(archive.getCore(), true));
         log.info("Got specimen batch: {}", batch.size());
         addExtensionsToSpecimen(archive, batch, specimenData);
         log.info("Start translation and publishing of batch: {}", specimenData.size());
@@ -185,8 +186,8 @@ public class DwcaService extends WebClientService {
           optionalEmlData.ifPresent(emlData -> addEmlDataToRecord(fullRecord, emlData));
           var digitalObjects = createDigitalObjects(fullRecord);
           log.debug("Digital Specimen: {}", digitalObjects);
-          var translatorEvent = new DigitalSpecimenEvent(enrichmentServices(false),
-              digitalObjects.getLeft(), digitalObjects.getRight());
+          var translatorEvent = new DigitalSpecimenEvent(setMachineAnnotationServices(false),
+              digitalObjects.getLeft(), digitalObjects.getRight(), masProperties.getForceMasSchedule());
           rabbitMqService.sendMessage(translatorEvent);
           processedRecords.incrementAndGet();
         } catch (DiSSCoDataException e) {
@@ -278,7 +279,8 @@ public class DwcaService extends WebClientService {
           return extractMultiMedia(recordId, imageArray, organisationId);
         }
       }
-    } if (fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA) != null) {
+    }
+    if (fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA) != null) {
       return publishAssociatedMedia(recordId,
           fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA).asText(), organisationId,
           fullDigitalSpecimen.get(EML_LICENSE));
@@ -305,11 +307,11 @@ public class DwcaService extends WebClientService {
           throw new DiSSCoDataException(
               "Digital media object for specimen does not have an access uri, ignoring record");
         }
-        var digitalMediaEvent = new DigitalMediaEvent(enrichmentServices(true),
+        var digitalMediaEvent = new DigitalMediaEvent(setMachineAnnotationServices(true),
             new DigitalMediaWrapper(
                 fdoProperties.getDigitalMediaType(),
                 digitalMedia,
-                image));
+                image), masProperties.getForceMasSchedule());
         digitalMediaEvents.add(digitalMediaEvent);
       } catch (DiSSCoDataException e) {
         log.error("Failed to process digital media object for digital specimen: {}",
@@ -327,14 +329,14 @@ public class DwcaService extends WebClientService {
     var mediaUrls = new LinkedHashSet<>(Arrays.asList(associatedMedia.split("\\|")));
     var digitalMedia = new ArrayList<DigitalMediaEvent>();
     for (var mediaUrl : mediaUrls) {
-      var digitalMediaEvent = new DigitalMediaEvent(enrichmentServices(true),
+      var digitalMediaEvent = new DigitalMediaEvent(setMachineAnnotationServices(true),
           new DigitalMediaWrapper(
               fdoProperties.getDigitalMediaType(),
               digitalSpecimenDirector.assembleDigitalMedia(true,
                   mapper.createObjectNode().put("ac:accessURI", mediaUrl)
                       .set(EML_LICENSE, licenseNode),
                   organisationId),
-              null));
+              null), masProperties.getForceMasSchedule());
       digitalMedia.add(digitalMediaEvent);
     }
     return digitalMedia;
@@ -400,10 +402,11 @@ public class DwcaService extends WebClientService {
 
   private String getTableName(ArchiveFile archiveFile, boolean isCore) {
     var fullSourceSystemId = sourceSystemComponent.getSourceSystemID();
-    var tableType= isCore? "_core_" : "_extension_";
+    var tableType = isCore ? "_core_" : "_extension_";
     var minifiedSourceSystemId = fullSourceSystemId.substring(fullSourceSystemId.indexOf('/') + 1)
         .replace("-", "_");
-    var tableName = "temp" +  tableType + (minifiedSourceSystemId + "_" + archiveFile.getRowType().simpleName()).toLowerCase()
+    var tableName = "temp" + tableType + (minifiedSourceSystemId + "_" + archiveFile.getRowType()
+        .simpleName()).toLowerCase()
         .replace(":", "_");
     tableName = tableName.replace("/", "_");
     return tableName.replace(".", "_");
@@ -443,7 +446,8 @@ public class DwcaService extends WebClientService {
   private void postToDatabase(ArchiveFile archiveFile,
       ArrayList<Pair<String, JsonNode>> dbRecords, boolean isCore) {
     log.info("Persisting {} records to database", dbRecords.size());
-    dwcaRepository.postRecords(getTableName(archiveFile, isCore), archiveFile.getRowType(), dbRecords);
+    dwcaRepository.postRecords(getTableName(archiveFile, isCore), archiveFile.getRowType(),
+        dbRecords);
     dbRecords.clear();
   }
 
@@ -466,14 +470,18 @@ public class DwcaService extends WebClientService {
     log.info("Finished posting extensions archive to database");
   }
 
-  private List<String> enrichmentServices(boolean multiMediaObject) {
-    if (enrichmentProperties.getList() != null) {
-      return enrichmentProperties.getList().stream()
-          .filter(e -> e.isImageOnly() == multiMediaObject).map(Enrichment::getName).toList();
+  private Set<String> setMachineAnnotationServices(boolean mediaObject) {
+    if (mediaObject) {
+      return Stream.concat(masProperties.getAdditionalMediaMass().stream(),
+          sourceSystemComponent.getMediaMass().stream()).collect(
+          Collectors.toSet());
     } else {
-      return Collections.emptyList();
+      return Stream.concat(masProperties.getAdditionalSpecimenMass().stream(),
+          sourceSystemComponent.getSpecimenMass().stream()).collect(
+          Collectors.toSet());
     }
   }
+
 
   private ObjectNode convertToJson(ArchiveFile core, Record rec) {
     var data = mapper.createObjectNode();

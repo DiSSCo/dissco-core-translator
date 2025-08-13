@@ -31,15 +31,24 @@ public class SourceSystemRepository {
   private SourceSystemInformation mapToSourceSystemInformation(
       Record3<String, String, JSONB> dbRecord) {
     List<String> filters = List.of();
+    List<String> specimenMass = List.of();
+    List<String> mediaMass = List.of();
     try {
       var data = mapper.readTree(dbRecord.value3().data());
       if (data.get("ods:filters") != null) {
         filters = mapper.readerForListOf(String.class).readValue(data.get("ods:filters"));
       }
+      if (data.get("ods:specimenMachineAnnotationServices") != null){
+        specimenMass = mapper.readerForListOf(String.class).readValue(data.get("ods:specimenMachineAnnotationServices"));
+      }
+      if (data.get("ods:mediaMachineAnnotationServices") != null){
+        mediaMass = mapper.readerForListOf(String.class).readValue(data.get("ods:mediaMachineAnnotationServices"));
+      }
     } catch (IOException e){
       log.error("Unable to read source system data", e);
     }
-    return new SourceSystemInformation(dbRecord.value1(), dbRecord.value2(), filters);
+    return new SourceSystemInformation(dbRecord.value1(), dbRecord.value2(), filters, specimenMass,
+        mediaMass);
   }
 
   public void storeEml(byte[] bytes, String sourceSystemID) {
