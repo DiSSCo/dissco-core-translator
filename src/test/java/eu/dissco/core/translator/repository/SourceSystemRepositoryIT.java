@@ -47,15 +47,18 @@ class SourceSystemRepositoryIT extends BaseRepositoryIT {
   }
 
   @Test
-  void testGetSourceSystemInformationWithFilter() {
+  void testGetSourceSystemInformationWithFilterAndMas() {
     // Given
     givenInsertRecords("""
         {
-          "ods:filters": ["dataset=AVES"]
+          "ods:filters": ["dataset=AVES"],
+          "ods:specimenMachineAnnotationServices": ["https://hdl.handle.net/20.5000.1025/111-111-111"],
+          "ods:mediaMachineAnnotationServices": ["https://hdl.handle.net/20.5000.1025/222-222-222"]
         }
         """);
     var expected = new SourceSystemInformation(SOURCE_SYSTEM_NAME, ENDPOINT,
-        List.of("dataset=AVES"), List.of(), List.of());
+        List.of("dataset=AVES"), List.of("https://hdl.handle.net/20.5000.1025/111-111-111"),
+        List.of("https://hdl.handle.net/20.5000.1025/222-222-222"));
 
     // When
     var result = repository.getSourceSystem(SOURCE_SYSTEM_ID);
