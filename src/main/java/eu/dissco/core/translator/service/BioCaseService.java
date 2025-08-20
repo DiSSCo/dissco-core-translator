@@ -43,11 +43,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
@@ -228,7 +226,7 @@ public class BioCaseService extends WebClientService {
         log.debug("Result digital Specimen: {}", digitalSpecimen);
         rabbitMqService.sendMessage(
             new DigitalSpecimenEvent(
-                machineAnnotationServices(false),
+                getMachineAnnotationServices(false, masProperties, sourceSystemComponent),
                 digitalSpecimen,
                 digitalMedia, masProperties.getForceMasSchedule()));
         processedRecords.incrementAndGet();
@@ -405,7 +403,8 @@ public class BioCaseService extends WebClientService {
       throw new DiSSCoDataException(
           "Digital media object for specimen does not have an access uri, ignoring record");
     }
-    var digitalMediaEvent = new DigitalMediaEvent(machineAnnotationServices(true),
+    var digitalMediaEvent = new DigitalMediaEvent(
+        getMachineAnnotationServices(true, masProperties, sourceSystemComponent),
         new DigitalMediaWrapper(
             fdoProperties.getDigitalMediaType(),
             digitalMedia,
@@ -413,18 +412,6 @@ public class BioCaseService extends WebClientService {
         ), masProperties.getForceMasSchedule());
     log.debug("Result digital media object: {}", digitalMediaEvent);
     return digitalMediaEvent;
-  }
-
-  private Set<String> machineAnnotationServices(boolean mediaObject) {
-    if (mediaObject) {
-      return Stream.concat(masProperties.getAdditionalMediaMass().stream(),
-          sourceSystemComponent.getMediaMass().stream()).collect(
-          Collectors.toSet());
-    } else {
-      return Stream.concat(masProperties.getAdditionalSpecimenMass().stream(),
-          sourceSystemComponent.getSpecimenMass().stream()).collect(
-          Collectors.toSet());
-    }
   }
 
   private StringWriter fillTemplate(Map<String, Object> templateProperties) {

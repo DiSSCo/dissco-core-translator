@@ -186,7 +186,7 @@ public class DwcaService extends WebClientService {
           optionalEmlData.ifPresent(emlData -> addEmlDataToRecord(fullRecord, emlData));
           var digitalObjects = createDigitalObjects(fullRecord);
           log.debug("Digital Specimen: {}", digitalObjects);
-          var translatorEvent = new DigitalSpecimenEvent(setMachineAnnotationServices(false),
+          var translatorEvent = new DigitalSpecimenEvent(getMachineAnnotationServices(false, masProperties, sourceSystemComponent),
               digitalObjects.getLeft(), digitalObjects.getRight(), masProperties.getForceMasSchedule());
           rabbitMqService.sendMessage(translatorEvent);
           processedRecords.incrementAndGet();
@@ -307,7 +307,7 @@ public class DwcaService extends WebClientService {
           throw new DiSSCoDataException(
               "Digital media object for specimen does not have an access uri, ignoring record");
         }
-        var digitalMediaEvent = new DigitalMediaEvent(setMachineAnnotationServices(true),
+        var digitalMediaEvent = new DigitalMediaEvent(getMachineAnnotationServices(true, masProperties, sourceSystemComponent),
             new DigitalMediaWrapper(
                 fdoProperties.getDigitalMediaType(),
                 digitalMedia,
@@ -329,7 +329,7 @@ public class DwcaService extends WebClientService {
     var mediaUrls = new LinkedHashSet<>(Arrays.asList(associatedMedia.split("\\|")));
     var digitalMedia = new ArrayList<DigitalMediaEvent>();
     for (var mediaUrl : mediaUrls) {
-      var digitalMediaEvent = new DigitalMediaEvent(setMachineAnnotationServices(true),
+      var digitalMediaEvent = new DigitalMediaEvent(getMachineAnnotationServices(true, masProperties, sourceSystemComponent),
           new DigitalMediaWrapper(
               fdoProperties.getDigitalMediaType(),
               digitalSpecimenDirector.assembleDigitalMedia(true,
@@ -373,7 +373,6 @@ public class DwcaService extends WebClientService {
     return inputList.stream()
         .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / chunkSize)).values();
   }
-
 
   private Set<String> postArchiveToDatabase(Archive archive) throws DisscoRepositoryException {
     var tableNames = generateTableNames(archive);
@@ -469,19 +468,6 @@ public class DwcaService extends WebClientService {
     }
     log.info("Finished posting extensions archive to database");
   }
-
-  private Set<String> setMachineAnnotationServices(boolean mediaObject) {
-    if (mediaObject) {
-      return Stream.concat(masProperties.getAdditionalMediaMass().stream(),
-          sourceSystemComponent.getMediaMass().stream()).collect(
-          Collectors.toSet());
-    } else {
-      return Stream.concat(masProperties.getAdditionalSpecimenMass().stream(),
-          sourceSystemComponent.getSpecimenMass().stream()).collect(
-          Collectors.toSet());
-    }
-  }
-
 
   private ObjectNode convertToJson(ArchiveFile core, Record rec) {
     var data = mapper.createObjectNode();
