@@ -1,3 +1,7 @@
 # July 7 2025
 # Issue with jackson-core, spring-parent update should fix this
 CVE-2025-52999
+
+# Aug 20
+# Issue with netty, spring needs ot upgrade
+CVE-2025-55163
