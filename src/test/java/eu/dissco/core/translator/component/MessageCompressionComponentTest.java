@@ -67,8 +67,8 @@ class MessageCompressionComponentTest {
   private String givenMessage() {
     return """
         {
-          "enrichmentList": [
-            "OCR"
+          "masList": [
+            "https://hdl.handle.net/20.5000.1025/RDC-0P1-ZZ2"
             ],
           "digitalSpecimenWrapper": {
             "ods:normalisedPhysicalSpecimenID": "https://geocollections.info/specimen/23602",
