@@ -186,7 +186,8 @@ public class DwcaService extends WebClientService {
           optionalEmlData.ifPresent(emlData -> addEmlDataToRecord(fullRecord, emlData));
           var digitalObjects = createDigitalObjects(fullRecord);
           log.debug("Digital Specimen: {}", digitalObjects);
-          var translatorEvent = new DigitalSpecimenEvent(getMachineAnnotationServices(false, masProperties, sourceSystemComponent),
+          var translatorEvent = new DigitalSpecimenEvent(
+              masProperties.getSpecimenMass(),
               digitalObjects.getLeft(), digitalObjects.getRight(), masProperties.getForceMasSchedule());
           rabbitMqService.sendMessage(translatorEvent);
           processedRecords.incrementAndGet();
@@ -307,7 +308,7 @@ public class DwcaService extends WebClientService {
           throw new DiSSCoDataException(
               "Digital media object for specimen does not have an access uri, ignoring record");
         }
-        var digitalMediaEvent = new DigitalMediaEvent(getMachineAnnotationServices(true, masProperties, sourceSystemComponent),
+        var digitalMediaEvent = new DigitalMediaEvent(masProperties.getMediaMass(),
             new DigitalMediaWrapper(
                 fdoProperties.getDigitalMediaType(),
                 digitalMedia,
@@ -329,7 +330,7 @@ public class DwcaService extends WebClientService {
     var mediaUrls = new LinkedHashSet<>(Arrays.asList(associatedMedia.split("\\|")));
     var digitalMedia = new ArrayList<DigitalMediaEvent>();
     for (var mediaUrl : mediaUrls) {
-      var digitalMediaEvent = new DigitalMediaEvent(getMachineAnnotationServices(true, masProperties, sourceSystemComponent),
+      var digitalMediaEvent = new DigitalMediaEvent(masProperties.getMediaMass(),
           new DigitalMediaWrapper(
               fdoProperties.getDigitalMediaType(),
               digitalSpecimenDirector.assembleDigitalMedia(true,

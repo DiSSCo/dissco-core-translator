@@ -57,8 +57,8 @@ class SourceSystemRepositoryIT extends BaseRepositoryIT {
         }
         """);
     var expected = new SourceSystemInformation(SOURCE_SYSTEM_NAME, ENDPOINT,
-        List.of("dataset=AVES"), List.of("https://hdl.handle.net/20.5000.1025/111-111-111"),
-        List.of("https://hdl.handle.net/20.5000.1025/222-222-222"));
+        List.of("dataset=AVES")
+    );
 
     // When
     var result = repository.getSourceSystem(SOURCE_SYSTEM_ID);

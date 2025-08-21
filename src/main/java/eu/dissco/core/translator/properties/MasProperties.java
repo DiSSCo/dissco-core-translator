@@ -2,7 +2,7 @@ package eu.dissco.core.translator.properties;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import java.util.List;
+import java.util.Set;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -11,9 +11,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class MasProperties {
 
   @NotNull
-  List<String> additionalSpecimenMass = List.of();
+  Set<String> specimenMass = Set.of();
   @NotNull
-  List<String> additionalMediaMass = List.of();
+  Set<String> mediaMass = Set.of();
   @NotBlank
   Boolean forceMasSchedule = false;
 

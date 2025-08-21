@@ -52,7 +52,7 @@ class SourceSystemComponentTest {
     given(properties.getSourceSystemId()).willReturn(SOURCE_SYSTEM_ID);
     given(repository.getSourceSystem(SOURCE_SYSTEM_ID)).willReturn(
         new SourceSystemInformation(SOURCE_SYSTEM_NAME, ENDPOINT,
-            List.of("<filter>foo</filter>", "<filter>bar</filter>"), List.of(), List.of()));
+            List.of("<filter>foo</filter>", "<filter>bar</filter>")));
 
     // When
     var component = new SourceSystemComponent(properties, repository);

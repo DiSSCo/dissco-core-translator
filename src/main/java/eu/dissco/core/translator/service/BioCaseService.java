@@ -226,7 +226,7 @@ public class BioCaseService extends WebClientService {
         log.debug("Result digital Specimen: {}", digitalSpecimen);
         rabbitMqService.sendMessage(
             new DigitalSpecimenEvent(
-                getMachineAnnotationServices(false, masProperties, sourceSystemComponent),
+                masProperties.getSpecimenMass(),
                 digitalSpecimen,
                 digitalMedia, masProperties.getForceMasSchedule()));
         processedRecords.incrementAndGet();
@@ -404,7 +404,7 @@ public class BioCaseService extends WebClientService {
           "Digital media object for specimen does not have an access uri, ignoring record");
     }
     var digitalMediaEvent = new DigitalMediaEvent(
-        getMachineAnnotationServices(true, masProperties, sourceSystemComponent),
+        masProperties.getMediaMass(),
         new DigitalMediaWrapper(
             fdoProperties.getDigitalMediaType(),
             digitalMedia,
