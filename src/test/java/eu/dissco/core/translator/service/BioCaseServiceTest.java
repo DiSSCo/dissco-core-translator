@@ -18,8 +18,8 @@ import eu.dissco.core.translator.database.jooq.enums.JobState;
 import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
 import eu.dissco.core.translator.domain.TranslatorJobResult;
 import eu.dissco.core.translator.properties.ApplicationProperties;
-import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.FdoProperties;
+import eu.dissco.core.translator.properties.MasProperties;
 import eu.dissco.core.translator.schema.DigitalMedia;
 import eu.dissco.core.translator.schema.DigitalSpecimen;
 import eu.dissco.core.translator.terms.BaseDigitalObjectDirector;
@@ -63,7 +63,7 @@ class BioCaseServiceTest {
   @Mock
   private RabbitMqService rabbitMqService;
   @Mock
-  private EnrichmentProperties enrichmentProperties;
+  private MasProperties masProperties;
   @Mock
   private BaseDigitalObjectDirector digitalSpecimenDirector;
   @Mock
@@ -77,7 +77,7 @@ class BioCaseServiceTest {
         new FileTemplateLoader(new ClassPathResource("templates").getFile()));
     service = new BioCaseService(mapper, properties, webClient, sourceSystemComponent,
         configuration, factory,
-        rabbitMqService, enrichmentProperties, digitalSpecimenDirector, fdoProperties);
+        rabbitMqService, masProperties, digitalSpecimenDirector, fdoProperties);
 
     // Given
     givenJsonWebclient();

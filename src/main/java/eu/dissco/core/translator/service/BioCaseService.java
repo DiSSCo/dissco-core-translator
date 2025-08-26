@@ -21,14 +21,13 @@ import eu.dissco.core.translator.domain.DigitalMediaEvent;
 import eu.dissco.core.translator.domain.DigitalMediaWrapper;
 import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
 import eu.dissco.core.translator.domain.DigitalSpecimenWrapper;
-import eu.dissco.core.translator.domain.Enrichment;
 import eu.dissco.core.translator.domain.TranslatorJobResult;
 import eu.dissco.core.translator.exception.DiSSCoDataException;
 import eu.dissco.core.translator.exception.DisscoEfgParsingException;
 import eu.dissco.core.translator.exception.ReachedMaximumLimitException;
 import eu.dissco.core.translator.properties.ApplicationProperties;
-import eu.dissco.core.translator.properties.EnrichmentProperties;
 import eu.dissco.core.translator.properties.FdoProperties;
+import eu.dissco.core.translator.properties.MasProperties;
 import eu.dissco.core.translator.terms.BaseDigitalObjectDirector;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
@@ -39,7 +38,6 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -87,7 +85,7 @@ public class BioCaseService extends WebClientService {
   private final Configuration configuration;
   private final XMLInputFactory xmlFactory;
   private final RabbitMqService rabbitMqService;
-  private final EnrichmentProperties enrichmentProperties;
+  private final MasProperties masProperties;
   private final BaseDigitalObjectDirector digitalSpecimenDirector;
   private final FdoProperties fdoProperties;
 
@@ -228,9 +226,9 @@ public class BioCaseService extends WebClientService {
         log.debug("Result digital Specimen: {}", digitalSpecimen);
         rabbitMqService.sendMessage(
             new DigitalSpecimenEvent(
-                enrichmentServices(false),
+                masProperties.getSpecimenMass(),
                 digitalSpecimen,
-                digitalMedia));
+                digitalMedia, masProperties.getForceMasSchedule()));
         processedRecords.incrementAndGet();
       } catch (DiSSCoDataException e) {
         log.error("Encountered data issue with record: {}", unitAttributes, e);
@@ -405,23 +403,15 @@ public class BioCaseService extends WebClientService {
       throw new DiSSCoDataException(
           "Digital media object for specimen does not have an access uri, ignoring record");
     }
-    var digitalMediaEvent = new DigitalMediaEvent(enrichmentServices(true),
+    var digitalMediaEvent = new DigitalMediaEvent(
+        masProperties.getMediaMass(),
         new DigitalMediaWrapper(
             fdoProperties.getDigitalMediaType(),
             digitalMedia,
             attributes
-        ));
+        ), masProperties.getForceMasSchedule());
     log.debug("Result digital media object: {}", digitalMediaEvent);
     return digitalMediaEvent;
-  }
-
-  private List<String> enrichmentServices(boolean multiMediaObject) {
-    if (enrichmentProperties.getList() != null) {
-      return enrichmentProperties.getList().stream()
-          .filter(e -> e.isImageOnly() == multiMediaObject).map(Enrichment::getName).toList();
-    } else {
-      return Collections.emptyList();
-    }
   }
 
   private StringWriter fillTemplate(Map<String, Object> templateProperties) {
