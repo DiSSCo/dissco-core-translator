@@ -50,6 +50,7 @@ import eu.dissco.core.translator.terms.media.CaptureDevice;
 import eu.dissco.core.translator.terms.media.Comments;
 import eu.dissco.core.translator.terms.media.CreateDate;
 import eu.dissco.core.translator.terms.media.Creator;
+import eu.dissco.core.translator.terms.media.CreatorID;
 import eu.dissco.core.translator.terms.media.Description;
 import eu.dissco.core.translator.terms.media.DigitizationDate;
 import eu.dissco.core.translator.terms.media.Format;
@@ -803,7 +804,8 @@ public abstract class BaseDigitalObjectDirector {
         .withOdsHasIdentifiers(assembleIdentifiers(mediaRecord))
         .withOdsHasAssertions(new MediaAssertions().gatherAssertions(mediaRecord, dwc));
     digitalMedia.setOdsHasAgents(addAgent(digitalMedia.getOdsHasAgents(), termMapper
-        .retrieveTerm(new Creator(), mediaRecord, dwc), null, CREATOR, SCHEMA_PERSON));
+        .retrieveTerm(new Creator(), mediaRecord, dwc), termMapper
+        .retrieveTerm(new CreatorID(), mediaRecord, dwc), CREATOR, SCHEMA_PERSON));
     digitalMedia.setOdsHasAgents(addAgent(digitalMedia.getOdsHasAgents(), termMapper
         .retrieveTerm(new RightsOwner(), mediaRecord, dwc), null, RIGHTS_OWNER, SCHEMA_PERSON));
     digitalMedia.withOdsHasEntityRelationships(

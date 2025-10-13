@@ -1,15 +1,13 @@
-package eu.dissco.core.translator.terms.specimen.assertion;
+package eu.dissco.core.translator.terms.media;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
-public class MeasurementUnitIRI extends Term {
+public class CreatorID extends Term {
 
-  public static final String TERM = "dwciri:measurementUnit";
-
-  private final List<String> dwcaTerms = List.of(TERM,
-      "http://rs.iobis.org/obis/terms/measurementUnitID");
+  public static final String TERM = "dc:creator";
+  private final List<String> dwcaTerms = List.of(TERM);
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {

@@ -8,7 +8,7 @@ public class MeasurementValueIRI extends Term {
 
   public static final String TERM = "dwciri:measurementValueID";
 
-  private final List<String> dwcaTerms = List.of(
+  private final List<String> dwcaTerms = List.of(TERM,
       "http://rs.iobis.org/obis/terms/measurementValueID");
 
   @Override
