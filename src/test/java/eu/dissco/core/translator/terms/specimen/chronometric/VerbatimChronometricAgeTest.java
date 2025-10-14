@@ -36,7 +36,7 @@ class VerbatimChronometricAgeTest {
     var result = uncalibratedChronometricAge.retrieveFromABCD(unit);
 
     // Then
-    assertThat(result).isEqualTo("ABCDEFG datingAccuracy is: " + VERBATIM);
+    assertThat(result).isEqualTo(VERBATIM);
   }
 
   @Test

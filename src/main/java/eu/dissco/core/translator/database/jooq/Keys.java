@@ -29,6 +29,7 @@ public class Keys {
     // -------------------------------------------------------------------------
 
     public static final UniqueKey<DataMappingRecord> DATA_MAPPING_PK = Internal.createUniqueKey(DataMapping.DATA_MAPPING, DSL.name("data_mapping_pk"), new TableField[] { DataMapping.DATA_MAPPING.ID, DataMapping.DATA_MAPPING.VERSION }, true);
+    public static final UniqueKey<SourceSystemRecord> ENDPOINT_UNIQUE = Internal.createUniqueKey(SourceSystem.SOURCE_SYSTEM, DSL.name("endpoint_unique"), new TableField[] { SourceSystem.SOURCE_SYSTEM.ENDPOINT, SourceSystem.SOURCE_SYSTEM.TOMBSTONED, SourceSystem.SOURCE_SYSTEM.FILTERS }, true);
     public static final UniqueKey<SourceSystemRecord> SOURCE_SYSTEM_PKEY = Internal.createUniqueKey(SourceSystem.SOURCE_SYSTEM, DSL.name("source_system_pkey"), new TableField[] { SourceSystem.SOURCE_SYSTEM.ID }, true);
     public static final UniqueKey<TranslatorJobRecordRecord> TRANSLATOR_JOB_RECORD_PKEY = Internal.createUniqueKey(TranslatorJobRecord.TRANSLATOR_JOB_RECORD, DSL.name("translator_job_record_pkey"), new TableField[] { TranslatorJobRecord.TRANSLATOR_JOB_RECORD.JOB_ID, TranslatorJobRecord.TRANSLATOR_JOB_RECORD.SOURCE_SYSTEM_ID }, true);
 }

@@ -8,8 +8,7 @@ public class EventRemarks extends Term {
 
   public static final String TERM = DWC_PREFIX + "eventRemarks";
   private final List<String> dwcaTerms = List.of(TERM, "dwc:occurrenceRemarks");
-  private final List<String> abcdUnitTerms = List.of("abcd:notes/value",
-      "abcd:gathering/notes/value");
+  private final List<String> abcdUnitTerms = List.of("abcd:notes/value");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {

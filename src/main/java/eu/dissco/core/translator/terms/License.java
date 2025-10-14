@@ -10,8 +10,8 @@ public class License extends Term {
   public static final String TERM = DCTERMS_PREFIX + "license";
 
   // Fall back to dc terms rights if no license is present
-  private final List<String> dwcaTerms = List.of(TERM, "dc:license", "eml:license",
-      "dcterms:rights", "dc:rights");
+  private final List<String> dwcaTerms = List.of(TERM, "dc:license",
+      "dcterms:rights", "dc:rights", "eml:license");
   private final List<String> abcdUnitTerms = List.of(
       "abcd:iprstatements/licenses/license/0/uri",
       "abcd:iprstatements/licenses/license/0/text",

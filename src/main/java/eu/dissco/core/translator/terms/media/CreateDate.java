@@ -7,7 +7,7 @@ import java.util.List;
 public class CreateDate extends Term {
 
   public static final String TERM = "xmp:CreateDate";
-  private final List<String> dwcaTerms = List.of(TERM);
+  private final List<String> dwcaTerms = List.of(TERM, "dcterms:created");
   private final List<String> abcdTerms = List.of("abcd:createdDate");
 
   @Override

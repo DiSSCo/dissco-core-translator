@@ -228,7 +228,8 @@ public class BioCaseService extends WebClientService {
             new DigitalSpecimenEvent(
                 masProperties.getSpecimenMass(),
                 digitalSpecimen,
-                digitalMedia, masProperties.getForceMasSchedule()));
+                digitalMedia,
+                masProperties.getForceMasSchedule()));
         processedRecords.incrementAndGet();
       } catch (DiSSCoDataException e) {
         log.error("Encountered data issue with record: {}", unitAttributes, e);

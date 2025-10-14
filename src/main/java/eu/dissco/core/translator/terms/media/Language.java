@@ -9,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 public class Language extends Term {
 
   public static final String TERM = "dcterms:language";
-  private final List<String> dwcaTerms = List.of(TERM);
+  private final List<String> dwcaTerms = List.of(TERM, "dc:language");
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {

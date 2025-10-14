@@ -14,7 +14,7 @@ public class Modified extends Term {
   private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_STRING).withZone(
       ZoneOffset.UTC);
   private final List<String> dwcaTerms = List.of(TERM);
-  private final List<String> abcdUnitTerms = List.of("abcd:hasDateModified", "abcd:dateLastEdited",
+  private final List<String> abcdUnitTerms = List.of("abcd:dateLastEdited",
       "abcd:revisionData/dateModified");
 
   @Override

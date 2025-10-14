@@ -18,12 +18,7 @@ public class VerbatimChronometricAge extends Term {
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    var value = super.searchJsonForTerm(unit, abcdTerms);
-    if (value != null) {
-      return "ABCDEFG datingAccuracy is: " + value;
-    } else {
-      return null;
-    }
+    return super.searchJsonForTerm(unit, abcdTerms);
   }
 
   @Override
