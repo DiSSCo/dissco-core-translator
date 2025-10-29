@@ -20,6 +20,11 @@ public class EventType extends Term {
   }
 
   @Override
+  public String retrieveFromABCD(JsonNode unit) {
+    return "Collecting Event";
+  }
+
+  @Override
   public String getTerm() {
     return TERM;
   }

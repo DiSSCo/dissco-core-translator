@@ -38,6 +38,18 @@ class EventTypeTest {
   }
 
   @Test
+  void testRetrieveFromABCD() {
+    // Given
+    var unit = MAPPER.createObjectNode();
+
+    // When
+    var result = eventType.retrieveFromDWCA(unit);
+
+    // Then
+    assertThat(result).isEqualTo("Collecting Event");
+  }
+
+  @Test
   void testGetTerm() {
     // When
     var result = eventType.getTerm();
