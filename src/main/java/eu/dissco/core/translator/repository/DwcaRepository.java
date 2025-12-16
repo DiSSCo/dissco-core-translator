@@ -1,5 +1,6 @@
 package eu.dissco.core.translator.repository;
 
+import static eu.dissco.core.translator.service.DwcaService.AC_MULTIMEDIA;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
@@ -19,6 +20,7 @@ import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
+import org.gbif.dwc.terms.AcTerm;
 import org.gbif.dwc.terms.DwcTerm;
 import org.gbif.dwc.terms.GbifTerm;
 import org.gbif.dwc.terms.Term;
@@ -37,7 +39,6 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class DwcaRepository {
 
-  private static final String AC_MULTIMEDIA = "http://rs.tdwg.org/ac/terms/Multimedia";
   private final Field<String> dwcaIDField = DSL.field("dwcaid", String.class);
   private final Field<String> uniqueIDField = DSL.field("id", String.class);
   private final Field<JSONB> dataField = DSL.field("data", JSONB.class);
@@ -103,8 +104,7 @@ public class DwcaRepository {
         return query.set(uniqueIDField,
             getUniqueIDValue(dbRecord, fieldsToCheck, true));
       }
-      if (fileType.prefixedName().equals(AC_MULTIMEDIA)
-          || fileType.equals(GbifTerm.Multimedia)) {
+      if (fileType.equals(AcTerm.Multimedia) || fileType.equals(GbifTerm.Multimedia)) {
         var uniqueField = dataMappingComponent.getFieldMappings()
             .getOrDefault("ac:accessURI", "ac:accessURI");
         var fieldsToCheck = new ArrayList<>(AccessURI.DWCA_TERMS);

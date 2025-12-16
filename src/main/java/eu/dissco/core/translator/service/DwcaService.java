@@ -42,7 +42,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
@@ -69,11 +68,11 @@ import org.springframework.web.reactive.function.client.WebClient;
 @RequiredArgsConstructor
 public class DwcaService extends WebClientService {
 
+  public static final String GBIF_MULTIMEDIA = "gbif:Multimedia";
+  public static final String AC_MULTIMEDIA = "ac:Multimedia";
+  public static final String EXTENSIONS = "extensions";
   private static final String DWC_ASSOCIATED_MEDIA = "dwc:associatedMedia";
-  private static final String GBIF_MULTIMEDIA = "gbif:Multimedia";
   private static final String EML_LICENSE = "eml:license";
-  private static final String AC_MULTIMEDIA = "ac:Multimedia";
-  private static final String EXTENSIONS = "extensions";
 
   private final ObjectMapper mapper;
   private final WebClient webClient;
@@ -188,7 +187,8 @@ public class DwcaService extends WebClientService {
           log.debug("Digital Specimen: {}", digitalObjects);
           var translatorEvent = new DigitalSpecimenEvent(
               masProperties.getSpecimenMass(),
-              digitalObjects.getLeft(), digitalObjects.getRight(), masProperties.getForceMasSchedule());
+              digitalObjects.getLeft(), digitalObjects.getRight(),
+              masProperties.getForceMasSchedule());
           rabbitMqService.sendMessage(translatorEvent);
           processedRecords.incrementAndGet();
         } catch (DiSSCoDataException e) {

@@ -42,7 +42,7 @@ class IsKnownToContainMediaTest {
   }
 
   @ParameterizedTest
-  @ValueSource(strings = {"gbif:Multimedia", "http://rs.tdwg.org/ac/terms/Multimedia"})
+  @ValueSource(strings = {"gbif:Multimedia", "ac:Multimedia"})
   void testRetrieveFromDWCAExtension(String extensionName) {
     // Given
     var unit = MAPPER.createObjectNode();
