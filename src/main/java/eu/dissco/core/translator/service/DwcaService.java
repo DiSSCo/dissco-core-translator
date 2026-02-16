@@ -330,14 +330,14 @@ public class DwcaService extends WebClientService {
     var mediaUrls = new LinkedHashSet<>(Arrays.asList(associatedMedia.split("\\|")));
     var digitalMedia = new ArrayList<DigitalMediaEvent>();
     for (var mediaUrl : mediaUrls) {
+      var mediaNode = mapper.createObjectNode().put("ac:accessURI", mediaUrl)
+          .set(EML_LICENSE, licenseNode);
       var digitalMediaEvent = new DigitalMediaEvent(masProperties.getMediaMass(),
           new DigitalMediaWrapper(
               fdoProperties.getDigitalMediaType(),
               digitalSpecimenDirector.assembleDigitalMedia(true,
-                  mapper.createObjectNode().put("ac:accessURI", mediaUrl)
-                      .set(EML_LICENSE, licenseNode),
-                  organisationId),
-              null), masProperties.getForceMasSchedule());
+                  mediaNode, organisationId),
+              mediaNode), masProperties.getForceMasSchedule());
       digitalMedia.add(digitalMediaEvent);
     }
     return digitalMedia;
