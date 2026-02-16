@@ -85,9 +85,6 @@ public class DwcaService extends WebClientService {
   private final FdoProperties fdoProperties;
   private final ApplicationProperties applicationProperties;
   private final XMLInputFactory xmlFactory;
-  private final List<String> allowedBasisOfRecord = List.of("PRESERVEDSPECIMEN", "FOSSIL", "OTHER",
-      "ROCK", "MINERAL", "METEORITE", "FOSSILSPECIMEN", "LIVINGSPECIMEN", "MATERIALSAMPLE",
-      "PRESERVED_SPECIMEN");
 
   @Override
   public TranslatorJobResult retrieveData() {
@@ -263,17 +260,25 @@ public class DwcaService extends WebClientService {
     return "";
   }
 
+  /*
+  For Media use the information in the extensions if available, otherwise look for associatedMedia.
+  Prioritise AC_Multimedia over GBIF_Multimedia if both are present.
+  Extensions and/or associatedMedia cannot be mixed.
+  */
   private List<DigitalMediaEvent> processMedia(String recordId, JsonNode fullDigitalSpecimen,
       String organisationId) throws OrganisationException {
     var extensions = fullDigitalSpecimen.get(EXTENSIONS);
+    var usedExtension = false;
     if (extensions != null) {
       if (extensions.get(AC_MULTIMEDIA) != null) {
+        usedExtension = true;
         var imageArray = extensions.get(AC_MULTIMEDIA);
         addDatasetMetadata(imageArray, fullDigitalSpecimen);
         if (imageArray.isArray() && !imageArray.isEmpty()) {
           return extractMultiMedia(recordId, imageArray, organisationId);
         }
       } else if (extensions.get(GBIF_MULTIMEDIA) != null) {
+        usedExtension = true;
         var imageArray = extensions.get(GBIF_MULTIMEDIA);
         addDatasetMetadata(imageArray, fullDigitalSpecimen);
         if (imageArray.isArray() && !imageArray.isEmpty()) {
@@ -281,7 +286,7 @@ public class DwcaService extends WebClientService {
         }
       }
     }
-    if (fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA) != null) {
+    if (!usedExtension && fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA) != null) {
       return publishAssociatedMedia(recordId,
           fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA).asText(), organisationId,
           fullDigitalSpecimen.get(EML_LICENSE));
@@ -423,7 +428,7 @@ public class DwcaService extends WebClientService {
     var idList = new HashSet<String>();
     for (var rec : core) {
       var basisOfRecord = rec.value(DwcTerm.basisOfRecord);
-      if (basisOfRecord != null && allowedBasisOfRecord.contains(basisOfRecord.toUpperCase())) {
+      if (basisOfRecord != null && ALLOWED_BASIS_OF_RECORD.contains(basisOfRecord.toUpperCase())) {
         idList.add(rec.id());
         var json = convertToJson(core, rec);
         json.set(EXTENSIONS, mapper.createObjectNode());

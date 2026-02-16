@@ -73,11 +73,6 @@ public class BioCaseService extends WebClientService {
   private static final String ABCD = "abcd:";
   private static final String ABCDEFG = "abcd-efg:";
 
-  private static final List<String> allowedBasisOfRecord = List.of("PRESERVEDSPECIMEN", "FOSSIL",
-      "OTHER", "ROCK", "MINERAL", "METEORITE", "FOSSILSPECIMEN", "LIVINGSPECIMEN", "MATERIALSAMPLE",
-      "FOSSIL SPECIMEN", "ROCKSPECIMEN", "ROCK SPECIMEN", "MINERALSPECIMEN", "MINERAL SPECIMEN",
-      "METEORITESPECIMEN", "METEORITE SPECIMEN", "HERBARIUM SHEET", "HERBARIUMSHEET", "DRIED");
-
   private final ObjectMapper mapper;
   private final ApplicationProperties applicationProperties;
   private final WebClient webClient;
@@ -92,7 +87,7 @@ public class BioCaseService extends WebClientService {
   private boolean isAcceptedBasisOfRecord(Unit unit) {
     var recordBasis = unit.getRecordBasis();
     if (recordBasis != null && !recordBasis.isBlank()) {
-      return allowedBasisOfRecord.contains(recordBasis.strip().toUpperCase());
+      return ALLOWED_BASIS_OF_RECORD.contains(recordBasis.strip().toUpperCase());
     }
     return false;
   }
