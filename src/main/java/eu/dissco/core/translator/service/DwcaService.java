@@ -274,14 +274,14 @@ public class DwcaService extends WebClientService {
         usedExtension = true;
         var imageArray = extensions.get(AC_MULTIMEDIA);
         addDatasetMetadata(imageArray, fullDigitalSpecimen);
-        if (imageArray.isArray() && !imageArray.isEmpty()) {
+        if (isImageArrayValid(imageArray)) {
           return extractMultiMedia(recordId, imageArray, organisationId);
         }
       } else if (extensions.get(GBIF_MULTIMEDIA) != null) {
         usedExtension = true;
         var imageArray = extensions.get(GBIF_MULTIMEDIA);
         addDatasetMetadata(imageArray, fullDigitalSpecimen);
-        if (imageArray.isArray() && !imageArray.isEmpty()) {
+        if (isImageArrayValid(imageArray)) {
           return extractMultiMedia(recordId, imageArray, organisationId);
         }
       }
@@ -291,13 +291,17 @@ public class DwcaService extends WebClientService {
         return publishAssociatedMedia(recordId,
             fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA).asText(), organisationId,
             fullDigitalSpecimen.get(EML_LICENSE));
-      }else {
+      } else {
         log.warn(
             "Record with id: {} has dwc:associatedMedia field but also a media extension, dwc:associatedMedia will be ignored",
             recordId);
       }
     }
     return List.of();
+  }
+
+  private static boolean isImageArrayValid(JsonNode imageArray) {
+    return imageArray.isArray() && !imageArray.isEmpty();
   }
 
   private void addDatasetMetadata(JsonNode imageArray, JsonNode fullDigitalSpecimen) {
