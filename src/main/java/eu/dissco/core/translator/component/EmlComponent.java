@@ -1,6 +1,8 @@
 package eu.dissco.core.translator.component;
 
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+import static com.fasterxml.jackson.annotation.JsonInclude.Value.construct;
+
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import efg.DataSets;
 import efg.DataSets.DataSet;
@@ -34,16 +36,16 @@ public class EmlComponent {
   }
 
   /**
-   * Generates an EML XML representation from the given ABCD dataset.
-   * Maps fields such as title, publication date, language, details.
-   * ContentCreators are seen as contact and technical contacts are seen as associatedParty.
+   * Generates an EML XML representation from the given ABCD dataset. Maps fields such as title,
+   * publication date, language, details. ContentCreators are seen as contact and technical contacts
+   * are seen as associatedParty.
    *
    * @param abcdDataset the ABCD dataset to convert
    * @return the EML XML as a String
    * @throws IOException if there is an error converting the domain object to an XML string
    */
   public static String generateEML(DataSets.DataSet abcdDataset) throws IOException {
-    var representation = abcdDataset.getMetadata().getDescription().getRepresentation().get(0);
+    var representation = abcdDataset.getMetadata().getDescription().getRepresentation().getFirst();
     var emlDataset = new Dataset(
         representation.getTitle(),
         formatPubDate(abcdDataset),
@@ -56,8 +58,8 @@ public class EmlComponent {
         getDistribution(representation),
         getGeographicCoverage(representation));
     var eml = new Eml(UUID.randomUUID().toString(), "https://dissco.eu", "en", emlDataset);
-    var xmlMapper = new XmlMapper();
-    xmlMapper.setSerializationInclusion(Include.NON_NULL);
+    var xmlMapper = XmlMapper.builder().defaultPropertyInclusion(construct(NON_NULL, NON_NULL))
+        .build();
     return xmlMapper.writeValueAsString(eml);
   }
 
@@ -89,7 +91,7 @@ public class EmlComponent {
   private static License parseLicense(IPRStatements iprStatements) {
     if (iprStatements != null && iprStatements.getLicenses() != null
         && !iprStatements.getLicenses().getLicense().isEmpty()) {
-      var abcdLicense = iprStatements.getLicenses().getLicense().get(0);
+      var abcdLicense = iprStatements.getLicenses().getLicense().getFirst();
       return new License(abcdLicense.getText(), abcdLicense.getURI());
     }
     return null;
@@ -98,10 +100,10 @@ public class EmlComponent {
   private static String getCopyright(IPRStatements iprStatement) {
     if (iprStatement != null && iprStatement.getCopyrights() != null
         && !iprStatement.getCopyrights().getCopyright().isEmpty()) {
-      return iprStatement.getCopyrights().getCopyright().get(0).getText();
+      return iprStatement.getCopyrights().getCopyright().getFirst().getText();
     } else if (iprStatement != null && iprStatement.getTermsOfUseStatements() != null
         && !iprStatement.getTermsOfUseStatements().getTermsOfUse().isEmpty()) {
-      return iprStatement.getTermsOfUseStatements().getTermsOfUse().get(0).getText();
+      return iprStatement.getTermsOfUseStatements().getTermsOfUse().getFirst().getText();
     }
     return null;
   }
