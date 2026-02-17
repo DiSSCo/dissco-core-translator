@@ -286,10 +286,16 @@ public class DwcaService extends WebClientService {
         }
       }
     }
-    if (!usedExtension && fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA) != null) {
-      return publishAssociatedMedia(recordId,
-          fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA).asText(), organisationId,
-          fullDigitalSpecimen.get(EML_LICENSE));
+    if (fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA) != null) {
+      if (!usedExtension) {
+        return publishAssociatedMedia(recordId,
+            fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA).asText(), organisationId,
+            fullDigitalSpecimen.get(EML_LICENSE));
+      }else {
+        log.warn(
+            "Record with id: {} has dwc:associatedMedia field but also a media extension, dwc:associatedMedia will be ignored",
+            recordId);
+      }
     }
     return List.of();
   }
