@@ -229,14 +229,15 @@ class DwcaServiceTest {
   void testRetrieveDataWithGbifMedia() throws Exception {
     // Given
     var expected = new TranslatorJobResult(JobState.COMPLETED, 19);
+    var imageMap = givenImageMap(19);
+    imageMap.put("id:1", List.of(MAPPER.createObjectNode()));
     givenDWCA("/dwca-kew-gbif-media.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(19));
     given(dwcaRepository.getRecords(anyList(),
         eq("temp_extension_gw0_tyl_yru_identification"))).willReturn(
         Map.of());
     given(dwcaRepository.getRecords(anyList(),
-        eq("temp_extension_gw0_tyl_yru_multimedia"))).willReturn(
-        givenImageMap(19));
+        eq("temp_extension_gw0_tyl_yru_multimedia"))).willReturn(imageMap);
     given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
         .willReturn(givenDigitalSpecimen());
     given(digitalSpecimenDirector.assembleDigitalMedia(anyBoolean(), any(JsonNode.class),

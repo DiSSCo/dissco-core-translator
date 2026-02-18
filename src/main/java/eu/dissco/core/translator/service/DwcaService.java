@@ -141,7 +141,7 @@ public class DwcaService extends WebClientService {
         log.info("Start translation and publishing of batch: {}", specimenData.size());
         processDigitalSpecimen(specimenData.values(), optionalEmlData, processedRecords);
       }
-    } catch (ReachedMaximumLimitException e) {
+    } catch (ReachedMaximumLimitException _) {
       log.warn("Reached maximum limit of {} processed specimens out of {} specimens available",
           applicationProperties.getMaxItems(), ids.size());
       return;
@@ -218,7 +218,7 @@ public class DwcaService extends WebClientService {
         retrieveEmlData(xmlEventReader, emlData);
       }
     } catch (FileNotFoundException e) {
-      log.error("Unable to find EML file for dataset at location: {}", mf.getAbsolutePath());
+      log.error("Unable to find EML file for dataset at location: {}", mf.getAbsolutePath(), e);
     } catch (XMLStreamException e) {
       log.error("Unable to process EML", e);
     }
@@ -268,48 +268,32 @@ public class DwcaService extends WebClientService {
   private List<DigitalMediaEvent> processMedia(String recordId, JsonNode fullDigitalSpecimen,
       String organisationId) throws OrganisationException {
     var extensions = fullDigitalSpecimen.get(EXTENSIONS);
-    var usedExtension = false;
     if (extensions != null) {
       if (extensions.get(AC_MULTIMEDIA) != null) {
-        usedExtension = true;
         var imageArray = extensions.get(AC_MULTIMEDIA);
         addDatasetMetadata(imageArray, fullDigitalSpecimen);
-        if (isImageArrayValid(imageArray)) {
-          return extractMultiMedia(recordId, imageArray, organisationId);
-        }
+        return extractMultiMedia(recordId, imageArray, organisationId);
       } else if (extensions.get(GBIF_MULTIMEDIA) != null) {
-        usedExtension = true;
         var imageArray = extensions.get(GBIF_MULTIMEDIA);
         addDatasetMetadata(imageArray, fullDigitalSpecimen);
-        if (isImageArrayValid(imageArray)) {
-          return extractMultiMedia(recordId, imageArray, organisationId);
-        }
+        return extractMultiMedia(recordId, imageArray, organisationId);
       }
     }
     if (fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA) != null) {
-      if (!usedExtension) {
-        return publishAssociatedMedia(recordId,
-            fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA).asText(), organisationId,
-            fullDigitalSpecimen.get(EML_LICENSE));
-      } else {
-        log.warn(
-            "Record with id: {} has dwc:associatedMedia field but also a media extension, dwc:associatedMedia will be ignored",
-            recordId);
-      }
+      return publishAssociatedMedia(recordId,
+          fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA).asText(), organisationId,
+          fullDigitalSpecimen.get(EML_LICENSE));
     }
     return List.of();
-  }
-
-  private static boolean isImageArrayValid(JsonNode imageArray) {
-    return imageArray.isArray() && !imageArray.isEmpty();
   }
 
   private void addDatasetMetadata(JsonNode imageArray, JsonNode fullDigitalSpecimen) {
     for (JsonNode jsonNode : imageArray) {
       var imageNode = (ObjectNode) jsonNode;
-      imageNode.set(EML_LICENSE, fullDigitalSpecimen.get(EML_LICENSE));
+      if (fullDigitalSpecimen.get(EML_LICENSE) != null) {
+        imageNode.set(EML_LICENSE, fullDigitalSpecimen.get(EML_LICENSE));
+      }
     }
-
   }
 
   private List<DigitalMediaEvent> extractMultiMedia(String recordId, JsonNode imageArray,

@@ -1,7 +1,6 @@
 package eu.dissco.core.translator.service;
 
 
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -161,7 +160,7 @@ public class BioCaseService extends WebClientService {
     } catch (XMLStreamException | JAXBException | IOException e) {
       log.error("Error converting response to XML", e);
       return new BioCasePartResult(true, true);
-    } catch (ReachedMaximumLimitException e) {
+    } catch (ReachedMaximumLimitException _) {
       log.warn("Reached maximum limit of {} processed specimens",
           applicationProperties.getMaxItems());
       return new BioCasePartResult(true, false);
@@ -170,7 +169,6 @@ public class BioCaseService extends WebClientService {
 
   private void retrieveUnitData(XMLEventReader xmlEventReader, AtomicInteger processedRecords)
       throws XMLStreamException, JAXBException, ReachedMaximumLimitException, IOException {
-    mapper.setSerializationInclusion(Include.NON_NULL);
     if (isStartElement(xmlEventReader.peek(), "DataSets")) {
       mapABCD206(xmlEventReader, processedRecords);
     }
@@ -180,7 +178,7 @@ public class BioCaseService extends WebClientService {
       throws JAXBException, ReachedMaximumLimitException, IOException {
     var context = JAXBContext.newInstance(DataSets.class);
     var datasetsMarshaller = context.createUnmarshaller().unmarshal(xmlEventReader, DataSets.class);
-    var datasets = datasetsMarshaller.getValue().getDataSet().get(0);
+    var datasets = datasetsMarshaller.getValue().getDataSet().getFirst();
     sourceSystemComponent.storeEmlRecord(EmlComponent.generateEML(datasets));
     for (var unit : datasets.getUnits().getUnit()) {
       try {
