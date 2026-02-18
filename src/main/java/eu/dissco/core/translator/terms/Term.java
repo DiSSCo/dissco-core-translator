@@ -119,7 +119,7 @@ public abstract class Term {
   protected Identification retrieveAcceptedIdentification(DigitalSpecimen ds) {
     if (ds.getOdsHasIdentifications() != null && !ds.getOdsHasIdentifications().isEmpty()) {
       if (ds.getOdsHasIdentifications().size() == 1) {
-        return ds.getOdsHasIdentifications().get(0);
+        return ds.getOdsHasIdentifications().getFirst();
       }
       for (Identification identification : ds.getOdsHasIdentifications()) {
         if (Boolean.TRUE.equals(identification.getOdsIsVerifiedIdentification())) {

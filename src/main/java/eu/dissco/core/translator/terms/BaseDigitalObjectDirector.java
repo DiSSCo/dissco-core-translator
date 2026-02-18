@@ -288,7 +288,7 @@ public abstract class BaseDigitalObjectDirector {
         return Double.valueOf(value);
       }
     } catch (NumberFormatException ex) {
-      log.warn("Unable to parse value: {} to a double for term: {}", value, term.getTerm());
+      log.warn("Unable to parse value: {} to a double for term: {}", value, term.getTerm(), ex);
     }
     return null;
   }
@@ -711,7 +711,7 @@ public abstract class BaseDigitalObjectDirector {
         return Enum.valueOf(enumClass, value.toUpperCase());
       }
     } catch (IllegalArgumentException ex) {
-      log.warn("Unable to parse value: {} to an enum for term: {}", value, term.getTerm());
+      log.warn("Unable to parse value: {} to an enum for term: {}", value, term.getTerm(), ex);
     }
     return null;
   }
@@ -723,7 +723,7 @@ public abstract class BaseDigitalObjectDirector {
         return Integer.valueOf(value);
       }
     } catch (NumberFormatException ex) {
-      log.warn("Unable to parse value: {} to an integer for term: {}", value, term.getTerm());
+      log.warn("Unable to parse value: {} to an integer for term: {}", value, term.getTerm(), ex);
     }
     return null;
   }
@@ -740,7 +740,7 @@ public abstract class BaseDigitalObjectDirector {
         return Boolean.valueOf(value);
       }
     } catch (NumberFormatException ex) {
-      log.warn("Unable to parse value: {} to a boolean for term: {}", value, term.getTerm());
+      log.warn("Unable to parse value: {} to a boolean for term: {}", value, term.getTerm(), ex);
     }
     return null;
   }
@@ -856,12 +856,12 @@ public abstract class BaseDigitalObjectDirector {
       String physicalSpecimenIDType) throws UnknownPhysicalSpecimenIdType {
     try {
       return OdsPhysicalSpecimenIDType.valueOf(physicalSpecimenIDType.toUpperCase());
-    } catch (IllegalArgumentException e) {
+    } catch (IllegalArgumentException _) {
       log.warn("Unknown physicalSpecimenIDType specified");
       throw new UnknownPhysicalSpecimenIdType(
           "Physical specimen ID type is: " + physicalSpecimenIDType
               + " which is not a known id type");
-    } catch (NullPointerException e) {
+    } catch (NullPointerException _) {
       log.warn("No physicalSpecimenIDType specified");
       throw new UnknownPhysicalSpecimenIdType("Physical specimen ID type is empty");
     }
