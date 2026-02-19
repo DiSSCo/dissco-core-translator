@@ -43,7 +43,7 @@ class EventTypeTest {
     var unit = MAPPER.createObjectNode();
 
     // When
-    var result = eventType.retrieveFromDWCA(unit);
+    var result = eventType.retrieveFromABCD(unit);
 
     // Then
     assertThat(result).isEqualTo("Collecting Event");

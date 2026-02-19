@@ -119,7 +119,7 @@ public class BiocaseDigitalObjectDirector extends BaseDigitalObjectDirector {
 
   private JsonNode getSubJsonAbcd(JsonNode data, int count, List<String> paths) {
     var subNode = mapper.createObjectNode();
-    paths.forEach(path -> data.fields().forEachRemaining(field -> {
+    paths.forEach(path -> data.properties().forEach(field -> {
       if (field.getKey().startsWith(path + count)) {
         subNode.set(
             field.getKey().replace(path + count + "/", ""),

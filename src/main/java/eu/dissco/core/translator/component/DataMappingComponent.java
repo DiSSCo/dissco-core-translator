@@ -29,15 +29,15 @@ public class DataMappingComponent {
     var objectNode = repository.retrieveMapping(properties.getSourceSystemId());
     var mappingObject = objectNode.get("ods:hasTermMapping");
     if (mappingObject != null) {
-      mappingObject.iterator().forEachRemaining(node -> node.fields()
-          .forEachRemaining(field -> fieldMappings.put(field.getKey(), field.getValue().asText())));
+      mappingObject.iterator().forEachRemaining(node -> node.properties()
+          .forEach(field -> fieldMappings.put(field.getKey(), field.getValue().asText())));
     } else {
       log.info("No term mappings found for source system {}", properties.getSourceSystemId());
     }
     var defaultObject = objectNode.get("ods:hasDefaultMapping");
     if (defaultObject != null) {
-      defaultObject.iterator().forEachRemaining(node -> node.fields()
-          .forEachRemaining(field -> defaults.put(field.getKey(), field.getValue().asText())));
+      defaultObject.iterator().forEachRemaining(node -> node.properties()
+          .forEach(field -> defaults.put(field.getKey(), field.getValue().asText())));
     } else {
       log.info("No default mappings found for source system {}", properties.getSourceSystemId());
     }

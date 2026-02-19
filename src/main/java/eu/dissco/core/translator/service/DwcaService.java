@@ -85,9 +85,6 @@ public class DwcaService extends WebClientService {
   private final FdoProperties fdoProperties;
   private final ApplicationProperties applicationProperties;
   private final XMLInputFactory xmlFactory;
-  private final List<String> allowedBasisOfRecord = List.of("PRESERVEDSPECIMEN", "FOSSIL", "OTHER",
-      "ROCK", "MINERAL", "METEORITE", "FOSSILSPECIMEN", "LIVINGSPECIMEN", "MATERIALSAMPLE",
-      "PRESERVED_SPECIMEN");
 
   @Override
   public TranslatorJobResult retrieveData() {
@@ -144,7 +141,7 @@ public class DwcaService extends WebClientService {
         log.info("Start translation and publishing of batch: {}", specimenData.size());
         processDigitalSpecimen(specimenData.values(), optionalEmlData, processedRecords);
       }
-    } catch (ReachedMaximumLimitException e) {
+    } catch (ReachedMaximumLimitException _) {
       log.warn("Reached maximum limit of {} processed specimens out of {} specimens available",
           applicationProperties.getMaxItems(), ids.size());
       return;
@@ -221,7 +218,7 @@ public class DwcaService extends WebClientService {
         retrieveEmlData(xmlEventReader, emlData);
       }
     } catch (FileNotFoundException e) {
-      log.error("Unable to find EML file for dataset at location: {}", mf.getAbsolutePath());
+      log.error("Unable to find EML file for dataset at location: {}", mf.getAbsolutePath(), e);
     } catch (XMLStreamException e) {
       log.error("Unable to process EML", e);
     }
@@ -263,6 +260,11 @@ public class DwcaService extends WebClientService {
     return "";
   }
 
+  /*
+  For Media use the information in the extensions if available, otherwise look for associatedMedia.
+  Prioritise AC_Multimedia over GBIF_Multimedia if both are present.
+  Extensions and/or associatedMedia cannot be mixed.
+  */
   private List<DigitalMediaEvent> processMedia(String recordId, JsonNode fullDigitalSpecimen,
       String organisationId) throws OrganisationException {
     var extensions = fullDigitalSpecimen.get(EXTENSIONS);
@@ -270,15 +272,11 @@ public class DwcaService extends WebClientService {
       if (extensions.get(AC_MULTIMEDIA) != null) {
         var imageArray = extensions.get(AC_MULTIMEDIA);
         addDatasetMetadata(imageArray, fullDigitalSpecimen);
-        if (imageArray.isArray() && !imageArray.isEmpty()) {
-          return extractMultiMedia(recordId, imageArray, organisationId);
-        }
+        return extractMultiMedia(recordId, imageArray, organisationId);
       } else if (extensions.get(GBIF_MULTIMEDIA) != null) {
         var imageArray = extensions.get(GBIF_MULTIMEDIA);
         addDatasetMetadata(imageArray, fullDigitalSpecimen);
-        if (imageArray.isArray() && !imageArray.isEmpty()) {
-          return extractMultiMedia(recordId, imageArray, organisationId);
-        }
+        return extractMultiMedia(recordId, imageArray, organisationId);
       }
     }
     if (fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA) != null) {
@@ -292,9 +290,10 @@ public class DwcaService extends WebClientService {
   private void addDatasetMetadata(JsonNode imageArray, JsonNode fullDigitalSpecimen) {
     for (JsonNode jsonNode : imageArray) {
       var imageNode = (ObjectNode) jsonNode;
-      imageNode.set(EML_LICENSE, fullDigitalSpecimen.get(EML_LICENSE));
+      if (fullDigitalSpecimen.get(EML_LICENSE) != null) {
+        imageNode.set(EML_LICENSE, fullDigitalSpecimen.get(EML_LICENSE));
+      }
     }
-
   }
 
   private List<DigitalMediaEvent> extractMultiMedia(String recordId, JsonNode imageArray,
@@ -423,7 +422,7 @@ public class DwcaService extends WebClientService {
     var idList = new HashSet<String>();
     for (var rec : core) {
       var basisOfRecord = rec.value(DwcTerm.basisOfRecord);
-      if (basisOfRecord != null && allowedBasisOfRecord.contains(basisOfRecord.toUpperCase())) {
+      if (basisOfRecord != null && ALLOWED_BASIS_OF_RECORD.contains(basisOfRecord.toUpperCase())) {
         idList.add(rec.id());
         var json = convertToJson(core, rec);
         json.set(EXTENSIONS, mapper.createObjectNode());

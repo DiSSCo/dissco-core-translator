@@ -38,7 +38,7 @@ public class EntityRelationshipUtils {
     if (relatedResource.startsWith("http")) {
       try {
         entityRelationship.setOdsRelatedResourceURI(new URI(relatedResource));
-      } catch (URISyntaxException e) {
+      } catch (URISyntaxException _) {
         log.warn("Could not create URI for related resource: " + relatedResource);
       }
     }

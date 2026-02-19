@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.5.7</version>
+    <version>4.0.2</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
   <groupId>eu.dissco.core</groupId>
@@ -15,15 +15,15 @@
   <name>translator</name>
   <description>DiSSCo core architecture translator component</description>
   <properties>
-    <java.version>21</java.version>
+    <java.version>25</java.version>
     <dwca-io.version>3.0.0</dwca-io.version>
     <commons-beanutils.version>1.11.0</commons-beanutils.version>
     <jaxb2-maven-plugin.version>3.3.0</jaxb2-maven-plugin.version>
     <commons-compress.version>1.28.0</commons-compress.version>
     <jakarta.activation-api.version>2.1.4</jakarta.activation-api.version>
-    <jakarta.xml.bind-api.version>4.0.4</jakarta.xml.bind-api.version>
-    <mockito-core.version>5.20.0</mockito-core.version>
-    <testcontainers.version>1.21.3</testcontainers.version>
+    <jakarta.xml.bind-api.version>4.0.5</jakarta.xml.bind-api.version>
+    <mockito-core.version>5.21.0</mockito-core.version>
+    <testcontainers.version>1.21.4</testcontainers.version>
     <sonar.organization>dissco</sonar.organization>
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     <sonar.coverage.jacoco.xmlReportPaths>../app-it/target/site/jacoco-aggregate/jacoco.xml
@@ -186,6 +186,18 @@
         <artifactId>spring-boot-maven-plugin</artifactId>
       </plugin>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+            </path>
+          </annotationProcessorPaths>
+        </configuration>
+      </plugin>
+      <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
         <version>3.3.0</version>
@@ -200,7 +212,7 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.13</version>
+        <version>0.8.14</version>
         <executions>
           <execution>
             <id>prepare-agent</id>
@@ -277,23 +289,6 @@
         <configuration>
           <configurationFile>src/main/resources/jooq-configuration.xml</configurationFile>
         </configuration>
-        <dependencies>
-          <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>${postgresql.version}</version>
-          </dependency>
-          <dependency>
-            <groupId>jakarta.xml.bind</groupId>
-            <artifactId>jakarta.xml.bind-api</artifactId>
-            <version>${jakarta-xml-bind.version}</version>
-          </dependency>
-          <dependency>
-            <groupId>org.glassfish.jaxb</groupId>
-            <artifactId>jaxb-runtime</artifactId>
-            <version>${glassfish-jaxb.version}</version>
-          </dependency>
-        </dependencies>
       </plugin>
       <plugin>
         <groupId>org.jsonschema2pojo</groupId>

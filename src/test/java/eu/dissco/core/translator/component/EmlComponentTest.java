@@ -1,6 +1,7 @@
 package eu.dissco.core.translator.component;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.mockStatic;
 
 import efg.ContentMetadata;
@@ -21,11 +22,14 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.MockedStatic;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 class EmlComponentTest {
 
   private MockedStatic<UUID> uuidMock;
@@ -161,7 +165,7 @@ class EmlComponentTest {
 
   private void mockUUID() {
     var uuid = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
-    uuidMock = mockStatic(UUID.class);
+    uuidMock = mockStatic(UUID.class, CALLS_REAL_METHODS);
     uuidMock.when(UUID::randomUUID).thenReturn(uuid);
   }
 
