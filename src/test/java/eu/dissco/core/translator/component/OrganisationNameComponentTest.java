@@ -8,9 +8,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.dissco.core.translator.exception.OrganisationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -35,7 +32,6 @@ class OrganisationNameComponentTest {
 
   private static final String ROR = "03srysw20";
   private static final String WIKIDATA_ID = "Q2203052";
-  private final ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
   @Mock
   private WebClient client;
   @Mock
@@ -50,7 +46,7 @@ class OrganisationNameComponentTest {
   private CompletableFuture<String> jsonFuture;
   private OrganisationNameComponent rorComponent;
 
-  private static Stream<Arguments> badRorResponse() throws JsonProcessingException {
+  private static Stream<Arguments> badRorResponse() {
     return Stream.of(
         Arguments.of(
             """
@@ -83,7 +79,7 @@ class OrganisationNameComponentTest {
     var result = rorComponent.getRorName(ROR);
 
     // Then
-    assertThat(result).isEqualTo("Royal Botanic Garden Edinburgh");
+    assertThat(result).isEqualTo("The MuseumFactory");
   }
 
   @Test
