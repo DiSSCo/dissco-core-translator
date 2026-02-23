@@ -45,55 +45,52 @@ class OrganisationNameComponentTest {
   @Mock
   private ResponseSpec responseSpec;
   @Mock
-  private Mono<JsonNode> jsonNodeMono;
+  private Mono<String> jsonNodeMono;
   @Mock
-  private CompletableFuture<JsonNode> jsonFuture;
+  private CompletableFuture<String> jsonFuture;
   private OrganisationNameComponent rorComponent;
 
   private static Stream<Arguments> badRorResponse() throws JsonProcessingException {
     return Stream.of(
         Arguments.of(
-            MAPPER.readTree("""
+            """
                 {
                   "names":"De MuseumFabriek"
                 }
                 """)
-        ),
-        Arguments.of(
-            MAPPER.readTree("""
+        ,
+        Arguments.of("""
                 {
                   "names": ["De MuseumFabriek"]
                 }
-                """)
+                """
         )
     );
   }
 
   @BeforeEach
   void setup() {
-    this.rorComponent = new OrganisationNameComponent(client);
+    this.rorComponent = new OrganisationNameComponent(client, MAPPER);
   }
 
   @Test
   void testGetRorId() throws Exception {
     // Given
     givenWebclient();
-    given(jsonFuture.get()).willReturn(
-        mapper.readTree(loadResourceFile("organisation-name/example-ror.json")));
+    given(jsonFuture.get()).willReturn(loadResourceFile("organisation-name/example-ror.json"));
 
     // When
     var result = rorComponent.getRorName(ROR);
 
     // Then
-    assertThat(result).isEqualTo("The MuseumFactory");
+    assertThat(result).isEqualTo("Royal Botanic Garden Edinburgh");
   }
 
   @Test
   void testGetRorIdFirst() throws Exception {
     // Given
     givenWebclient();
-    given(jsonFuture.get()).willReturn(
-        mapper.readTree("""
+    given(jsonFuture.get()).willReturn("""
             {
               "names": [
                 {
@@ -105,7 +102,7 @@ class OrganisationNameComponentTest {
                   }
               ]
             }
-            """));
+            """);
 
     // When
     var result = rorComponent.getRorName(ROR);
@@ -116,7 +113,7 @@ class OrganisationNameComponentTest {
 
   @ParameterizedTest
   @MethodSource("badRorResponse")
-  void testBadRorResponse(JsonNode rorResponse) throws Exception {
+  void testBadRorResponse(String rorResponse) throws Exception {
     // Given
     givenWebclient();
     given(jsonFuture.get()).willReturn(rorResponse);
@@ -130,8 +127,7 @@ class OrganisationNameComponentTest {
   void testWikidataId() throws Exception {
     // Given
     givenWebclient();
-    given(jsonFuture.get()).willReturn(
-        mapper.readTree(loadResourceFile("organisation-name/example-wikidata.json")));
+    given(jsonFuture.get()).willReturn(loadResourceFile("organisation-name/example-wikidata.json"));
 
     // When
     var result = rorComponent.getWikiDataName(WIKIDATA_ID);
@@ -144,8 +140,7 @@ class OrganisationNameComponentTest {
   void testWikidataIdInvalid() throws Exception {
     // Given
     givenWebclient();
-    given(jsonFuture.get()).willReturn(
-        mapper.readTree(loadResourceFile("organisation-name/invalid-wikidata.json")));
+    given(jsonFuture.get()).willReturn(loadResourceFile("organisation-name/invalid-wikidata.json"));
 
     // When / Then
     assertThrows(OrganisationException.class, () -> rorComponent.getWikiDataName(ROR));
@@ -156,8 +151,7 @@ class OrganisationNameComponentTest {
   void testResponseInvalid() throws Exception {
     // Given
     givenWebclient();
-    given(jsonFuture.get()).willReturn(
-        mapper.readTree(loadResourceFile("organisation-name/response-invalid.json")));
+    given(jsonFuture.get()).willReturn(loadResourceFile("organisation-name/response-invalid.json"));
 
     // When / Then
     assertThrows(OrganisationException.class, () -> rorComponent.getRorName(ROR));

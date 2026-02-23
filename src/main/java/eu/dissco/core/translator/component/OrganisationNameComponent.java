@@ -1,6 +1,8 @@
 package eu.dissco.core.translator.component;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.dissco.core.translator.exception.OrganisationException;
 import java.util.concurrent.ExecutionException;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,7 @@ import reactor.core.scheduler.Schedulers;
 public class OrganisationNameComponent {
 
   private final WebClient webClient;
+  private final ObjectMapper mapper;
   private static final String NAMES = "names";
   private static final String ORG_NAME_ERROR = "Unable to retrieve organisationName";
 
@@ -23,17 +26,17 @@ public class OrganisationNameComponent {
   public String getRorName(String ror) throws OrganisationException {
     log.info("Requesting organisation details for organisation: {} with ror", ror);
     String url = "https://api.ror.org/v2/organizations/" + ror;
-    var response = webClient.get().uri(url).retrieve().bodyToMono(JsonNode.class)
+    var response = webClient.get().uri(url).retrieve().bodyToMono(String.class)
         .publishOn(Schedulers.boundedElastic());
     try {
       var json = response.toFuture().get();
       if (json != null) {
-        return getRorInstitutionName(json);
+        return getRorInstitutionName(mapper.readTree(json));
       }
     } catch (InterruptedException e) {
       log.error("Failed to make request to RoR service", e);
       Thread.currentThread().interrupt();
-    } catch (ExecutionException e) {
+    } catch (ExecutionException | JsonProcessingException e) {
       log.error("Failed to make request to RoR service", e);
     }
     log.warn("Could not match name to a ROR id for: {}", url);
@@ -65,17 +68,22 @@ public class OrganisationNameComponent {
   public String getWikiDataName(String wikidata) throws OrganisationException {
     log.info("Requesting organisation details for organisation: {} with wikidata", wikidata);
     String url = "https://www.wikidata.org/w/rest.php/wikibase/v1/entities/items/" + wikidata + "/labels/en";
-    var response = webClient.get().uri(url).retrieve().bodyToMono(JsonNode.class)
+    var response = webClient.get().uri(url).retrieve().bodyToMono(String.class)
         .publishOn(Schedulers.boundedElastic());
     try {
       var name = response.toFuture().get();
-      if (name != null && name.isTextual()) {
-        return name.asText();
+      if (name != null) {
+        var json = mapper.readTree(name);
+        if (json.isTextual()){
+          return name.replace("\"", "");
+        } else {
+          log.warn("Received invalid response from wikidata for url: {}. Response: {}", url, name);
+        }
       }
     } catch (InterruptedException e) {
       log.error("Failed to make request to wikidata service", e);
       Thread.currentThread().interrupt();
-    } catch (ExecutionException e) {
+    } catch (ExecutionException | JsonProcessingException e) {
       log.error("Failed to make request to wikidata service", e);
     }
     log.warn("Could not match to an English (en) label to a wikidata id for: {}", url);
