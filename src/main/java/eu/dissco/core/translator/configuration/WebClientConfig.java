@@ -1,5 +1,7 @@
 package eu.dissco.core.translator.configuration;
 
+import eu.dissco.core.translator.client.RorClient;
+import eu.dissco.core.translator.client.WikidataClient;
 import io.netty.channel.ChannelOption;
 import javax.xml.stream.XMLInputFactory;
 import lombok.AllArgsConstructor;
@@ -7,8 +9,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.support.RestClientAdapter;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 import reactor.netty.http.client.HttpClient;
 
 @Configuration
@@ -39,5 +44,33 @@ public class WebClientConfig {
     return factory;
   }
 
+  @Bean
+  public RorClient rorClient() {
+    // Initialize HTTP client
+    RestClient restClient = RestClient.create("https://api.ror.org/v2/organizations/");
+
+    // Create factory for client proxies
+    HttpServiceProxyFactory proxyFactory = HttpServiceProxyFactory.builder()
+        .exchangeAdapter(RestClientAdapter.create(restClient))
+        .build();
+
+    // Create client proxy
+    return proxyFactory.createClient(RorClient.class);
+  }
+
+  @Bean
+  public WikidataClient wikidataClient() {
+    // Initialize HTTP client
+    RestClient restClient = RestClient.create(
+        "https://www.wikidata.org/w/rest.php/wikibase/v1/entities/items/");
+
+    // Create factory for client proxies
+    HttpServiceProxyFactory proxyFactory = HttpServiceProxyFactory.builder()
+        .exchangeAdapter(RestClientAdapter.create(restClient))
+        .build();
+
+    // Create client proxy
+    return proxyFactory.createClient(WikidataClient.class);
+  }
 
 }

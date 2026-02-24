@@ -1,42 +1,39 @@
 package eu.dissco.core.translator.component;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.dissco.core.translator.client.RorClient;
+import eu.dissco.core.translator.client.WikidataClient;
 import eu.dissco.core.translator.exception.OrganisationException;
-import java.util.concurrent.ExecutionException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.scheduler.Schedulers;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class OrganisationNameComponent {
 
-  private final WebClient webClient;
+  private final RorClient rorClient;
+  private final WikidataClient wikidataClient;
+  private final ObjectMapper mapper;
   private static final String NAMES = "names";
   private static final String ORG_NAME_ERROR = "Unable to retrieve organisationName";
 
   @Cacheable("ror")
   public String getRorName(String ror) throws OrganisationException {
     log.info("Requesting organisation details for organisation: {} with ror", ror);
-    String url = "https://api.ror.org/v2/organizations/" + ror;
-    var response = webClient.get().uri(url).retrieve().bodyToMono(JsonNode.class)
-        .publishOn(Schedulers.boundedElastic());
-    try {
-      var json = response.toFuture().get();
-      if (json != null) {
-        return getRorInstitutionName(json);
+    var response = rorClient.getRorInformation(ror);
+    if (response != null) {
+      try {
+        return getRorInstitutionName(mapper.readTree(response));
+      } catch (JsonProcessingException e) {
+        log.error("Failed to make parse response from RoR service to JSON: {}", response, e);
       }
-    } catch (InterruptedException e) {
-      log.error("Failed to make request to RoR service", e);
-      Thread.currentThread().interrupt();
-    } catch (ExecutionException e) {
-      log.error("Failed to make request to RoR service", e);
     }
-    log.warn("Could not match name to a ROR id for: {}", url);
+    log.warn("Could not match name to a ROR id for: {}", ror);
     throw new OrganisationException(ORG_NAME_ERROR);
   }
 
@@ -64,21 +61,19 @@ public class OrganisationNameComponent {
   @Cacheable("wikidata")
   public String getWikiDataName(String wikidata) throws OrganisationException {
     log.info("Requesting organisation details for organisation: {} with wikidata", wikidata);
-    String url = "https://www.wikidata.org/w/rest.php/wikibase/v1/entities/items/" + wikidata + "/labels/en";
-    var response = webClient.get().uri(url).retrieve().bodyToMono(JsonNode.class)
-        .publishOn(Schedulers.boundedElastic());
+    var response = wikidataClient.getWikidataLabel(wikidata);
     try {
-      var name = response.toFuture().get();
-      if (name != null && name.isTextual()) {
-        return name.asText();
+      var json = mapper.readTree(response);
+      if (json.isTextual()) {
+        return json.asText().replace("\"", "");
+      } else {
+        log.warn("Received invalid response from wikidata for wikidataId: {}. Response: {}",
+            wikidata, response);
       }
-    } catch (InterruptedException e) {
-      log.error("Failed to make request to wikidata service", e);
-      Thread.currentThread().interrupt();
-    } catch (ExecutionException e) {
+    } catch (JsonProcessingException e) {
       log.error("Failed to make request to wikidata service", e);
     }
-    log.warn("Could not match to an English (en) label to a wikidata id for: {}", url);
+    log.warn("Could not match to an English (en) label to a wikidata id for: {}", wikidata);
     throw new OrganisationException(ORG_NAME_ERROR);
   }
 }
