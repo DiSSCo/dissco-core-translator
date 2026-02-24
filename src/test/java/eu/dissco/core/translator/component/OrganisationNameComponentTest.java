@@ -4,13 +4,11 @@ import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static eu.dissco.core.translator.TestUtils.loadResourceFile;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 
+import eu.dissco.core.translator.client.RorClient;
+import eu.dissco.core.translator.client.WikidataClient;
 import eu.dissco.core.translator.exception.OrganisationException;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,12 +18,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClient.RequestHeadersSpec;
-import org.springframework.web.reactive.function.client.WebClient.RequestHeadersUriSpec;
-import org.springframework.web.reactive.function.client.WebClient.ResponseSpec;
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Scheduler;
 
 @ExtendWith(MockitoExtension.class)
 class OrganisationNameComponentTest {
@@ -33,17 +25,9 @@ class OrganisationNameComponentTest {
   private static final String ROR = "03srysw20";
   private static final String WIKIDATA_ID = "Q2203052";
   @Mock
-  private WebClient client;
+  private RorClient rorClient;
   @Mock
-  private RequestHeadersUriSpec headersSpec;
-  @Mock
-  private RequestHeadersSpec uriSpec;
-  @Mock
-  private ResponseSpec responseSpec;
-  @Mock
-  private Mono<String> jsonNodeMono;
-  @Mock
-  private CompletableFuture<String> jsonFuture;
+  private WikidataClient wikidataClient;
   private OrganisationNameComponent rorComponent;
 
   private static Stream<Arguments> badRorResponse() {
@@ -56,24 +40,24 @@ class OrganisationNameComponentTest {
                 """)
         ,
         Arguments.of("""
-                {
-                  "names": ["De MuseumFabriek"]
-                }
-                """
+            {
+              "names": ["De MuseumFabriek"]
+            }
+            """
         )
     );
   }
 
   @BeforeEach
   void setup() {
-    this.rorComponent = new OrganisationNameComponent(client, MAPPER);
+    this.rorComponent = new OrganisationNameComponent(rorClient, wikidataClient, MAPPER);
   }
 
   @Test
   void testGetRorId() throws Exception {
     // Given
-    givenWebclient();
-    given(jsonFuture.get()).willReturn(loadResourceFile("organisation-name/example-ror.json"));
+    given(rorClient.getRorInformation(ROR)).willReturn(
+        loadResourceFile("organisation-name/example-ror.json"));
 
     // When
     var result = rorComponent.getRorName(ROR);
@@ -85,20 +69,19 @@ class OrganisationNameComponentTest {
   @Test
   void testGetRorIdFirst() throws Exception {
     // Given
-    givenWebclient();
-    given(jsonFuture.get()).willReturn("""
+    given(rorClient.getRorInformation(ROR)).willReturn("""
+        {
+          "names": [
             {
-              "names": [
-                {
-                  "lang": "nl",
-                  "types": [
-                    "label"
-                    ],
-                  "value": "De MuseumFabriek"
-                  }
-              ]
-            }
-            """);
+              "lang": "nl",
+              "types": [
+                "label"
+                ],
+              "value": "De MuseumFabriek"
+              }
+          ]
+        }
+        """);
 
     // When
     var result = rorComponent.getRorName(ROR);
@@ -107,12 +90,32 @@ class OrganisationNameComponentTest {
     assertThat(result).isEqualTo("De MuseumFabriek");
   }
 
+  @Test
+  void testGetRorInvalidJson() {
+    // Given
+    given(rorClient.getRorInformation(ROR)).willReturn("""
+        {
+          "names": [
+            // invalid stuff is happening here
+              "lang": "nl",
+              "types": [
+                "label"
+                ],
+              "value": "De MuseumFabriek"
+              }
+          ]
+        }
+        """);
+
+    // When / Then
+    assertThrows(OrganisationException.class, () -> rorComponent.getRorName(ROR));
+  }
+
   @ParameterizedTest
   @MethodSource("badRorResponse")
-  void testBadRorResponse(String rorResponse) throws Exception {
+  void testBadRorResponse(String rorResponse) {
     // Given
-    givenWebclient();
-    given(jsonFuture.get()).willReturn(rorResponse);
+    given(rorClient.getRorInformation(ROR)).willReturn(rorResponse);
 
     // When / Then
     assertThrows(OrganisationException.class, () -> rorComponent.getRorName(ROR));
@@ -122,8 +125,8 @@ class OrganisationNameComponentTest {
   @Test
   void testWikidataId() throws Exception {
     // Given
-    givenWebclient();
-    given(jsonFuture.get()).willReturn(loadResourceFile("organisation-name/example-wikidata.json"));
+    given(wikidataClient.getWikidataLabel(WIKIDATA_ID)).willReturn(
+        loadResourceFile("organisation-name/example-wikidata.json"));
 
     // When
     var result = rorComponent.getWikiDataName(WIKIDATA_ID);
@@ -135,60 +138,43 @@ class OrganisationNameComponentTest {
   @Test
   void testWikidataIdInvalid() throws Exception {
     // Given
-    givenWebclient();
-    given(jsonFuture.get()).willReturn(loadResourceFile("organisation-name/invalid-wikidata.json"));
-
-    // When / Then
-    assertThrows(OrganisationException.class, () -> rorComponent.getWikiDataName(ROR));
-  }
-
-
-  @Test
-  void testResponseInvalid() throws Exception {
-    // Given
-    givenWebclient();
-    given(jsonFuture.get()).willReturn(loadResourceFile("organisation-name/response-invalid.json"));
-
-    // When / Then
-    assertThrows(OrganisationException.class, () -> rorComponent.getRorName(ROR));
-  }
-
-  @Test
-  void testWebClientIssueRor() throws Exception {
-    // Given
-    givenWebclient();
-    given(jsonFuture.get()).willThrow(new ExecutionException(new RuntimeException()));
-
-    // When / Then
-    assertThrows(OrganisationException.class, () -> rorComponent.getRorName(ROR));
-  }
-
-  @Test
-  void testWebClientIssueWikidata() throws Exception {
-    // Given
-    givenWebclient();
-    given(jsonFuture.get()).willThrow(new ExecutionException(new RuntimeException()));
+    given(wikidataClient.getWikidataLabel(WIKIDATA_ID)).willReturn(
+        loadResourceFile("organisation-name/invalid-wikidata.json"));
 
     // When / Then
     assertThrows(OrganisationException.class, () -> rorComponent.getWikiDataName(WIKIDATA_ID));
   }
 
   @Test
-  void testEmptyMono() throws Exception {
+  void testResponseInvalid() throws Exception {
     // Given
-    givenWebclient();
-    given(jsonFuture.get()).willReturn(null);
+    given(rorClient.getRorInformation(ROR)).willReturn(
+        loadResourceFile("organisation-name/response-invalid.json"));
 
     // When / Then
     assertThrows(OrganisationException.class, () -> rorComponent.getRorName(ROR));
   }
 
-  private void givenWebclient() {
-    given(client.get()).willReturn(headersSpec);
-    given(headersSpec.uri(anyString())).willReturn(uriSpec);
-    given(uriSpec.retrieve()).willReturn(responseSpec);
-    given(responseSpec.bodyToMono(any(Class.class))).willReturn(jsonNodeMono);
-    given(jsonNodeMono.publishOn(any(Scheduler.class))).willReturn(jsonNodeMono);
-    given(jsonNodeMono.toFuture()).willReturn(jsonFuture);
+  @Test
+  void testGetWikidataInvalidJson() {
+    // Given
+    given(wikidataClient.getWikidataLabel(WIKIDATA_ID)).willReturn("""
+        {
+          "en": "De Museumfabriek"
+          // with some invalid stuff happening here....
+        }
+        """);
+
+    // When / Then
+    assertThrows(OrganisationException.class, () -> rorComponent.getWikiDataName(WIKIDATA_ID));
+  }
+
+  @Test
+  void testEmptyMono() {
+    // Given
+    given(rorClient.getRorInformation(ROR)).willReturn(null);
+
+    // When / Then
+    assertThrows(OrganisationException.class, () -> rorComponent.getRorName(ROR));
   }
 }
