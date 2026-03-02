@@ -288,7 +288,8 @@ public abstract class BaseDigitalObjectDirector {
         return Double.valueOf(value);
       }
     } catch (NumberFormatException ex) {
-      log.warn("Unable to parse value: {} to a double for term: {}", value, term.getTerm(), ex);
+      log.warn("Unable to parse value: {} to a double for term: {}", value, term.getTerm());
+      log.debug("Stacktrace: ", ex);
     }
     return null;
   }
@@ -723,7 +724,8 @@ public abstract class BaseDigitalObjectDirector {
         return Integer.valueOf(value);
       }
     } catch (NumberFormatException ex) {
-      log.warn("Unable to parse value: {} to an integer for term: {}", value, term.getTerm(), ex);
+      log.warn("Unable to parse value: {} to an integer for term: {}", value, term.getTerm());
+      log.debug("Stacktrace: ", ex);
     }
     return null;
   }
@@ -740,7 +742,8 @@ public abstract class BaseDigitalObjectDirector {
         return Boolean.valueOf(value);
       }
     } catch (NumberFormatException ex) {
-      log.warn("Unable to parse value: {} to a boolean for term: {}", value, term.getTerm(), ex);
+      log.warn("Unable to parse value: {} to a boolean for term: {}", value, term.getTerm());
+      log.debug("Stacktrace", ex);
     }
     return null;
   }
