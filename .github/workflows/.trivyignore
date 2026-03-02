@@ -1,3 +1,12 @@
 # July 7 2025
 # Issue with jackson-core, gbif-common would need an update for this
 CVE-2025-52999
+
+# March 2, 2025
+# Issue with alpine image, libpng
+CVE-2026-25646
+
+# March 2, 2025
+# Issue with jackson, spring boot may need to update its jackson 2 version
+# Also could be fixed by upgrading to jackson 3
+GHSA-72hv-8253-57qq
