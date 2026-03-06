@@ -7,8 +7,6 @@ import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import eu.dissco.core.translator.component.DataMappingComponent;
 import eu.dissco.core.translator.exception.IllegalDataException;
 import java.util.ArrayList;
@@ -25,6 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
 @ExtendWith(MockitoExtension.class)
 class DwcaRepositoryTest extends BaseRepositoryIT {
@@ -89,7 +89,7 @@ class DwcaRepositoryTest extends BaseRepositoryIT {
 
     // Then
     assertThat(results).isEqualTo(
-        Map.of(records.get(0).getLeft(), givenRecord(" someCorruptedInformation", id)));
+        Map.of(records.getFirst().getLeft(), givenRecord(" someCorruptedInformation", id)));
   }
 
   @Test

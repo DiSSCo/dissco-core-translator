@@ -1,9 +1,5 @@
 package eu.dissco.core.translator.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import eu.dissco.core.translator.Profiles;
 import eu.dissco.core.translator.component.SourceSystemComponent;
 import eu.dissco.core.translator.database.jooq.enums.JobState;
@@ -53,7 +49,6 @@ import org.gbif.dwc.Archive;
 import org.gbif.dwc.ArchiveFile;
 import org.gbif.dwc.DwcFiles;
 import org.gbif.dwc.record.Record;
-import org.gbif.dwc.terms.DwcTerm;
 import org.gbif.dwc.terms.DwcaTerm;
 import org.gbif.dwc.terms.Term;
 import org.springframework.context.annotation.Profile;
@@ -61,6 +56,9 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 @Service
 @Slf4j
@@ -74,7 +72,7 @@ public class DwcaService extends WebClientService {
   private static final String DWC_ASSOCIATED_MEDIA = "dwc:associatedMedia";
   private static final String EML_LICENSE = "eml:license";
 
-  private final ObjectMapper mapper;
+  private final JsonMapper mapper;
   private final WebClient webClient;
   private final DwcaProperties dwcaProperties;
   private final RabbitMqService rabbitMqService;
@@ -171,7 +169,7 @@ public class DwcaService extends WebClientService {
 
   private void processDigitalSpecimen(Collection<ObjectNode> fullRecords,
       Optional<Map<String, String>> optionalEmlData, AtomicInteger processedRecords)
-      throws JsonProcessingException, ReachedMaximumLimitException {
+      throws ReachedMaximumLimitException {
     for (var fullRecord : fullRecords) {
       if (fullRecord != null) {
         if (applicationProperties.getMaxItems() != null
@@ -281,7 +279,7 @@ public class DwcaService extends WebClientService {
     }
     if (fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA) != null) {
       return publishAssociatedMedia(recordId,
-          fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA).asText(), organisationId,
+          fullDigitalSpecimen.get(DWC_ASSOCIATED_MEDIA).asString(), organisationId,
           fullDigitalSpecimen.get(EML_LICENSE));
     }
     return List.of();
@@ -303,10 +301,7 @@ public class DwcaService extends WebClientService {
       try {
         var digitalMedia = digitalSpecimenDirector.assembleDigitalMedia(true, image,
             organisationId);
-        if (digitalMedia.getAcAccessURI() == null) {
-          throw new DiSSCoDataException(
-              "Digital media object for specimen does not have an access uri, ignoring record");
-        }
+        checkIfMediaComplies(digitalMedia);
         var digitalMediaEvent = new DigitalMediaEvent(masProperties.getMediaMass(),
             new DigitalMediaWrapper(
                 fdoProperties.getDigitalMediaType(),
@@ -314,8 +309,9 @@ public class DwcaService extends WebClientService {
                 image), masProperties.getForceMasSchedule());
         digitalMediaEvents.add(digitalMediaEvent);
       } catch (DiSSCoDataException e) {
-        log.error("Failed to process digital media object for digital specimen: {}",
-            recordId, e);
+        log.warn(
+            "Digital Media connect to Digital Specimen: {} does not comply with requirements: {}",
+            recordId, image, e);
       }
     }
     return digitalMediaEvents;
@@ -329,15 +325,24 @@ public class DwcaService extends WebClientService {
     var mediaUrls = new LinkedHashSet<>(Arrays.asList(associatedMedia.split("\\|")));
     var digitalMedia = new ArrayList<DigitalMediaEvent>();
     for (var mediaUrl : mediaUrls) {
-      var mediaNode = mapper.createObjectNode().put("ac:accessURI", mediaUrl)
+      var mediaNode = mapper.createObjectNode()
+          .put("ac:accessURI", mediaUrl)
           .set(EML_LICENSE, licenseNode);
-      var digitalMediaEvent = new DigitalMediaEvent(masProperties.getMediaMass(),
-          new DigitalMediaWrapper(
-              fdoProperties.getDigitalMediaType(),
-              digitalSpecimenDirector.assembleDigitalMedia(true,
-                  mediaNode, organisationId),
-              mediaNode), masProperties.getForceMasSchedule());
-      digitalMedia.add(digitalMediaEvent);
+      var media = digitalSpecimenDirector.assembleDigitalMedia(true,
+          mediaNode, organisationId);
+      try {
+        checkIfMediaComplies(media);
+        var digitalMediaEvent = new DigitalMediaEvent(masProperties.getMediaMass(),
+            new DigitalMediaWrapper(
+                fdoProperties.getDigitalMediaType(),
+                media,
+                mediaNode), masProperties.getForceMasSchedule());
+        digitalMedia.add(digitalMediaEvent);
+      } catch (DiSSCoDataException e) {
+        log.warn(
+            "Digital Media connect to Digital Specimen: {} does not comply with requirements: {}",
+            recordId, media, e);
+      }
     }
     return digitalMedia;
   }
@@ -345,10 +350,7 @@ public class DwcaService extends WebClientService {
   private Pair<DigitalSpecimenWrapper, List<DigitalMediaEvent>> createDigitalObjects(
       JsonNode fullRecord) throws DiSSCoDataException {
     var ds = digitalSpecimenDirector.assembleDigitalSpecimenTerm(fullRecord, true);
-    if (ds.getOdsNormalisedPhysicalSpecimenID() == null || ds.getOdsOrganisationID() == null) {
-      throw new DiSSCoDataException(
-          "Record does not comply to MIDS level 0 (id and organisation), ignoring record");
-    }
+    checkIfSpecimenComplies(ds);
     return Pair.of(new DigitalSpecimenWrapper(
             ds.getOdsNormalisedPhysicalSpecimenID(),
             fdoProperties.getDigitalSpecimenType(),
@@ -421,18 +423,12 @@ public class DwcaService extends WebClientService {
     var dbRecords = new ArrayList<Pair<String, JsonNode>>();
     var idList = new HashSet<String>();
     for (var rec : core) {
-      var basisOfRecord = rec.value(DwcTerm.basisOfRecord);
-      if (basisOfRecord != null && ALLOWED_BASIS_OF_RECORD.contains(basisOfRecord.toUpperCase())) {
-        idList.add(rec.id());
-        var json = convertToJson(core, rec);
-        json.set(EXTENSIONS, mapper.createObjectNode());
-        dbRecords.add(Pair.of(rec.id(), json));
-        if (dbRecords.size() % 10000 == 0) {
-          postToDatabase(core, dbRecords, true);
-        }
-      } else {
-        log.debug("Record with id: {} has basisOfRecord: {} which is not an accepted basisOfRecord",
-            rec.id(), basisOfRecord);
+      idList.add(rec.id());
+      var json = convertToJson(core, rec);
+      json.set(EXTENSIONS, mapper.createObjectNode());
+      dbRecords.add(Pair.of(rec.id(), json));
+      if (dbRecords.size() % 10000 == 0) {
+        postToDatabase(core, dbRecords, true);
       }
     }
     if (!dbRecords.isEmpty()) {

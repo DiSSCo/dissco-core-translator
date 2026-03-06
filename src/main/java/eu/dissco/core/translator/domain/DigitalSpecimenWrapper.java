@@ -1,8 +1,8 @@
 package eu.dissco.core.translator.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.schema.DigitalSpecimen;
+import tools.jackson.databind.JsonNode;
 
 
 public record DigitalSpecimenWrapper(

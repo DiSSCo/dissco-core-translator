@@ -1,9 +1,6 @@
 package eu.dissco.core.translator.service;
 
-import static eu.dissco.core.translator.TestUtils.MAPPER;
-import static eu.dissco.core.translator.TestUtils.SOURCE_SYSTEM_ID;
-import static eu.dissco.core.translator.TestUtils.givenDigitalMedia;
-import static eu.dissco.core.translator.TestUtils.givenDigitalSpecimen;
+import static eu.dissco.core.translator.TestUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -14,8 +11,6 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import eu.dissco.core.translator.TestUtils;
 import eu.dissco.core.translator.component.SourceSystemComponent;
 import eu.dissco.core.translator.database.jooq.enums.JobState;
@@ -58,6 +53,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClient.RequestHeadersSpec;
 import org.springframework.web.reactive.function.client.WebClient.RequestHeadersUriSpec;
 import org.springframework.web.reactive.function.client.WebClient.ResponseSpec;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
 @ExtendWith(MockitoExtension.class)
 class DwcaServiceTest {
@@ -130,9 +127,9 @@ class DwcaServiceTest {
     then(sourceSystemComponent).should().storeEmlRecord(any(File.class));
     then(rabbitMqService).should(times(processedRecords)).sendMessage(any(
         DigitalSpecimenEvent.class));
-    assertThat(captor.getValue().get("eml:license").asText()).isEqualTo(
+    assertThat(captor.getValue().get("eml:license").asString()).isEqualTo(
         "http://creativecommons.org/licenses/by-nc/4.0/legalcode");
-    assertThat(captor.getValue().get("eml:title").asText()).isEqualTo(
+    assertThat(captor.getValue().get("eml:title").asString()).isEqualTo(
         "Royal Belgian Institute of Natural Sciences Crustacea collection");
     cleanup("src/test/resources/dwca/test/dwca-rbins.zip");
   }
@@ -183,9 +180,9 @@ class DwcaServiceTest {
     then(sourceSystemComponent).should().storeEmlRecord(any(File.class));
     then(rabbitMqService).should(times(9)).sendMessage(any(
         DigitalSpecimenEvent.class));
-    assertThat(captor.getValue().get("eml:license").asText()).isEqualTo(
+    assertThat(captor.getValue().get("eml:license").asString()).isEqualTo(
         "Creative Commons Attribution Non Commercial (CC-BY-NC) 4.0 License");
-    assertThat(captor.getValue().get("eml:title").asText()).isEqualTo(
+    assertThat(captor.getValue().get("eml:title").asString()).isEqualTo(
         "Royal Belgian Institute of Natural Sciences Crustacea collection");
     cleanup("src/test/resources/dwca/test/dwca-rbins-license-text.zip");
   }
@@ -326,10 +323,19 @@ class DwcaServiceTest {
   }
 
   @Test
-  void testRetrieveOnlyOccurrence() throws Exception {
+  void testSpecimenRejectedLicense() throws Exception {
     // Given
     var expected = new TranslatorJobResult(JobState.FAILED, 0);
     givenDWCA("/dwca-only-occurrences.zip");
+    given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(14));
+    given(dwcaRepository.getRecords(anyList(),
+            eq("temp_extension_gw0_tyl_yru_multimedia"))).willReturn(givenImageMap(14));
+    given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
+            .willReturn(new DigitalSpecimen()
+                    .withDwcBasisOfRecord("PreservedSpecimen")
+                    .withDctermsLicense("https://creativecommons.org/licenses/by-nc/4.0/legalcode")
+                    .withOdsNormalisedPhysicalSpecimenID(NORMALISED_PHYSICAL_SPECIMEN_ID)
+                    .withOdsOrganisationID(ORGANISATION_ID));
 
     // When
     var result = service.retrieveData();
@@ -337,7 +343,8 @@ class DwcaServiceTest {
     // Then
     assertThat(result).isEqualTo(expected);
     then(dwcaRepository).should(times(2)).createTable(anyString(), any(Term.class));
-    then(dwcaRepository).should(times(0)).postRecords(anyString(), any(Term.class), anyList());
+    then(dwcaRepository).should(times(2)).postRecords(anyString(), any(Term.class), anyList());
+    then(digitalSpecimenDirector).shouldHaveNoMoreInteractions();
     then(sourceSystemComponent).should().storeEmlRecord(any(File.class));
     then(rabbitMqService).shouldHaveNoInteractions();
     cleanup("src/test/resources/dwca/test/dwca-only-occurrences.zip");

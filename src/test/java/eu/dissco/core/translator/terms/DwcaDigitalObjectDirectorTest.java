@@ -8,8 +8,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.component.OrganisationNameComponent;
 import eu.dissco.core.translator.component.SourceSystemComponent;
 import eu.dissco.core.translator.exception.OrganisationException;
@@ -24,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tools.jackson.databind.JsonNode;
 
 @ExtendWith(MockitoExtension.class)
 class DwcaDigitalObjectDirectorTest {
@@ -107,7 +106,7 @@ class DwcaDigitalObjectDirectorTest {
 
 
   @Test
-  void testConstructDwcaDigitalMedia() throws JsonProcessingException, OrganisationException {
+  void testConstructDwcaDigitalMedia() throws OrganisationException {
     // Given
     var specimenJson = givenDwcaMediaObject();
     given(institutionNameComponent.getRorName(anyString())).willReturn(
@@ -129,7 +128,7 @@ class DwcaDigitalObjectDirectorTest {
         .hasSize(2);
   }
 
-  private JsonNode givenDwcaMediaObject() throws JsonProcessingException {
+  private JsonNode givenDwcaMediaObject() {
     return MAPPER.readTree("""
               {
                         "dwca:ID": "http://coldb.mnhn.fr/catalognumber/mnhn/ec/ec12801",
@@ -142,7 +141,7 @@ class DwcaDigitalObjectDirectorTest {
         """);
   }
 
-  private JsonNode givenDwcaSpecimenJson() throws JsonProcessingException {
+  private JsonNode givenDwcaSpecimenJson() {
     return MAPPER.readTree("""
         {
               "dwc:sex": "M",
@@ -239,7 +238,7 @@ class DwcaDigitalObjectDirectorTest {
         """);
   }
 
-  private JsonNode givenDwcaSpecimenSingleIdentificationJson() throws JsonProcessingException {
+  private JsonNode givenDwcaSpecimenSingleIdentificationJson() {
     return MAPPER.readTree("""
         {
               "dwc:sex": "M",

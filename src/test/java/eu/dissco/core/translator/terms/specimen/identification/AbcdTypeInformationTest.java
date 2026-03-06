@@ -3,7 +3,6 @@ package eu.dissco.core.translator.terms.specimen.identification;
 import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.schema.DigitalSpecimen;
 import eu.dissco.core.translator.schema.Identification;
 import eu.dissco.core.translator.schema.TaxonIdentification;
@@ -12,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tools.jackson.databind.JsonNode;
 
 @ExtendWith(MockitoExtension.class)
 class AbcdTypeInformationTest {
@@ -34,7 +34,7 @@ class AbcdTypeInformationTest {
     abcdTypeInformation.addTypeInformation(digitalSpecimen, json, MAPPER);
 
     // Then
-    assertThat(digitalSpecimen.getOdsHasIdentifications().get(0))
+    assertThat(digitalSpecimen.getOdsHasIdentifications().getFirst())
         .extracting(Identification::getDwcTypeStatus)
         .isEqualTo("isotype");
   }
@@ -51,7 +51,7 @@ class AbcdTypeInformationTest {
     abcdTypeInformation.addTypeInformation(digitalSpecimen, json, MAPPER);
 
     // Then
-    assertThat(digitalSpecimen.getOdsHasIdentifications().get(0))
+    assertThat(digitalSpecimen.getOdsHasIdentifications().getFirst())
         .extracting(Identification::getDwcTypeStatus)
         .isEqualTo("isotype");
     assertThat(digitalSpecimen.getOdsHasIdentifications().get(1))
@@ -71,7 +71,7 @@ class AbcdTypeInformationTest {
     abcdTypeInformation.addTypeInformation(digitalSpecimen, json, MAPPER);
 
     // Then
-    assertThat(digitalSpecimen.getOdsHasIdentifications().get(0))
+    assertThat(digitalSpecimen.getOdsHasIdentifications().getFirst())
         .extracting(Identification::getDwcTypeStatus)
         .isNull();
   }
