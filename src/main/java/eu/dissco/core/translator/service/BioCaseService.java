@@ -1,10 +1,6 @@
 package eu.dissco.core.translator.service;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import efg.*;
 import efg.DataSets.DataSet;
 import eu.dissco.core.translator.Profiles;
@@ -31,6 +27,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.w3c.dom.Node;
 import reactor.core.scheduler.Schedulers;
 import reactor.util.retry.Retry;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
@@ -60,7 +59,7 @@ public class BioCaseService extends WebClientService {
     private static final String ABCD = "abcd:";
     private static final String ABCDEFG = "abcd-efg:";
 
-    private final ObjectMapper mapper;
+    private final JsonMapper mapper;
     private final ApplicationProperties applicationProperties;
     private final WebClient webClient;
     private final SourceSystemComponent sourceSystemComponent;
@@ -70,14 +69,6 @@ public class BioCaseService extends WebClientService {
     private final MasProperties masProperties;
     private final BaseDigitalObjectDirector digitalSpecimenDirector;
     private final FdoProperties fdoProperties;
-
-    private boolean isAcceptedBasisOfRecord(Unit unit) {
-        var recordBasis = unit.getRecordBasis();
-        if (recordBasis != null && !recordBasis.isBlank()) {
-            return ALLOWED_BASIS_OF_RECORD.contains(recordBasis.strip().toUpperCase());
-        }
-        return false;
-    }
 
     @Override
     public TranslatorJobResult retrieveData() {
@@ -175,51 +166,44 @@ public class BioCaseService extends WebClientService {
                     throw new ReachedMaximumLimitException();
                 }
                 processUnit(datasets, unit, processedRecords);
-            } catch (DisscoEfgParsingException | JsonProcessingException e) {
+            } catch (DisscoEfgParsingException e) {
                 log.error("Unit could not be processed due to error", e);
             }
         }
     }
 
     private void processUnit(DataSet dataset, Unit unit, AtomicInteger processedRecords)
-            throws JsonProcessingException, DisscoEfgParsingException {
+            throws DisscoEfgParsingException {
         var unitAttributes = parseToJson(unit);
         var datasetAttribute = getData(mapper.valueToTree(dataset.getMetadata()));
         unitAttributes.setAll(datasetAttribute);
         unitAttributes.put("abcd:datasetGUID", dataset.getDatasetGUID());
-        if (isAcceptedBasisOfRecord(unit)) {
-            try {
-                var attributes = digitalSpecimenDirector.assembleDigitalSpecimenTerm(unitAttributes, false);
-                if (attributes.getOdsNormalisedPhysicalSpecimenID() == null
-                        || attributes.getOdsOrganisationID() == null) {
-                    throw new DiSSCoDataException(
-                            "Record does not comply to MIDS level 0 (id and organisation), ignoring record");
-                }
-                var digitalSpecimen = new DigitalSpecimenWrapper(
-                        attributes.getOdsNormalisedPhysicalSpecimenID(),
-                        fdoProperties.getDigitalSpecimenType(),
-                        attributes,
-                        cleanupRedundantFields(unitAttributes)
-                );
-                var digitalMedia = makeDigitalMediaUnique(processDigitalMedia(
-                        attributes.getOdsNormalisedPhysicalSpecimenID(), unit,
-                        attributes.getOdsOrganisationID()));
-                log.debug("Result digital Specimen: {}", digitalSpecimen);
-                rabbitMqService.sendMessage(
-                        new DigitalSpecimenEvent(
-                                masProperties.getSpecimenMass(),
-                                digitalSpecimen,
-                                digitalMedia,
-                                masProperties.getForceMasSchedule()));
-                processedRecords.incrementAndGet();
-            } catch (DiSSCoDataException e) {
-                log.error("Encountered data issue with record: {}", unitAttributes, e);
-            }
-        } else {
-            log.info("Record with record basis: {} and id: {} is ignored ", unit.getRecordBasis(),
-                    unit.getUnitID());
+        try {
+            var digitalSpecimen = digitalSpecimenDirector.assembleDigitalSpecimenTerm(unitAttributes,
+                    false);
+            checkIfSpecimenComplies(digitalSpecimen);
+            var digitalSpecimenWrapper = new DigitalSpecimenWrapper(
+                    digitalSpecimen.getOdsNormalisedPhysicalSpecimenID(),
+                    fdoProperties.getDigitalSpecimenType(),
+                    digitalSpecimen,
+                    cleanupRedundantFields(unitAttributes)
+            );
+            var digitalMedia = makeDigitalMediaUnique(processDigitalMedia(
+                    digitalSpecimen.getOdsNormalisedPhysicalSpecimenID(), unit,
+                    digitalSpecimen.getOdsOrganisationID()));
+            log.debug("Result digital Specimen: {}", digitalSpecimenWrapper);
+            rabbitMqService.sendMessage(
+                    new DigitalSpecimenEvent(
+                            masProperties.getSpecimenMass(),
+                            digitalSpecimenWrapper,
+                            digitalMedia,
+                            masProperties.getForceMasSchedule()));
+            processedRecords.incrementAndGet();
+        } catch (DiSSCoDataException e) {
+            log.error("Encountered data issue with record: {}", unitAttributes, e);
         }
     }
+
 
     private List<DigitalMediaEvent> makeDigitalMediaUnique(List<DigitalMediaEvent> digitalMedia) {
         return digitalMedia.stream()
@@ -368,8 +352,8 @@ public class BioCaseService extends WebClientService {
                     digitalMediaEvents.add(
                             processDigitalMedia(media, organisationId));
                 } catch (DiSSCoDataException e) {
-                    log.error("Failed to process digital media object for digital specimen: {}",
-                            physicalSpecimenId, e);
+                    log.warn("Failed to process digital media object for digital specimen: {} with media record: {}",
+                            physicalSpecimenId, media, e);
                 }
             }
         }
@@ -381,10 +365,7 @@ public class BioCaseService extends WebClientService {
         var attributes = getData(mapper.valueToTree(media));
         var digitalMedia = digitalSpecimenDirector.assembleDigitalMedia(false, attributes,
                 organisationId);
-        if (digitalMedia.getAcAccessURI() == null) {
-            throw new DiSSCoDataException(
-                    "Digital media object for specimen does not have an access uri, ignoring record");
-        }
+        checkIfMediaComplies(digitalMedia);
         var digitalMediaEvent = new DigitalMediaEvent(
                 masProperties.getMediaMass(),
                 new DigitalMediaWrapper(
@@ -444,8 +425,8 @@ public class BioCaseService extends WebClientService {
 
     private void getValueFromField(ObjectNode data, StringBuilder prefix,
                                    Entry<String, JsonNode> field, String nameSpace) {
-        if (field.getValue().isTextual()) {
-            data.put(nameSpace + prefix + field.getKey(), field.getValue().textValue());
+        if (field.getValue().isString()) {
+            data.put(nameSpace + prefix + field.getKey(), field.getValue().asString());
         } else if (field.getValue().isDouble()) {
             data.put(nameSpace + prefix + field.getKey(), field.getValue().doubleValue());
         } else if (field.getValue().isInt()) {

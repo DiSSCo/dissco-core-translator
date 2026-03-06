@@ -5,10 +5,6 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import eu.dissco.core.translator.component.DataMappingComponent;
 import eu.dissco.core.translator.exception.IllegalDataException;
 import eu.dissco.core.translator.terms.media.AccessURI;
@@ -33,6 +29,9 @@ import org.jooq.Table;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.springframework.stereotype.Repository;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 @Slf4j
 @Repository
@@ -43,7 +42,7 @@ public class DwcaRepository {
   private final Field<String> uniqueIDField = DSL.field("id", String.class);
   private final Field<JSONB> dataField = DSL.field("data", JSONB.class);
 
-  private final ObjectMapper mapper;
+  private final JsonMapper mapper;
   private final DSLContext context;
   private final DataMappingComponent dataMappingComponent;
 
@@ -51,7 +50,7 @@ public class DwcaRepository {
       List<String> fieldsToCheck, boolean isOccurrence) {
     for (var fieldName : fieldsToCheck) {
       if (dbRecord.getRight().has(fieldName) && !dbRecord.getRight().get(fieldName).isNull()) {
-        return dbRecord.getRight().get(fieldName).asText();
+        return dbRecord.getRight().get(fieldName).asString();
       }
     }
     if (isOccurrence) {
@@ -86,39 +85,33 @@ public class DwcaRepository {
 
   public void postRecords(String tableName, Term fileType, List<Pair<String, JsonNode>> dbRecords) {
     var queries = dbRecords.stream().map(dbRecord -> recordToQuery(tableName, fileType, dbRecord))
-        .filter(
-            Objects::nonNull).toList();
+        .filter(Objects::nonNull).toList();
     context.batch(queries).execute();
   }
 
   private Query recordToQuery(String tableName, Term fileType, Pair<String, JsonNode> dbRecord) {
-    try {
-      var query = context.insertInto(getTable(tableName)).set(dwcaIDField, dbRecord.getLeft())
-          .set(dataField,
+    var query = context.insertInto(getTable(tableName)).set(dwcaIDField, dbRecord.getLeft())
+        .set(dataField,
+            JSONB.jsonb(mapper.writeValueAsString(dbRecord.getRight()).replace("\\u0000", "")));
+    if (fileType.equals(DwcTerm.Occurrence)) {
+      var uniqueField = dataMappingComponent.getFieldMappings()
+          .getOrDefault("ods:physicalSpecimenID", "dwc:occurrenceID");
+      var fieldsToCheck = new ArrayList<>(PhysicalSpecimenID.DWCA_TERMS);
+      fieldsToCheck.addFirst(uniqueField);
+      return query.set(uniqueIDField,
+          getUniqueIDValue(dbRecord, fieldsToCheck, true));
+    }
+    if (fileType.equals(AcTerm.Multimedia) || fileType.equals(GbifTerm.Multimedia)) {
+      var uniqueField = dataMappingComponent.getFieldMappings()
+          .getOrDefault("ac:accessURI", "ac:accessURI");
+      var fieldsToCheck = new ArrayList<>(AccessURI.DWCA_TERMS);
+      fieldsToCheck.addFirst(uniqueField);
+      return query.set(uniqueIDField, getUniqueIDValue(dbRecord, fieldsToCheck, false))
+          .onConflict(dwcaIDField, uniqueIDField)
+          .doUpdate().set(dataField,
               JSONB.jsonb(mapper.writeValueAsString(dbRecord.getRight()).replace("\\u0000", "")));
-      if (fileType.equals(DwcTerm.Occurrence)) {
-        var uniqueField = dataMappingComponent.getFieldMappings()
-            .getOrDefault("ods:physicalSpecimenID", "dwc:occurrenceID");
-        var fieldsToCheck = new ArrayList<>(PhysicalSpecimenID.DWCA_TERMS);
-        fieldsToCheck.add(0, uniqueField);
-        return query.set(uniqueIDField,
-            getUniqueIDValue(dbRecord, fieldsToCheck, true));
-      }
-      if (fileType.equals(AcTerm.Multimedia) || fileType.equals(GbifTerm.Multimedia)) {
-        var uniqueField = dataMappingComponent.getFieldMappings()
-            .getOrDefault("ac:accessURI", "ac:accessURI");
-        var fieldsToCheck = new ArrayList<>(AccessURI.DWCA_TERMS);
-        fieldsToCheck.add(0, uniqueField);
-        return query.set(uniqueIDField, getUniqueIDValue(dbRecord, fieldsToCheck, false))
-            .onConflict(dwcaIDField, uniqueIDField)
-            .doUpdate().set(dataField,
-                JSONB.jsonb(mapper.writeValueAsString(dbRecord.getRight()).replace("\\u0000", "")));
-      } else {
-        return query;
-      }
-    } catch (JsonProcessingException e) {
-      log.error("Unable to map JSON to JSONB, ignoring record: {}", dbRecord.getLeft(), e);
-      return null;
+    } else {
+      return query;
     }
   }
 
@@ -128,12 +121,7 @@ public class DwcaRepository {
   }
 
   private ObjectNode getNode(Record dbRecord) {
-    try {
-      return mapper.readValue(dbRecord.get(dataField).data(), ObjectNode.class);
-    } catch (JsonProcessingException e) {
-      log.error("Unable to map JSONB to JSON, ignoring record: {}", dbRecord.get(dwcaIDField), e);
-      return null;
-    }
+    return mapper.readValue(dbRecord.get(dataField).data(), ObjectNode.class);
   }
 
   public Map<String, List<ObjectNode>> getRecords(List<String> batch, String tableName) {

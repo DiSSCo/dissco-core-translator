@@ -4,7 +4,7 @@ import static eu.dissco.core.translator.service.DwcaService.AC_MULTIMEDIA;
 import static eu.dissco.core.translator.service.DwcaService.EXTENSIONS;
 import static eu.dissco.core.translator.service.DwcaService.GBIF_MULTIMEDIA;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 

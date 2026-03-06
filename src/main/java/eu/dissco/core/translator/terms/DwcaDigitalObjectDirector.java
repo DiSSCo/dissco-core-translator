@@ -1,7 +1,5 @@
 package eu.dissco.core.translator.terms;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.dissco.core.translator.Profiles;
 import eu.dissco.core.translator.component.OrganisationNameComponent;
 import eu.dissco.core.translator.component.SourceSystemComponent;
@@ -17,6 +15,8 @@ import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
 @Slf4j
 @Component
@@ -25,11 +25,11 @@ public class DwcaDigitalObjectDirector extends BaseDigitalObjectDirector {
 
   private static final String EXTENSION = "extensions";
   private static final Citation EMTPY_CITATION = new Citation().withType("ods:Citation");
-  private static final Identification EMPTY_IDENTIFICIATION = new Identification().withType(
+  private static final Identification EMPTY_IDENTIFICATION = new Identification().withType(
       "ods:Identification").withOdsHasTaxonIdentifications(
       List.of(new TaxonIdentification().withType("ods:TaxonIdentification")));
 
-  public DwcaDigitalObjectDirector(ObjectMapper mapper, TermMapper termMapper,
+  public DwcaDigitalObjectDirector(JsonMapper mapper, TermMapper termMapper,
       OrganisationNameComponent rorComponent, SourceSystemComponent sourceSystemComponent,
       FdoProperties fdoProperties) {
     super(mapper, termMapper, rorComponent, sourceSystemComponent, fdoProperties,
@@ -94,14 +94,14 @@ public class DwcaDigitalObjectDirector extends BaseDigitalObjectDirector {
       }
     }
     var occurrenceIdentification = createIdentification(data, dwc);
-    if (!Objects.equals(occurrenceIdentification, EMPTY_IDENTIFICIATION)) {
+    if (!Objects.equals(occurrenceIdentification, EMPTY_IDENTIFICATION)) {
       mappedIdentifications.add(occurrenceIdentification);
     }
 
     if (mappedIdentifications.size() == 1
-        && mappedIdentifications.get(0).getOdsIsVerifiedIdentification() == null) {
+        && mappedIdentifications.getFirst().getOdsIsVerifiedIdentification() == null) {
       //If there is only one identification, and it doesn't have a verification status, set it to true
-      mappedIdentifications.get(0).setOdsIsVerifiedIdentification(Boolean.TRUE);
+      mappedIdentifications.getFirst().setOdsIsVerifiedIdentification(Boolean.TRUE);
     }
     return mappedIdentifications;
   }

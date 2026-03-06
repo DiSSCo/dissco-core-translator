@@ -1,8 +1,5 @@
 package eu.dissco.core.translator.component;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.dissco.core.translator.client.RorClient;
 import eu.dissco.core.translator.client.WikidataClient;
 import eu.dissco.core.translator.exception.OrganisationException;
@@ -10,6 +7,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
 @Slf4j
 @Component
@@ -18,7 +18,7 @@ public class OrganisationNameComponent {
 
   private final RorClient rorClient;
   private final WikidataClient wikidataClient;
-  private final ObjectMapper mapper;
+  private final JsonMapper mapper;
   private static final String NAMES = "names";
   private static final String ORG_NAME_ERROR = "Unable to retrieve organisationName";
 
@@ -29,7 +29,7 @@ public class OrganisationNameComponent {
     if (response != null) {
       try {
         return getRorInstitutionName(mapper.readTree(response));
-      } catch (JsonProcessingException e) {
+      } catch (JacksonException e) {
         log.error("Failed to make parse response from RoR service to JSON: {}", response, e);
       }
     }
@@ -42,13 +42,13 @@ public class OrganisationNameComponent {
       if (rorResult.get(NAMES).isArray() && !rorResult.get(NAMES).isEmpty()) {
         for (var name : rorResult.get(NAMES)) {
           for (var type : name.get("types")) {
-            if ("ror_display".equals(type.asText())) {
-              return name.get("value").asText();
+            if ("ror_display".equals(type.asString())) {
+              return name.get("value").asString();
             }
           }
         }
         log.warn("No ror display names provided in ROR record. Using first name");
-        return rorResult.get(NAMES).get(0).get("value").asText();
+        return rorResult.get(NAMES).get(0).get("value").asString();
       }
       log.error("Unable to parse ROR result {}", rorResult);
       throw new OrganisationException(ORG_NAME_ERROR);
@@ -64,13 +64,13 @@ public class OrganisationNameComponent {
     var response = wikidataClient.getWikidataLabel(wikidata);
     try {
       var json = mapper.readTree(response);
-      if (json.isTextual()) {
-        return json.asText().replace("\"", "");
+      if (json.isString()) {
+        return json.asString().replace("\"", "");
       } else {
         log.warn("Received invalid response from wikidata for wikidataId: {}. Response: {}",
             wikidata, response);
       }
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       log.error("Failed to make request to wikidata service", e);
     }
     log.warn("Could not match to an English (en) label to a wikidata id for: {}", wikidata);

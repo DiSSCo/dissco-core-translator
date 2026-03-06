@@ -20,8 +20,6 @@ import static eu.dissco.core.translator.terms.utils.AgentsUtils.addAgent;
 import static eu.dissco.core.translator.terms.utils.EntityRelationshipUtils.addEntityRelationship;
 import static eu.dissco.core.translator.terms.utils.IdentifierUtils.addIdentifier;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.dissco.core.translator.component.OrganisationNameComponent;
 import eu.dissco.core.translator.component.SourceSystemComponent;
 import eu.dissco.core.translator.exception.OrganisationException;
@@ -263,6 +261,8 @@ import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
 @Slf4j
 @Component
@@ -275,7 +275,7 @@ public abstract class BaseDigitalObjectDirector {
       "ods:GeologicalContext");
   private static final Location EMPTY_LOCATION = new Location().withType("ods:Location");
 
-  protected final ObjectMapper mapper;
+  protected final JsonMapper mapper;
   protected final TermMapper termMapper;
   private final OrganisationNameComponent organisationNameComponent;
   private final SourceSystemComponent sourceSystemComponent;
@@ -440,7 +440,7 @@ public abstract class BaseDigitalObjectDirector {
     var identifiers = new ArrayList<Identifier>();
     for (String identifierTerm : identifierTerms) {
       if (data.get(identifierTerm) != null) {
-        var identifier = addIdentifier(data.get(identifierTerm).asText(), identifierTerm);
+        var identifier = addIdentifier(data.get(identifierTerm).asString(), identifierTerm);
         identifiers.add(identifier);
       }
     }

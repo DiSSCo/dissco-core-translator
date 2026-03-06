@@ -1,8 +1,8 @@
 package eu.dissco.core.translator.terms.media;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.terms.Term;
 import java.util.List;
+import tools.jackson.databind.JsonNode;
 
 public class CreatorID extends Term {
 

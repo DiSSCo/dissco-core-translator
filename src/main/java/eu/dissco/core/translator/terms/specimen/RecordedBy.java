@@ -1,6 +1,6 @@
 package eu.dissco.core.translator.terms.specimen;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
@@ -24,7 +24,7 @@ public class RecordedBy extends Term {
     var value = combinePossibleValues(unit);
     if (value == null) {
       if (unit.get("abcd:gathering/agents/gatheringAgentsText/value") != null) {
-        return unit.get("abcd:gathering/agents/gatheringAgentsText/value").asText();
+        return unit.get("abcd:gathering/agents/gatheringAgentsText/value").asString();
       } else {
         return null;
       }
@@ -42,7 +42,7 @@ public class RecordedBy extends Term {
       for (var abcdTerm : abcdTerms) {
         var jsonValue = unit.get(abcdTerm.getLeft() + numberFound + abcdTerm.getRight());
         if (jsonValue != null) {
-          string = jsonValue.asText();
+          string = jsonValue.asString();
           break;
         }
       }

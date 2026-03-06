@@ -1,13 +1,13 @@
 package eu.dissco.core.translator.terms;
 
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.dissco.core.translator.schema.DigitalSpecimen;
 import eu.dissco.core.translator.schema.Identification;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
 @Slf4j
 public abstract class Term {
@@ -30,8 +30,8 @@ public abstract class Term {
     for (var originalTerm : originalTerms) {
       var valueNode = attributes.get(originalTerm);
       if (valueNode != null) {
-        if (valueNode.isTextual()) {
-          return attributes.get(originalTerm).asText();
+        if (valueNode.isString()) {
+          return attributes.get(originalTerm).asString();
         } else if (valueNode.isLong()) {
           var longValue = attributes.get(originalTerm).asLong();
           return String.valueOf(longValue);
@@ -58,7 +58,7 @@ public abstract class Term {
         if (!builder.isEmpty()) {
           builder.append(" | ");
         }
-        builder.append(unit.get(abcdTerm).asText());
+        builder.append(unit.get(abcdTerm).asString());
       }
     }
     if (builder.isEmpty()) {
@@ -68,7 +68,7 @@ public abstract class Term {
     }
   }
 
-  protected JsonNode getSubJsonAbcd(ObjectMapper mapper, JsonNode data, int count, String path) {
+  protected JsonNode getSubJsonAbcd(JsonMapper mapper, JsonNode data, int count, String path) {
     var subNode = mapper.createObjectNode();
     data.properties().forEach(field -> {
       if (field.getKey().startsWith(path + count)) {
@@ -101,10 +101,10 @@ public abstract class Term {
         var divisionNode = unit.get(
             key.getLeft() + numberFound + key.getRight());
         if (divisionNode != null) {
-          var division = divisionNode.asText();
+          var division = divisionNode.asString();
           if (division.equalsIgnoreCase(divisionSearch)
               && unit.get(value.getLeft() + numberFound + value.getRight()) != null) {
-            return unit.get(value.getLeft() + numberFound + value.getRight()).asText();
+            return unit.get(value.getLeft() + numberFound + value.getRight()).asString();
           }
           numberFound++;
         } else {
