@@ -43,7 +43,10 @@ public abstract class WebClientService {
   }
 
     private static boolean basisOfRecordComplies(String basisOfRecord) {
-        return ALLOWED_BASIS_OF_RECORD.contains(basisOfRecord.strip().replace(" ", "").toUpperCase());
+      if (basisOfRecord == null) {
+          return false;
+      }
+      return ALLOWED_BASIS_OF_RECORD.contains(basisOfRecord.strip().replace(" ", "").toUpperCase());
     }
 
 

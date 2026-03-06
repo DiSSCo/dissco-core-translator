@@ -1,9 +1,13 @@
 package eu.dissco.core.translator.terms.utils;
 
 import eu.dissco.core.translator.domain.License;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
 import java.util.Map;
+
+import static eu.dissco.core.translator.domain.License.*;
+import static eu.dissco.core.translator.domain.License.CC0;
 
 public class LicenseUtils {
 
@@ -12,23 +16,32 @@ public class LicenseUtils {
     }
 
     private static final List<String> ACCEPTED_LIST = List.of(
-            License.CC0.getUrl(),
-            License.CC_BY.getUrl()
+            CC0.getUrl(),
+            CC_BY.getUrl()
     );
 
-    private static final Map<License, String> LICENSE_MAP = Map.of(
-            License.CC0,
+    private static final Map<License, String> LICENSE_URL_MAP = Map.of(
+            CC0,
             "creativecommons.org/publicdomain/zero/1.0/",
-            License.CC_BY,
+            CC_BY,
             "creativecommons.org/licenses/by/4.0/",
-            License.CC_BY_SA,
+            CC_BY_SA,
             "creativecommons.org/licenses/by-sa/4.0/",
-            License.CC_BY_NC,
+            CC_BY_NC,
             "creativecommons.org/licenses/by-nc/4.0/",
-            License.CC_BY_ND,
+            CC_BY_ND,
             "creativecommons.org/licenses/by-nd/4.0/",
-            License.CC_BY_NC_ND,
+            CC_BY_NC_ND,
             "creativecommons.org/licenses/by-nc-nd/4.0/"
+    );
+    
+    private static final List<Pair<License, List<String>>> LICENSE_FUZY_MATCH = List.of(
+            Pair.of(CC_BY_NC_ND, List.of("BYNCND", "NONCOMMERCIALNONDERIVATIVES")),
+            Pair.of(CC_BY_ND, List.of("BYND", "NONDERIVATIVES")),
+            Pair.of(CC_BY_NC, List.of("BYNC", "NONCOMMERCIAL")),
+            Pair.of(CC_BY_SA, List.of("BYSA", "SHAREALIKE")),
+            Pair.of(CC_BY, List.of("CCBY", "CREATIVECOMMONSATTRIBUTION")),
+            Pair.of(CC0, List.of("CC0", "PUBLICDOMAIN", "NORIGHTS"))
     );
 
     public static boolean licenseComplies(String license) {
@@ -42,32 +55,30 @@ public class LicenseUtils {
         if (license == null) {
             return null;
         }
-        for (var entry : LICENSE_MAP.entrySet()) {
+        for (var entry : LICENSE_URL_MAP.entrySet()) {
             if (license.contains(entry.getValue())) {
                 return entry.getKey();
             }
         }
-        var normalisedLicense = license.replace("/", "").replace("_", "").replace("-", "")
-                .replace(" ", "").toUpperCase();
-        // First most strict then more open as sometimes sentences are reused for example
-        // "Creative Commons Attribution-ShareAlike 4.0 International License" contains both "BY-SA" and "BY", but should be classified as BY-SA
-        if (normalisedLicense.contains("BYNCND") || normalisedLicense.contains("NONCOMMERCIALNONDERIVATIVES")) {
-            return License.CC_BY_NC_ND;
-        } else if (normalisedLicense.contains("BYND") || normalisedLicense.contains("NONDERIVATIVES")) {
-            return License.CC_BY_ND;
-        } else if (normalisedLicense.contains("BYNC") || normalisedLicense.contains("NONCOMMERCIAL")) {
-            return License.CC_BY_NC;
-        } else if (normalisedLicense.contains("BYSA") || normalisedLicense.contains("SHAREALIKE")) {
-            return License.CC_BY_SA;
-        } else if (normalisedLicense.contains("CCBY") || normalisedLicense.contains(
-                "CREATIVECOMMONSATTRIBUTION")) {
-            return License.CC_BY;
-        } else if (normalisedLicense.contains("CC0") || normalisedLicense.contains("PUBLICDOMAIN")
-                || normalisedLicense.contains("NORIGHTS")) {
-            return License.CC0;
-        } else {
-            return null;
+
+        var normalisedLicense = normalize(license);
+        for (var entry : LICENSE_FUZY_MATCH) {
+            for (var token : entry.getRight()) {
+                if (normalisedLicense.contains(token)) {
+                    return entry.getLeft();
+                }
+            }
         }
+        return null;
+    }
+
+    // Helper to centralise normalization rules; makes changes easier and reduces noise in the main method
+    private static String normalize(String license) {
+        return license.replace("/", "")
+                .replace("_", "")
+                .replace("-", "")
+                .replace(" ", "")
+                .toUpperCase();
     }
 
 }
