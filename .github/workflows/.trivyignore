@@ -8,7 +8,7 @@ CVE-2026-25646
 
 # March 10, 2026
 # Issue with alpine image, zlib: zlib: Arbitrary code execution via buffer overflow
-CVE-2026-29062
+CVE-2026-22184
 
 # March 2, 2026
 # Issue with jackson, spring boot may need to update its jackson 2 version
