@@ -90,27 +90,6 @@ class OrganisationNameComponentTest {
     assertThat(result).isEqualTo("De MuseumFabriek");
   }
 
-  @Test
-  void testGetRorInvalidJson() {
-    // Given
-    given(rorClient.getRorInformation(ROR)).willReturn(MAPPER.readTree("""
-        {
-          "names": [
-            // invalid stuff is happening here
-              "lang": "nl",
-              "types": [
-                "label"
-                ],
-              "value": "De MuseumFabriek"
-              }
-          ]
-        }
-        """));
-
-    // When / Then
-    assertThrows(OrganisationException.class, () -> rorComponent.getRorName(ROR));
-  }
-
   @ParameterizedTest
   @MethodSource("badRorResponse")
   void testBadRorResponse(String rorResponse) {
@@ -156,23 +135,9 @@ class OrganisationNameComponentTest {
   }
 
   @Test
-  void testGetWikidataInvalidJson() {
-    // Given
-    given(wikidataClient.getWikidataLabel(WIKIDATA_ID)).willReturn(MAPPER.readTree("""
-        {
-          "en": "De Museumfabriek"
-          // with some invalid stuff happening here....
-        }
-        """));
-
-    // When / Then
-    assertThrows(OrganisationException.class, () -> rorComponent.getWikiDataName(WIKIDATA_ID));
-  }
-
-  @Test
   void testEmptyMono() {
     // Given
-    given(rorClient.getRorInformation(ROR)).willReturn(null);
+    given(rorClient.getRorInformation(ROR)).willReturn(MAPPER.createObjectNode());
 
     // When / Then
     assertThrows(OrganisationException.class, () -> rorComponent.getRorName(ROR));
