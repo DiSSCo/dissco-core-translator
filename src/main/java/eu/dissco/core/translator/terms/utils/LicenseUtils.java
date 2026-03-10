@@ -1,10 +1,11 @@
 package eu.dissco.core.translator.terms.utils;
 
 import eu.dissco.core.translator.domain.License;
-import org.apache.commons.lang3.tuple.Pair;
+import java.util.LinkedHashMap;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static eu.dissco.core.translator.domain.License.*;
 import static eu.dissco.core.translator.domain.License.CC0;
@@ -34,15 +35,17 @@ public class LicenseUtils {
             CC_BY_NC_ND,
             "creativecommons.org/licenses/by-nc-nd/4.0/"
     );
-    
-    private static final List<Pair<License, List<String>>> LICENSE_FUZY_MATCH = List.of(
-            Pair.of(CC_BY_NC_ND, List.of("BYNCND", "NONCOMMERCIALNONDERIVATIVES")),
-            Pair.of(CC_BY_ND, List.of("BYND", "NONDERIVATIVES")),
-            Pair.of(CC_BY_NC, List.of("BYNC", "NONCOMMERCIAL")),
-            Pair.of(CC_BY_SA, List.of("BYSA", "SHAREALIKE")),
-            Pair.of(CC_BY, List.of("CCBY", "CREATIVECOMMONSATTRIBUTION")),
-            Pair.of(CC0, List.of("CC0", "PUBLICDOMAIN", "NORIGHTS"))
-    );
+
+     private static final Map<License, Set<String>> LICENSE_FUZY_MATCH;
+     static {
+         LICENSE_FUZY_MATCH = new LinkedHashMap<>();
+         LICENSE_FUZY_MATCH.put(CC_BY_NC_ND, Set.of("BYNCND", "NONCOMMERCIALNONDERIVATIVES"));
+         LICENSE_FUZY_MATCH.put(CC_BY_ND, Set.of("BYND", "NONDERIVATIVES"));
+         LICENSE_FUZY_MATCH.put(CC_BY_NC, Set.of("BYNC", "NONCOMMERCIAL"));
+         LICENSE_FUZY_MATCH.put(CC_BY_SA, Set.of("BYSA", "SHAREALIKE"));
+         LICENSE_FUZY_MATCH.put(CC_BY, Set.of("CCBY", "CREATIVECOMMONSATTRIBUTION"));
+         LICENSE_FUZY_MATCH.put(CC0, Set.of("CC0", "PUBLICDOMAIN", "NORIGHTS"));
+     }
 
     public static boolean licenseComplies(String license) {
         if (license == null) {
@@ -60,12 +63,11 @@ public class LicenseUtils {
                 return entry.getKey();
             }
         }
-
         var normalisedLicense = normalize(license);
-        for (var entry : LICENSE_FUZY_MATCH) {
-            for (var token : entry.getRight()) {
+        for (var entry : LICENSE_FUZY_MATCH.entrySet()) {
+            for (var token : entry.getValue()) {
                 if (normalisedLicense.contains(token)) {
-                    return entry.getLeft();
+                    return entry.getKey();
                 }
             }
         }

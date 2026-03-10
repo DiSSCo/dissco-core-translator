@@ -1,7 +1,7 @@
 package eu.dissco.core.translator;
 
 import eu.dissco.core.translator.service.TranslatorJobRecordService;
-import eu.dissco.core.translator.service.WebClientService;
+import eu.dissco.core.translator.service.AbstractDataRetrievalService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @AllArgsConstructor
 public class ProjectRunner implements CommandLineRunner {
 
-  private final WebClientService webService;
+  private final AbstractDataRetrievalService webService;
   private final ConfigurableApplicationContext context;
   private final TranslatorJobRecordService tjrService;
 

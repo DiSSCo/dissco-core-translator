@@ -51,7 +51,7 @@ import java.util.stream.Collectors;
 @Service
 @Profile(Profiles.BIOCASE)
 @RequiredArgsConstructor
-public class BioCaseService extends WebClientService {
+public class BioCaseService extends AbstractDataRetrievalService {
 
     private static final String START_AT = "startAt";
     private static final String LIMIT = "limit";
@@ -84,7 +84,7 @@ public class BioCaseService extends WebClientService {
                 var partResult = webClient.get().uri(uri + writer)
                         .retrieve()
                         .bodyToMono(String.class).publishOn(Schedulers.boundedElastic()).map(
-                                (String xml) -> mapToABCD(xml, processedRecords))
+                                (String xml) -> handleBioCaseResponse(xml, processedRecords))
                         .retryWhen(Retry.backoff(3, Duration.ofSeconds(2)))
                         .toFuture().get();
                 if (partResult.exception()) {
@@ -111,31 +111,10 @@ public class BioCaseService extends WebClientService {
         return new TranslatorJobResult(JobState.COMPLETED, processedRecords.get());
     }
 
-    private BioCasePartResult mapToABCD(String xml, AtomicInteger processedRecords) {
-        var recordCount = 0;
-        var recordDropped = 0;
+    private BioCasePartResult handleBioCaseResponse(String xml, AtomicInteger processedRecords) {
         try {
             var xmlEventReader = xmlFactory.createXMLEventReader(new StringReader(xml));
-            while (xmlEventReader.hasNext()) {
-                var element = xmlEventReader.nextEvent();
-                if (isStartElement(element, "content")) {
-                    recordCount = Integer.parseInt(
-                            element.asStartElement().getAttributeByName(new QName("recordCount")).getValue());
-                    recordDropped = Integer.parseInt(
-                            element.asStartElement().getAttributeByName(new QName("recordDropped")).getValue());
-                    log.info("Received {} records in BioCase request, {} records dropped", recordCount,
-                            recordDropped);
-                }
-                retrieveUnitData(xmlEventReader, processedRecords);
-            }
-            if ((recordCount + recordDropped) % applicationProperties.getItemsPerRequest() != 0) {
-                log.info("Received records {} does not match requested records {}. "
-                                + "All records have been processed", (recordCount + recordDropped),
-                        applicationProperties.getItemsPerRequest());
-                return new BioCasePartResult(true, false);
-            } else {
-                return new BioCasePartResult(false, false);
-            }
+            return handleBioCasePage(processedRecords, xmlEventReader);
         } catch (XMLStreamException | JAXBException | IOException e) {
             log.error("Error converting response to XML", e);
             return new BioCasePartResult(true, true);
@@ -143,6 +122,31 @@ public class BioCaseService extends WebClientService {
             log.warn("Reached maximum limit of {} processed specimens",
                     applicationProperties.getMaxItems());
             return new BioCasePartResult(true, false);
+        }
+    }
+
+    private BioCasePartResult handleBioCasePage(AtomicInteger processedRecords, XMLEventReader xmlEventReader) throws XMLStreamException, JAXBException, ReachedMaximumLimitException, IOException {
+        var recordCount = 0;
+        var recordDropped = 0;
+        while (xmlEventReader.hasNext()) {
+            var element = xmlEventReader.nextEvent();
+            if (isStartElement(element, "content")) {
+                recordCount = Integer.parseInt(
+                        element.asStartElement().getAttributeByName(new QName("recordCount")).getValue());
+                recordDropped = Integer.parseInt(
+                        element.asStartElement().getAttributeByName(new QName("recordDropped")).getValue());
+                log.info("Received {} records in BioCase request, {} records dropped", recordCount,
+                        recordDropped);
+            }
+            retrieveUnitData(xmlEventReader, processedRecords);
+        }
+        if ((recordCount + recordDropped) % applicationProperties.getItemsPerRequest() != 0) {
+            log.info("Received records {} does not match requested records {}. "
+                            + "All records have been processed", (recordCount + recordDropped),
+                    applicationProperties.getItemsPerRequest());
+            return new BioCasePartResult(true, false);
+        } else {
+            return new BioCasePartResult(false, false);
         }
     }
 

@@ -4,18 +4,17 @@ import static eu.dissco.core.translator.terms.utils.LicenseUtils.licenseComplies
 
 import eu.dissco.core.translator.domain.TranslatorJobResult;
 import eu.dissco.core.translator.exception.DiSSCoDataException;
-import java.util.List;
+import java.util.Set;
 import javax.xml.stream.events.XMLEvent;
 import eu.dissco.core.translator.schema.DigitalSpecimen;
 import eu.dissco.core.translator.schema.DigitalMedia;
 
-public abstract class WebClientService {
+public abstract class AbstractDataRetrievalService {
 
-  protected static final List<String> ALLOWED_BASIS_OF_RECORD = List.of("PRESERVEDSPECIMEN",
+  protected static final Set<String> ALLOWED_BASIS_OF_RECORD = Set.of("PRESERVEDSPECIMEN",
       "PRESERVED_SPECIMEN", "FOSSIL", "OTHER", "ROCK", "MINERAL", "METEORITE", "FOSSILSPECIMEN",
-      "LIVINGSPECIMEN", "MATERIALSAMPLE", "FOSSIL SPECIMEN", "ROCKSPECIMEN", "ROCK SPECIMEN",
-      "MINERALSPECIMEN", "MINERAL SPECIMEN", "METEORITESPECIMEN", "METEORITE SPECIMEN",
-      "HERBARIUM SHEET", "HERBARIUMSHEET", "DRIED");
+      "LIVINGSPECIMEN", "MATERIALSAMPLE", "ROCKSPECIMEN", "MINERALSPECIMEN", "METEORITESPECIMEN", "HERBARIUMSHEET",
+      "DRIED");
 
   public abstract TranslatorJobResult retrieveData();
 
@@ -28,7 +27,6 @@ public abstract class WebClientService {
     }
   }
 
-
   protected void checkIfSpecimenComplies(DigitalSpecimen ds)
       throws DiSSCoDataException {
     if (ds.getOdsNormalisedPhysicalSpecimenID() == null || ds.getOdsOrganisationID() == null) {
@@ -38,7 +36,7 @@ public abstract class WebClientService {
     if (!basisOfRecordComplies(ds.getDwcBasisOfRecord())
         || !licenseComplies(ds.getDctermsLicense())) {
       throw new DiSSCoDataException(
-          "Record does not comply basis of record or license requirements");
+          "Record does not comply with basis of record or license requirements");
     }
   }
 
@@ -48,7 +46,6 @@ public abstract class WebClientService {
       }
       return ALLOWED_BASIS_OF_RECORD.contains(basisOfRecord.strip().replace(" ", "").toUpperCase());
     }
-
 
     protected void checkIfMediaComplies(DigitalMedia digitalMedia)
       throws DiSSCoDataException {

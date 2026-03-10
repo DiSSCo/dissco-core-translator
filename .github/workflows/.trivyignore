@@ -12,5 +12,5 @@ CVE-2026-25646
 GHSA-72hv-8253-57qq
 
 # March 6, 2026
-# jackson-core has Nesting Depth Constraint Bypass in
+# jackson-core has Nesting Depth Constraint Bypass, jackson should be fixed to 3.1.X
 CVE-2026-29062

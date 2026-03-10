@@ -64,7 +64,7 @@ import tools.jackson.databind.node.ObjectNode;
 @Slf4j
 @Profile(Profiles.DWCA)
 @RequiredArgsConstructor
-public class DwcaService extends WebClientService {
+public class DwcaService extends AbstractDataRetrievalService {
 
   public static final String GBIF_MULTIMEDIA = "gbif:Multimedia";
   public static final String AC_MULTIMEDIA = "ac:Multimedia";
