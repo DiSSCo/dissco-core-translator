@@ -8,9 +8,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import eu.dissco.core.translator.component.OrganisationNameComponent;
 import eu.dissco.core.translator.component.SourceSystemComponent;
 import eu.dissco.core.translator.exception.UnknownPhysicalSpecimenIdType;
@@ -30,6 +27,8 @@ import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
 @ExtendWith(MockitoExtension.class)
 class BiocaseDigitalObjectDirectorTest {
@@ -45,7 +44,7 @@ class BiocaseDigitalObjectDirectorTest {
 
   private BiocaseDigitalObjectDirector director;
 
-  private static Stream<Arguments> givenIdentifications() throws JsonProcessingException {
+  private static Stream<Arguments> givenIdentifications() {
     return Stream.of(
         Arguments.of(addSecondIdentification(identifications(true)), 2),
         Arguments.of(identifications(true), 1),
@@ -54,7 +53,7 @@ class BiocaseDigitalObjectDirectorTest {
     );
   }
 
-  private static ObjectNode identifications(boolean verified) throws JsonProcessingException {
+  private static ObjectNode identifications(boolean verified) {
     var node = (ObjectNode) MAPPER.readTree(
         """
                 {
@@ -73,8 +72,7 @@ class BiocaseDigitalObjectDirectorTest {
     return node;
   }
 
-  private static ObjectNode addSecondIdentification(ObjectNode identifications)
-      throws JsonProcessingException {
+  private static ObjectNode addSecondIdentification(ObjectNode identifications) {
     var node = (ObjectNode) MAPPER.readTree(
         """
                 {
@@ -132,7 +130,7 @@ class BiocaseDigitalObjectDirectorTest {
   @ParameterizedTest
   @ValueSource(strings = {"An Unknown PhysicalSpecimenIdType"})
   @NullSource
-  void testConstructAbcdDigitalSpecimenUnknownIdType(String value) throws Exception {
+  void testConstructAbcdDigitalSpecimenUnknownIdType(String value) {
     // Given
     var specimenJson = givenAbcdSpecimenJson(identifications(true));
     given(termMapper.retrieveTerm(any(PhysicalSpecimenIDType.class), eq(specimenJson), eq(false)))
@@ -143,8 +141,7 @@ class BiocaseDigitalObjectDirectorTest {
         () -> director.assembleDigitalSpecimenTerm(specimenJson, false));
   }
 
-  private JsonNode givenAbcdSpecimenJson(ObjectNode identifications)
-      throws JsonProcessingException {
+  private JsonNode givenAbcdSpecimenJson(ObjectNode identifications) {
     var node = (ObjectNode) MAPPER.readTree(
         """
             {

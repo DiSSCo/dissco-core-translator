@@ -1,6 +1,6 @@
 package eu.dissco.core.translator.terms.specimen.identification;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import eu.dissco.core.translator.terms.specimen.identification.taxonomy.AbstractTaxonomy;
 import java.util.List;
 

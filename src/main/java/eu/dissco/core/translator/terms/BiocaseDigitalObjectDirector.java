@@ -1,7 +1,5 @@
 package eu.dissco.core.translator.terms;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.dissco.core.translator.Profiles;
 import eu.dissco.core.translator.component.OrganisationNameComponent;
 import eu.dissco.core.translator.component.SourceSystemComponent;
@@ -16,13 +14,15 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
 @Slf4j
 @Component
 @Profile(Profiles.BIOCASE)
 public class BiocaseDigitalObjectDirector extends BaseDigitalObjectDirector {
 
-  public BiocaseDigitalObjectDirector(ObjectMapper mapper, TermMapper termMapper,
+  public BiocaseDigitalObjectDirector(JsonMapper mapper, TermMapper termMapper,
       OrganisationNameComponent rorComponent, SourceSystemComponent sourceSystemComponent,
       FdoProperties fdoProperties) {
     super(mapper, termMapper, rorComponent, sourceSystemComponent, fdoProperties,
@@ -76,9 +76,9 @@ public class BiocaseDigitalObjectDirector extends BaseDigitalObjectDirector {
       }
     }
     if (identifications.size() == 1
-        && identifications.get(0).getOdsIsVerifiedIdentification() == null) {
+        && identifications.getFirst().getOdsIsVerifiedIdentification() == null) {
       //If there is only one identification, and it doesn't have a verification status, set it to true
-      identifications.get(0).setOdsIsVerifiedIdentification(Boolean.TRUE);
+      identifications.getFirst().setOdsIsVerifiedIdentification(Boolean.TRUE);
     }
     return identifications;
   }

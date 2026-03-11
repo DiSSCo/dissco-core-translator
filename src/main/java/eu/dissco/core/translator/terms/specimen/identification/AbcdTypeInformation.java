@@ -1,7 +1,5 @@
 package eu.dissco.core.translator.terms.specimen.identification;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.dissco.core.translator.schema.DigitalSpecimen;
 import eu.dissco.core.translator.schema.Identification;
 import eu.dissco.core.translator.terms.Term;
@@ -9,19 +7,21 @@ import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
 public class AbcdTypeInformation extends Term {
 
   private static final Logger log = LoggerFactory.getLogger(AbcdTypeInformation.class);
 
-  public void addTypeInformation(DigitalSpecimen ds, JsonNode unit, ObjectMapper mapper) {
+  public void addTypeInformation(DigitalSpecimen ds, JsonNode unit, JsonMapper mapper) {
     var typeDesignationNodes = getTypeDesignationNodes(unit, mapper);
     if (typeDesignationNodes.isEmpty()) {
       return;
     }
     var identifications = ds.getOdsHasIdentifications();
     if (typeDesignationNodes.size() == 1 && identifications.size() == 1) {
-      setAdditionalIdentificationInfo(identifications.get(0), typeDesignationNodes.get(0));
+      setAdditionalIdentificationInfo(identifications.getFirst(), typeDesignationNodes.getFirst());
     } else {
       identifications.forEach(identification -> typeDesignationNodes.stream()
           .filter(node -> isNameMatch(identification, node)).findFirst()
@@ -31,8 +31,8 @@ public class AbcdTypeInformation extends Term {
 
   private boolean isNameMatch(Identification identification, JsonNode node) {
     if (node.get("typifiedName/fullScientificNameString") != null) {
-      return node.get("typifiedName/fullScientificNameString").asText()
-          .equals(identification.getOdsHasTaxonIdentifications().get(0).getDwcScientificName());
+      return node.get("typifiedName/fullScientificNameString").asString()
+          .equals(identification.getOdsHasTaxonIdentifications().getFirst().getDwcScientificName());
     } else {
       log.warn("No typifiedName found in typeDesignationNode: {}", node);
       return false;
@@ -44,7 +44,7 @@ public class AbcdTypeInformation extends Term {
     identification.setDwcTypeStatus(new TypeStatus().retrieveFromABCD(typeDesignationNodes));
   }
 
-  private List<JsonNode> getTypeDesignationNodes(JsonNode unit, ObjectMapper mapper) {
+  private List<JsonNode> getTypeDesignationNodes(JsonNode unit, JsonMapper mapper) {
     var typeDesignationNodes = new ArrayList<JsonNode>();
     var iterateOverElements = true;
     var count = 0;

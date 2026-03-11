@@ -6,7 +6,6 @@ import static eu.dissco.core.translator.TestUtils.givenDigitalMedia;
 import static eu.dissco.core.translator.TestUtils.givenDigitalSpecimen;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import eu.dissco.core.translator.domain.DigitalMediaEvent;
 import eu.dissco.core.translator.domain.DigitalMediaWrapper;
 import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
@@ -57,7 +56,7 @@ class RabbitMqServiceTest {
   }
 
   @Test
-  void testSendMessage() throws JsonProcessingException {
+  void testSendMessage() {
     // Given
     var message = new DigitalSpecimenEvent(Set.of(), new DigitalSpecimenWrapper(
         NORMALISED_PHYSICAL_SPECIMEN_ID, "https://doi.org/21.T11148/894b1e6cad57e921764e",

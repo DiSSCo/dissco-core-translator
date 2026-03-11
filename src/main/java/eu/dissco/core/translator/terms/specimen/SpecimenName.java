@@ -12,14 +12,14 @@ public class SpecimenName extends Term {
     if (acceptedIdentification != null
         && acceptedIdentification.getOdsHasTaxonIdentifications() != null
         && !acceptedIdentification.getOdsHasTaxonIdentifications().isEmpty()) {
-      if (acceptedIdentification.getOdsHasTaxonIdentifications().get(0)
+      if (acceptedIdentification.getOdsHasTaxonIdentifications().getFirst()
           .getDwcScientificName() != null) {
-        return acceptedIdentification.getOdsHasTaxonIdentifications().get(0)
+        return acceptedIdentification.getOdsHasTaxonIdentifications().getFirst()
             .getDwcScientificName();
       }
-      if (acceptedIdentification.getOdsHasTaxonIdentifications().get(0)
+      if (acceptedIdentification.getOdsHasTaxonIdentifications().getFirst()
           .getDwcVernacularName() != null) {
-        return acceptedIdentification.getOdsHasTaxonIdentifications().get(0)
+        return acceptedIdentification.getOdsHasTaxonIdentifications().getFirst()
             .getDwcVernacularName();
       }
     }

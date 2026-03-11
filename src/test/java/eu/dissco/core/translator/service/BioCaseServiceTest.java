@@ -1,5 +1,6 @@
 package eu.dissco.core.translator.service;
 
+import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static eu.dissco.core.translator.TestUtils.givenDigitalMedia;
 import static eu.dissco.core.translator.TestUtils.givenDigitalSpecimen;
 import static eu.dissco.core.translator.TestUtils.loadResourceFile;
@@ -11,8 +12,6 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.dissco.core.translator.component.SourceSystemComponent;
 import eu.dissco.core.translator.database.jooq.enums.JobState;
 import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
@@ -43,12 +42,12 @@ import org.springframework.web.reactive.function.client.WebClient.RequestHeaders
 import org.springframework.web.reactive.function.client.WebClient.RequestHeadersUriSpec;
 import org.springframework.web.reactive.function.client.WebClient.ResponseSpec;
 import reactor.core.publisher.Mono;
+import tools.jackson.databind.JsonNode;
 
 @ExtendWith(MockitoExtension.class)
 class BioCaseServiceTest {
 
   private final XMLInputFactory factory = XMLInputFactory.newFactory();
-  private final ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
   private final ApplicationProperties properties = new ApplicationProperties();
   @Mock
   private WebClient webClient;
@@ -75,7 +74,7 @@ class BioCaseServiceTest {
     var configuration = new Configuration(Configuration.VERSION_2_3_31);
     configuration.setTemplateLoader(
         new FileTemplateLoader(new ClassPathResource("templates").getFile()));
-    service = new BioCaseService(mapper, properties, webClient, sourceSystemComponent,
+    service = new BioCaseService(MAPPER, properties, webClient, sourceSystemComponent,
         configuration, factory,
         rabbitMqService, masProperties, digitalSpecimenDirector, fdoProperties);
 
@@ -90,7 +89,7 @@ class BioCaseServiceTest {
     // Given
     properties.setMaxItems(processedRecords);
     if (processedRecords == null) {
-      processedRecords = 99;
+      processedRecords = 100;
     }
     var expectedResult = new TranslatorJobResult(JobState.COMPLETED, processedRecords);
     given(sourceSystemComponent.getSourceSystemEndpoint()).willReturn("https://endpoint.com");
@@ -106,7 +105,7 @@ class BioCaseServiceTest {
 
     // Then
     assertThat(result).isEqualTo(expectedResult);
-    if (processedRecords == 99) {
+    if (processedRecords >= 99) {
       then(webClient).should(times(2)).get();
     } else {
       then(webClient).should(times(1)).get();

@@ -1,12 +1,16 @@
 package eu.dissco.core.translator.configuration;
 
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import java.time.Instant;
-import java.util.Date;
+import com.fasterxml.jackson.annotation.JsonSetter.Value;
+import com.fasterxml.jackson.annotation.Nulls;
+import java.text.SimpleDateFormat;
+import java.time.ZoneOffset;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TimeZone;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import tools.jackson.databind.json.JsonMapper;
 
 @Configuration
 public class ApplicationConfiguration {
@@ -14,14 +18,17 @@ public class ApplicationConfiguration {
   public static final String DATE_STRING = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
 
   @Bean
-  public ObjectMapper objectMapper() {
-    var mapper = new ObjectMapper().findAndRegisterModules();
-    SimpleModule dateModule = new SimpleModule();
-    dateModule.addSerializer(Instant.class, new InstantSerializer());
-    dateModule.addDeserializer(Instant.class, new InstantDeserializer());
-    dateModule.addSerializer(Date.class, new DateSerializer());
-    mapper.registerModule(dateModule);
-    mapper.setDefaultPropertyInclusion(Include.NON_NULL);
-    return mapper;
+  public JsonMapper objectMapper() {
+    return JsonMapper.builder()
+        .findAndAddModules()
+        .defaultDateFormat(new SimpleDateFormat(DATE_STRING))
+        .defaultTimeZone(TimeZone.getTimeZone(ZoneOffset.UTC))
+        .withConfigOverride(List.class, cfg ->
+            cfg.setNullHandling(Value.forValueNulls(Nulls.AS_EMPTY)))
+        .withConfigOverride(Map.class, cfg ->
+            cfg.setNullHandling(Value.forValueNulls(Nulls.AS_EMPTY)))
+        .withConfigOverride(Set.class, cfg ->
+            cfg.setNullHandling(Value.forValueNulls(Nulls.AS_EMPTY)))
+        .build();
   }
 }

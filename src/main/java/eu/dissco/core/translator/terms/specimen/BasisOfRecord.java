@@ -1,6 +1,6 @@
 package eu.dissco.core.translator.terms.specimen;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
@@ -14,14 +14,18 @@ public class BasisOfRecord extends Term {
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
-    return super.searchJsonForTerm(unit, dwcaTerms);
+      var result = super.searchJsonForTerm(unit, dwcaTerms);
+      if (result != null && PRESERVED_SPECIMEN_ALTERNATIVES.contains(result.toUpperCase())) {
+          return "PreservedSpecimen";
+      }
+      return result;
   }
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
     var result = super.searchJsonForTerm(unit, abcdTerms);
     if (result != null && PRESERVED_SPECIMEN_ALTERNATIVES.contains(result.toUpperCase())) {
-      return "Preserved specimen";
+      return "PreservedSpecimen";
     }
     return result;
   }

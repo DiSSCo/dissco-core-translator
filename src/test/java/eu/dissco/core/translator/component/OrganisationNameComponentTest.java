@@ -50,14 +50,14 @@ class OrganisationNameComponentTest {
 
   @BeforeEach
   void setup() {
-    this.rorComponent = new OrganisationNameComponent(rorClient, wikidataClient, MAPPER);
+    this.rorComponent = new OrganisationNameComponent(rorClient, wikidataClient);
   }
 
   @Test
   void testGetRorId() throws Exception {
     // Given
-    given(rorClient.getRorInformation(ROR)).willReturn(
-        loadResourceFile("organisation-name/example-ror.json"));
+    given(rorClient.getRorInformation(ROR)).willReturn(MAPPER.readTree(
+        loadResourceFile("organisation-name/example-ror.json")));
 
     // When
     var result = rorComponent.getRorName(ROR);
@@ -69,7 +69,7 @@ class OrganisationNameComponentTest {
   @Test
   void testGetRorIdFirst() throws Exception {
     // Given
-    given(rorClient.getRorInformation(ROR)).willReturn("""
+    given(rorClient.getRorInformation(ROR)).willReturn(MAPPER.readTree("""
         {
           "names": [
             {
@@ -81,7 +81,7 @@ class OrganisationNameComponentTest {
               }
           ]
         }
-        """);
+        """));
 
     // When
     var result = rorComponent.getRorName(ROR);
@@ -90,32 +90,11 @@ class OrganisationNameComponentTest {
     assertThat(result).isEqualTo("De MuseumFabriek");
   }
 
-  @Test
-  void testGetRorInvalidJson() {
-    // Given
-    given(rorClient.getRorInformation(ROR)).willReturn("""
-        {
-          "names": [
-            // invalid stuff is happening here
-              "lang": "nl",
-              "types": [
-                "label"
-                ],
-              "value": "De MuseumFabriek"
-              }
-          ]
-        }
-        """);
-
-    // When / Then
-    assertThrows(OrganisationException.class, () -> rorComponent.getRorName(ROR));
-  }
-
   @ParameterizedTest
   @MethodSource("badRorResponse")
   void testBadRorResponse(String rorResponse) {
     // Given
-    given(rorClient.getRorInformation(ROR)).willReturn(rorResponse);
+    given(rorClient.getRorInformation(ROR)).willReturn(MAPPER.readTree(rorResponse));
 
     // When / Then
     assertThrows(OrganisationException.class, () -> rorComponent.getRorName(ROR));
@@ -126,7 +105,7 @@ class OrganisationNameComponentTest {
   void testWikidataId() throws Exception {
     // Given
     given(wikidataClient.getWikidataLabel(WIKIDATA_ID)).willReturn(
-        loadResourceFile("organisation-name/example-wikidata.json"));
+        MAPPER.readTree(loadResourceFile("organisation-name/example-wikidata.json")));
 
     // When
     var result = rorComponent.getWikiDataName(WIKIDATA_ID);
@@ -139,7 +118,7 @@ class OrganisationNameComponentTest {
   void testWikidataIdInvalid() throws Exception {
     // Given
     given(wikidataClient.getWikidataLabel(WIKIDATA_ID)).willReturn(
-        loadResourceFile("organisation-name/invalid-wikidata.json"));
+        MAPPER.readTree(loadResourceFile("organisation-name/invalid-wikidata.json")));
 
     // When / Then
     assertThrows(OrganisationException.class, () -> rorComponent.getWikiDataName(WIKIDATA_ID));
@@ -149,30 +128,16 @@ class OrganisationNameComponentTest {
   void testResponseInvalid() throws Exception {
     // Given
     given(rorClient.getRorInformation(ROR)).willReturn(
-        loadResourceFile("organisation-name/response-invalid.json"));
+        MAPPER.readTree(loadResourceFile("organisation-name/response-invalid.json")));
 
     // When / Then
     assertThrows(OrganisationException.class, () -> rorComponent.getRorName(ROR));
   }
 
   @Test
-  void testGetWikidataInvalidJson() {
-    // Given
-    given(wikidataClient.getWikidataLabel(WIKIDATA_ID)).willReturn("""
-        {
-          "en": "De Museumfabriek"
-          // with some invalid stuff happening here....
-        }
-        """);
-
-    // When / Then
-    assertThrows(OrganisationException.class, () -> rorComponent.getWikiDataName(WIKIDATA_ID));
-  }
-
-  @Test
   void testEmptyMono() {
     // Given
-    given(rorClient.getRorInformation(ROR)).willReturn(null);
+    given(rorClient.getRorInformation(ROR)).willReturn(MAPPER.createObjectNode());
 
     // When / Then
     assertThrows(OrganisationException.class, () -> rorComponent.getRorName(ROR));

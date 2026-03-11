@@ -1,6 +1,6 @@
 package eu.dissco.core.translator.terms.specimen.event;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import eu.dissco.core.translator.terms.Term;
 import java.util.List;
 
@@ -18,7 +18,7 @@ public class EventRemarks extends Term {
         if (!builder.isEmpty()) {
           builder.append(" | ");
         }
-        builder.append(unit.get(term).asText());
+        builder.append(unit.get(term).asString());
       }
     }
     if (builder.isEmpty()) {

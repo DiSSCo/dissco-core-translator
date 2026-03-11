@@ -1,8 +1,9 @@
 package eu.dissco.core.translator.terms;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import eu.dissco.core.translator.terms.utils.LicenseUtils;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import tools.jackson.databind.JsonNode;
 
 @Slf4j
 public class License extends Term {
@@ -20,7 +21,13 @@ public class License extends Term {
 
   @Override
   public String retrieveFromDWCA(JsonNode unit) {
-    return super.searchJsonForTerm(unit, dwcaTerms);
+    var license = super.searchJsonForTerm(unit, dwcaTerms);
+    var harmonisedLicense = LicenseUtils.harmoniseLicense(license);
+    if (harmonisedLicense == null) {
+        return null;
+    } else {
+        return harmonisedLicense.getUrl();
+    }
   }
 
   @Override
@@ -30,6 +37,12 @@ public class License extends Term {
 
   @Override
   public String retrieveFromABCD(JsonNode unit) {
-    return searchJsonForTerm(unit, abcdUnitTerms);
+    var license = searchJsonForTerm(unit, abcdUnitTerms);
+    var harmonisedLicense = LicenseUtils.harmoniseLicense(license);
+    if (harmonisedLicense == null) {
+      return null;
+    } else {
+        return harmonisedLicense.getUrl();
+    }
   }
 }

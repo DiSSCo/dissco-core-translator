@@ -23,7 +23,7 @@ public class TopicDiscipline extends Term {
         && acceptedIdentification.getOdsHasTaxonIdentifications() != null
         && !acceptedIdentification.getOdsHasTaxonIdentifications().isEmpty()) {
       return getDiscipline(basisOfRecord,
-          acceptedIdentification.getOdsHasTaxonIdentifications().get(0).getDwcKingdom());
+          acceptedIdentification.getOdsHasTaxonIdentifications().getFirst().getDwcKingdom());
     }
     return getDiscipline(basisOfRecord, null);
   }

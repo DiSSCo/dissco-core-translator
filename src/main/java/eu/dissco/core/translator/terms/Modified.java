@@ -2,11 +2,11 @@ package eu.dissco.core.translator.terms;
 
 import static eu.dissco.core.translator.configuration.ApplicationConfiguration.DATE_STRING;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import tools.jackson.databind.JsonNode;
 
 public class Modified extends Term {
 

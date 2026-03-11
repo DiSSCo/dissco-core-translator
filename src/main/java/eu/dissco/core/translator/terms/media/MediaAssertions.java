@@ -1,11 +1,11 @@
 package eu.dissco.core.translator.terms.media;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.schema.Assertion;
 import eu.dissco.core.translator.terms.Term;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
+import tools.jackson.databind.JsonNode;
 
 public class MediaAssertions {
 

@@ -12,7 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class LicenseTest {
 
-  private static final String LICENSE_STRING = "https://creativecommons.org/licenses/by-nc/4.0";
+  private static final String LICENSE_STRING = "https://creativecommons.org/licenses/by-nc/4.0/legalcode";
 
   private final License license = new License();
 
@@ -54,7 +54,7 @@ class LicenseTest {
     var result = license.retrieveFromABCD(unit);
 
     // Then
-    assertThat(result).isEqualTo("Another License");
+    assertThat(result).isNull();
   }
 
   @Test

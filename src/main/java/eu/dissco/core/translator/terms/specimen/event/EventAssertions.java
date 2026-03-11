@@ -4,8 +4,6 @@ import static eu.dissco.core.translator.domain.AgentRoleType.MEASURER;
 import static eu.dissco.core.translator.schema.Agent.Type.SCHEMA_PERSON;
 import static eu.dissco.core.translator.terms.utils.AgentsUtils.addAgent;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.dissco.core.translator.schema.Assertion;
 import eu.dissco.core.translator.terms.Term;
 import eu.dissco.core.translator.terms.TermMapper;
@@ -23,13 +21,15 @@ import eu.dissco.core.translator.terms.specimen.assertion.MeasurementValueIRI;
 import eu.dissco.core.translator.terms.specimen.assertion.ParentMeasurementID;
 import java.util.ArrayList;
 import java.util.List;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
 public class EventAssertions extends Term {
 
   private static final String EXTENSIONS = "extensions";
 
   public List<Assertion> gatherEventAssertions(
-      TermMapper termMapper, ObjectMapper mapper, JsonNode data, boolean dwc) {
+      TermMapper termMapper, JsonMapper mapper, JsonNode data, boolean dwc) {
     if (dwc) {
       return gatherEventAssertionsForDwc(termMapper, data);
     } else {
@@ -38,7 +38,7 @@ public class EventAssertions extends Term {
   }
 
   private List<Assertion> gatherEventAssertionsForABCD(
-      TermMapper termMapper, ObjectMapper mapper, JsonNode data) {
+      TermMapper termMapper, JsonMapper mapper, JsonNode data) {
     var assertions = new ArrayList<Assertion>();
     var iterateOverElements = true;
     var count = 0;

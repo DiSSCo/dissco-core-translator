@@ -20,23 +20,25 @@ class BasisOfRecordTest {
     return Stream.of(
         Arguments.of("PreservedSpecimen", "PreservedSpecimen"),
         Arguments.of("RockSpecimen", "RockSpecimen"),
-        Arguments.of("HerbariumSheet", "Preserved specimen"),
-        Arguments.of("Dried", "Preserved specimen"),
+        Arguments.of("HerbariumSheet", "PreservedSpecimen"),
+        Arguments.of("Dried", "PreservedSpecimen"),
+        Arguments.of("LivingSpecimen", "LivingSpecimen"),
         Arguments.of(null, null)
     );
   }
 
-  @Test
-  void testRetrieveFromDWCA() {
+  @ParameterizedTest
+  @MethodSource("prepareABCDRecordBasis")
+  void testRetrieveFromDWCA(String recordBasis, String expected) {
     // Given
     var unit = MAPPER.createObjectNode();
-    unit.put("dwc:basisOfRecord", "LivingSpecimen");
+    unit.put("dwc:basisOfRecord", recordBasis);
 
     // When
     var result = basisOfRecord.retrieveFromDWCA(unit);
 
     // Then
-    assertThat(result).isEqualTo("LivingSpecimen");
+    assertThat(result).isEqualTo(expected);
   }
 
   @ParameterizedTest

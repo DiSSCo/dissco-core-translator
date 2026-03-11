@@ -1,10 +1,10 @@
 package eu.dissco.core.translator.terms;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.component.DataMappingComponent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
 
 @Slf4j
 @Component
@@ -19,8 +19,8 @@ public class TermMapper {
       return dataMappingComponents.getDefaults().get(termName);
     } else if (dataMappingComponents.getFieldMappings().containsKey(termName)) {
       var value = unit.get(dataMappingComponents.getFieldMappings().get(termName));
-      if (value != null && value.isTextual()) {
-        return value.asText();
+      if (value != null && value.isString()) {
+        return value.asString();
       } else {
         log.info("No value for the specific field mapping for term: {} with mapping: {}",
             term.getTerm(), value);

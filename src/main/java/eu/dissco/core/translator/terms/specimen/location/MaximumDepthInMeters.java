@@ -1,6 +1,6 @@
 package eu.dissco.core.translator.terms.specimen.location;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import java.util.List;
 
 public class MaximumDepthInMeters extends AbstractMeterTerm {

@@ -1,21 +1,39 @@
 package eu.dissco.core.translator;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static eu.dissco.core.translator.configuration.ApplicationConfiguration.DATE_STRING;
+
+import com.fasterxml.jackson.annotation.JsonSetter.Value;
+import com.fasterxml.jackson.annotation.Nulls;
 import eu.dissco.core.translator.domain.SourceSystemInformation;
 import eu.dissco.core.translator.schema.DigitalMedia;
 import eu.dissco.core.translator.schema.DigitalSpecimen;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TimeZone;
 import java.util.UUID;
 import java.util.stream.Stream;
 import org.junit.jupiter.params.provider.Arguments;
 import org.springframework.core.io.ClassPathResource;
+import tools.jackson.databind.json.JsonMapper;
 
 public class TestUtils {
 
-  public static final ObjectMapper MAPPER = new ObjectMapper().findAndRegisterModules();
+  public static final JsonMapper MAPPER = JsonMapper.builder()
+      .findAndAddModules()
+      .defaultDateFormat(new SimpleDateFormat(DATE_STRING))
+      .defaultTimeZone(TimeZone.getTimeZone(ZoneOffset.UTC))
+      .withConfigOverride(List.class, cfg ->
+          cfg.setNullHandling(Value.forValueNulls(Nulls.AS_EMPTY)))
+      .withConfigOverride(Map.class, cfg ->
+          cfg.setNullHandling(Value.forValueNulls(Nulls.AS_EMPTY)))
+      .withConfigOverride(Set.class, cfg ->
+          cfg.setNullHandling(Value.forValueNulls(Nulls.AS_EMPTY)))
+      .build();
   public static final String SOME_VALUE = "someValue";
   public static final String SOURCE_SYSTEM_ID = "20.5000.1025/GW0-TYL-YRU";
   public static final String SOURCE_SYSTEM_NAME = "Naturalis Biodiversity Center (NL) - Vermes";
@@ -90,12 +108,16 @@ public class TestUtils {
 
   public static DigitalSpecimen givenDigitalSpecimen() {
     return new DigitalSpecimen()
+        .withDwcBasisOfRecord("PreservedSpecimen")
+        .withDctermsLicense("https://creativecommons.org/publicdomain/zero/1.0/legalcode")
         .withOdsNormalisedPhysicalSpecimenID(NORMALISED_PHYSICAL_SPECIMEN_ID)
         .withOdsOrganisationID(ORGANISATION_ID);
   }
 
   public static DigitalMedia givenDigitalMedia() {
-    return new DigitalMedia().withAcAccessURI("https://accessuri.eu/image_1");
+    return new DigitalMedia()
+        .withDctermsRights("https://creativecommons.org/publicdomain/zero/1.0/legalcode")
+        .withAcAccessURI("https://accessuri.eu/image_1");
   }
 
   public static Stream<Arguments> provideInvalidDigitalSpecimen() {

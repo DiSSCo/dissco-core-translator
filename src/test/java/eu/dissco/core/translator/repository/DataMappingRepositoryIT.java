@@ -8,14 +8,13 @@ import static eu.dissco.core.translator.database.jooq.Tables.DATA_MAPPING;
 import static eu.dissco.core.translator.database.jooq.Tables.SOURCE_SYSTEM;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import eu.dissco.core.translator.database.jooq.enums.TranslatorType;
 import java.time.Instant;
 import org.jooq.JSONB;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
 
 class DataMappingRepositoryIT extends BaseRepositoryIT {
 
@@ -45,7 +44,7 @@ class DataMappingRepositoryIT extends BaseRepositoryIT {
     assertThat(result).isEqualTo(expected);
   }
 
-  private JsonNode givenExpected() throws JsonProcessingException {
+  private JsonNode givenExpected() {
     return MAPPER.readTree(MAPPING_JSON);
   }
 
