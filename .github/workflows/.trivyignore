@@ -18,3 +18,7 @@ GHSA-72hv-8253-57qq
 # March 6, 2026
 # jackson-core has Nesting Depth Constraint Bypass, jackson should be fixed to 3.1.X
 CVE-2026-29062
+
+# March 20, 2026
+# Issue with libexpat, alpine image needs to update
+CVE-2026-32767
