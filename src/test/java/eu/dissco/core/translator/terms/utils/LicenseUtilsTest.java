@@ -1,16 +1,22 @@
 package eu.dissco.core.translator.terms.utils;
 
+import static eu.dissco.core.translator.domain.License.CC0;
+import static eu.dissco.core.translator.domain.License.CC_BY;
+import static eu.dissco.core.translator.domain.License.CC_BY_NC;
+import static eu.dissco.core.translator.domain.License.CC_BY_NC_ND;
+import static eu.dissco.core.translator.domain.License.CC_BY_ND;
+import static eu.dissco.core.translator.domain.License.CC_BY_SA;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import eu.dissco.core.translator.domain.License;
+import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
-
-import java.util.stream.Stream;
-
-import static eu.dissco.core.translator.domain.License.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 
 class LicenseUtilsTest {

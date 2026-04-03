@@ -11,6 +11,7 @@ import eu.dissco.core.translator.database.jooq.tables.TranslatorJobRecord;
 import java.time.Instant;
 import java.util.UUID;
 
+import org.jooq.JSONB;
 import org.jooq.Record2;
 import org.jooq.impl.UpdatableRecordImpl;
 
@@ -121,6 +122,20 @@ public class TranslatorJobRecordRecord extends UpdatableRecordImpl<TranslatorJob
         return (ErrorCode) get(6);
     }
 
+    /**
+     * Setter for <code>public.translator_job_record.report</code>.
+     */
+    public void setReport(JSONB value) {
+        set(7, value);
+    }
+
+    /**
+     * Getter for <code>public.translator_job_record.report</code>.
+     */
+    public JSONB getReport() {
+        return (JSONB) get(7);
+    }
+
     // -------------------------------------------------------------------------
     // Primary key information
     // -------------------------------------------------------------------------
@@ -144,7 +159,7 @@ public class TranslatorJobRecordRecord extends UpdatableRecordImpl<TranslatorJob
     /**
      * Create a detached, initialised TranslatorJobRecordRecord
      */
-    public TranslatorJobRecordRecord(UUID jobId, JobState jobState, String sourceSystemId, Instant timeStarted, Instant timeCompleted, Integer processedRecords, ErrorCode error) {
+    public TranslatorJobRecordRecord(UUID jobId, JobState jobState, String sourceSystemId, Instant timeStarted, Instant timeCompleted, Integer processedRecords, ErrorCode error, JSONB report) {
         super(TranslatorJobRecord.TRANSLATOR_JOB_RECORD);
 
         setJobId(jobId);
@@ -154,6 +169,7 @@ public class TranslatorJobRecordRecord extends UpdatableRecordImpl<TranslatorJob
         setTimeCompleted(timeCompleted);
         setProcessedRecords(processedRecords);
         setError(error);
+        setReport(report);
         resetChangedOnNotNull();
     }
 }

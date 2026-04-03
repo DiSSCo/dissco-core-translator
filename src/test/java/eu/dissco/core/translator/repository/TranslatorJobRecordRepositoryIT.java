@@ -1,7 +1,9 @@
 package eu.dissco.core.translator.repository;
 
 import static eu.dissco.core.translator.TestUtils.ENDPOINT;
+import static eu.dissco.core.translator.TestUtils.MAPPER;
 import static eu.dissco.core.translator.TestUtils.SOURCE_SYSTEM_ID;
+import static eu.dissco.core.translator.TestUtils.givenReport;
 import static eu.dissco.core.translator.database.jooq.Tables.SOURCE_SYSTEM;
 import static eu.dissco.core.translator.database.jooq.Tables.TRANSLATOR_JOB_RECORD;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -23,7 +25,7 @@ class TranslatorJobRecordRepositoryIT extends BaseRepositoryIT {
 
   @BeforeEach
   void setup() {
-    repository = new TranslatorJobRecordRepository(context);
+    repository = new TranslatorJobRecordRepository(context, MAPPER);
   }
 
   @AfterEach
@@ -58,7 +60,8 @@ class TranslatorJobRecordRepositoryIT extends BaseRepositoryIT {
     repository.createNewJobRecord(jobId, SOURCE_SYSTEM_ID);
 
     // When
-    repository.updateJobState(jobId, new TranslatorJobResult(JobState.COMPLETED, 50000), null);
+    repository.updateJobState(jobId,
+        new TranslatorJobResult(JobState.COMPLETED, givenReport(50000)), null);
 
     // Then
     var result = context.fetchOne(TRANSLATOR_JOB_RECORD, TRANSLATOR_JOB_RECORD.JOB_ID.eq(jobId));
@@ -80,7 +83,7 @@ class TranslatorJobRecordRepositoryIT extends BaseRepositoryIT {
     repository.createNewJobRecord(jobId, SOURCE_SYSTEM_ID);
 
     // When
-    repository.updateJobState(jobId, new TranslatorJobResult(JobState.FAILED, 421312),
+    repository.updateJobState(jobId, new TranslatorJobResult(JobState.FAILED, givenReport(421312)),
         ErrorCode.DISSCO_EXCEPTION);
 
     // Then

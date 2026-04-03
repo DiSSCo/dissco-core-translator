@@ -4,7 +4,7 @@ import eu.dissco.core.translator.database.jooq.enums.JobState;
 
 public record TranslatorJobResult(
     JobState jobState,
-    int processedRecords
+    TranslatorJobReport report
 ) {
 
 }

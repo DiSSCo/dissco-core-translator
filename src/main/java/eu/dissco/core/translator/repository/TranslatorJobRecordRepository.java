@@ -10,7 +10,9 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jooq.DSLContext;
+import org.jooq.JSONB;
 import org.springframework.stereotype.Repository;
+import tools.jackson.databind.json.JsonMapper;
 
 @Slf4j
 @Repository
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Repository;
 public class TranslatorJobRecordRepository {
 
   private final DSLContext context;
+  private final JsonMapper jsonMapper;
 
   public void createNewJobRecord(UUID jobId, String sourceSystemId) {
     context.insertInto(TRANSLATOR_JOB_RECORD)
@@ -33,7 +36,8 @@ public class TranslatorJobRecordRepository {
     context.update(TRANSLATOR_JOB_RECORD)
         .set(TRANSLATOR_JOB_RECORD.JOB_STATE, processingResult.jobState())
         .set(TRANSLATOR_JOB_RECORD.TIME_COMPLETED, Instant.now())
-        .set(TRANSLATOR_JOB_RECORD.PROCESSED_RECORDS, processingResult.processedRecords())
+        .set(TRANSLATOR_JOB_RECORD.PROCESSED_RECORDS, processingResult.report().getSuccessfulSpecimen())
+        .set(TRANSLATOR_JOB_RECORD.REPORT, JSONB.valueOf(jsonMapper.writeValueAsString(processingResult.report())))
         .set(TRANSLATOR_JOB_RECORD.ERROR, errorCode)
         .where(TRANSLATOR_JOB_RECORD.JOB_ID.eq(jobId))
         .execute();

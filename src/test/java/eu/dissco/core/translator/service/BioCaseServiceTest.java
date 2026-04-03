@@ -1,9 +1,13 @@
 package eu.dissco.core.translator.service;
 
 import static eu.dissco.core.translator.TestUtils.MAPPER;
+import static eu.dissco.core.translator.TestUtils.NORMALISED_PHYSICAL_SPECIMEN_ID;
+import static eu.dissco.core.translator.TestUtils.ORGANISATION_ID;
 import static eu.dissco.core.translator.TestUtils.givenDigitalMedia;
 import static eu.dissco.core.translator.TestUtils.givenDigitalSpecimen;
+import static eu.dissco.core.translator.TestUtils.givenReport;
 import static eu.dissco.core.translator.TestUtils.loadResourceFile;
+import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -15,6 +19,7 @@ import static org.mockito.Mockito.times;
 import eu.dissco.core.translator.component.SourceSystemComponent;
 import eu.dissco.core.translator.database.jooq.enums.JobState;
 import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
+import eu.dissco.core.translator.domain.TranslatorJobReport;
 import eu.dissco.core.translator.domain.TranslatorJobResult;
 import eu.dissco.core.translator.properties.ApplicationProperties;
 import eu.dissco.core.translator.properties.FdoProperties;
@@ -25,11 +30,15 @@ import eu.dissco.core.translator.terms.BaseDigitalObjectDirector;
 import freemarker.cache.FileTemplateLoader;
 import freemarker.template.Configuration;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Stream;
 import javax.xml.stream.XMLInputFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -91,7 +100,7 @@ class BioCaseServiceTest {
     if (processedRecords == null) {
       processedRecords = 100;
     }
-    var expectedResult = new TranslatorJobResult(JobState.COMPLETED, processedRecords);
+    var expectedResult = new TranslatorJobResult(JobState.COMPLETED, givenReport(processedRecords));
     given(sourceSystemComponent.getSourceSystemEndpoint()).willReturn("https://endpoint.com");
     given(responseSpec.bodyToMono(any(Class.class))).willReturn(
             Mono.just(loadResourceFile("biocase/geocase-record-dropped.xml")))
@@ -117,7 +126,7 @@ class BioCaseServiceTest {
   @Test
   void testRetrieveDataWithMedia206() throws Exception {
     // Given
-    var expectedResult = new TranslatorJobResult(JobState.COMPLETED, 100);
+    var expectedResult = new TranslatorJobResult(JobState.COMPLETED, givenReport(100, 100));
     given(sourceSystemComponent.getSourceSystemEndpoint()).willReturn("https://endpoint.com");
     given(responseSpec.bodyToMono(any(Class.class))).willReturn(
         Mono.just(loadResourceFile("biocase/biocase-206-with-media.xml")));
@@ -143,7 +152,8 @@ class BioCaseServiceTest {
   @Test
   void testRetrieveDataInvalidMedia() throws Exception {
     // Given
-    var expectedResult = new TranslatorJobResult(JobState.COMPLETED, 1);
+    var expectedResult = new TranslatorJobResult(JobState.COMPLETED,
+        new TranslatorJobReport(new HashMap<>(), Map.of("License 'null' is not accepted", 2), 1, 0));
     given(sourceSystemComponent.getSourceSystemEndpoint()).willReturn("https://endpoint.com");
     given(responseSpec.bodyToMono(any(Class.class))).willReturn(
         Mono.just(loadResourceFile("biocase/biocase-206-with-invalid-media.xml")));
@@ -166,10 +176,10 @@ class BioCaseServiceTest {
   }
 
   @ParameterizedTest
-  @MethodSource("eu.dissco.core.translator.TestUtils#provideInvalidDigitalSpecimen")
-  void testRetrieveDataInvalidSpecimen(DigitalSpecimen digitalSpecimen) throws Exception {
+  @MethodSource("provideInvalidDigitalSpecimen")
+  void testRetrieveDataInvalidSpecimen(DigitalSpecimen digitalSpecimen, TranslatorJobReport report) throws Exception {
     // Given
-    var expectedResult = new TranslatorJobResult(JobState.FAILED, 0);
+    var expectedResult = new TranslatorJobResult(JobState.COMPLETED, report);
     given(sourceSystemComponent.getSourceSystemEndpoint()).willReturn("https://endpoint.com");
     given(responseSpec.bodyToMono(any(Class.class))).willReturn(
         Mono.just(loadResourceFile("biocase/biocase-206-with-media.xml")));
@@ -184,6 +194,17 @@ class BioCaseServiceTest {
     assertThat(result).isEqualTo(expectedResult);
     then(webClient).should(times(1)).get();
     then(rabbitMqService).shouldHaveNoInteractions();
+  }
+
+  private static Stream<Arguments> provideInvalidDigitalSpecimen() {
+    return Stream.of(
+        Arguments.of(new DigitalSpecimen().withOdsNormalisedPhysicalSpecimenID(
+                NORMALISED_PHYSICAL_SPECIMEN_ID),
+            new TranslatorJobReport(Map.of("Missing Organisation ID", 100), emptyMap(), 0, 0)),
+        Arguments.of(new DigitalSpecimen().withOdsOrganisationID(ORGANISATION_ID),
+            new TranslatorJobReport(Map.of("Missing Normalised Physical Specimen Identifier", 100),
+                emptyMap(), 0, 0))
+    );
   }
 
   private void givenJsonWebclient() {

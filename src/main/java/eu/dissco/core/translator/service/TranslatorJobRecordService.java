@@ -28,12 +28,10 @@ public class TranslatorJobRecordService {
   public void updateJobState(UUID jobId, TranslatorJobResult processingResult) {
     var jobState = processingResult.jobState();
     if (jobState == JobState.COMPLETED) {
-      log.info("Job with id {} finished successfully. Processed {} records", jobId,
-          processingResult.processedRecords());
+      log.info("Job with id {} finished successfully. Job report: {}", jobId, processingResult);
       repository.updateJobState(jobId, processingResult, null);
     } else {
-      log.info("Job with id {} failed. Processed {} records", jobId,
-          processingResult.processedRecords());
+      log.info("Job with id {} failed. Job report: {}", jobId, processingResult);
       repository.updateJobState(jobId, processingResult, ErrorCode.DISSCO_EXCEPTION);
     }
   }
