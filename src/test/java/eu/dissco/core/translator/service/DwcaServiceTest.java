@@ -224,10 +224,10 @@ class DwcaServiceTest {
     return Stream.of(
         Arguments.of(new DigitalSpecimen().withOdsNormalisedPhysicalSpecimenID(
                 NORMALISED_PHYSICAL_SPECIMEN_ID),
-            new TranslatorJobReport(Map.of("Missing Organisation ID", 9), emptyMap(), 0, 0)),
+            new TranslatorJobReport(Map.of("Missing Organisation ID", 9), emptyMap(), 0, 0, 9, 0)),
         Arguments.of(new DigitalSpecimen().withOdsOrganisationID(ORGANISATION_ID),
             new TranslatorJobReport(Map.of("Missing Normalised Physical Specimen Identifier", 9),
-                emptyMap(), 0, 0))
+                emptyMap(), 0, 0, 9, 0))
     );
   }
 
@@ -320,7 +320,7 @@ class DwcaServiceTest {
   void testRetrieveDataWithInvalidAcMedia() throws Exception {
     // Given
     var expected = new TranslatorJobResult(JobState.COMPLETED,
-        new TranslatorJobReport(emptyMap(), Map.of("License 'null' is not accepted", 1), 1, 0));
+        new TranslatorJobReport(emptyMap(), Map.of("License 'null' is not accepted", 1), 1, 0, 0, 1));
     givenDWCA("/dwca-invalid-ac-media.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(1));
     given(dwcaRepository.getRecords(anyList(),
@@ -349,7 +349,7 @@ class DwcaServiceTest {
   void testSpecimenRejectedLicense() throws Exception {
     // Given
     var expected = new TranslatorJobResult(JobState.COMPLETED,
-        new TranslatorJobReport(Map.of("License 'https://creativecommons.org/licenses/by-nc/4.0/legalcode' is not accepted", 14), emptyMap(), 0, 0));
+        new TranslatorJobReport(Map.of("License 'https://creativecommons.org/licenses/by-nc/4.0/legalcode' is not accepted", 14), emptyMap(), 0, 0, 14, 0));
     givenDWCA("/dwca-only-occurrences.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(14));
     given(dwcaRepository.getRecords(anyList(),

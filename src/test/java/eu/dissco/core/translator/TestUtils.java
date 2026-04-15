@@ -107,12 +107,12 @@ public class TestUtils {
   }
 
   public static TranslatorJobReport givenReport(int successfulSpecimen) {
-    return new TranslatorJobReport(emptyMap(), emptyMap(), successfulSpecimen, 0);
+    return new TranslatorJobReport(emptyMap(), emptyMap(), successfulSpecimen, 0, 0, 0);
   }
 
   public static TranslatorJobReport givenReport(int successfulSpecimen, int successfulMedia) {
     return new TranslatorJobReport(emptyMap(), emptyMap(), successfulSpecimen,
-        successfulMedia);
+        successfulMedia, 0, 0);
   }
 
   public static DigitalSpecimen givenDigitalSpecimen() {

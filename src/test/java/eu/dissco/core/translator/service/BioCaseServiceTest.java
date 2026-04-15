@@ -153,7 +153,7 @@ class BioCaseServiceTest {
   void testRetrieveDataInvalidMedia() throws Exception {
     // Given
     var expectedResult = new TranslatorJobResult(JobState.COMPLETED,
-        new TranslatorJobReport(new HashMap<>(), Map.of("License 'null' is not accepted", 2), 1, 0));
+        new TranslatorJobReport(new HashMap<>(), Map.of("License 'null' is not accepted", 2), 1, 0,0, 2));
     given(sourceSystemComponent.getSourceSystemEndpoint()).willReturn("https://endpoint.com");
     given(responseSpec.bodyToMono(any(Class.class))).willReturn(
         Mono.just(loadResourceFile("biocase/biocase-206-with-invalid-media.xml")));
@@ -200,10 +200,10 @@ class BioCaseServiceTest {
     return Stream.of(
         Arguments.of(new DigitalSpecimen().withOdsNormalisedPhysicalSpecimenID(
                 NORMALISED_PHYSICAL_SPECIMEN_ID),
-            new TranslatorJobReport(Map.of("Missing Organisation ID", 100), emptyMap(), 0, 0)),
+            new TranslatorJobReport(Map.of("Missing Organisation ID", 100), emptyMap(), 0, 0, 100, 0)),
         Arguments.of(new DigitalSpecimen().withOdsOrganisationID(ORGANISATION_ID),
             new TranslatorJobReport(Map.of("Missing Normalised Physical Specimen Identifier", 100),
-                emptyMap(), 0, 0))
+                emptyMap(), 0, 0, 100, 0))
     );
   }
 

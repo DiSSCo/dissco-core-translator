@@ -95,7 +95,6 @@ public class BioCaseService extends AbstractDataRetrievalService {
         this.masProperties = masProperties;
         this.digitalSpecimenDirector = digitalSpecimenDirector;
         this.fdoProperties = fdoProperties;
-
     }
 
     @Override
