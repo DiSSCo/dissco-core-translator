@@ -1,13 +1,23 @@
 package eu.dissco.core.translator.service;
 
 
-import efg.*;
+import efg.DataSets;
 import efg.DataSets.DataSet;
+import efg.EarthScienceSpecimenType;
+import efg.MineralRockIdentifiedType;
+import efg.MultiMediaObject;
+import efg.Unit;
 import eu.dissco.core.translator.Profiles;
 import eu.dissco.core.translator.component.EmlComponent;
 import eu.dissco.core.translator.component.SourceSystemComponent;
 import eu.dissco.core.translator.database.jooq.enums.JobState;
-import eu.dissco.core.translator.domain.*;
+import eu.dissco.core.translator.domain.BioCasePartResult;
+import eu.dissco.core.translator.domain.DigitalMediaEvent;
+import eu.dissco.core.translator.domain.DigitalMediaWrapper;
+import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
+import eu.dissco.core.translator.domain.DigitalSpecimenWrapper;
+import eu.dissco.core.translator.domain.TranslatorJobReport;
+import eu.dissco.core.translator.domain.TranslatorJobResult;
 import eu.dissco.core.translator.exception.DiSSCoDataException;
 import eu.dissco.core.translator.exception.DisscoEfgParsingException;
 import eu.dissco.core.translator.exception.ReachedMaximumLimitException;
@@ -19,7 +29,24 @@ import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
-import lombok.RequiredArgsConstructor;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.transform.Source;
+import javax.xml.transform.dom.DOMSource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -31,26 +58,9 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.node.ObjectNode;
 
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.transform.Source;
-import javax.xml.transform.dom.DOMSource;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.time.Duration;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-
 @Slf4j
 @Service
 @Profile(Profiles.BIOCASE)
-@RequiredArgsConstructor
 public class BioCaseService extends AbstractDataRetrievalService {
 
     private static final String START_AT = "startAt";
@@ -70,13 +80,29 @@ public class BioCaseService extends AbstractDataRetrievalService {
     private final BaseDigitalObjectDirector digitalSpecimenDirector;
     private final FdoProperties fdoProperties;
 
+    public BioCaseService(JsonMapper mapper, ApplicationProperties applicationProperties, WebClient webClient,
+                          SourceSystemComponent sourceSystemComponent, Configuration configuration,
+                          XMLInputFactory xmlFactory, RabbitMqService rabbitMqService, MasProperties masProperties,
+                          BaseDigitalObjectDirector digitalSpecimenDirector, FdoProperties fdoProperties) {
+        super(new TranslatorJobReport());
+        this.mapper = mapper;
+        this.applicationProperties = applicationProperties;
+        this.webClient = webClient;
+        this.sourceSystemComponent = sourceSystemComponent;
+        this.configuration = configuration;
+        this.xmlFactory = xmlFactory;
+        this.rabbitMqService = rabbitMqService;
+        this.masProperties = masProperties;
+        this.digitalSpecimenDirector = digitalSpecimenDirector;
+        this.fdoProperties = fdoProperties;
+    }
+
     @Override
     public TranslatorJobResult retrieveData() {
         var uri = sourceSystemComponent.getSourceSystemEndpoint();
         var templateProperties = getTemplateProperties();
         configuration.setNumberFormat("computer");
         var finished = false;
-        var processedRecords = new AtomicInteger(0);
         while (!finished) {
             log.info("Currently at: {} still collecting...", templateProperties.get(START_AT));
             StringWriter writer = fillTemplate(templateProperties);
@@ -84,11 +110,11 @@ public class BioCaseService extends AbstractDataRetrievalService {
                 var partResult = webClient.get().uri(uri + writer)
                         .retrieve()
                         .bodyToMono(String.class).publishOn(Schedulers.boundedElastic()).map(
-                                (String xml) -> handleBioCaseResponse(xml, processedRecords))
+                        this::handleBioCaseResponse)
                         .retryWhen(Retry.backoff(3, Duration.ofSeconds(2)))
                         .toFuture().get();
                 if (partResult.exception()) {
-                    return new TranslatorJobResult(JobState.FAILED, processedRecords.get());
+                    return new TranslatorJobResult(JobState.FAILED, report);
                 }
                 finished = partResult.finished();
                 if (finished) {
@@ -97,24 +123,20 @@ public class BioCaseService extends AbstractDataRetrievalService {
             } catch (InterruptedException e) {
                 log.error("Failed to get response from uri", e);
                 Thread.currentThread().interrupt();
-                return new TranslatorJobResult(JobState.FAILED, processedRecords.get());
+                return new TranslatorJobResult(JobState.FAILED, report);
             } catch (ExecutionException e) {
                 log.error("Failed to get response from uri", e);
-                return new TranslatorJobResult(JobState.FAILED, processedRecords.get());
+                return new TranslatorJobResult(JobState.FAILED, report);
             }
             updateStartAtParameter(templateProperties);
         }
-        if (processedRecords.get() == 0) {
-            log.info("No records were successfully processed");
-            return new TranslatorJobResult(JobState.FAILED, processedRecords.get());
-        }
-        return new TranslatorJobResult(JobState.COMPLETED, processedRecords.get());
+        return new TranslatorJobResult(JobState.COMPLETED, report);
     }
 
-    private BioCasePartResult handleBioCaseResponse(String xml, AtomicInteger processedRecords) {
+    private BioCasePartResult handleBioCaseResponse(String xml) {
         try {
             var xmlEventReader = xmlFactory.createXMLEventReader(new StringReader(xml));
-            return handleBioCasePage(processedRecords, xmlEventReader);
+            return handleBioCasePage(xmlEventReader);
         } catch (XMLStreamException | JAXBException | IOException e) {
             log.error("Error converting response to XML", e);
             return new BioCasePartResult(true, true);
@@ -125,7 +147,7 @@ public class BioCaseService extends AbstractDataRetrievalService {
         }
     }
 
-    private BioCasePartResult handleBioCasePage(AtomicInteger processedRecords, XMLEventReader xmlEventReader) throws XMLStreamException, JAXBException, ReachedMaximumLimitException, IOException {
+    private BioCasePartResult handleBioCasePage(XMLEventReader xmlEventReader) throws XMLStreamException, JAXBException, ReachedMaximumLimitException, IOException {
         var recordCount = 0;
         var recordDropped = 0;
         while (xmlEventReader.hasNext()) {
@@ -138,7 +160,7 @@ public class BioCaseService extends AbstractDataRetrievalService {
                 log.info("Received {} records in BioCase request, {} records dropped", recordCount,
                         recordDropped);
             }
-            retrieveUnitData(xmlEventReader, processedRecords);
+            retrieveUnitData(xmlEventReader);
         }
         if ((recordCount + recordDropped) % applicationProperties.getItemsPerRequest() != 0) {
             log.info("Received records {} does not match requested records {}. "
@@ -150,14 +172,14 @@ public class BioCaseService extends AbstractDataRetrievalService {
         }
     }
 
-    private void retrieveUnitData(XMLEventReader xmlEventReader, AtomicInteger processedRecords)
+    private void retrieveUnitData(XMLEventReader xmlEventReader)
             throws XMLStreamException, JAXBException, ReachedMaximumLimitException, IOException {
         if (isStartElement(xmlEventReader.peek(), "DataSets")) {
-            mapABCD206(xmlEventReader, processedRecords);
+            mapABCD206(xmlEventReader);
         }
     }
 
-    private void mapABCD206(XMLEventReader xmlEventReader, AtomicInteger processedRecords)
+    private void mapABCD206(XMLEventReader xmlEventReader)
             throws JAXBException, ReachedMaximumLimitException, IOException {
         var context = JAXBContext.newInstance(DataSets.class);
         var datasetsMarshaller = context.createUnmarshaller().unmarshal(xmlEventReader, DataSets.class);
@@ -166,17 +188,17 @@ public class BioCaseService extends AbstractDataRetrievalService {
         for (var unit : datasets.getUnits().getUnit()) {
             try {
                 if (applicationProperties.getMaxItems() != null
-                        && processedRecords.get() >= applicationProperties.getMaxItems()) {
+                        && report.getSuccessfulSpecimen() >= applicationProperties.getMaxItems()) {
                     throw new ReachedMaximumLimitException();
                 }
-                processUnit(datasets, unit, processedRecords);
+                processUnit(datasets, unit);
             } catch (DisscoEfgParsingException e) {
                 log.error("Unit could not be processed due to error", e);
             }
         }
     }
 
-    private void processUnit(DataSet dataset, Unit unit, AtomicInteger processedRecords)
+    private void processUnit(DataSet dataset, Unit unit)
             throws DisscoEfgParsingException {
         var unitAttributes = parseToJson(unit);
         var datasetAttribute = getData(mapper.valueToTree(dataset.getMetadata()));
@@ -202,9 +224,9 @@ public class BioCaseService extends AbstractDataRetrievalService {
                             digitalSpecimenWrapper,
                             digitalMedia,
                             masProperties.getForceMasSchedule()));
-            processedRecords.incrementAndGet();
-        } catch (DiSSCoDataException e) {
-            log.error("Encountered data issue with record: {}", unitAttributes, e);
+            report.incrementSuccessfulRecords(digitalMedia.size());
+        } catch (DiSSCoDataException _) {
+            log.warn("Encountered data issue with record: {}", unitAttributes);
         }
     }
 

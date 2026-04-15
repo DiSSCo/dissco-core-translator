@@ -1,6 +1,13 @@
 package eu.dissco.core.translator.service;
 
-import static eu.dissco.core.translator.TestUtils.*;
+import static eu.dissco.core.translator.TestUtils.MAPPER;
+import static eu.dissco.core.translator.TestUtils.NORMALISED_PHYSICAL_SPECIMEN_ID;
+import static eu.dissco.core.translator.TestUtils.ORGANISATION_ID;
+import static eu.dissco.core.translator.TestUtils.SOURCE_SYSTEM_ID;
+import static eu.dissco.core.translator.TestUtils.givenDigitalMedia;
+import static eu.dissco.core.translator.TestUtils.givenDigitalSpecimen;
+import static eu.dissco.core.translator.TestUtils.givenReport;
+import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -15,6 +22,7 @@ import eu.dissco.core.translator.TestUtils;
 import eu.dissco.core.translator.component.SourceSystemComponent;
 import eu.dissco.core.translator.database.jooq.enums.JobState;
 import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
+import eu.dissco.core.translator.domain.TranslatorJobReport;
 import eu.dissco.core.translator.domain.TranslatorJobResult;
 import eu.dissco.core.translator.properties.ApplicationProperties;
 import eu.dissco.core.translator.properties.DwcaProperties;
@@ -32,12 +40,14 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 import javax.xml.stream.XMLInputFactory;
 import org.gbif.dwc.terms.Term;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -109,7 +119,7 @@ class DwcaServiceTest {
     if (processedRecords == null) {
       processedRecords = 9;
     }
-    var expected = new TranslatorJobResult(JobState.COMPLETED, processedRecords);
+    var expected = new TranslatorJobResult(JobState.COMPLETED, givenReport(processedRecords));
     var captor = ArgumentCaptor.forClass(JsonNode.class);
     givenDWCA("/dwca-rbins.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(9));
@@ -137,7 +147,7 @@ class DwcaServiceTest {
   @Test
   void testRetrieveDataEmlException() throws Exception {
     // Given
-    var expected = new TranslatorJobResult(JobState.COMPLETED, 9);
+    var expected = new TranslatorJobResult(JobState.COMPLETED, givenReport(9));
     var captor = ArgumentCaptor.forClass(JsonNode.class);
     givenDWCA("/dwca-rbins-invalid-eml.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(9));
@@ -162,7 +172,7 @@ class DwcaServiceTest {
   @Test
   void testRetrieveDataWithLicenseText() throws Exception {
     // Given
-    var expected = new TranslatorJobResult(JobState.COMPLETED, 9);
+    var expected = new TranslatorJobResult(JobState.COMPLETED, givenReport(9));
     var captor = ArgumentCaptor.forClass(JsonNode.class);
     givenDWCA("/dwca-rbins-license-text.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(9));
@@ -188,10 +198,11 @@ class DwcaServiceTest {
   }
 
   @ParameterizedTest
-  @MethodSource("eu.dissco.core.translator.TestUtils#provideInvalidDigitalSpecimen")
-  void testRetrieveDataInvalidSpecimen(DigitalSpecimen digitalSpecimen) throws Exception {
+  @MethodSource("provideInvalidDigitalSpecimen")
+  void testRetrieveDataInvalidSpecimen(DigitalSpecimen digitalSpecimen, TranslatorJobReport report)
+      throws Exception {
     // Given
-    var expected = new TranslatorJobResult(JobState.FAILED, 0);
+    var expected = new TranslatorJobResult(JobState.COMPLETED, report);
     givenDWCA("/dwca-rbins.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(9));
     given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
@@ -207,6 +218,17 @@ class DwcaServiceTest {
     then(sourceSystemComponent).should().storeEmlRecord(any(File.class));
     then(rabbitMqService).shouldHaveNoInteractions();
     cleanup("src/test/resources/dwca/test/dwca-rbins.zip");
+  }
+
+  private static Stream<Arguments> provideInvalidDigitalSpecimen() {
+    return Stream.of(
+        Arguments.of(new DigitalSpecimen().withOdsNormalisedPhysicalSpecimenID(
+                NORMALISED_PHYSICAL_SPECIMEN_ID),
+            new TranslatorJobReport(Map.of("Missing Organisation ID", 9), emptyMap(), 0, 0, 9, 0)),
+        Arguments.of(new DigitalSpecimen().withOdsOrganisationID(ORGANISATION_ID),
+            new TranslatorJobReport(Map.of("Missing Normalised Physical Specimen Identifier", 9),
+                emptyMap(), 0, 0, 9, 0))
+    );
   }
 
 
@@ -225,7 +247,7 @@ class DwcaServiceTest {
   @Test
   void testRetrieveDataWithGbifMedia() throws Exception {
     // Given
-    var expected = new TranslatorJobResult(JobState.COMPLETED, 19);
+    var expected = new TranslatorJobResult(JobState.COMPLETED, givenReport(19, 19));
     var imageMap = givenImageMap(19);
     imageMap.put("id:1", List.of(MAPPER.createObjectNode()));
     givenDWCA("/dwca-kew-gbif-media.zip");
@@ -269,7 +291,7 @@ class DwcaServiceTest {
   @Test
   void testRetrieveDataWithAcMedia() throws Exception {
     // Given
-    var expected = new TranslatorJobResult(JobState.COMPLETED, 14);
+    var expected = new TranslatorJobResult(JobState.COMPLETED, givenReport(14, 14));
     givenDWCA("/dwca-naturalis-ac-media.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(14));
     given(dwcaRepository.getRecords(anyList(),
@@ -297,7 +319,8 @@ class DwcaServiceTest {
   @Test
   void testRetrieveDataWithInvalidAcMedia() throws Exception {
     // Given
-    var expected = new TranslatorJobResult(JobState.COMPLETED, 1);
+    var expected = new TranslatorJobResult(JobState.COMPLETED,
+        new TranslatorJobReport(emptyMap(), Map.of("License 'null' is not accepted", 1), 1, 0, 0, 1));
     givenDWCA("/dwca-invalid-ac-media.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(1));
     given(dwcaRepository.getRecords(anyList(),
@@ -325,17 +348,18 @@ class DwcaServiceTest {
   @Test
   void testSpecimenRejectedLicense() throws Exception {
     // Given
-    var expected = new TranslatorJobResult(JobState.FAILED, 0);
+    var expected = new TranslatorJobResult(JobState.COMPLETED,
+        new TranslatorJobReport(Map.of("License 'https://creativecommons.org/licenses/by-nc/4.0/legalcode' is not accepted", 14), emptyMap(), 0, 0, 14, 0));
     givenDWCA("/dwca-only-occurrences.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(givenSpecimenMap(14));
     given(dwcaRepository.getRecords(anyList(),
-            eq("temp_extension_gw0_tyl_yru_multimedia"))).willReturn(givenImageMap(14));
+        eq("temp_extension_gw0_tyl_yru_multimedia"))).willReturn(givenImageMap(14));
     given(digitalSpecimenDirector.assembleDigitalSpecimenTerm(any(JsonNode.class), anyBoolean()))
-            .willReturn(new DigitalSpecimen()
-                    .withDwcBasisOfRecord("PreservedSpecimen")
-                    .withDctermsLicense("https://creativecommons.org/licenses/by-nc/4.0/legalcode")
-                    .withOdsNormalisedPhysicalSpecimenID(NORMALISED_PHYSICAL_SPECIMEN_ID)
-                    .withOdsOrganisationID(ORGANISATION_ID));
+        .willReturn(new DigitalSpecimen()
+            .withDwcBasisOfRecord("PreservedSpecimen")
+            .withDctermsLicense("https://creativecommons.org/licenses/by-nc/4.0/legalcode")
+            .withOdsNormalisedPhysicalSpecimenID(NORMALISED_PHYSICAL_SPECIMEN_ID)
+            .withOdsOrganisationID(ORGANISATION_ID));
 
     // When
     var result = service.retrieveData();
@@ -353,7 +377,7 @@ class DwcaServiceTest {
   @Test
   void testRetrieveDataWithAssociatedMedia() throws Exception {
     // Given
-    var expected = new TranslatorJobResult(JobState.COMPLETED, 20);
+    var expected = new TranslatorJobResult(JobState.COMPLETED, givenReport(20, 40));
     givenDWCA("/dwca-lux-associated-media.zip");
     given(dwcaRepository.getCoreRecords(anyList(), anyString())).willReturn(
         givenSpecimenMapWithMedia(20));
@@ -411,7 +435,7 @@ class DwcaServiceTest {
   @Test
   void testRetrieveDataNull() throws Exception {
     // Given
-    var expected = new TranslatorJobResult(JobState.FAILED, 0);
+    var expected = new TranslatorJobResult(JobState.COMPLETED, givenReport(0));
     givenDWCA("/dwca-lux-associated-media.zip");
     var nullMap = new HashMap<String, ObjectNode>();
     nullMap.put("id", null);

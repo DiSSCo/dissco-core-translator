@@ -221,15 +221,15 @@ public class SourceSystemRecord extends UpdatableRecordImpl<SourceSystemRecord> 
     /**
      * Setter for <code>public.source_system.filters</code>.
      */
-    public void setFilters(String value) {
+    public void setFilters(String[] value) {
         set(14, value);
     }
 
     /**
      * Getter for <code>public.source_system.filters</code>.
      */
-    public String getFilters() {
-        return (String) get(14);
+    public String[] getFilters() {
+        return (String[]) get(14);
     }
 
     // -------------------------------------------------------------------------
@@ -255,7 +255,7 @@ public class SourceSystemRecord extends UpdatableRecordImpl<SourceSystemRecord> 
     /**
      * Create a detached, initialised SourceSystemRecord
      */
-    public SourceSystemRecord(String id, Integer version, String name, String endpoint, Instant created, Instant modified, Instant tombstoned, String mappingId, String creator, TranslatorType translatorType, JSONB data, String dwcDpLink, String dwcaLink, byte[] eml, String filters) {
+    public SourceSystemRecord(String id, Integer version, String name, String endpoint, Instant created, Instant modified, Instant tombstoned, String mappingId, String creator, TranslatorType translatorType, JSONB data, String dwcDpLink, String dwcaLink, byte[] eml, String[] filters) {
         super(SourceSystem.SOURCE_SYSTEM);
 
         setId(id);

@@ -127,7 +127,7 @@ public class SourceSystem extends TableImpl<SourceSystemRecord> {
     /**
      * The column <code>public.source_system.filters</code>.
      */
-    public final TableField<SourceSystemRecord, String> FILTERS = createField(DSL.name("filters"), SQLDataType.CLOB, this, "");
+    public final TableField<SourceSystemRecord, String[]> FILTERS = createField(DSL.name("filters"), SQLDataType.CLOB.array(), this, "");
 
     private SourceSystem(Name alias, Table<SourceSystemRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
@@ -170,7 +170,7 @@ public class SourceSystem extends TableImpl<SourceSystemRecord> {
 
     @Override
     public List<UniqueKey<SourceSystemRecord>> getUniqueKeys() {
-        return Arrays.asList(Keys.ENDPOINT_UNIQUE);
+        return Arrays.asList(Keys.ENDPOINT_UNIQUE, Keys.NAME_UNIQUE);
     }
 
     @Override

@@ -2,60 +2,120 @@ package eu.dissco.core.translator.service;
 
 import static eu.dissco.core.translator.terms.utils.LicenseUtils.licenseComplies;
 
+import eu.dissco.core.translator.domain.TranslatorJobReport;
 import eu.dissco.core.translator.domain.TranslatorJobResult;
 import eu.dissco.core.translator.exception.DiSSCoDataException;
-import java.util.Set;
-import javax.xml.stream.events.XMLEvent;
-import eu.dissco.core.translator.schema.DigitalSpecimen;
 import eu.dissco.core.translator.schema.DigitalMedia;
+import eu.dissco.core.translator.schema.DigitalSpecimen;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Predicate;
+import javax.xml.stream.events.XMLEvent;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 public abstract class AbstractDataRetrievalService {
 
-  protected static final Set<String> ALLOWED_BASIS_OF_RECORD = Set.of("PRESERVEDSPECIMEN",
-      "PRESERVED_SPECIMEN", "FOSSIL", "OTHER", "ROCK", "MINERAL", "METEORITE", "FOSSILSPECIMEN",
-      "LIVINGSPECIMEN", "MATERIALSAMPLE", "ROCKSPECIMEN", "MINERALSPECIMEN", "METEORITESPECIMEN", "HERBARIUMSHEET",
-      "DRIED");
+	private static final String NOT_ACCEPTED = "' is not accepted";
 
-  public abstract TranslatorJobResult retrieveData();
+	protected static final Set<String> ALLOWED_BASIS_OF_RECORD = Set.of("PRESERVEDSPECIMEN", "PRESERVED_SPECIMEN",
+			"FOSSIL", "OTHER", "ROCK", "MINERAL", "METEORITE", "FOSSILSPECIMEN", "LIVINGSPECIMEN", "MATERIALSAMPLE",
+			"ROCKSPECIMEN", "MINERALSPECIMEN", "METEORITESPECIMEN", "HERBARIUMSHEET", "DRIED");
 
-  protected boolean isStartElement(XMLEvent element, String field) {
-    if (element != null) {
-      return element.isStartElement() && element.asStartElement().getName().getLocalPart()
-          .equals(field);
-    } else {
-      return false;
-    }
-  }
+	protected final TranslatorJobReport report;
 
-  protected void checkIfSpecimenComplies(DigitalSpecimen ds)
-      throws DiSSCoDataException {
-    if (ds.getOdsNormalisedPhysicalSpecimenID() == null || ds.getOdsOrganisationID() == null) {
-      throw new DiSSCoDataException(
-          "Record does not comply to MIDS level 0 (id and organisation), ignoring record");
-    }
-    if (!basisOfRecordComplies(ds.getDwcBasisOfRecord())
-        || !licenseComplies(ds.getDctermsLicense())) {
-      throw new DiSSCoDataException(
-          "Record does not comply with basis of record or license requirements");
-    }
-  }
+	private final List<Predicate<DigitalSpecimen>> specimenComplianceChecks = List.of(
+			this::isNormalisedPhysicalSpecimenIDPresent, this::isOrganisationIDPresent, this::basisOfRecordComplies,
+			this::digitalSpecimenLicenseComplies);
 
-    private static boolean basisOfRecordComplies(String basisOfRecord) {
-      if (basisOfRecord == null) {
-          return false;
-      }
-      return ALLOWED_BASIS_OF_RECORD.contains(basisOfRecord.strip().replace(" ", "").toUpperCase());
-    }
+	private final List<Predicate<DigitalMedia>> mediaComplianceChecks = List.of(this::digitalMediaLicenseComplies,
+			this::isAccessURIPresent);
 
-    protected void checkIfMediaComplies(DigitalMedia digitalMedia)
-      throws DiSSCoDataException {
-    if (digitalMedia.getAcAccessURI() == null) {
-      throw new DiSSCoDataException(
-          "Digital media object for specimen does not have an access uri, ignoring record");
-    }
-    if (!licenseComplies(digitalMedia.getDctermsRights())) {
-      throw new DiSSCoDataException(
-          "Digital media object does not have a valid license uri, ignoring record");
-    }
-  }
+	public abstract TranslatorJobResult retrieveData();
+
+	protected boolean isStartElement(XMLEvent element, String field) {
+		if (element != null) {
+			return element.isStartElement() && element.asStartElement().getName().getLocalPart().equals(field);
+		}
+		return false;
+	}
+
+	protected void checkIfSpecimenComplies(DigitalSpecimen ds) throws DiSSCoDataException {
+		for (var check : specimenComplianceChecks) {
+			if (!check.test(ds)) {
+				throw new DiSSCoDataException("Specimen with id " + ds.getOdsNormalisedPhysicalSpecimenID()
+						+ " does not comply with the requirements, ignoring record");
+			}
+		}
+	}
+
+	private boolean digitalSpecimenLicenseComplies(DigitalSpecimen ds) {
+		var license = ds.getDctermsLicense();
+		if (!licenseComplies(license)) {
+			report.addRejectedSpecimen("License '" + license + NOT_ACCEPTED);
+			return false;
+		}
+		return true;
+	}
+
+	private boolean isOrganisationIDPresent(DigitalSpecimen ds) {
+		if (ds.getOdsOrganisationID() != null) {
+			return true;
+		}
+		report.addRejectedSpecimen("Missing Organisation ID");
+		return false;
+
+	}
+
+	private boolean isNormalisedPhysicalSpecimenIDPresent(DigitalSpecimen ds) {
+		if (ds.getOdsNormalisedPhysicalSpecimenID() != null) {
+			return true;
+		}
+		report.addRejectedSpecimen("Missing Normalised Physical Specimen Identifier");
+		return false;
+
+	}
+
+	private boolean basisOfRecordComplies(DigitalSpecimen ds) {
+		String basisOfRecord = ds.getDwcBasisOfRecord();
+		if (basisOfRecord == null) {
+			report.addRejectedSpecimen("Missing Basis of Record");
+			return false;
+		}
+		if (ALLOWED_BASIS_OF_RECORD.contains(basisOfRecord.strip().replace(" ", "").toUpperCase())) {
+			return true;
+		}
+		report.addRejectedSpecimen("BasisOfRecord '" + basisOfRecord + NOT_ACCEPTED);
+		return false;
+
+	}
+
+	protected void checkIfMediaComplies(DigitalMedia dm) throws DiSSCoDataException {
+		for (var check : mediaComplianceChecks) {
+			if (!check.test(dm)) {
+				throw new DiSSCoDataException("Media with id " + dm.getAcAccessURI()
+						+ " does not comply with the requirements, ignoring record");
+			}
+		}
+	}
+
+	private boolean isAccessURIPresent(DigitalMedia dm) {
+		if (dm.getAcAccessURI() != null) {
+			return true;
+		}
+		report.addRejectedMedia("Missing Access URI");
+		return false;
+
+	}
+
+	private boolean digitalMediaLicenseComplies(DigitalMedia dm) {
+		var license = dm.getDctermsRights();
+		if (!licenseComplies(license)) {
+			report.addRejectedMedia("License '" + license + NOT_ACCEPTED);
+			return false;
+		}
+		return true;
+
+	}
+
 }

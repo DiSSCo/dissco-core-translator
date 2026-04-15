@@ -7,6 +7,7 @@ import eu.dissco.core.translator.domain.DigitalMediaEvent;
 import eu.dissco.core.translator.domain.DigitalMediaWrapper;
 import eu.dissco.core.translator.domain.DigitalSpecimenEvent;
 import eu.dissco.core.translator.domain.DigitalSpecimenWrapper;
+import eu.dissco.core.translator.domain.TranslatorJobReport;
 import eu.dissco.core.translator.domain.TranslatorJobResult;
 import eu.dissco.core.translator.exception.DiSSCoDataException;
 import eu.dissco.core.translator.exception.DisscoRepositoryException;
@@ -42,7 +43,6 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.gbif.dwc.Archive;
@@ -63,7 +63,6 @@ import tools.jackson.databind.node.ObjectNode;
 @Service
 @Slf4j
 @Profile(Profiles.DWCA)
-@RequiredArgsConstructor
 public class DwcaService extends AbstractDataRetrievalService {
 
   public static final String GBIF_MULTIMEDIA = "gbif:Multimedia";
@@ -84,11 +83,29 @@ public class DwcaService extends AbstractDataRetrievalService {
   private final ApplicationProperties applicationProperties;
   private final XMLInputFactory xmlFactory;
 
+  public DwcaService(JsonMapper mapper, WebClient webClient,
+      DwcaProperties dwcaProperties, RabbitMqService rabbitMqService, MasProperties masProperties,
+      SourceSystemComponent sourceSystemComponent, DwcaRepository dwcaRepository,
+      BaseDigitalObjectDirector digitalSpecimenDirector, FdoProperties fdoProperties,
+      ApplicationProperties applicationProperties, XMLInputFactory xmlFactory) {
+    super(new TranslatorJobReport());
+    this.mapper = mapper;
+    this.webClient = webClient;
+    this.dwcaProperties = dwcaProperties;
+    this.rabbitMqService = rabbitMqService;
+    this.masProperties = masProperties;
+    this.sourceSystemComponent = sourceSystemComponent;
+    this.dwcaRepository = dwcaRepository;
+    this.digitalSpecimenDirector = digitalSpecimenDirector;
+    this.fdoProperties = fdoProperties;
+    this.applicationProperties = applicationProperties;
+    this.xmlFactory = xmlFactory;
+  }
+
   @Override
   public TranslatorJobResult retrieveData() {
     var endpoint = sourceSystemComponent.getSourceSystemEndpoint();
     Archive archive = null;
-    var processedRecords = new AtomicInteger(0);
     try {
       var file = Path.of(dwcaProperties.getDownloadFile());
       var buffer = webClient.get().uri(URI.create(endpoint)).retrieve()
@@ -97,34 +114,30 @@ public class DwcaService extends AbstractDataRetrievalService {
           .then().toFuture().get();
       archive = DwcFiles.fromCompressed(file, Path.of(dwcaProperties.getTempFolder()));
       var ids = postArchiveToDatabase(archive);
-      getSpecimenData(ids, archive, processedRecords);
+      getSpecimenData(ids, archive);
     } catch (IOException e) {
       log.error("Failed to open output stream for download file", e);
-      return new TranslatorJobResult(JobState.FAILED, processedRecords.get());
+      return new TranslatorJobResult(JobState.FAILED, report);
     } catch (ExecutionException e) {
       log.error("Failed during downloading file with exception", e.getCause());
-      return new TranslatorJobResult(JobState.FAILED, processedRecords.get());
+      return new TranslatorJobResult(JobState.FAILED, report);
     } catch (InterruptedException e) {
       log.error("Failed during downloading file due to interruption", e);
       Thread.currentThread().interrupt();
-      return new TranslatorJobResult(JobState.FAILED, processedRecords.get());
+      return new TranslatorJobResult(JobState.FAILED, report);
     } catch (DisscoRepositoryException e) {
       log.error("Failed during batch copy into temp tables with exception", e);
-      return new TranslatorJobResult(JobState.FAILED, processedRecords.get());
+      return new TranslatorJobResult(JobState.FAILED, report);
     } finally {
       if (archive != null) {
         log.info("Cleaning up database tables");
         removeTempTables(archive);
       }
     }
-    if (processedRecords.get() == 0) {
-      log.info("No records were successfully processed");
-      return new TranslatorJobResult(JobState.FAILED, processedRecords.get());
-    }
-    return new TranslatorJobResult(JobState.COMPLETED, processedRecords.get());
+    return new TranslatorJobResult(JobState.COMPLETED, report);
   }
 
-  public void getSpecimenData(Set<String> ids, Archive archive, AtomicInteger processedRecords)
+  public void getSpecimenData(Set<String> ids, Archive archive)
       throws IOException {
     var batches = prepareChunks(ids, 10000);
     sourceSystemComponent.storeEmlRecord(archive.getMetadataLocationFile());
@@ -137,7 +150,7 @@ public class DwcaService extends AbstractDataRetrievalService {
         log.info("Got specimen batch: {}", batch.size());
         addExtensionsToSpecimen(archive, batch, specimenData);
         log.info("Start translation and publishing of batch: {}", specimenData.size());
-        processDigitalSpecimen(specimenData.values(), optionalEmlData, processedRecords);
+        processDigitalSpecimen(specimenData.values(), optionalEmlData);
       }
     } catch (ReachedMaximumLimitException _) {
       log.warn("Reached maximum limit of {} processed specimens out of {} specimens available",
@@ -168,12 +181,12 @@ public class DwcaService extends AbstractDataRetrievalService {
   }
 
   private void processDigitalSpecimen(Collection<ObjectNode> fullRecords,
-      Optional<Map<String, String>> optionalEmlData, AtomicInteger processedRecords)
+      Optional<Map<String, String>> optionalEmlData)
       throws ReachedMaximumLimitException {
     for (var fullRecord : fullRecords) {
       if (fullRecord != null) {
         if (applicationProperties.getMaxItems() != null
-            && processedRecords.get() >= applicationProperties.getMaxItems()) {
+            && report.getSuccessfulSpecimen() >= applicationProperties.getMaxItems()) {
           throw new ReachedMaximumLimitException();
         }
         try {
@@ -182,12 +195,13 @@ public class DwcaService extends AbstractDataRetrievalService {
           log.debug("Digital Specimen: {}", digitalObjects);
           var translatorEvent = new DigitalSpecimenEvent(
               masProperties.getSpecimenMass(),
-              digitalObjects.getLeft(), digitalObjects.getRight(),
+              digitalObjects.getLeft(),
+              digitalObjects.getRight(),
               masProperties.getForceMasSchedule());
           rabbitMqService.sendMessage(translatorEvent);
-          processedRecords.incrementAndGet();
-        } catch (DiSSCoDataException e) {
-          log.error("Encountered data issue with record: {}", fullRecord, e);
+          report.incrementSuccessfulRecords(digitalObjects.getRight().size());
+        } catch (DiSSCoDataException _) {
+          log.warn("Encountered data issue with record: {}", fullRecord);
         }
       }
     }
@@ -373,7 +387,7 @@ public class DwcaService extends AbstractDataRetrievalService {
   private Collection<List<String>> prepareChunks(Set<String> inputList, int chunkSize) {
     AtomicInteger counter = new AtomicInteger();
     return inputList.stream()
-        .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / chunkSize)).values();
+        .collect(Collectors.groupingBy(_ -> counter.getAndIncrement() / chunkSize)).values();
   }
 
   private Set<String> postArchiveToDatabase(Archive archive) throws DisscoRepositoryException {

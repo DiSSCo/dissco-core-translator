@@ -1,10 +1,12 @@
 package eu.dissco.core.translator;
 
 import static eu.dissco.core.translator.configuration.ApplicationConfiguration.DATE_STRING;
+import static java.util.Collections.emptyMap;
 
 import com.fasterxml.jackson.annotation.JsonSetter.Value;
 import com.fasterxml.jackson.annotation.Nulls;
 import eu.dissco.core.translator.domain.SourceSystemInformation;
+import eu.dissco.core.translator.domain.TranslatorJobReport;
 import eu.dissco.core.translator.schema.DigitalMedia;
 import eu.dissco.core.translator.schema.DigitalSpecimen;
 import java.io.IOException;
@@ -16,8 +18,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
-import java.util.stream.Stream;
-import org.junit.jupiter.params.provider.Arguments;
 import org.springframework.core.io.ClassPathResource;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -106,6 +106,15 @@ public class TestUtils {
         .readAllBytes(), StandardCharsets.UTF_8);
   }
 
+  public static TranslatorJobReport givenReport(int successfulSpecimen) {
+    return new TranslatorJobReport(emptyMap(), emptyMap(), successfulSpecimen, 0, 0, 0);
+  }
+
+  public static TranslatorJobReport givenReport(int successfulSpecimen, int successfulMedia) {
+    return new TranslatorJobReport(emptyMap(), emptyMap(), successfulSpecimen,
+        successfulMedia, 0, 0);
+  }
+
   public static DigitalSpecimen givenDigitalSpecimen() {
     return new DigitalSpecimen()
         .withDwcBasisOfRecord("PreservedSpecimen")
@@ -118,14 +127,6 @@ public class TestUtils {
     return new DigitalMedia()
         .withDctermsRights("https://creativecommons.org/publicdomain/zero/1.0/legalcode")
         .withAcAccessURI("https://accessuri.eu/image_1");
-  }
-
-  public static Stream<Arguments> provideInvalidDigitalSpecimen() {
-    return Stream.of(
-        Arguments.of(new DigitalSpecimen().withOdsNormalisedPhysicalSpecimenID(
-            NORMALISED_PHYSICAL_SPECIMEN_ID)),
-        Arguments.of(new DigitalSpecimen().withOdsOrganisationID(ORGANISATION_ID))
-    );
   }
 
   public static SourceSystemInformation givenSourceSystemInformation() {

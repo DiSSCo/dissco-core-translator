@@ -16,6 +16,7 @@ import java.util.UUID;
 
 import org.jooq.Condition;
 import org.jooq.Field;
+import org.jooq.JSONB;
 import org.jooq.Name;
 import org.jooq.PlainSQL;
 import org.jooq.QueryPart;
@@ -87,6 +88,11 @@ public class TranslatorJobRecord extends TableImpl<TranslatorJobRecordRecord> {
      * The column <code>public.translator_job_record.error</code>.
      */
     public final TableField<TranslatorJobRecordRecord, ErrorCode> ERROR = createField(DSL.name("error"), SQLDataType.VARCHAR.asEnumDataType(ErrorCode.class), this, "");
+
+    /**
+     * The column <code>public.translator_job_record.report</code>.
+     */
+    public final TableField<TranslatorJobRecordRecord, JSONB> REPORT = createField(DSL.name("report"), SQLDataType.JSONB, this, "");
 
     private TranslatorJobRecord(Name alias, Table<TranslatorJobRecordRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);

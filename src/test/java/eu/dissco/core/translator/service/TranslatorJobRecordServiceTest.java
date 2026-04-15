@@ -1,6 +1,7 @@
 package eu.dissco.core.translator.service;
 
 import static eu.dissco.core.translator.TestUtils.SOURCE_SYSTEM_ID;
+import static eu.dissco.core.translator.TestUtils.givenReport;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -48,7 +49,7 @@ class TranslatorJobRecordServiceTest {
   @Test
   void testUpdateSuccessfulJob() {
     // Given
-    var result = new TranslatorJobResult(JobState.COMPLETED, 50000);
+    var result = new TranslatorJobResult(JobState.COMPLETED, givenReport(50000));
 
     // When
     service.updateJobState(TestUtils.JOB_ID, result);
@@ -60,7 +61,7 @@ class TranslatorJobRecordServiceTest {
   @Test
   void testUpdateFailedJob() {
     // Given
-    var result = new TranslatorJobResult(JobState.FAILED, 50000);
+    var result = new TranslatorJobResult(JobState.FAILED, givenReport(50000));
 
     // When
     service.updateJobState(TestUtils.JOB_ID, result);

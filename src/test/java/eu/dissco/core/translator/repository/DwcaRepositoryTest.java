@@ -5,7 +5,8 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 
 import eu.dissco.core.translator.component.DataMappingComponent;
 import eu.dissco.core.translator.exception.IllegalDataException;
