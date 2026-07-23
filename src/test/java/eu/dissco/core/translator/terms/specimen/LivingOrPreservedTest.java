@@ -27,6 +27,18 @@ class LivingOrPreservedTest {
   }
 
   @Test
+  void testRetrieveFromDWCANullBasisOfRecord() {
+    // Given
+    var unit = MAPPER.createObjectNode();
+
+    // When
+    var result = livingSpecimen.retrieveFromDWCA(unit);
+
+    // Then
+    assertThat(result).isNull();
+  }
+
+  @Test
   void testRetrieveFromDWCANotLiving() {
     // Given
     var unit = MAPPER.createObjectNode();

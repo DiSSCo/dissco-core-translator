@@ -124,7 +124,9 @@ public class TestUtils {
     return Stream.of(
         Arguments.of(new DigitalSpecimen().withOdsNormalisedPhysicalSpecimenID(
             NORMALISED_PHYSICAL_SPECIMEN_ID)),
-        Arguments.of(new DigitalSpecimen().withOdsOrganisationID(ORGANISATION_ID))
+        Arguments.of(new DigitalSpecimen().withOdsOrganisationID(ORGANISATION_ID)),
+        Arguments.of(new DigitalSpecimen().withOdsNormalisedPhysicalSpecimenID(
+            NORMALISED_PHYSICAL_SPECIMEN_ID).withOdsOrganisationID(ORGANISATION_ID))
     );
   }
 
